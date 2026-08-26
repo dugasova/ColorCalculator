@@ -1,0 +1,22 @@
+.bleach__subtitle {
+  margin: -16px 0 20px;
+  color: var(--blendsor-gray);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.bleach__note {
+  margin: 12px 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background: rgba(200, 132, 81, 0.1);
+  color: var(--blendsor-gold-ink);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+@media (min-width: 1024px) {
+  .calculator--wide > .bleach__subtitle {
+    grid-column: 1 / -1;
+  }
+}

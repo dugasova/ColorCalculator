@@ -1,0 +1,297 @@
+import type { Shade } from '../shades';
+
+// Coded from the official Koleston Perfect chart. The primary reflect digit (first
+// digit after the slash) maps to `tone`; a second digit, if present, maps to
+// `secondaryTone` (informational only — the calculation engine only reads `tone`).
+// The "Intensive" double-prefix sub-line (33/0, 44/65, ...) is left out for now.
+// Digit->name reading of this chart: 0 natural, 1 ash, 2 matt, 3 gold, 4 red,
+// 5 mahogany, 6 violet, 7 brown, 8 pearl, 9 cendré. ToneFamily has no 'cendré'
+// entry, so that one is still approximated: cendré -> 'slate-grey'.
+
+import type { LiftTable } from '../levels';
+
+const specialBlondeLiftTable: LiftTable = (volume) => {
+    switch (volume) {
+        case 30: return 3; // 9%
+        case 40: return 5; // 12%
+        default: return 0;
+    }
+};
+
+const kolestonPerfectShades: Shade[] = [
+    // Level 2
+    { code: '2/0', level: 2, tone: 'natural' },
+    { code: '2/8', level: 2, tone: 'pearl' },
+
+    // Level 3
+    { code: '3/0', level: 3, tone: 'natural' },
+    { code: '3/00', level: 3, tone: 'natural', secondaryTone: 'natural' },
+
+    // Level 4
+    { code: '4/0', level: 4, tone: 'natural' },
+    { code: '4/00', level: 4, tone: 'natural', secondaryTone: 'natural' },
+    { code: '4/07', level: 4, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '4/3', level: 4, tone: 'gold' },
+    { code: '4/82', level: 4, tone: 'pearl', secondaryTone: 'matt' },
+    { code: '4/75', level: 4, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '4/77', level: 4, tone: 'chocolate', secondaryTone: 'chocolate' },
+
+    // Level 5
+    { code: '5/0', level: 5, tone: 'natural' },
+    { code: '5/00', level: 5, tone: 'natural', secondaryTone: 'natural' },
+    { code: '5/05', level: 5, tone: 'natural', secondaryTone: 'mahogany' },
+    { code: '5/07', level: 5, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '5/1', level: 5, tone: 'ash' },
+    { code: '5/18', level: 5, tone: 'ash', secondaryTone: 'pearl' },
+    { code: '5/3', level: 5, tone: 'gold' },
+    { code: '5/37', level: 5, tone: 'gold', secondaryTone: 'chocolate' },
+    { code: '5/82', level: 5, tone: 'pearl', secondaryTone: 'matt' },
+    { code: '5/41', level: 5, tone: 'red', secondaryTone: 'ash' },
+    { code: '5/43', level: 5, tone: 'red', secondaryTone: 'gold' },
+    { code: '5/5', level: 5, tone: 'mahogany' },
+    { code: '5/7', level: 5, tone: 'chocolate' },
+    { code: '5/71', level: 5, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '5/73', level: 5, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '5/75', level: 5, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '5/77', level: 5, tone: 'chocolate', secondaryTone: 'chocolate' },
+
+    // Level 6
+    { code: '6/0', level: 6, tone: 'natural' },
+    { code: '6/00', level: 6, tone: 'natural', secondaryTone: 'natural' },
+    { code: '6/07', level: 6, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '6/1', level: 6, tone: 'ash' },
+    { code: '6/3', level: 6, tone: 'gold' },
+    { code: '6/91', level: 6, tone: 'slate-grey', secondaryTone: 'ash' },
+    { code: '6/97', level: 6, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    { code: '6/41', level: 6, tone: 'red', secondaryTone: 'ash' },
+    { code: '6/43', level: 6, tone: 'red', secondaryTone: 'gold' },
+    { code: '6/45', level: 6, tone: 'red', secondaryTone: 'mahogany' },
+    { code: '6/5', level: 6, tone: 'mahogany' },
+    { code: '6/7', level: 6, tone: 'chocolate' },
+    { code: '6/71', level: 6, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '6/73', level: 6, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '6/74', level: 6, tone: 'chocolate', secondaryTone: 'red' },
+    { code: '6/75', level: 6, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '6/77', level: 6, tone: 'chocolate', secondaryTone: 'chocolate' },
+
+    // Level 7
+    { code: '7/0', level: 7, tone: 'natural' },
+    { code: '7/00', level: 7, tone: 'natural', secondaryTone: 'natural' },
+    { code: '7/01', level: 7, tone: 'natural', secondaryTone: 'ash' },
+    { code: '7/03', level: 7, tone: 'natural', secondaryTone: 'gold' },
+    { code: '7/05', level: 7, tone: 'natural', secondaryTone: 'mahogany' },
+    { code: '7/07', level: 7, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '7/1', level: 7, tone: 'ash' },
+    { code: '7/17', level: 7, tone: 'ash', secondaryTone: 'chocolate' },
+    { code: '7/18', level: 7, tone: 'ash', secondaryTone: 'pearl' },
+    { code: '7/3', level: 7, tone: 'gold' },
+    { code: '7/31', level: 7, tone: 'gold', secondaryTone: 'ash' },
+    { code: '7/36', level: 7, tone: 'gold', secondaryTone: 'violet' },
+    { code: '7/37', level: 7, tone: 'gold', secondaryTone: 'chocolate' },
+    { code: '7/38', level: 7, tone: 'gold', secondaryTone: 'pearl' },
+    { code: '7/34', level: 7, tone: 'gold', secondaryTone: 'red' },
+    { code: '7/43', level: 7, tone: 'red', secondaryTone: 'gold' },
+    { code: '7/47', level: 7, tone: 'red', secondaryTone: 'chocolate' },
+    { code: '7/7', level: 7, tone: 'chocolate' },
+    { code: '7/71', level: 7, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '7/73', level: 7, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '7/75', level: 7, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '7/77', level: 7, tone: 'chocolate', secondaryTone: 'chocolate' },
+
+    // Level 8
+    { code: '8/0', level: 8, tone: 'natural' },
+    { code: '8/00', level: 8, tone: 'natural', secondaryTone: 'natural' },
+    { code: '8/01', level: 8, tone: 'natural', secondaryTone: 'ash' },
+    { code: '8/03', level: 8, tone: 'natural', secondaryTone: 'gold' },
+    { code: '8/04', level: 8, tone: 'natural', secondaryTone: 'red' },
+    { code: '8/07', level: 8, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '8/1', level: 8, tone: 'ash' },
+    { code: '8/3', level: 8, tone: 'gold' },
+    { code: '8/38', level: 8, tone: 'gold', secondaryTone: 'pearl' },
+    { code: '8/96', level: 8, tone: 'slate-grey', secondaryTone: 'violet' },
+    { code: '8/97', level: 8, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    { code: '8/34', level: 8, tone: 'gold', secondaryTone: 'red' },
+    { code: '8/41', level: 8, tone: 'red', secondaryTone: 'ash' },
+    { code: '8/43', level: 8, tone: 'red', secondaryTone: 'gold' },
+    { code: '8/45', level: 8, tone: 'red', secondaryTone: 'mahogany' },
+    { code: '8/7', level: 8, tone: 'chocolate' },
+    { code: '8/71', level: 8, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '8/73', level: 8, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '8/74', level: 8, tone: 'chocolate', secondaryTone: 'red' },
+
+    // Level 9
+    { code: '9/0', level: 9, tone: 'natural' },
+    { code: '9/00', level: 9, tone: 'natural', secondaryTone: 'natural' },
+    { code: '9/01', level: 9, tone: 'natural', secondaryTone: 'ash' },
+    { code: '9/03', level: 9, tone: 'natural', secondaryTone: 'gold' },
+    { code: '9/04', level: 9, tone: 'natural', secondaryTone: 'red' },
+    { code: '9/05', level: 9, tone: 'natural', secondaryTone: 'mahogany' },
+    { code: '9/1', level: 9, tone: 'ash' },
+    { code: '9/16', level: 9, tone: 'ash', secondaryTone: 'violet' },
+    { code: '9/17', level: 9, tone: 'ash', secondaryTone: 'chocolate' },
+    { code: '9/3', level: 9, tone: 'gold' },
+    { code: '9/31', level: 9, tone: 'gold', secondaryTone: 'ash' },
+    { code: '9/38', level: 9, tone: 'gold', secondaryTone: 'pearl' },
+    { code: '9/8', level: 9, tone: 'pearl' },
+    { code: '9/81', level: 9, tone: 'pearl', secondaryTone: 'ash' },
+    { code: '9/96', level: 9, tone: 'slate-grey', secondaryTone: 'violet' },
+    { code: '9/97', level: 9, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    { code: '9/7', level: 9, tone: 'chocolate' },
+    { code: '9/73', level: 9, tone: 'chocolate', secondaryTone: 'gold' },
+
+    // Level 10
+    { code: '10/0', level: 10, tone: 'natural' },
+    { code: '10/04', level: 10, tone: 'natural', secondaryTone: 'red' },
+    { code: '10/1', level: 10, tone: 'ash' },
+    { code: '10/16', level: 10, tone: 'ash', secondaryTone: 'violet' },
+    { code: '10/3', level: 10, tone: 'gold' },
+    { code: '10/31', level: 10, tone: 'gold', secondaryTone: 'ash' },
+    { code: '10/38', level: 10, tone: 'gold', secondaryTone: 'pearl' },
+    { code: '10/8', level: 10, tone: 'pearl' },
+    { code: '10/86', level: 10, tone: 'pearl', secondaryTone: 'violet' },
+    { code: '10/95', level: 10, tone: 'slate-grey', secondaryTone: 'mahogany' },
+    { code: '10/96', level: 10, tone: 'slate-grey', secondaryTone: 'violet' },
+    { code: '10/97', level: 10, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    // Level 12
+    { code: '12/0', level: 12, tone: 'natural', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/1', level: 12, tone: 'ash', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/3', level: 12, tone: 'gold', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/11', level: 12, tone: 'ash', secondaryTone: 'ash', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/16', level: 12, tone: 'ash', secondaryTone: 'violet', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/81', level: 12, tone: 'pearl', secondaryTone: 'ash', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/86', level: 12, tone: 'pearl', secondaryTone: 'violet', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/89', level: 12, tone: 'pearl', secondaryTone: 'slate-grey', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+    { code: '12/61', level: 12, tone: 'violet', secondaryTone: 'ash', developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+];
+
+export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({ ...shade, line: 'koleston-perfect' }));
+
+//color touch
+const colorTouchBaseShades: Shade[] = [
+    // Level 2
+    { code: '2/0', level: 2, tone: 'natural' },
+    { code: '2/8', level: 2, tone: 'pearl' },
+    // Level 3
+    { code: '3/0', level: 3, tone: 'natural' },
+    { code: '33/06', level: 3, tone: 'natural', secondaryTone: 'violet' },
+    { code: '3/5', level: 3, tone: 'mahogany' },
+    { code: '3/66', level: 3, tone: 'violet', secondaryTone: 'violet' },
+    { code: '3/68', level: 3, tone: 'violet', secondaryTone: 'pearl' },
+    // Level 4
+    { code: '4/0', level: 4, tone: 'natural' },
+    { code: '44/05', level: 4, tone: 'natural', secondaryTone: 'mahogany' },
+    { code: '44/06', level: 4, tone: 'natural', secondaryTone: 'violet' },
+    { code: '44/07', level: 4, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '4/5', level: 4, tone: 'mahogany' },
+    { code: '4/57', level: 4, tone: 'mahogany', secondaryTone: 'chocolate' },
+    { code: '4/6', level: 4, tone: 'violet' },
+    { code: '44/65', level: 4, tone: 'violet', secondaryTone: 'mahogany' },
+    { code: '4/71', level: 4, tone: 'chocolate', secondaryTone: 'ash' },
+    // Level 5
+    { code: '5/0', level: 5, tone: 'natural' },
+    { code: '5/03', level: 5, tone: 'natural', secondaryTone: 'gold' },
+    { code: '55/03', level: 5, tone: 'natural', secondaryTone: 'gold' },
+    { code: '55/04', level: 5, tone: 'natural', secondaryTone: 'red' },
+    { code: '55/05', level: 5, tone: 'natural', secondaryTone: 'mahogany' },
+    { code: '55/06', level: 5, tone: 'natural', secondaryTone: 'violet' },
+    { code: '55/07', level: 5, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '5/1', level: 5, tone: 'ash' },
+    { code: '5/3', level: 5, tone: 'gold' },
+    { code: '5/37', level: 5, tone: 'gold', secondaryTone: 'chocolate' },
+    { code: '5/4', level: 5, tone: 'red' },
+    { code: '5/5', level: 5, tone: 'mahogany' },
+    { code: '55/54', level: 5, tone: 'mahogany', secondaryTone: 'red' },
+    { code: '55/65', level: 5, tone: 'violet', secondaryTone: 'mahogany' },
+    { code: '5/66', level: 5, tone: 'violet', secondaryTone: 'violet' },
+    { code: '5/71', level: 5, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '5/73', level: 5, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '5/75', level: 5, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '5/97', level: 5, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    // Level 6
+    { code: '6/0', level: 6, tone: 'natural' },
+    { code: '66/03', level: 6, tone: 'natural', secondaryTone: 'gold' },
+    { code: '66/04', level: 6, tone: 'natural', secondaryTone: 'red' },
+    { code: '66/07', level: 6, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '6/3', level: 6, tone: 'gold' },
+    { code: '6/35', level: 6, tone: 'gold', secondaryTone: 'mahogany' },
+    { code: '6/37', level: 6, tone: 'gold', secondaryTone: 'chocolate' },
+    { code: '6/4', level: 6, tone: 'red' },
+    { code: '66/44', level: 6, tone: 'red', secondaryTone: 'red' },
+    { code: '66/45', level: 6, tone: 'red', secondaryTone: 'mahogany' },
+    { code: '6/47', level: 6, tone: 'red', secondaryTone: 'chocolate' },
+    { code: '6/57', level: 6, tone: 'mahogany', secondaryTone: 'chocolate' },
+    { code: '6/7', level: 6, tone: 'chocolate' },
+    { code: '6/71', level: 6, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '6/73', level: 6, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '6/75', level: 6, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '6/77', level: 6, tone: 'chocolate', secondaryTone: 'chocolate' },
+    // Level 7
+    { code: '7/0', level: 7, tone: 'natural' },
+    { code: '7/03', level: 7, tone: 'natural', secondaryTone: 'gold' },
+    { code: '77/03', level: 7, tone: 'natural', secondaryTone: 'gold' },
+    { code: '77/07', level: 7, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '7/1', level: 7, tone: 'ash' },
+    { code: '7/3', level: 7, tone: 'gold' },
+    { code: '7/4', level: 7, tone: 'red' },
+    { code: '7/43', level: 7, tone: 'red', secondaryTone: 'gold' },
+    { code: '77/45', level: 7, tone: 'red', secondaryTone: 'mahogany' },
+    { code: '7/47', level: 7, tone: 'red', secondaryTone: 'chocolate' },
+    { code: '7/7', level: 7, tone: 'chocolate' },
+    { code: '7/71', level: 7, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '7/73', level: 7, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '7/75', level: 7, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '7/86', level: 7, tone: 'pearl', secondaryTone: 'violet' },
+    { code: '7/89', level: 7, tone: 'pearl', secondaryTone: 'slate-grey' },
+    { code: '7/97', level: 7, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    // Level 8
+    { code: '8/0', level: 8, tone: 'natural' },
+    { code: '8/03', level: 8, tone: 'natural', secondaryTone: 'gold' },
+    { code: '88/03', level: 8, tone: 'natural', secondaryTone: 'gold' },
+    { code: '88/07', level: 8, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '8/3', level: 8, tone: 'gold' },
+    { code: '8/35', level: 8, tone: 'gold', secondaryTone: 'mahogany' },
+    { code: '8/38', level: 8, tone: 'gold', secondaryTone: 'pearl' },
+    { code: '8/41', level: 8, tone: 'red', secondaryTone: 'ash' },
+    { code: '8/43', level: 8, tone: 'red', secondaryTone: 'gold' },
+    { code: '8/71', level: 8, tone: 'chocolate', secondaryTone: 'ash' },
+    { code: '8/73', level: 8, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '8/81', level: 8, tone: 'pearl', secondaryTone: 'ash' },
+    // Level 9
+    { code: '9/0', level: 9, tone: 'natural' },
+    { code: '9/01', level: 9, tone: 'natural', secondaryTone: 'ash' },
+    { code: '9/03', level: 9, tone: 'natural', secondaryTone: 'gold' },
+    { code: '9/16', level: 9, tone: 'ash', secondaryTone: 'violet' },
+    { code: '9/3', level: 9, tone: 'gold' },
+    { code: '9/36', level: 9, tone: 'gold', secondaryTone: 'violet' },
+    { code: '9/73', level: 9, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '9/75', level: 9, tone: 'chocolate', secondaryTone: 'mahogany' },
+    { code: '9/86', level: 9, tone: 'pearl', secondaryTone: 'violet' },
+    { code: '9/96', level: 9, tone: 'slate-grey', secondaryTone: 'violet' },
+    { code: '9/97', level: 9, tone: 'slate-grey', secondaryTone: 'chocolate' },
+    // Level 10
+    { code: '10/0', level: 10, tone: 'natural' },
+    { code: '10/01', level: 10, tone: 'natural', secondaryTone: 'ash' },
+    { code: '10/03', level: 10, tone: 'natural', secondaryTone: 'gold' },
+    { code: '10/07', level: 10, tone: 'natural', secondaryTone: 'chocolate' },
+    { code: '10/1', level: 10, tone: 'ash' },
+    { code: '10/16', level: 10, tone: 'ash', secondaryTone: 'violet' },
+    { code: '10/17', level: 10, tone: 'ash', secondaryTone: 'chocolate' },
+    { code: '10/18', level: 10, tone: 'ash', secondaryTone: 'pearl' },
+    { code: '10/3', level: 10, tone: 'gold' },
+    { code: '10/36', level: 10, tone: 'gold', secondaryTone: 'violet' },
+    { code: '10/38', level: 10, tone: 'gold', secondaryTone: 'pearl' },
+    { code: '10/73', level: 10, tone: 'chocolate', secondaryTone: 'gold' },
+    { code: '10/8', level: 10, tone: 'pearl' },
+    { code: '10/86', level: 10, tone: 'pearl', secondaryTone: 'violet' },
+    { code: '10/89', level: 10, tone: 'pearl', secondaryTone: 'slate-grey' },
+    { code: '10/96', level: 10, tone: 'slate-grey', secondaryTone: 'violet' },
+    { code: '10/97', level: 10, tone: 'slate-grey', secondaryTone: 'chocolate' },
+];
+
+export const WELLA_COLOR_TOUCH_CHART: Shade[] = colorTouchBaseShades.map(shade => ({
+    ...shade,
+    line: 'color-touch',
+    fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+    developerVolumeChoices: [6, 13],
+}));
+

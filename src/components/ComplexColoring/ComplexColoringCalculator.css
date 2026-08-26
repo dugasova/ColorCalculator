@@ -1,0 +1,70 @@
+@media (min-width: 1024px) {
+  .calculator--complex {
+    max-width: 900px;
+  }
+}
+
+.complex-coloring__subtitle {
+  margin: -12px 0 24px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.complex-coloring__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step-card {
+  padding: 20px;
+  border-radius: 1rem;
+  background: var(--field-bg);
+  border: 1px solid var(--border-field);
+}
+
+.step-card .calculator__form {
+  margin-bottom: 4px;
+}
+
+.step-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.step-card__title {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.step-card__remove {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+}
+
+.complex-coloring__add-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.complex-coloring__add-actions .button {
+  flex: 1;
+}
+
+.complex-coloring__empty {
+  margin: 0 0 20px;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--field-bg);
+  border: 1px dashed var(--border-field);
+  color: var(--muted);
+  font-size: 0.875rem;
+}

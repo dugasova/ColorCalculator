@@ -1,0 +1,55 @@
+rules_version = '2';
+
+// Deploy with `firebase deploy --only firestore:rules`. This file is the single source of
+// truth for Firestore access — there is no server (no Cloud Functions in this project), so
+// every write-time invariant the app relies on (e.g. "only an admin can edit the palette")
+// has to be enforced here, not just hidden behind client-side UI.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Role assignment has no self-service UI on purpose — an admin (or the salon owner,
+    // via the Firebase console) sets `role: 'admin'` on a user's document by hand. See
+    // src/roles.ts.
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Every authenticated account belongs to the same single salon (see the shared
+    // invite code in src/inviteCode.ts) — any signed-in user may read/write shared
+    // salon data. Only role assignment itself is locked down.
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /formulaHistory/{entryId} {
+      allow read, create, update: if isSignedIn();
+    }
+
+    // Palette management (src/palette.ts, src/components/PaletteAdmin): every stylist
+    // reads the live catalog, but only an admin may add a dye line, add a shade, or mark
+    // one discontinued.
+    match /customBrands/{brandId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /paletteOverrides/{overrideId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Built-in brand shade charts (Wella, L'Oréal, ...), migrated out of the JS bundle so
+    // an admin can correct entries without a redeploy. Same read/write split as
+    // customBrands/paletteOverrides.
+    match /brandCharts/{brandId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

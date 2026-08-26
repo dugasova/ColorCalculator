@@ -1,0 +1,19 @@
+.login-form__language {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.login-form {
+  grid-template-columns: 1fr;
+}
+
+.login-form__tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.login-form__tabs .button {
+  flex: 1;
+}

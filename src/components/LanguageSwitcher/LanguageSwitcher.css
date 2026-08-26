@@ -1,0 +1,10 @@
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.language-switcher .button {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
