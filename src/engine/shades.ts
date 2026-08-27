@@ -1,6 +1,6 @@
 import type { DeveloperVolume, Level, LiftTable } from "./levels";
 
-export type ToneFamily = 'natural' | 'ash' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
+export type ToneFamily = 'mocha' | 'natural' | 'ash' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
 
 export interface MixingRatio {
   colorParts: number;
@@ -102,8 +102,4 @@ export const GENERIC_SHADE_CHART: Shade[] = [
   { code: '10.4', level: 10, tone: 'copper' },
   { code: '10.5', level: 10, tone: 'red' },
   { code: '10.7', level: 10, tone: 'chocolate' },
-
-
-
 ];
-

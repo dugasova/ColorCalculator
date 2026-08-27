@@ -56,6 +56,8 @@ src/
 scripts/
   migrateBuiltInPalette.ts   One-off migration: copies the hard-coded brand charts into
                              Firestore so they become admin-editable too.
+  repairMajirelPalette.ts    One-off repair: clears stale migrated Majirel overrides
+                             after a built-in chart correction so it takes effect.
 ```
 
 The shade/brand catalog is a merge of two sources: the built-in charts hard-coded in
@@ -127,6 +129,18 @@ MIGRATION_ADMIN_EMAIL=you@salon.example MIGRATION_ADMIN_PASSWORD=*** npm run mig
 
 Safe to re-run — already-migrated shades are skipped.
 
+If a brand's built-in chart is corrected after it was already migrated (e.g. L'Oréal
+Majirel's shade data was fixed to match the official chart), the stale migrated copy in
+Firestore shadows the fix — `getFullBrandShades` prefers an `add` override over the base
+shade whenever they share a (line, code). Clear the stale Majirel overrides once, as an
+admin account:
+
+```bash
+MIGRATION_ADMIN_EMAIL=you@salon.example MIGRATION_ADMIN_PASSWORD=*** npm run migrate:repair-majirel
+```
+
+Safe to run even if Majirel was never migrated, and safe to re-run.
+
 ## Available scripts
 
 | Command                  | Description                                    |
@@ -137,3 +151,4 @@ Safe to re-run — already-migrated shades are skipped.
 | `npm run test`             | Run the Vitest suite                             |
 | `npm run preview`          | Preview a production build locally               |
 | `npm run migrate:palette`  | One-off migration of built-in shades to Firestore |
+| `npm run migrate:repair-majirel` | Clears stale migrated Majirel overrides after a chart fix |
