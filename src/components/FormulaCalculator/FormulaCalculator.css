@@ -1,34 +1,45 @@
 .calculator {
-  --ink: var(--blendsor-black);
-  --muted: var(--blendsor-gray);
-  --gold: var(--blendsor-gold);
-  --gold-ink: var(--blendsor-gold-ink);
-  --surface: var(--blendsor-white);
-  --field-bg: var(--blendsor-cream);
-  --border-card: rgba(26, 26, 26, 0.05);
-  --border-field: rgba(26, 26, 26, 0.08);
+  --ink: var(--brand-ink);
+  --muted: var(--brand-muted);
+  --gold: var(--brand-primary);
+  --gold-ink: var(--brand-primary-ink);
+  --surface: var(--brand-surface);
+  --field-bg: var(--brand-field);
+  --border-card: rgba(22, 18, 31, 0.05);
+  --border-field: rgba(22, 18, 31, 0.08);
 
   max-width: 480px;
   margin: 40px auto;
   padding: 32px;
   background: var(--surface);
   border-radius: 1.5rem;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--brand-shadow-sm);
   border: 1px solid var(--border-card);
   color: var(--ink);
 }
 
 .calculator__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 24px;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 500;
   color: var(--ink);
 }
 
+.calculator__title-mark {
+  display: block;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .calculator__title-accent {
-  font-style: italic;
-  color: var(--gold-ink);
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .calculator__form {
@@ -40,7 +51,7 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -76,7 +87,7 @@
 .field input:focus,
 .field textarea:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(200, 132, 81, 0.1);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
 .shade-field {
@@ -96,7 +107,12 @@
   height: 40px;
   border-radius: 50%;
   border: 2px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--border-field), 0 2px 6px -2px rgba(26, 26, 26, 0.35);
+  box-shadow: 0 0 0 1px var(--border-field), 0 2px 6px -2px rgba(22, 18, 31, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.shade-swatch:hover {
+  transform: scale(1.08);
 }
 
 .results {
@@ -120,6 +136,24 @@
   border-radius: 1rem;
   background: var(--field-bg);
   border: 1px solid var(--border-field);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: stat-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--brand-shadow-sm);
+}
+
+.stat:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+@keyframes stat-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 .stat__label {
@@ -143,6 +177,11 @@
   padding: 10px 0;
   border-bottom: 1px solid var(--border-card);
   font-size: 0.95rem;
+  transition: padding-left 0.15s ease;
+}
+
+.results__row:hover {
+  padding-left: 4px;
 }
 
 .results__row:last-of-type {
@@ -161,6 +200,14 @@
   background: rgba(234, 88, 12, 0.08);
   color: #9a3412;
   font-size: 0.8125rem;
+  animation: note-enter 0.25s ease both;
+}
+
+@keyframes note-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 .results__section-heading {
@@ -218,15 +265,35 @@
 }
 
 .processing-timer__clock {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
 
+.processing-timer--running .processing-timer__clock {
+  animation: timer-pulse 2s ease-in-out infinite;
+}
+
 .processing-timer--done .processing-timer__clock {
   color: var(--gold-ink);
+  animation: timer-done-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes timer-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes timer-done-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
 }
 
 .processing-timer__controls {
@@ -300,8 +367,34 @@
 }
 
 .results__photo input[type="file"] {
-  padding: 8px;
-  font-size: 0.85rem;
+  padding: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.results__photo input[type="file"]::file-selector-button,
+.results__photo input[type="file"]::-webkit-file-upload-button {
+  margin-right: 10px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 0.4rem;
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  background-position: 0% 50%;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, background-position 0.3s ease, transform 0.15s ease;
+}
+
+.results__photo input[type="file"]:hover::file-selector-button,
+.results__photo input[type="file"]:hover::-webkit-file-upload-button {
+  box-shadow: var(--brand-shadow-sm);
+  background-position: 100% 50%;
+  transform: translateY(-1px);
 }
 
 .results__photo-preview {
@@ -338,7 +431,7 @@
   background: transparent;
   font-size: 0.85rem;
   font-weight: 600;
-  border: 1px solid rgba(26, 26, 26, 0.08);
+  border: 1px solid rgba(22, 18, 31, 0.08);
 }
 
 .button--whatsapp {

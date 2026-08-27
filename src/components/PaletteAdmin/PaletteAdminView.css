@@ -7,7 +7,7 @@
 }
 
 .palette-admin__status {
-  color: var(--blendsor-gold-ink, #8a6d1f);
+  color: var(--brand-primary-ink, #6d28d9);
   font-size: 0.9rem;
   margin-left: 12px;
 }
@@ -27,8 +27,14 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(22, 18, 31, 0.1);
   border-radius: 8px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.palette-admin__shade-row:not(.palette-admin__shade-row--disabled):hover {
+  border-color: rgba(124, 58, 237, 0.35);
+  background: rgba(124, 58, 237, 0.04);
 }
 
 .palette-admin__shade-row--disabled {
@@ -41,7 +47,7 @@
 }
 
 .palette-admin__shade-detail {
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(22, 18, 31, 0.65);
   font-size: 0.9rem;
 }
 

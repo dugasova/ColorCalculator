@@ -51,7 +51,7 @@ export default function LoginForm() {
       <div className="login-form__language">
         <LanguageSwitcher />
       </div>
-      <h1 className="calculator__title">{t('app.titlePrefix')} <span className="calculator__title-accent">{t('app.titleAccent')}</span></h1>
+      <h1 className="calculator__title"><img className="calculator__title-mark" src="/favicon.svg" alt="" width="28" height="28" />{t('app.titlePrefix')}<span className="calculator__title-accent">{t('app.titleAccent')}</span></h1>
 
       <div className="login-form__tabs">
         <button

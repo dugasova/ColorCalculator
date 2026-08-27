@@ -1,6 +1,6 @@
 .correction__subtitle {
   margin: -16px 0 20px;
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
   font-size: 0.9rem;
   line-height: 1.4;
 }
@@ -20,20 +20,28 @@
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border: 1px solid rgba(26, 26, 26, 0.08);
+  border: 1px solid var(--brand-border);
   border-radius: 0.5rem;
-  background: #fcfaf7;
-  color: #1a1a1a;
+  background: var(--brand-field);
+  color: var(--brand-ink);
   font-size: 0.85rem;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.tone-btn:hover {
+  transform: translateY(-1px);
 }
 
 .tone-btn--active {
   border-color: var(--tone-color);
   background: color-mix(in srgb, var(--tone-color) 14%, white);
+}
+
+.tone-btn--active .tone-dot {
+  animation: tone-dot-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .tone-dot {
@@ -42,6 +50,16 @@
   border-radius: 50%;
   background: var(--tone-color);
   flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+@keyframes tone-dot-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.25);
+  }
 }
 
 
@@ -59,16 +77,24 @@
   margin: 12px 0 0;
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
-  background: rgba(200, 132, 81, 0.1);
-  color: var(--blendsor-gold-ink);
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--brand-primary-ink);
   font-size: 0.8125rem;
   line-height: 1.4;
+  animation: note-enter 0.25s ease both;
+}
+
+@keyframes note-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 .correction__disclaimer {
   margin: 16px 0 0;
   font-size: 0.75rem;
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
   font-style: italic;
 }
 

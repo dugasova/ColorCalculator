@@ -22,6 +22,14 @@
   border-radius: 1rem;
   background: var(--field-bg);
   border: 1px solid var(--border-field);
+  animation: step-card-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes step-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 .step-card .calculator__form {
@@ -38,7 +46,7 @@
 
 .step-card__title {
   margin: 0;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1.1rem;
   font-weight: 500;
   color: var(--ink);

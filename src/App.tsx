@@ -79,7 +79,7 @@ function AuthenticatedApp({ user }: { user: User }) {
     <div>
       <header className="app-header">
         <div className="app-topbar">
-          <span className="app-brand">{t('app.titlePrefix')} <em>{t('app.titleAccent')}</em></span>
+          <button type="button" className="app-brand" onClick={() => setView('calculator')} aria-label={t('nav.calculator')}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t('app.titlePrefix')}<em>{t('app.titleAccent')}</em></button>
           <Nav view={view} onViewChange={setView} isAdmin={isAdmin} />
           <div className="app-topbar__account">
             <LanguageSwitcher />

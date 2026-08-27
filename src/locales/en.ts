@@ -1,7 +1,7 @@
 export const en = {
   app: {
-    titlePrefix: 'Color',
-    titleAccent: 'Calculator',
+    titlePrefix: 'Hue',
+    titleAccent: 'mix',
   },
   language: {
     en: 'EN',

@@ -1,5 +1,5 @@
 .history__status {
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
   font-size: 0.9rem;
   margin: 16px 0 0;
 }
@@ -16,8 +16,14 @@
 .history__entry {
   padding: 16px;
   border-radius: 1rem;
-  background: var(--blendsor-cream);
-  border: 1px solid rgba(26, 26, 26, 0.08);
+  background: var(--brand-field);
+  border: 1px solid rgba(22, 18, 31, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.history__entry:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--brand-shadow-sm);
 }
 
 .history__entry-header {
@@ -29,7 +35,7 @@
 
 .history__entry-date {
   font-size: 0.8rem;
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
 }
 
 .history__entry-text {
@@ -46,15 +52,15 @@
   margin-top: 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--blendsor-black);
+  color: var(--brand-ink);
 }
 
 .history__entry-note {
   margin: 8px 0 0;
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
-  background: rgba(200, 132, 81, 0.1);
-  color: var(--blendsor-gold-ink);
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--brand-primary-ink);
   font-size: 0.85rem;
   font-style: italic;
 }
@@ -62,7 +68,7 @@
 .history__entry-patch-test {
   margin: 8px 0 0;
   font-size: 0.75rem;
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
 }
 
 .history__entry-photos {
@@ -77,7 +83,7 @@
   max-height: 160px;
   object-fit: cover;
   border-radius: 0.5rem;
-  border: 1px solid rgba(26, 26, 26, 0.08);
+  border: 1px solid rgba(22, 18, 31, 0.08);
 }
 
 .history__entry-footer {
@@ -87,7 +93,7 @@
   justify-content: space-between;
   gap: 8px;
   font-size: 0.75rem;
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
 }
 
 .history__entry-repeat {
@@ -107,16 +113,16 @@
   margin: 20px 0 0;
   padding: 16px;
   border-radius: 1rem;
-  background: var(--blendsor-cream);
-  border: 1px solid rgba(26, 26, 26, 0.08);
+  background: var(--brand-field);
+  border: 1px solid rgba(22, 18, 31, 0.08);
 }
 
 .history__reminders-title {
   margin: 0 0 12px;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 500;
-  color: var(--blendsor-black);
+  color: var(--brand-ink);
 }
 
 .history__reminders-list {
@@ -136,17 +142,17 @@
   gap: 4px 12px;
   padding: 8px 12px;
   border-radius: 0.5rem;
-  background: var(--blendsor-white);
+  background: var(--brand-surface);
   font-size: 0.85rem;
 }
 
 .history__reminder-client {
   font-weight: 600;
-  color: var(--blendsor-black);
+  color: var(--brand-ink);
 }
 
 .history__reminder-detail {
-  color: var(--blendsor-gray);
+  color: var(--brand-muted);
   flex: 1 0 auto;
 }
 
@@ -163,11 +169,18 @@
 }
 
 .history__reminder--due-soon .history__reminder-status {
-  background: rgba(200, 132, 81, 0.12);
-  color: var(--blendsor-gold-ink);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--brand-primary-ink);
+  animation: reminder-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes reminder-pulse {
+  50% {
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+  }
 }
 
 .history__reminder--upcoming .history__reminder-status {
-  background: rgba(26, 26, 26, 0.06);
-  color: var(--blendsor-gray);
+  background: rgba(22, 18, 31, 0.06);
+  color: var(--brand-muted);
 }
