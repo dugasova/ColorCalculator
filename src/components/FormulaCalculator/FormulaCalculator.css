@@ -64,7 +64,7 @@
 }
 
 .field select,
-.field input,
+.field input:not([type="checkbox"]),
 .field textarea {
   width: 100%;
   min-width: 0;
@@ -84,7 +84,7 @@
 }
 
 .field select:focus,
-.field input:focus,
+.field input:not([type="checkbox"]):focus,
 .field textarea:focus {
   border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
@@ -113,6 +113,39 @@
 
 .shade-swatch:hover {
   transform: scale(1.08);
+}
+
+.field .blend-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.blend-ratio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blend-ratio .button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.blend-ratio__grams {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.blend-ratio input {
+  width: 70px;
+  flex: none;
 }
 
 .results {

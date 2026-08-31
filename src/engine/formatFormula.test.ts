@@ -18,6 +18,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -49,6 +50,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -71,6 +73,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: true,
     });
 
@@ -93,6 +96,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -119,6 +123,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -140,6 +145,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -161,6 +167,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: null,
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -189,6 +196,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade,
       additionalShadeGrams: 5,
+      blend: null,
       neutralizationApplied: false,
     });
 
@@ -211,6 +219,7 @@ describe('formatFormulaText', () => {
       applicationZone: 'full-head',
       additionalShade: { code: '8.3', level: 8, tone: 'gold' },
       additionalShadeGrams: 0,
+      blend: null,
       neutralizationApplied: false,
     });
 

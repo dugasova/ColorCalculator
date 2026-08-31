@@ -3,7 +3,7 @@ import type { FullFormula } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { ApplicationZone } from "../../engine/applicationZone";
-import { formatFormulaText, buildMixSummary } from "../../engine/formatFormula";
+import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
 import { SessionDetailsPanel, type SessionDetails } from "./SessionDetailsPanel";
@@ -18,6 +18,7 @@ export interface FormulaResultsProps {
   result: FullFormula;
   additionalShade: Shade | null;
   additionalShadeGrams: number;
+  blend: BlendSummary | null;
   neutralizationApplied: boolean;
   onNeutralizationAppliedChange: (applied: boolean) => void;
   appliedBy: string;
@@ -37,7 +38,7 @@ const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
   brandName, line, targetShade, startLevel, grayPercent, applicationZone, result,
-  additionalShade, additionalShadeGrams, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
+  additionalShade, additionalShadeGrams, blend, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
   productCost, recommendedServicePrice, servicePrice, onServicePriceChange,
@@ -49,7 +50,7 @@ export function FormulaResults({
 
   const formulaText = formatFormulaText({
     brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-    additionalShade, additionalShadeGrams, neutralizationApplied,
+    additionalShade, additionalShadeGrams, blend, neutralizationApplied,
   });
 
   const handleSave = async (details: SessionDetails) => {
@@ -64,6 +65,7 @@ export function FormulaResults({
       result,
       additionalShade,
       additionalShadeGrams,
+      blend,
       neutralizationApplied,
       processingMinutes,
       pricePerGram,
@@ -111,7 +113,7 @@ export function FormulaResults({
       {result.grams !== null && (
         <div className="results__row">
           <span className="results__row-label">{t('results.mix')}</span>
-          <span>{buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams)}</span>
+          <span>{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams)}</span>
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { shadeToHexColor } from './color';
+import { shadeToHexColor, blendShadeHexColors } from './color';
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
@@ -56,5 +56,28 @@ describe('shadeToHexColor', () => {
       shadeToHexColor({ code: '10.3', level: 10, tone: 'gold' }),
     );
     expect(level10Delta).toBeGreaterThan(level1Delta);
+  });
+});
+
+describe('blendShadeHexColors', () => {
+  const ash = { code: '7/1', level: 7, tone: 'ash' } as const;
+  const gold = { code: '7/3', level: 7, tone: 'gold' } as const;
+
+  it('returns a valid 6-digit hex color', () => {
+    expect(blendShadeHexColors(ash, gold, 50)).toMatch(HEX_RE);
+  });
+
+  it('matches the primary shade alone at 100%', () => {
+    expect(blendShadeHexColors(ash, gold, 100)).toBe(shadeToHexColor(ash));
+  });
+
+  it('matches the secondary shade alone at 0%', () => {
+    expect(blendShadeHexColors(ash, gold, 0)).toBe(shadeToHexColor(gold));
+  });
+
+  it('lands strictly between the two swatches at 50%', () => {
+    const blended = blendShadeHexColors(ash, gold, 50);
+    expect(blended).not.toBe(shadeToHexColor(ash));
+    expect(blended).not.toBe(shadeToHexColor(gold));
   });
 });

@@ -119,6 +119,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     result: effectiveResult,
     additionalShade,
     additionalShadeGrams,
+    blend: null,
     neutralizationApplied,
     processingMinutes,
     pricePerGram,

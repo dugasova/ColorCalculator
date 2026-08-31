@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GENERIC_SHADE_CHART } from "../../engine/shades";
-import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
+import { GENERIC_SHADE_CHART, canBlendShades, suggestBlendComponents } from "../../engine/shades";
+import { applyAdditionalShade, calculateFullFormula, splitShadeBlend } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
 import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
@@ -16,11 +16,15 @@ import { GrayPercentField } from "./fields/GrayPercentField";
 import { ShadeField } from "./fields/ShadeField";
 import { AdditionalShadeField } from "./fields/AdditionalShadeField";
 import { AdditionalShadeGramsField } from "./fields/AdditionalShadeGramsField";
+import { BlendModeField } from "./fields/BlendModeField";
+import { BlendComponentField } from "./fields/BlendComponentField";
+import { BlendRatioField } from "./fields/BlendRatioField";
 import { DeveloperVolumeField } from "./fields/DeveloperVolumeField";
 import { ApplicationZoneField } from "./fields/ApplicationZoneField";
 import { TotalGramsField } from "./fields/TotalGramsField";
 import { FormulaResults } from "./FormulaResults";
 
+const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
 
 export interface FormulaCalculatorProps {
   appliedBy: string;
@@ -44,6 +48,10 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
   const [manualServicePrice, setManualServicePrice] = useState<number | undefined>(undefined);
   const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(null);
   const [additionalShadeGrams, setAdditionalShadeGrams] = useState(0);
+  const [blendModeEnabled, setBlendModeEnabled] = useState(false);
+  const [blendShadeACode, setBlendShadeACode] = useState<string | null>(null);
+  const [blendShadeBCode, setBlendShadeBCode] = useState<string | null>(null);
+  const [blendPrimaryPercent, setBlendPrimaryPercent] = useState(DEFAULT_BLEND_PRIMARY_PERCENT);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
   const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
 
@@ -68,6 +76,10 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
     setManualServicePrice(repeatRequest.servicePrice);
     setAdditionalShadeCode(repeatRequest.additionalShadeCode);
     setAdditionalShadeGrams(repeatRequest.additionalShadeGrams);
+    setBlendModeEnabled(repeatRequest.blendShadeACode !== null && repeatRequest.blendShadeBCode !== null);
+    setBlendShadeACode(repeatRequest.blendShadeACode);
+    setBlendShadeBCode(repeatRequest.blendShadeBCode);
+    setBlendPrimaryPercent(repeatRequest.blendPrimaryPercent);
     setNeutralizationApplied(false);
   }
 
@@ -85,6 +97,10 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
     setManualServicePrice(undefined);
     setAdditionalShadeCode(null);
     setAdditionalShadeGrams(0);
+    setBlendModeEnabled(false);
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
     setNeutralizationApplied(false);
   };
 
@@ -97,6 +113,10 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
     setManualServicePrice(undefined);
     setAdditionalShadeCode(null);
     setAdditionalShadeGrams(0);
+    setBlendModeEnabled(false);
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
     setNeutralizationApplied(false);
   };
 
@@ -105,12 +125,27 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
     setManualDeveloperVolume(undefined);
     setManualProcessingMinutes(undefined);
     setManualServicePrice(undefined);
+    // A blend picked for the previous target may no longer be a physically valid pairing
+    // for the new one (different level/reflect); drop it so suggestBlendComponents below
+    // proposes a fresh default for the new target instead of silently keeping a stale one.
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
     setNeutralizationApplied(false);
   };
 
   const handleAdditionalShadeCodeChange = (code: string | null) => {
     setAdditionalShadeCode(code);
     setAdditionalShadeGrams(0);
+  };
+
+  const handleBlendModeChange = (enabled: boolean) => {
+    setBlendModeEnabled(enabled);
+    if (!enabled) {
+      setBlendShadeACode(null);
+      setBlendShadeBCode(null);
+      setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
+    }
   };
 
   const handleApplicationZoneChange = (zone: ApplicationZone) => {
@@ -127,10 +162,31 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
     brands[brandId].mixingRatio, effectiveManualDeveloperVolume
   );
   const additionalShade = additionalShadeCode !== null ? lineShades.find(s => s.code === additionalShadeCode) ?? null : null;
-  const grams = result.grams !== null && additionalShade !== null && additionalShadeGrams > 0
+  const grams = !blendModeEnabled && result.grams !== null && additionalShade !== null && additionalShadeGrams > 0
     ? applyAdditionalShade(result.grams, result.mixingRatio, additionalShadeGrams)
     : result.grams;
   const effectiveResult = grams !== result.grams ? { ...result, grams } : result;
+
+  // Two dedicated fields for the substitute-blend components (see BlendComponentField),
+  // fully independent of targetShade/additionalShade above -- targetShade stays the
+  // visual goal (may not itself be a physical product to weigh), and each blend
+  // component defaults to the closest real single-reflect shade the moment blend mode is
+  // turned on (e.g. target 7/17 suggests 7/1 + 7/7), overridable via the two selects.
+  const blendCandidates = lineShades.filter(s => s.code !== targetShade.code && canBlendShades(targetShade, s));
+  const blendSuggestion = suggestBlendComponents(targetShade, lineShades);
+  const blendShadeACodeEffective = blendShadeACode ?? blendSuggestion.primary?.code ?? null;
+  const blendShadeBCodeEffective = blendShadeBCode ?? blendSuggestion.secondary?.code ?? null;
+  const blendShadeA = blendShadeACodeEffective !== null ? blendCandidates.find(s => s.code === blendShadeACodeEffective) ?? null : null;
+  const blendShadeB = blendShadeBCodeEffective !== null ? blendCandidates.find(s => s.code === blendShadeBCodeEffective) ?? null : null;
+  const blend = blendModeEnabled && blendShadeA !== null && blendShadeB !== null && result.grams !== null
+    ? {
+        shadeA: blendShadeA,
+        shadeAGrams: splitShadeBlend(result.grams.colorGrams, blendPrimaryPercent).primaryGrams,
+        shadeB: blendShadeB,
+        shadeBGrams: splitShadeBlend(result.grams.colorGrams, blendPrimaryPercent).secondaryGrams,
+      }
+    : null;
+
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
   const pricePerGram = manualPricePerGram ?? brands[brandId].pricePerGram;
   const totalProductGrams = grams !== null ? grams.colorGrams + grams.developerGrams : null;
@@ -152,16 +208,50 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
           targetShade={targetShade}
           onTargetShadeCodeChange={handleTargetShadeCodeChange}
         />
-        <AdditionalShadeField
-          lineShades={lineShades}
-          additionalShadeCode={additionalShadeCode}
-          onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
-        />
-        <AdditionalShadeGramsField
-          additionalShadeCode={additionalShadeCode}
-          additionalShadeGrams={additionalShadeGrams}
-          onAdditionalShadeGramsChange={setAdditionalShadeGrams}
-        />
+        <BlendModeField substituteBlend={blendModeEnabled} onSubstituteBlendChange={handleBlendModeChange} />
+        {!blendModeEnabled && (
+          <>
+            <AdditionalShadeField
+              lineShades={lineShades}
+              additionalShadeCode={additionalShadeCode}
+              onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
+            />
+            <AdditionalShadeGramsField
+              additionalShadeCode={additionalShadeCode}
+              additionalShadeGrams={additionalShadeGrams}
+              onAdditionalShadeGramsChange={setAdditionalShadeGrams}
+            />
+          </>
+        )}
+        {blendModeEnabled && (
+          <>
+            <BlendComponentField
+              id="blendShadeA"
+              label={t('fields.blendShadeA')}
+              placeholder={t('fields.blendShadeNone')}
+              candidates={blendCandidates}
+              shadeCode={blendShadeACodeEffective}
+              onShadeCodeChange={setBlendShadeACode}
+            />
+            <BlendComponentField
+              id="blendShadeB"
+              label={t('fields.blendShadeB')}
+              placeholder={t('fields.blendShadeNone')}
+              candidates={blendCandidates}
+              shadeCode={blendShadeBCodeEffective}
+              onShadeCodeChange={setBlendShadeBCode}
+            />
+            {blendShadeA !== null && blendShadeB !== null && result.grams !== null && (
+              <BlendRatioField
+                shadeA={blendShadeA}
+                shadeB={blendShadeB}
+                colorGrams={result.grams.colorGrams}
+                primaryPercent={blendPrimaryPercent}
+                onPrimaryPercentChange={setBlendPrimaryPercent}
+              />
+            )}
+          </>
+        )}
         <DeveloperVolumeField
           targetShade={targetShade}
           manualDeveloperVolume={manualDeveloperVolume}
@@ -180,6 +270,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
         result={effectiveResult}
         additionalShade={additionalShade}
         additionalShadeGrams={additionalShadeGrams}
+        blend={blend}
         neutralizationApplied={neutralizationApplied}
         onNeutralizationAppliedChange={setNeutralizationApplied}
         appliedBy={appliedBy}

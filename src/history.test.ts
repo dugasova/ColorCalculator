@@ -31,6 +31,7 @@ function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryS
     result: colorFullFormula,
     additionalShade: null,
     additionalShadeGrams: null,
+    blend: null,
     neutralizationApplied: false,
     processingMinutes: 30,
     pricePerGram: 0.18,
@@ -118,6 +119,7 @@ describe('normalizeHistoryEntry', () => {
       result: colorFullFormula,
       additionalShade: null,
       additionalShadeGrams: null,
+      blend: null,
       neutralizationApplied: false,
       processingMinutes: 30,
       pricePerGram: 0.2,
@@ -190,6 +192,30 @@ describe('buildRepeatFormulaRequest', () => {
     expect(request!.totalGrams).toBe(60);
     expect(request!.additionalShadeCode).toBe('7.3');
     expect(request!.additionalShadeGrams).toBe(10);
+  });
+
+  it('does not back grams out of totalGrams for a substitute blend, since the total was never grown', () => {
+    // A substitute blend splits a single 60g total (30g color : 30g developer) between
+    // its two components rather than adding a shade's grams on top of the primary mix.
+    const step = makeColorStep({
+      result: { ...colorFullFormula, grams: { colorGrams: 30, developerGrams: 30 } },
+      blend: {
+        shadeA: { code: '7.1', level: 7, tone: 'ash' },
+        shadeAGrams: 21,
+        shadeB: { code: '7.3', level: 7, tone: 'gold' },
+        shadeBGrams: 9,
+      },
+    });
+    const entry = makeEntry({ clientName: 'Anna', steps: [step] });
+    const request = buildRepeatFormulaRequest(entry, BRANDS);
+
+    expect(request).not.toBeNull();
+    expect(request!.totalGrams).toBe(60);
+    expect(request!.blendShadeACode).toBe('7.1');
+    expect(request!.blendShadeBCode).toBe('7.3');
+    expect(request!.blendPrimaryPercent).toBe(70);
+    expect(request!.additionalShadeCode).toBeNull();
+    expect(request!.additionalShadeGrams).toBe(0);
   });
 
   it('returns null for a multi-step complex-coloring session', () => {

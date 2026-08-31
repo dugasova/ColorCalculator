@@ -25,9 +25,22 @@ export interface ColorHistoryStep {
   result: FullFormula;
   additionalShade: Shade | null;
   additionalShadeGrams: number | null;
+  // A substitute blend for a shade that's out of stock -- two real shades split the
+  // single calculated color total (see `splitShadeBlend` in engine/formula.ts) instead
+  // of `targetShade` (which may not be a physical product to weigh) or growing the total
+  // the way `additionalShade`/`applyAdditionalShade` does. Mutually exclusive with
+  // `additionalShade` above.
+  blend: ColorBlend | null;
   neutralizationApplied: boolean;
   processingMinutes: number;
   pricePerGram: number;
+}
+
+export interface ColorBlend {
+  shadeA: Shade;
+  shadeAGrams: number;
+  shadeB: Shade;
+  shadeBGrams: number;
 }
 
 export interface BleachHistoryStep {
@@ -106,6 +119,7 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
     result: legacy.result,
     additionalShade: legacy.additionalShade ?? null,
     additionalShadeGrams: legacy.additionalShadeGrams ?? null,
+    blend: null,
     neutralizationApplied: false,
     processingMinutes: legacy.processingMinutes,
     pricePerGram: legacy.pricePerGram,
@@ -208,6 +222,9 @@ export interface RepeatFormulaRequest {
   manualDeveloperVolume: DeveloperVolume | undefined;
   additionalShadeCode: string | null;
   additionalShadeGrams: number;
+  blendShadeACode: string | null;
+  blendShadeBCode: string | null;
+  blendPrimaryPercent: number;
   processingMinutes: number;
   applicationZone: ApplicationZone;
   pricePerGram: number;
@@ -232,16 +249,24 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   const brand = Object.values(brands).find(b => b.name === step.brandName);
   if (brand === undefined) return null;
 
-  // `step.result.grams` already includes any additional shade blended in (see
-  // applyAdditionalShade); back it out here so the reconstructed `totalGrams` reflects only
-  // the primary mix — the additional shade is re-applied on top from its own restored state.
+  // A substitute blend already splits the single calculated total between its two
+  // components (see `splitShadeBlend`), so `step.result.grams.colorGrams` *is* the
+  // original total — nothing to back out. A discretionary additional shade instead grew
+  // the total on top of the primary mix (see `applyAdditionalShade`), so its grams are
+  // subtracted back out here first, and re-applied on top from restored state on repeat.
+  // The two are mutually exclusive (see ColorHistoryStep), so only one branch applies.
+  const blend = step.blend;
   const additionalShadeGrams = step.additionalShadeGrams ?? 0;
   let totalGrams = 60;
   if (step.result.grams !== null) {
-    const primaryColorGrams = step.result.grams.colorGrams - additionalShadeGrams;
+    const primaryColorGrams = blend !== null
+      ? step.result.grams.colorGrams
+      : step.result.grams.colorGrams - additionalShadeGrams;
     const primaryDeveloperGrams = primaryColorGrams * step.result.mixingRatio.developerParts / step.result.mixingRatio.colorParts;
     totalGrams = Math.round(primaryColorGrams + primaryDeveloperGrams);
   }
+  const blendTotal = blend !== null ? blend.shadeAGrams + blend.shadeBGrams : 0;
+  const blendPrimaryPercent = blend !== null && blendTotal > 0 ? Math.round(blend.shadeAGrams / blendTotal * 100) : 70;
 
   return {
     brandId: brand.id,
@@ -253,8 +278,11 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     manualDeveloperVolume: step.targetShade.developerVolumeChoices !== undefined
       ? (step.result.developerVolume ?? undefined)
       : undefined,
-    additionalShadeCode: step.additionalShade?.code ?? null,
-    additionalShadeGrams,
+    additionalShadeCode: blend === null ? (step.additionalShade?.code ?? null) : null,
+    additionalShadeGrams: blend === null ? additionalShadeGrams : 0,
+    blendShadeACode: blend?.shadeA.code ?? null,
+    blendShadeBCode: blend?.shadeB.code ?? null,
+    blendPrimaryPercent,
     processingMinutes: step.processingMinutes,
     applicationZone: step.applicationZone ?? 'full-head',
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,

@@ -101,6 +101,25 @@ export function applyAdditionalShade(grams: FormulaGrams, ratio: MixingRatio, ad
   return { colorGrams, developerGrams };
 }
 
+export interface ShadeBlendSplit {
+  primaryGrams: number;
+  secondaryGrams: number;
+}
+
+// Splits a shade's already-calculated color total between two component shades by ratio,
+// for approximating a shade that's out of stock (e.g. no 7/13 on hand -> blend 7/1 and
+// 7/3 at a 70/30 split). Unlike `applyAdditionalShade`, the color/developer weight
+// `calculateFullFormula` produced is left untouched -- the two components share that
+// single total rather than growing it, since together they stand in for the one missing
+// shade. Callers should only pair shades `canBlendShades` (see shades.ts) accepts.
+export function splitShadeBlend(colorGrams: number, primaryPercent: number): ShadeBlendSplit {
+  const ratio = Math.min(100, Math.max(0, primaryPercent)) / 100;
+  return {
+    primaryGrams: colorGrams * ratio,
+    secondaryGrams: colorGrams * (1 - ratio),
+  };
+}
+
 export function calculateFullFormula(
   startLevel: Level,
   targetShade: Shade,

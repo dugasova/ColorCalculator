@@ -15,7 +15,29 @@ export interface FormatFormulaParams {
     applicationZone: ApplicationZone;
     additionalShade: Shade | null;
     additionalShadeGrams: number;
+    // A substitute blend for a shade that's out of stock (see BlendSummary) -- mutually
+    // exclusive with additionalShade/additionalShadeGrams above, which is instead a
+    // discretionary corrective addition on top of the primary mix.
+    blend: BlendSummary | null;
     neutralizationApplied: boolean;
+}
+
+export interface BlendSummary {
+    shadeA: Shade;
+    shadeAGrams: number;
+    shadeB: Shade;
+    shadeBGrams: number;
+}
+
+// Mix breakdown for a substitute blend approximating a shade that's out of stock: the
+// target shade (the visual goal named in the title above) never appears here, since it
+// isn't a real product to weigh -- only the two components standing in for it.
+export function buildBlendMixSummary(blend: BlendSummary, developerGrams: number): string {
+    return [
+        i18n.t('format.mixShade', { code: blend.shadeA.code, grams: blend.shadeAGrams.toFixed(1) }),
+        i18n.t('format.mixShade', { code: blend.shadeB.code, grams: blend.shadeBGrams.toFixed(1) }),
+        i18n.t('format.mixDeveloper', { grams: developerGrams.toFixed(1) }),
+    ].join(' ');
 }
 
 // Renders the mix as a per-shade breakdown (e.g. "7/71-30.0 g 7/17-15.0 g developer 45.0 g")
@@ -44,7 +66,7 @@ export function buildMixSummary(
 export function formatFormulaText(params: FormatFormulaParams): string {
     const {
         brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-        additionalShade, additionalShadeGrams, neutralizationApplied,
+        additionalShade, additionalShadeGrams, blend, neutralizationApplied,
     } = params;
 
     const title = `${brandName}${line ? ' ' + formatLineLabel(line) : ''} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? '/' + targetShade.secondaryTone : ''})`;
@@ -71,7 +93,11 @@ export function formatFormulaText(params: FormatFormulaParams): string {
         i18n.t('format.developer', { value: developer }),
         i18n.t('format.ratio', { color: result.mixingRatio.colorParts, developer: result.mixingRatio.developerParts }),
         result.grams !== null
-            ? i18n.t('format.mixValue', { value: buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams) })
+            ? i18n.t('format.mixValue', {
+                value: blend !== null
+                    ? buildBlendMixSummary(blend, result.grams.developerGrams)
+                    : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams),
+            })
             : i18n.t('format.mixFallback', { message: result.liftUnsupportedWarning ?? i18n.t('results.notAchievable') }),
         i18n.t('format.processingTime', { value: processingMinutes }),
         i18n.t('format.grayCoverage', {

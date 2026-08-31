@@ -26,6 +26,7 @@ const colorStep: ColorHistoryStep = {
   },
   additionalShade: null,
   additionalShadeGrams: null,
+  blend: null,
   neutralizationApplied: false,
   processingMinutes: 30,
   pricePerGram: 0.18,

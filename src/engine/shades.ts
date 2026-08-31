@@ -35,6 +35,34 @@ export const toneId = (tone: ToneFamily): number => {
   }
 };
 
+// Two shades can stand in for each other in a blend (see `splitShadeBlend` in formula.ts)
+// only if they share the level and mixing chemistry a formula was calculated for --
+// otherwise the developer ratio/volume computed for one wouldn't hold for the blended
+// total. Same level alone isn't enough: a handful of shades override their line's usual
+// mixing ratio or developer choices for just that one shade (e.g. Wella's Special Blonde).
+export function canBlendShades(a: Shade, b: Shade): boolean {
+  return a.level === b.level
+    && (a.line ?? null) === (b.line ?? null)
+    && JSON.stringify(a.fixedMixingRatio ?? null) === JSON.stringify(b.fixedMixingRatio ?? null)
+    && JSON.stringify(a.developerVolumeChoices ?? null) === JSON.stringify(b.developerVolumeChoices ?? null);
+}
+
+// Best-effort default pair for a substitute blend of `target` -- a shade whose tone
+// matches just `target`'s primary reflect, and (only if `target` has one) a shade whose
+// tone matches just its secondary reflect. E.g. target 7/17 (tone 'ash', secondaryTone
+// 'chocolate') suggests 7/1 (pure 'ash') as the primary component and 7/7 (pure
+// 'chocolate') as the secondary one. Either half is null if no matching pure-reflect
+// shade exists in `candidates` -- the colorist then has to pick manually.
+export function suggestBlendComponents(target: Shade, candidates: Shade[]): { primary: Shade | null; secondary: Shade | null } {
+  const pureToneMatch = (tone: ToneFamily): Shade | null => candidates.find(s =>
+    s.code !== target.code && s.tone === tone && s.secondaryTone === undefined && canBlendShades(target, s)
+  ) ?? null;
+  return {
+    primary: pureToneMatch(target.tone),
+    secondary: target.secondaryTone !== undefined ? pureToneMatch(target.secondaryTone) : null,
+  };
+}
+
 
 export const GENERIC_SHADE_CHART: Shade[] = [
   { code: '1.0', level: 1, tone: 'natural' },

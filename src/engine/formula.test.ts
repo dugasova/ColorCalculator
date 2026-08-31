@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, applyAdditionalShade, getRecommendedProcessingMinutes } from './formula';
+import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, applyAdditionalShade, splitShadeBlend, getRecommendedProcessingMinutes } from './formula';
 import type { Shade } from './shades';
 
 describe('getGrayCoverageStrategy', () => {
@@ -107,6 +107,28 @@ describe('applyAdditionalShade', () => {
       colorGrams: 30,
       developerGrams: 30,
     });
+  });
+});
+
+describe('splitShadeBlend', () => {
+  it('splits the color total evenly at 50%', () => {
+    expect(splitShadeBlend(30, 50)).toEqual({ primaryGrams: 15, secondaryGrams: 15 });
+  });
+
+  it('splits the color total unevenly, e.g. 70/30', () => {
+    const { primaryGrams, secondaryGrams } = splitShadeBlend(30, 70);
+    expect(primaryGrams).toBeCloseTo(21);
+    expect(secondaryGrams).toBeCloseTo(9);
+  });
+
+  it('leaves the total untouched -- unlike applyAdditionalShade it never grows it', () => {
+    const { primaryGrams, secondaryGrams } = splitShadeBlend(30, 70);
+    expect(primaryGrams + secondaryGrams).toBe(30);
+  });
+
+  it('clamps an out-of-range percent to [0, 100]', () => {
+    expect(splitShadeBlend(30, 130)).toEqual({ primaryGrams: 30, secondaryGrams: 0 });
+    expect(splitShadeBlend(30, -10)).toEqual({ primaryGrams: 0, secondaryGrams: 30 });
   });
 });
 

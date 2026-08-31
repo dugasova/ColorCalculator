@@ -128,3 +128,18 @@ export function shadeToHexColor(shade: Shade): string {
   }
   return hex;
 }
+
+// Previews the swatch a blend would produce: a straight RGB interpolation of the two
+// component shades' own rendered swatches, weighted by the same ratio the formula splits
+// their grams by (see `splitShadeBlend`). Approximate -- real pigment mixing isn't linear
+// in RGB -- but close enough for a preview swatch.
+export function blendShadeHexColors(shadeA: Shade, shadeB: Shade, primaryPercent: number): string {
+  const ratio = Math.min(100, Math.max(0, primaryPercent)) / 100;
+  const [ra, ga, ba] = hexToRgb(shadeToHexColor(shadeA));
+  const [rb, gb, bb] = hexToRgb(shadeToHexColor(shadeB));
+  return rgbToHex([
+    ra * ratio + rb * (1 - ratio),
+    ga * ratio + gb * (1 - ratio),
+    ba * ratio + bb * (1 - ratio),
+  ]);
+}
