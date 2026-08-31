@@ -56,6 +56,13 @@ export function useClampedNumberText(value: number, onChange: (value: number) =>
       onFocus: handleFocus,
       onChange: handleChange,
       onBlur: handleBlur,
+      // `type="text"` above (see comment) forfeits the native <input type="number">
+      // spinbutton role/min/max/now exposed to assistive tech -- restore it explicitly
+      // so screen readers still announce this as a bounded number field.
+      role: 'spinbutton' as const,
+      'aria-valuemin': min,
+      'aria-valuemax': max,
+      'aria-valuenow': value,
     },
   };
 }

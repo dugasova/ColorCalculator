@@ -139,7 +139,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   return (
     <div className="step-card">
       <div className="step-card__header">
-        <h3 className="step-card__title">{t('complexColoring.colorStepTitle')}</h3>
+        <h2 className="step-card__title">{t('complexColoring.colorStepTitle')}</h2>
         <button type="button" className="button button--secondary step-card__remove" onClick={onRemove}>
           {t('complexColoring.removeStep')}
         </button>
@@ -200,12 +200,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
         </div>
       </div>
 
-      {result.liftUnsupportedWarning !== null && <p className="warning">{result.liftUnsupportedWarning}</p>}
+      {result.liftUnsupportedWarning !== null && <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning">{t('results.notAchievable')}</p>
+        <p className="warning" role="alert">{t('results.notAchievable')}</p>
       )}
-      {result.toneWarning !== null && !neutralizationApplied && <p className="warning">{result.toneWarning}</p>}
-      {result.eligibilityWarning !== null && <p className="warning">{result.eligibilityWarning}</p>}
+      {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
+      {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
 
       {grams !== null && (
         <div className="results__row">

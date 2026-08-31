@@ -28,11 +28,11 @@ export function AnalyticsView() {
     <div className="calculator">
       <h1 className="calculator__title">{t('analytics.titlePrefix')} <span className="calculator__title-accent">{t('analytics.titleAccent')}</span></h1>
 
-      {isLoading && <p className="history__status">{t('analytics.loading')}</p>}
-      {error !== null && <p className="warning">{error}</p>}
+      {isLoading && <p className="history__status" aria-live="polite">{t('analytics.loading')}</p>}
+      {error !== null && <p className="warning" role="alert">{error}</p>}
 
       {!isLoading && error === null && stats.totalVisits === 0 && (
-        <p className="history__status">{t('analytics.empty')}</p>
+        <p className="history__status" aria-live="polite">{t('analytics.empty')}</p>
       )}
 
       {!isLoading && error === null && stats.totalVisits > 0 && (
@@ -62,7 +62,7 @@ export function AnalyticsView() {
 
           <h2 className="analytics__section-title">{t('analytics.popularShadesTitle')}</h2>
           {topShades.length === 0 ? (
-            <p className="history__status">{t('analytics.noShades')}</p>
+            <p className="history__status" aria-live="polite">{t('analytics.noShades')}</p>
           ) : (
             <ol className="analytics__shade-list">
               {topShades.map(shade => (

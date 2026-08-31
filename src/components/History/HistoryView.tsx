@@ -67,10 +67,10 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
         />
       </div>
 
-      {isLoading && <p className="history__status">{t('history.loading')}</p>}
-      {error !== null && <p className="warning">{error}</p>}
+      {isLoading && <p className="history__status" aria-live="polite">{t('history.loading')}</p>}
+      {error !== null && <p className="warning" role="alert">{error}</p>}
       {!isLoading && error === null && filtered.length === 0 && (
-        <p className="history__status">{t('history.empty')}</p>
+        <p className="history__status" aria-live="polite">{t('history.empty')}</p>
       )}
 
       <ul className="history__list">

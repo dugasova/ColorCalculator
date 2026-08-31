@@ -38,10 +38,21 @@ void i18n
     interpolation: { escapeValue: false },
   });
 
+// WCAG 3.1.1 Language of Page: assistive tech relies on `<html lang>` to pick the right
+// pronunciation/voice, and it's static in index.html -- keep it in sync with the actual
+// UI language, both on initial load and on every subsequent switch.
+function syncDocumentLanguage(lng: string): void {
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lng;
+  }
+}
+
+syncDocumentLanguage(getInitialLanguage());
 i18n.on('languageChanged', lng => {
   if (hasLocalStorage) {
     localStorage.setItem(STORAGE_KEY, lng);
   }
+  syncDocumentLanguage(lng);
 });
 
 export default i18n;

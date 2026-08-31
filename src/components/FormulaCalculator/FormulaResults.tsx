@@ -104,10 +104,10 @@ export function FormulaResults({
       </div>
 
       {result.liftUnsupportedWarning !== null && (
-        <p className="warning">{result.liftUnsupportedWarning}</p>
+        <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>
       )}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning">{t('results.notAchievable')}</p>
+        <p className="warning" role="alert">{t('results.notAchievable')}</p>
       )}
 
       {result.grams !== null && (
@@ -149,8 +149,8 @@ export function FormulaResults({
         </label>
       )}
 
-      {result.toneWarning !== null && !neutralizationApplied && <p className="warning">{result.toneWarning}</p>}
-      {result.eligibilityWarning !== null && <p className="warning">{result.eligibilityWarning}</p>}
+      {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
+      {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
 
       <h2 className="results__section-heading">{t('results.timingPricingSectionTitle')}</h2>
 

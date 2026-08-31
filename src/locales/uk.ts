@@ -4,6 +4,7 @@ export const uk: typeof en = {
   app: {
     titlePrefix: 'Hue',
     titleAccent: 'mix',
+    skipToContent: 'Перейти до вмісту',
   },
   language: {
     en: 'EN',

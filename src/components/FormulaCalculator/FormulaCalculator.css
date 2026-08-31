@@ -487,12 +487,15 @@
   border: 1px solid rgba(22, 18, 31, 0.08);
 }
 
+/* Darkened from the literal brand colors (#25d366/#229ed9), which measure only
+   ~1.98:1/~3.02:1 against this button's white background -- well under WCAG AA's 4.5:1
+   for normal-size text. Still clearly read as "WhatsApp green"/"Telegram blue". */
 .button--whatsapp {
-  color: #25d366;
+  color: #188842;
 }
 
 .button--telegram {
-  color: #229ed9;
+  color: #1b7eae;
 }
 
 @media (max-width: 520px) {

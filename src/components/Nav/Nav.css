@@ -55,8 +55,19 @@
 }
 
 @media (max-width: 400px) {
+  /* Visually hidden, not display:none -- the label is still the tab's only accessible
+     name (the icon is aria-hidden in Nav.tsx), so removing it from the a11y tree would
+     leave every nav button with an empty name at this width. */
   .app-nav__item span {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .app-nav__item {

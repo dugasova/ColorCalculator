@@ -120,7 +120,10 @@ export function ProcessingTimer({ minutes }: ProcessingTimerProps) {
           )}
         </div>
       </div>
-      {isDone && <p className="processing-timer__done">{t('results.timerDone')}</p>}
+      {/* Only the completion message is a live region -- announcing the clock every
+          second would spam screen readers with a running countdown, a known anti-pattern
+          for live regions. The one-shot "done" text is the announcement that matters. */}
+      {isDone && <p className="processing-timer__done" role="status" aria-live="polite">{t('results.timerDone')}</p>}
     </div>
   );
 }

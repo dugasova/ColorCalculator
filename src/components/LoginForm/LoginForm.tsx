@@ -105,7 +105,7 @@ export default function LoginForm() {
             />
           </div>
         )}
-        {error !== null && <p className="warning">{error}</p>}
+        {error !== null && <p className="warning" role="alert">{error}</p>}
         <button type="submit" className="button" disabled={isSubmitting}>
           {isSubmitting
             ? (mode === 'sign-in' ? t('login.signingIn') : t('login.creatingAccount'))

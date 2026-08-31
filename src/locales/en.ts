@@ -2,6 +2,7 @@ export const en = {
   app: {
     titlePrefix: 'Hue',
     titleAccent: 'mix',
+    skipToContent: 'Skip to content',
   },
   language: {
     en: 'EN',

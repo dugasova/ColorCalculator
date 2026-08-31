@@ -46,7 +46,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
   return (
     <div className="step-card">
       <div className="step-card__header">
-        <h3 className="step-card__title">{t('complexColoring.bleachStepTitle')}</h3>
+        <h2 className="step-card__title">{t('complexColoring.bleachStepTitle')}</h2>
         <button type="button" className="button button--secondary step-card__remove" onClick={onRemove}>
           {t('complexColoring.removeStep')}
         </button>
@@ -115,8 +115,8 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
         )}
       </div>
 
-      {result.liftNeeded === 0 && <p className="warning">{t('bleach.noLiftWarning')}</p>}
-      {result.multiStepRequired && <p className="warning">{t('bleach.multiStepWarning')}</p>}
+      {result.liftNeeded === 0 && <p className="warning" role="alert">{t('bleach.noLiftWarning')}</p>}
+      {result.multiStepRequired && <p className="warning" role="alert">{t('bleach.multiStepWarning')}</p>}
 
       {result.grams !== null && (
         <>

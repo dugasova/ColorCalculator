@@ -159,7 +159,7 @@ export function PaletteAdminView() {
         <form className="calculator__form" onSubmit={handleAddBrand}>
           <div className="field">
             <label htmlFor="paletteBrandName">{t('palette.brandName')}</label>
-            <input id="paletteBrandName" type="text" value={brandName} onChange={e => handleBrandNameChange(e.target.value)} />
+            <input id="paletteBrandName" type="text" value={brandName} onChange={e => handleBrandNameChange(e.target.value)} required />
           </div>
           <div className="field">
             <label htmlFor="paletteBrandId">{t('palette.brandId')}</label>
@@ -168,6 +168,7 @@ export function PaletteAdminView() {
               type="text"
               value={brandId}
               onChange={e => { setBrandId(e.target.value); setBrandIdTouched(true); }}
+              required
             />
             <small>{t('palette.brandIdHint')}</small>
           </div>
@@ -201,11 +202,11 @@ export function PaletteAdminView() {
               </div>
             </>
           )}
-          {brandError !== null && <p className="warning">{brandError}</p>}
+          {brandError !== null && <p className="warning" role="alert">{brandError}</p>}
           <button type="submit" className="button" disabled={brandStatus === 'saving'}>
             {brandStatus === 'saving' ? t('palette.saving') : t('palette.addBrand')}
           </button>
-          {brandStatus === 'saved' && <span className="palette-admin__status">{t('palette.brandAdded')}</span>}
+          {brandStatus === 'saved' && <span className="palette-admin__status" role="status">{t('palette.brandAdded')}</span>}
         </form>
       </section>
 
@@ -221,7 +222,7 @@ export function PaletteAdminView() {
         </div>
 
         {fullShades.length === 0 ? (
-          <p className="history__status">{t('palette.noShades')}</p>
+          <p className="history__status" aria-live="polite">{t('palette.noShades')}</p>
         ) : (
           <ul className="palette-admin__shade-list">
             {fullShades.map(shade => (
@@ -253,7 +254,7 @@ export function PaletteAdminView() {
         <form className="calculator__form" onSubmit={handleAddShade}>
           <div className="field">
             <label htmlFor="paletteShadeCode">{t('palette.shadeCode')}</label>
-            <input id="paletteShadeCode" type="text" value={shadeCode} onChange={e => setShadeCode(e.target.value)} />
+            <input id="paletteShadeCode" type="text" value={shadeCode} onChange={e => setShadeCode(e.target.value)} required />
             <small>{t('palette.shadeCodeHint')}</small>
           </div>
           <div className="field">
@@ -279,11 +280,11 @@ export function PaletteAdminView() {
             <label htmlFor="paletteShadeLine">{t('palette.line')}</label>
             <input id="paletteShadeLine" type="text" value={shadeLine} onChange={e => setShadeLine(e.target.value)} />
           </div>
-          {shadeError !== null && <p className="warning">{shadeError}</p>}
+          {shadeError !== null && <p className="warning" role="alert">{shadeError}</p>}
           <button type="submit" className="button" disabled={shadeStatus === 'saving'}>
             {shadeStatus === 'saving' ? t('palette.saving') : t('palette.addShade')}
           </button>
-          {shadeStatus === 'saved' && <span className="palette-admin__status">{t('palette.shadeAdded')}</span>}
+          {shadeStatus === 'saved' && <span className="palette-admin__status" role="status">{t('palette.shadeAdded')}</span>}
         </form>
       </section>
     </div>

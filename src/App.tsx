@@ -77,6 +77,7 @@ function AuthenticatedApp({ user }: { user: User }) {
 
   return (
     <div>
+      <a href="#main-content" className="skip-link">{t('app.skipToContent')}</a>
       <header className="app-header">
         <div className="app-topbar">
           <button type="button" className="app-brand" onClick={() => setView('calculator')} aria-label={t('nav.calculator')}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t('app.titlePrefix')}<em>{t('app.titleAccent')}</em></button>
@@ -88,7 +89,7 @@ function AuthenticatedApp({ user }: { user: User }) {
           </div>
         </div>
       </header>
-      <main className="app-main">
+      <main className="app-main" id="main-content" tabIndex={-1}>
         {view === 'calculator' && (
           <FormulaCalculator
             appliedBy={user.email ?? 'unknown'}

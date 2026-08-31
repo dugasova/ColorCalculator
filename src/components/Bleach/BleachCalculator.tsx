@@ -51,11 +51,11 @@ export function BleachResults({
       </div>
 
       {result.liftNeeded === 0 && (
-        <p className="warning">{t('bleach.noLiftWarning')}</p>
+        <p className="warning" role="alert">{t('bleach.noLiftWarning')}</p>
       )}
 
       {result.multiStepRequired && (
-        <p className="warning">{t('bleach.multiStepWarning')}</p>
+        <p className="warning" role="alert">{t('bleach.multiStepWarning')}</p>
       )}
 
       {result.grams !== null && (

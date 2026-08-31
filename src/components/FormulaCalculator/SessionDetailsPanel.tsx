@@ -120,6 +120,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
           value={clientName}
           onChange={e => setClientName(e.target.value)}
           placeholder={t('results.clientNamePlaceholder')}
+          required
         />
       </div>
 
@@ -141,6 +142,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
           type="datetime-local"
           value={patchTestDate}
           onChange={e => setPatchTestDate(e.target.value)}
+          aria-required={!patchTestOverride}
         />
       </div>
 
@@ -159,7 +161,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         {t('results.patchTestOverrideLabel')}
       </label>
 
-      {!patchTestOk && <p className="warning">{t('results.patchTestRequired')}</p>}
+      {!patchTestOk && <p className="warning" role="alert">{t('results.patchTestRequired')}</p>}
 
       <div className="results__photos">
         <div className="field results__photo">
@@ -187,7 +189,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
           {saveState === 'saved' ? t('results.saved') : saveState === 'saving' ? t('results.saving') : t('results.save')}
         </button>
       </div>
-      {saveState === 'error' && <p className="warning">{t('results.saveError')}</p>}
+      {saveState === 'error' && <p className="warning" role="alert">{t('results.saveError')}</p>}
 
       <div className="results__share">
         <button type="button" className="button button--share button--whatsapp" onClick={handleShareWhatsApp}>
