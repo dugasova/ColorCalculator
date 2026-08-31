@@ -34,7 +34,7 @@ const majirelShades: Shade[] = [
     { code: '4.35', level: 4, tone: 'gold', secondaryTone: 'mahogany' },
     { code: '4.45', level: 4, tone: 'copper', secondaryTone: 'mahogany' },
     { code: '4.56', level: 4, tone: 'mahogany', secondaryTone: 'red' },
-    { code: '4.8', level: 4, tone: 'mocha' },
+    { code: '4.8', level: 4, tone: 'chocolate' },
 
     // Level 5
     { code: '5', level: 5, tone: 'natural' },
@@ -47,7 +47,7 @@ const majirelShades: Shade[] = [
     { code: '5.4', level: 5, tone: 'copper' },
     { code: '5.5', level: 5, tone: 'mahogany' },
     { code: '5.52', level: 5, tone: 'mahogany', secondaryTone: 'violet' },
-    { code: '5.8', level: 5, tone: 'mocha' },
+    { code: '5.8', level: 5, tone: 'chocolate' },
 
     // Level 6
     { code: '6', level: 6, tone: 'natural' },
@@ -64,7 +64,7 @@ const majirelShades: Shade[] = [
     { code: '6.45', level: 6, tone: 'copper', secondaryTone: 'mahogany' },
     { code: '6.46', level: 6, tone: 'copper', secondaryTone: 'red' },
     { code: '6.5', level: 6, tone: 'mahogany' },
-    { code: '6.8', level: 6, tone: 'mocha' },
+    { code: '6.8', level: 6, tone: 'chocolate' },
 
     // Level 7
     { code: '7', level: 7, tone: 'natural' },
@@ -80,7 +80,7 @@ const majirelShades: Shade[] = [
     { code: '7.4', level: 7, tone: 'copper' },
     { code: '7.43', level: 7, tone: 'copper', secondaryTone: 'gold' },
     { code: '7.44', level: 7, tone: 'copper', secondaryTone: 'copper' },
-    { code: '7.8', level: 7, tone: 'mocha' },
+    { code: '7.8', level: 7, tone: 'chocolate' },
 
     // Level 8
     { code: '8', level: 8, tone: 'natural' },
@@ -168,7 +168,6 @@ const inoaShades: Shade[] = [
     { code: '5.8', level: 5, tone: 'pearl' },
     { code: '5.15', level: 5, tone: 'ash', secondaryTone: 'mahogany' },
     { code: '5.18', level: 5, tone: 'ash', secondaryTone: 'pearl' },
-    { code: '5.25', level: 5, tone: 'violet', secondaryTone: 'mahogany' },
     { code: '5.32', level: 5, tone: 'gold', secondaryTone: 'violet' },
 
 
@@ -182,7 +181,7 @@ const inoaShades: Shade[] = [
     { code: '6.45', level: 6, tone: 'copper', secondaryTone: 'mahogany' },
     { code: '6.46', level: 6, tone: 'copper', secondaryTone: 'red' },
     { code: '6.66', level: 6, tone: 'red', secondaryTone: 'red' },
-    { code: '6.8', level: 6, tone: 'mocha' },
+    { code: '6.8', level: 6, tone: 'chocolate' },
     { code: '6.13', level: 6, tone: 'ash', secondaryTone: 'gold' },
     { code: '6.23', level: 6, tone: 'matt', secondaryTone: 'gold' },
     { code: '6.32', level: 6, tone: 'gold', secondaryTone: 'matt' },
@@ -198,9 +197,9 @@ const inoaShades: Shade[] = [
     { code: '7.4', level: 7, tone: 'copper' },
     { code: '7.43', level: 7, tone: 'copper', secondaryTone: 'copper' },
     { code: '7.44', level: 7, tone: 'copper', secondaryTone: 'copper' },
-    { code: '7.8', level: 7, tone: 'mocha' },
+    { code: '7.8', level: 7, tone: 'chocolate' },
     { code: '7.13', level: 7, tone: 'ash', secondaryTone: 'gold' },
-    { code: '7.18', level: 7, tone: 'ash', secondaryTone: 'mocha' },
+    { code: '7.18', level: 7, tone: 'ash', secondaryTone: 'chocolate' },
     { code: '7.31', level: 7, tone: 'gold', secondaryTone: 'ash' },
     { code: '7.23', level: 7, tone: 'pearl', secondaryTone: 'gold' },
 
@@ -276,9 +275,9 @@ const diaLightShades: Shade[] = [
     { code: '7.40', level: 7, tone: 'copper', secondaryTone: 'copper' },
     { code: '7.01', level: 7, tone: 'natural', secondaryTone: 'ash' },
     { code: '7.12', level: 7, tone: 'ash', secondaryTone: 'pearl' },
-    { code: '7.12', level: 7, tone: 'matt' },
+    { code: '7.2', level: 7, tone: 'matt' },
     { code: '7.13', level: 7, tone: 'gold' },
-    { code: '7.8', level: 7, tone: 'mocha' },
+    { code: '7.8', level: 7, tone: 'chocolate' },
     { code: '7.31', level: 7, tone: 'gold', secondaryTone: 'ash' },
 
     // Level 8
@@ -286,7 +285,7 @@ const diaLightShades: Shade[] = [
     { code: '8.3', level: 8, tone: 'gold' },
     { code: '8.43', level: 8, tone: 'copper', secondaryTone: 'gold' },
     { code: '8.34', level: 8, tone: 'gold', secondaryTone: 'copper' },
-    { code: '8.18', level: 8, tone: 'ash', secondaryTone: 'mocha' },
+    { code: '8.18', level: 8, tone: 'ash', secondaryTone: 'chocolate' },
     { code: '8.21', level: 8, tone: 'pearl', secondaryTone: 'ash' },
     { code: '8.23', level: 8, tone: 'gold' },
 
@@ -297,18 +296,18 @@ const diaLightShades: Shade[] = [
     { code: '9.1', level: 9, tone: 'ash' },
     { code: '9.11', level: 9, tone: 'ash' },
     { code: '9.01', level: 9, tone: 'natural', secondaryTone: 'ash' },
-    { code: '9.18', level: 9, tone: 'ash', secondaryTone: 'mocha' },
+    { code: '9.18', level: 9, tone: 'ash', secondaryTone: 'chocolate' },
     { code: '9.2', level: 9, tone: 'pearl' },
     { code: '9.21', level: 9, tone: 'pearl', secondaryTone: 'ash' },
     { code: '9.02', level: 9, tone: 'natural', secondaryTone: 'pearl' },
     { code: '9.12', level: 9, tone: 'ash', secondaryTone: 'pearl' },
     { code: '9.13', level: 9, tone: 'ash', secondaryTone: 'gold' },
-    { code: '9.82', level: 9, tone: 'mocha', secondaryTone: 'pearl' },
+    { code: '9.82', level: 9, tone: 'chocolate', secondaryTone: 'pearl' },
     { code: '9.31', level: 9, tone: 'ash', secondaryTone: 'gold' },
 
     // Level 10
     { code: '10.01', level: 10, tone: 'natural', secondaryTone: 'ash' },
-    { code: '10.18', level: 10, tone: 'ash', secondaryTone: 'mocha' },
+    { code: '10.18', level: 10, tone: 'ash', secondaryTone: 'chocolate' },
     { code: '10.21', level: 10, tone: 'pearl', secondaryTone: 'ash' },
     { code: '10.22', level: 10, tone: 'pearl', secondaryTone: 'pearl' },
     { code: '10.2', level: 10, tone: 'pearl' },
@@ -316,7 +315,7 @@ const diaLightShades: Shade[] = [
     { code: '10.12', level: 10, tone: 'pearl' },
     { code: '10.13', level: 10, tone: 'pearl', secondaryTone: 'gold' },
     { code: '10.23', level: 10, tone: 'pearl' },
-    { code: '10.82', level: 10, tone: 'mocha', secondaryTone: 'pearl' },
+    { code: '10.82', level: 10, tone: 'chocolate', secondaryTone: 'pearl' },
     { code: '10.32', level: 10, tone: 'gold', secondaryTone: 'pearl' },
 ];
 
@@ -354,9 +353,9 @@ const diaRichesseShades: Shade[] = [
     { code: '5.12', level: 5, tone: 'ash', secondaryTone: 'pearl' },
     { code: '5.13', level: 5, tone: 'ash', secondaryTone: 'gold' },
     { code: '5.15', level: 5, tone: 'ash', secondaryTone: 'mahogany' },
-    { code: '5.8', level: 5, tone: 'mocha' },
+    { code: '5.8', level: 5, tone: 'chocolate' },
     { code: '5.31', level: 5, tone: 'gold', secondaryTone: 'ash' },
-    { code: '5.32', level: 5, tone: 'gold', secondaryTone: 'mocha' },
+    { code: '5.32', level: 5, tone: 'gold', secondaryTone: 'chocolate' },
     { code: '5.35', level: 5, tone: 'gold', secondaryTone: 'mahogany' },
     { code: '5.3', level: 5, tone: 'gold' },
     { code: '5.5', level: 5, tone: 'mahogany' },
@@ -370,9 +369,9 @@ const diaRichesseShades: Shade[] = [
     { code: '6.12', level: 6, tone: 'ash', secondaryTone: 'pearl' },
     { code: '6.13', level: 6, tone: 'ash', secondaryTone: 'gold' },
     { code: '6.23', level: 6, tone: 'pearl', secondaryTone: 'gold' },
-    { code: '6.8', level: 6, tone: 'mocha' },
+    { code: '6.8', level: 6, tone: 'chocolate' },
     { code: '6.31', level: 6, tone: 'gold', secondaryTone: 'ash' },
-    { code: '6.32', level: 6, tone: 'gold', secondaryTone: 'mocha' },
+    { code: '6.32', level: 6, tone: 'gold', secondaryTone: 'chocolate' },
     { code: '6.35', level: 6, tone: 'gold', secondaryTone: 'mahogany' },
     { code: '6.34', level: 6, tone: 'natural' },
     { code: '6.40', level: 6, tone: 'natural' },
@@ -384,7 +383,7 @@ const diaRichesseShades: Shade[] = [
     { code: '7.01', level: 7, tone: 'natural', secondaryTone: 'ash' },
     { code: '7.13', level: 7, tone: 'ash', secondaryTone: 'gold' },
     { code: '7.14', level: 7, tone: 'ash', secondaryTone: 'copper' },
-    { code: '7.8', level: 7, tone: 'mocha' },
+    { code: '7.8', level: 7, tone: 'chocolate' },
     { code: '7.30', level: 7, tone: 'gold', secondaryTone: 'natural' },
     { code: '7.40', level: 7, tone: 'copper' },
     { code: '7.43', level: 7, tone: 'copper', secondaryTone: 'gold' },

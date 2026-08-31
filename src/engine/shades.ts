@@ -1,6 +1,6 @@
 import type { DeveloperVolume, Level, LiftTable } from "./levels";
 
-export type ToneFamily = 'mocha' | 'natural' | 'ash' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
+export type ToneFamily = 'natural' | 'ash' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
 
 export interface MixingRatio {
   colorParts: number;
