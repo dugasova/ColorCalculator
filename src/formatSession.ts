@@ -22,7 +22,7 @@ function formatStepText(step: HistoryStep): string {
         applicationZone: step.applicationZone,
         additionalShade: step.additionalShade,
         additionalShadeGrams: step.additionalShadeGrams ?? 0,
-        blend: step.blend,
+        blend: step.blend ?? null,
         neutralizationApplied: step.neutralizationApplied,
     });
 }

@@ -70,4 +70,12 @@ describe('formatSessionText', () => {
     const bleachIndex = text.indexOf('Bleach Calculator');
     expect(colorIndex).toBeLessThan(bleachIndex);
   });
+
+  it('does not throw for a step saved before the blend field existed (blend is undefined, not null)', () => {
+    const legacyStep = { ...colorStep };
+    delete (legacyStep as Partial<ColorHistoryStep>).blend;
+
+    expect(() => formatSessionText([legacyStep])).not.toThrow();
+    expect(formatSessionText([legacyStep])).toContain('Mix: 9.1-20.0 g developer 40.0 g');
+  });
 });

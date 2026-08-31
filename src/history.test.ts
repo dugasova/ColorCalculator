@@ -218,6 +218,21 @@ describe('buildRepeatFormulaRequest', () => {
     expect(request!.additionalShadeGrams).toBe(0);
   });
 
+  it('does not throw for a history doc saved before the blend field existed (blend is undefined, not null)', () => {
+    // Firestore docs written before this feature simply lack the `blend` key -- it reads
+    // back as `undefined` at runtime despite the ColorHistoryStep type saying it's always
+    // present. `blend !== null` is true for `undefined`, so this must be normalized away
+    // rather than crash dereferencing an undefined blend (see history.ts).
+    const step = makeColorStep();
+    delete (step as Partial<ColorHistoryStep>).blend;
+    const entry = makeEntry({ clientName: 'Anna', steps: [step] });
+
+    expect(() => buildRepeatFormulaRequest(entry, BRANDS)).not.toThrow();
+    const request = buildRepeatFormulaRequest(entry, BRANDS);
+    expect(request!.blendShadeACode).toBeNull();
+    expect(request!.blendShadeBCode).toBeNull();
+  });
+
   it('returns null for a multi-step complex-coloring session', () => {
     const entry = makeEntry({ clientName: 'Anna', steps: [makeBleachStep(), makeColorStep()] });
     expect(buildRepeatFormulaRequest(entry, BRANDS)).toBeNull();

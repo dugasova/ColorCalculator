@@ -255,7 +255,10 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   // the total on top of the primary mix (see `applyAdditionalShade`), so its grams are
   // subtracted back out here first, and re-applied on top from restored state on repeat.
   // The two are mutually exclusive (see ColorHistoryStep), so only one branch applies.
-  const blend = step.blend;
+  // Old history docs saved before this field existed lack it entirely, reading back as
+  // `undefined` (not `null`) from Firestore -- normalize so the `!== null` checks below
+  // don't take the "blend present" branch and crash dereferencing an undefined blend.
+  const blend = step.blend ?? null;
   const additionalShadeGrams = step.additionalShadeGrams ?? 0;
   let totalGrams = 60;
   if (step.result.grams !== null) {

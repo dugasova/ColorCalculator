@@ -224,23 +224,25 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
           </>
         )}
         {blendModeEnabled && (
-          <>
-            <BlendComponentField
-              id="blendShadeA"
-              label={t('fields.blendShadeA')}
-              placeholder={t('fields.blendShadeNone')}
-              candidates={blendCandidates}
-              shadeCode={blendShadeACodeEffective}
-              onShadeCodeChange={setBlendShadeACode}
-            />
-            <BlendComponentField
-              id="blendShadeB"
-              label={t('fields.blendShadeB')}
-              placeholder={t('fields.blendShadeNone')}
-              candidates={blendCandidates}
-              shadeCode={blendShadeBCodeEffective}
-              onShadeCodeChange={setBlendShadeBCode}
-            />
+          <div className="blend-group">
+            <div className="blend-group__fields">
+              <BlendComponentField
+                id="blendShadeA"
+                label={t('fields.blendShadeA')}
+                placeholder={t('fields.blendShadeNone')}
+                candidates={blendCandidates}
+                shadeCode={blendShadeACodeEffective}
+                onShadeCodeChange={setBlendShadeACode}
+              />
+              <BlendComponentField
+                id="blendShadeB"
+                label={t('fields.blendShadeB')}
+                placeholder={t('fields.blendShadeNone')}
+                candidates={blendCandidates}
+                shadeCode={blendShadeBCodeEffective}
+                onShadeCodeChange={setBlendShadeBCode}
+              />
+            </div>
             {blendShadeA !== null && blendShadeB !== null && result.grams !== null && (
               <BlendRatioField
                 shadeA={blendShadeA}
@@ -250,7 +252,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
                 onPrimaryPercentChange={setBlendPrimaryPercent}
               />
             )}
-          </>
+          </div>
         )}
         <DeveloperVolumeField
           targetShade={targetShade}
