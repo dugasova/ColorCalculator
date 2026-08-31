@@ -29,4 +29,12 @@ describe('ColorCorrectionCalculator', () => {
     expect(html).toContain('id="currentLevel"');
     expect(html).toContain('id="targetLevel"');
   });
+
+  it('renders the neutralization wheel with a title and all 6 tone wedges', () => {
+    const html = renderToStaticMarkup(<ColorCorrectionCalculator />);
+
+    expect(html).toContain('class="neutralization-wheel"');
+    expect(html).toContain('Neutralization wheel');
+    expect((html.match(/<path /g) || []).length).toBe(6);
+  });
 });

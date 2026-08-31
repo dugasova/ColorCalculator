@@ -22,6 +22,7 @@ import { BlendRatioField } from "./fields/BlendRatioField";
 import { DeveloperVolumeField } from "./fields/DeveloperVolumeField";
 import { ApplicationZoneField } from "./fields/ApplicationZoneField";
 import { TotalGramsField } from "./fields/TotalGramsField";
+import { CrossBrandMatchField } from "./fields/CrossBrandMatchField";
 import { FormulaResults } from "./FormulaResults";
 
 const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
@@ -134,6 +135,23 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
     setNeutralizationApplied(false);
   };
 
+  const handleCrossBrandMatchSelect = (newBrandId: BrandId, newLine: string | null, newShadeCode: string) => {
+    setBrandId(newBrandId);
+    setLine(newLine);
+    setTargetShadeCode(newShadeCode);
+    setManualDeveloperVolume(undefined);
+    setManualProcessingMinutes(undefined);
+    setManualPricePerGram(undefined);
+    setManualServicePrice(undefined);
+    setAdditionalShadeCode(null);
+    setAdditionalShadeGrams(0);
+    setBlendModeEnabled(false);
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
+    setNeutralizationApplied(false);
+  };
+
   const handleAdditionalShadeCodeChange = (code: string | null) => {
     setAdditionalShadeCode(code);
     setAdditionalShadeGrams(0);
@@ -207,6 +225,12 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}
           onTargetShadeCodeChange={handleTargetShadeCodeChange}
+        />
+        <CrossBrandMatchField
+          targetShade={targetShade}
+          currentBrandId={brandId}
+          brands={brands}
+          onSelectMatch={handleCrossBrandMatchSelect}
         />
         <BlendModeField substituteBlend={blendModeEnabled} onSubstituteBlendChange={handleBlendModeChange} />
         {!blendModeEnabled && (

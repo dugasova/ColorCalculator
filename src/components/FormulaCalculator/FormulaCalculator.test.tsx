@@ -21,6 +21,13 @@ describe('FormulaCalculator', () => {
     expect(html).not.toContain('id="blendShadeA"');
     expect(html).not.toContain('id="blendShadeB"');
   });
+
+  it('renders a collapsed cross-brand match trigger, with the results list absent until expanded', () => {
+    const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" />);
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain('cross-brand-match-list');
+    expect(html).not.toContain('cross-brand-match-empty');
+  });
 });
 
 describe('FormulaResults additional shade blending', () => {

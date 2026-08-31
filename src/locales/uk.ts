@@ -45,6 +45,14 @@ export const uk: typeof en = {
     applicationZoneFullHead: 'Все волосся',
     applicationZoneRootTouchUp: 'Прикореневе фарбування',
     totalGrams: 'Загальна вага, г',
+    crossBrandFind: 'Знайти аналог в іншому бренді',
+    crossBrandEmpty: 'Інших брендів у палітрі поки немає',
+    crossBrandUnknownPermanence: 'Неможливо визначити безпечний аналог для хімії цієї лінії (стійка проти напівстійкої)',
+    crossBrandUse: 'Використати',
+    crossBrandQualityExcellent: 'Відмінний збіг',
+    crossBrandQualityGood: 'Гарний збіг',
+    crossBrandQualityFair: 'Приблизний збіг',
+    crossBrandQualityPoor: 'Слабкий збіг',
   },
   results: {
     developer: 'Окислювач',
@@ -180,6 +188,7 @@ export const uk: typeof en = {
     currentLevel: 'Поточний рівень',
     targetLevel: 'Цільовий рівень',
     unwantedTone: 'Небажаний відтінок',
+    wheelTitle: 'Колесо нейтралізації',
     tones: {
       red: 'Червоний',
       orange: 'Помаранчевий',

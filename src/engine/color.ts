@@ -143,3 +143,102 @@ export function blendShadeHexColors(shadeA: Shade, shadeB: Shade, primaryPercent
     ba * ratio + bb * (1 - ratio),
   ]);
 }
+
+// sRGB (0-255) -> CIE Lab (D65 reference white), the standard input space for perceptual
+// color-difference formulas (see ciede2000). RGB/HSL distances over- or under-weight hue
+// differences relative to how people actually perceive them; Lab is built so that a fixed
+// numeric distance corresponds to a roughly fixed *perceived* difference, hue or no hue.
+function rgbToLab([r, g, b]: [number, number, number]): [number, number, number] {
+  function toLinear(c: number): number {
+    const v = c / 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  }
+  const rl = toLinear(r), gl = toLinear(g), bl = toLinear(b);
+  const x = rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375;
+  const y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750;
+  const z = rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041;
+  const xn = 0.95047, yn = 1.0, zn = 1.08883;
+  function f(t: number): number {
+    const delta = 6 / 29;
+    return t > delta ** 3 ? Math.cbrt(t) : t / (3 * delta * delta) + 4 / 29;
+  }
+  const fx = f(x / xn), fy = f(y / yn), fz = f(z / zn);
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+
+export function hexToLab(hex: string): [number, number, number] {
+  return rgbToLab(hexToRgb(hex));
+}
+
+// CIEDE2000 perceptual color difference (delta-E) between two Lab colors -- see Sharma,
+// Wu, Dalal (2005), "The CIEDE2000 Color-Difference Formula: Implementation Notes,
+// Supplementary Test Data, and Mathematical Observations". Verified against all 34 pairs
+// of that paper's published reference test data (see color.test.ts) to within 5e-5.
+// Roughly: ~1 is a just-noticeable difference under ideal viewing, ~2-5 is noticeable
+// side by side, beyond ~10 the colors read as clearly different at a glance.
+export function ciede2000([l1, a1, b1]: [number, number, number], [l2, a2, b2]: [number, number, number]): number {
+  const avgLp = (l1 + l2) / 2;
+  const c1 = Math.hypot(a1, b1);
+  const c2 = Math.hypot(a2, b2);
+  const avgC = (c1 + c2) / 2;
+  const g = 0.5 * (1 - Math.sqrt(avgC ** 7 / (avgC ** 7 + 25 ** 7)));
+
+  const a1p = (1 + g) * a1;
+  const a2p = (1 + g) * a2;
+  const c1p = Math.hypot(a1p, b1);
+  const c2p = Math.hypot(a2p, b2);
+  const avgCp = (c1p + c2p) / 2;
+
+  function hueAngle(ap: number, bComp: number): number {
+    if (ap === 0 && bComp === 0) return 0;
+    const deg = (Math.atan2(bComp, ap) * 180) / Math.PI;
+    return deg < 0 ? deg + 360 : deg;
+  }
+  const h1p = hueAngle(a1p, b1);
+  const h2p = hueAngle(a2p, b2);
+
+  let avgHp: number;
+  if (c1p === 0 || c2p === 0) avgHp = h1p + h2p;
+  else if (Math.abs(h1p - h2p) > 180) avgHp = (h1p + h2p + 360) / 2;
+  else avgHp = (h1p + h2p) / 2;
+
+  const t = 1
+    - 0.17 * Math.cos(((avgHp - 30) * Math.PI) / 180)
+    + 0.24 * Math.cos((2 * avgHp * Math.PI) / 180)
+    + 0.32 * Math.cos(((3 * avgHp + 6) * Math.PI) / 180)
+    - 0.20 * Math.cos(((4 * avgHp - 63) * Math.PI) / 180);
+
+  let deltahp: number;
+  if (c1p === 0 || c2p === 0) {
+    deltahp = 0;
+  } else {
+    const diff = h2p - h1p;
+    if (Math.abs(diff) <= 180) deltahp = diff;
+    else if (diff > 180) deltahp = diff - 360;
+    else deltahp = diff + 360;
+  }
+
+  const deltaLp = l2 - l1;
+  const deltaCp = c2p - c1p;
+  const deltaHp = 2 * Math.sqrt(c1p * c2p) * Math.sin(((deltahp / 2) * Math.PI) / 180);
+
+  const sl = 1 + (0.015 * (avgLp - 50) ** 2) / Math.sqrt(20 + (avgLp - 50) ** 2);
+  const sc = 1 + 0.045 * avgCp;
+  const sh = 1 + 0.015 * avgCp * t;
+
+  const deltaRo = 30 * Math.exp(-(((avgHp - 275) / 25) ** 2));
+  const rc = 2 * Math.sqrt(avgCp ** 7 / (avgCp ** 7 + 25 ** 7));
+  const rt = -rc * Math.sin((2 * deltaRo * Math.PI) / 180);
+
+  const lTerm = deltaLp / sl;
+  const cTerm = deltaCp / sc;
+  const hTerm = deltaHp / sh;
+
+  return Math.sqrt(lTerm ** 2 + cTerm ** 2 + hTerm ** 2 + rt * cTerm * hTerm);
+}
+
+// How perceptually different two shades' rendered swatches are (see shadeToHexColor),
+// via CIEDE2000 -- the metric findClosestShadeByBrand (shadeMatch.ts) ranks candidates by.
+export function shadeColorDistance(a: Shade, b: Shade): number {
+  return ciede2000(hexToLab(shadeToHexColor(a)), hexToLab(shadeToHexColor(b)));
+}

@@ -43,6 +43,14 @@ export const en = {
     applicationZoneFullHead: 'Full head',
     applicationZoneRootTouchUp: 'Root touch-up',
     totalGrams: 'Total weight, g',
+    crossBrandFind: 'Find equivalent in another brand',
+    crossBrandEmpty: 'No other brands in the palette yet',
+    crossBrandUnknownPermanence: 'Can\'t determine a safe equivalent for this line\'s chemistry (permanent vs. semi-permanent)',
+    crossBrandUse: 'Use this',
+    crossBrandQualityExcellent: 'Excellent match',
+    crossBrandQualityGood: 'Good match',
+    crossBrandQualityFair: 'Rough match',
+    crossBrandQualityPoor: 'Poor match',
   },
   results: {
     developer: 'Developer',
@@ -178,6 +186,7 @@ export const en = {
     currentLevel: 'Current level',
     targetLevel: 'Target level',
     unwantedTone: 'Unwanted tone',
+    wheelTitle: 'Neutralization wheel',
     tones: {
       red: 'Red',
       orange: 'Orange',

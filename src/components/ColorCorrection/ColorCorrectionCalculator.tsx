@@ -4,17 +4,10 @@ import type { Level } from "../../engine/levels";
 import { calculateColorCorrection, calculateCorrectorGrams, type UnwantedTone } from "../../engine/correction";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./ColorCorrectionCalculator.css";
+import { NeutralizationWheel } from "./NeutralizationWheel";
+import { TONES, TONE_COLORS } from "./toneColors";
 
 const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const TONES: UnwantedTone[] = ['red', 'orange', 'yellow', 'green', 'blue', 'violet'];
-const TONE_COLORS: Record<UnwantedTone, string> = {
-  red: '#CC3333',
-  orange: '#E8873B',
-  yellow: '#E8D44D',
-  green: '#4CAF50',
-  blue: '#3B7DD8',
-  violet: '#9B59B6',
-};
 
 function getTipKey(tone: UnwantedTone, technique: 'deposit' | 'lift-tone' | 'multi-step'): string {
   if (technique === 'multi-step') {
@@ -98,6 +91,13 @@ export function ColorCorrectionCalculator() {
             ))}
           </div>
         </div>
+
+        <NeutralizationWheel
+          tones={TONES}
+          toneColors={TONE_COLORS}
+          selectedTone={unwantedTone}
+          onSelectTone={setUnwantedTone}
+        />
 
         <div className="field">
           <label htmlFor="baseGrams">{t('correction.baseGrams')}</label>
