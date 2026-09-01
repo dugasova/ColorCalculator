@@ -40,8 +40,7 @@ describe('SessionDetailsPanel onSaved', () => {
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     await waitFor(() => {
-      const button = screen.getByRole('button', { name: 'Save to history' }) as HTMLButtonElement;
-      expect(button.disabled).toBe(false);
+      expect(screen.getByRole('button', { name: 'Save to history' })).not.toBeDisabled();
     }, { timeout: 2500 });
   });
 });

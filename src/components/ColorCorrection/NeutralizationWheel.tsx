@@ -1,4 +1,5 @@
 import { useState } from "react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { getComplementaryCorrector, type UnwantedTone } from "../../engine/correction";
 
@@ -81,7 +82,7 @@ export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectT
               key={tone}
               d={wedgePath(angleOf(tone))}
               fill={toneColors[tone]}
-              className={`neutralization-wheel__wedge${active ? ' neutralization-wheel__wedge--active' : ''}`}
+              className={clsx('neutralization-wheel__wedge', active && 'neutralization-wheel__wedge--active')}
               onMouseEnter={() => setHoveredTone(tone)}
               onClick={() => onSelectTone(tone)}
             />

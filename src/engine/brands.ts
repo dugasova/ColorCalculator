@@ -1,5 +1,6 @@
+import { z } from 'zod';
 import type { Level } from './levels';
-import { type MixingRatio, type Shade } from './shades';
+import { type MixingRatio, type Shade, shadeSchema } from './shades';
 import { GENERIC_SHADE_CHART } from './shades';
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from './brands/wella';
 import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from './brands/loreal';
@@ -53,12 +54,25 @@ export function resolveMixingRatio(config: MixingRatioConfig): (startLevel: Leve
     return getMixingRatio;
 }
 
+const mixingRatioConfigSchema: z.ZodType<MixingRatioConfig> = z.object({
+    kind: z.enum(['fixed', 'generic']),
+    fixedRatio: z.object({ colorParts: z.number(), developerParts: z.number() }).optional(),
+});
+
 export interface CustomBrandRecord {
     id: string;
     name: string;
     pricePerGram: number;
     mixingRatioConfig: MixingRatioConfig;
 }
+
+// Validates a customBrands Firestore document's payload -- everything but `id`, which
+// comes from the document id itself (see palette.ts's subscribeToCustomBrands).
+export const customBrandRecordSchema: z.ZodType<Omit<CustomBrandRecord, 'id'>> = z.object({
+    name: z.string(),
+    pricePerGram: z.number(),
+    mixingRatioConfig: mixingRatioConfigSchema,
+});
 
 // A single correction an admin makes to a brand's shade chart at runtime, persisted in
 // the `paletteOverrides` Firestore collection. `add` covers both "add a shade to an
@@ -73,6 +87,13 @@ export interface CustomBrandRecord {
 export type PaletteOverride =
     | { id: string; kind: 'add'; brandId: BrandId; shade: Shade }
     | { id: string; kind: 'disable'; brandId: BrandId; line: string | null; code: string };
+
+// Validates a paletteOverrides Firestore document's payload -- everything but `id`, same
+// as customBrandRecordSchema above (see palette.ts's subscribeToPaletteOverrides).
+export const paletteOverrideSchema: z.ZodType<Omit<PaletteOverride, 'id'>> = z.union([
+    z.object({ kind: z.literal('add'), brandId: z.string(), shade: shadeSchema }),
+    z.object({ kind: z.literal('disable'), brandId: z.string(), line: z.string().nullable(), code: z.string() }),
+]);
 
 function addedShadesFor(overrides: PaletteOverride[], brandId: BrandId): Shade[] {
     return overrides

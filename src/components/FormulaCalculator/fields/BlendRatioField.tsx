@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 import type { Shade } from "../../../engine/shades";
 import { splitShadeBlend } from "../../../engine/formula";
 import { blendShadeHexColors } from "../../../engine/color";
@@ -32,7 +33,7 @@ export function BlendRatioField({
           <button
             key={percent}
             type="button"
-            className={`button button--secondary ${primaryPercent === percent ? 'button--active' : ''}`}
+            className={clsx('button button--secondary', primaryPercent === percent && 'button--active')}
             onClick={() => onPrimaryPercentChange(percent)}
           >
             {percent}/{100 - percent}

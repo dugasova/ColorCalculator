@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// Deploy with `firebase deploy --only storage`. Mirrors firestore.rules: there is no
+// server in this project, so the same single-salon, any-signed-in-user model applies to
+// the before/after formula photos uploaded by uploadFormulaPhoto (src/history.ts) at
+// formulaHistory/{entryId}/before and formulaHistory/{entryId}/after.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /formulaHistory/{entryId}/{slot} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

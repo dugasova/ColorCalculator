@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import "./Nav.css";
 
@@ -74,14 +75,14 @@ export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   }
 
   return (
-    <nav className="app-nav" role="tablist" aria-label={t('nav.ariaLabel')}>
+    <div className="app-nav" role="tablist" aria-label={t('nav.ariaLabel')}>
       {items.map(item => (
         <button
           key={item}
           type="button"
           role="tab"
           aria-selected={view === item}
-          className={`app-nav__item ${view === item ? 'app-nav__item--active' : ''}`}
+          className={clsx('app-nav__item', view === item && 'app-nav__item--active')}
           onClick={() => onViewChange(item)}
         >
           <svg className="app-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -90,6 +91,6 @@ export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
           <span>{t(`nav.${item}`)}</span>
         </button>
       ))}
-    </nav>
+    </div>
   );
 }

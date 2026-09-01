@@ -92,14 +92,15 @@ setup and configuration (these are public client identifiers, not secrets — se
 note in `src/firebase.ts`). Set a shared sign-up gate in `src/inviteCode.ts`
 (`SALON_INVITE_CODE`) — anyone with this code can self-register and gets full access to
 shared salon data; it's a light deterrent, not real security. Real access control lives
-in `firestore.rules`.
+in `firestore.rules` (Firestore documents) and `storage.rules` (before/after formula
+photos).
 
-Deploy the security rules (required — Firestore denies everything by default until
-rules are published):
+Deploy the security rules (required — both Firestore and Storage deny everything by
+default until rules are published):
 
 ```bash
 npx firebase-tools login
-npx firebase-tools deploy --only firestore:rules
+npx firebase-tools deploy --only firestore:rules,storage
 ```
 
 Run it locally:

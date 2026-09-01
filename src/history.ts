@@ -1,4 +1,5 @@
-import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, updateDoc, type Timestamp } from "firebase/firestore";
+import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, Timestamp, updateDoc } from "firebase/firestore";
+import { z } from "zod";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "./firebase";
 import type { Shade } from "./engine/shades";
@@ -104,6 +105,71 @@ export interface LegacyFormulaHistoryEntry {
   afterPhotoUrl: string | null;
 }
 
+// Validates a formulaHistory Firestore document's top-level shape (see fetchFormulaHistory
+// below). Deliberately shallow: `result`/`targetShade`/`additionalShade`/`blend` are the
+// nested, purely-computed/display output of the formula engine (FullFormula, BleachFormula
+// -- engine/formula.ts, engine/bleach.ts), not something a corrupt value could feed back
+// into a live calculation the way a palette shade does. Deep-validating every one of their
+// fields here would mean shadowing that whole type graph and keeping it in permanent
+// lockstep with the engine, for a read-only history/repeat feature -- a bad trade. This
+// still catches the realistic corruption case (a document missing/mistyped the top-level
+// scalar fields the UI reads directly: client name, pricing, patch-test/photo metadata)
+// and each step's `kind` discriminant, which HistoryView/formatSession switch on.
+const historyStepShapeSchema = z.union([
+  z.looseObject({ kind: z.literal('color') }),
+  z.looseObject({ kind: z.literal('bleach') }),
+]);
+
+const formulaHistoryEntryShapeSchema = z.object({
+  id: z.string(),
+  clientName: z.string(),
+  note: z.string(),
+  appliedBy: z.string(),
+  appliedAt: z.instanceof(Timestamp).nullable(),
+  steps: z.array(historyStepShapeSchema),
+  markupMultiplier: z.number(),
+  productCost: z.number().nullable(),
+  servicePrice: z.number().nullable(),
+  patchTestDate: z.string(),
+  allergyNotes: z.string(),
+  patchTestOverride: z.boolean(),
+  beforePhotoUrl: z.string().nullable(),
+  afterPhotoUrl: z.string().nullable(),
+});
+
+const legacyFormulaHistoryEntryShapeSchema = z.object({
+  id: z.string(),
+  clientName: z.string(),
+  note: z.string(),
+  appliedBy: z.string(),
+  appliedAt: z.instanceof(Timestamp).nullable(),
+  brandName: z.string(),
+  line: z.string().nullable(),
+  targetShade: z.looseObject({ code: z.string() }),
+  startLevel: z.number(),
+  grayPercent: z.number(),
+  result: z.looseObject({}),
+  additionalShade: z.looseObject({ code: z.string() }).nullable().optional(),
+  additionalShadeGrams: z.number().nullable().optional(),
+  processingMinutes: z.number(),
+  applicationZone: z.enum(['full-head', 'root-touch-up']),
+  pricePerGram: z.number(),
+  markupMultiplier: z.number(),
+  productCost: z.number().nullable(),
+  servicePrice: z.number().nullable(),
+  patchTestDate: z.string(),
+  allergyNotes: z.string(),
+  patchTestOverride: z.boolean(),
+  beforePhotoUrl: z.string().nullable(),
+  afterPhotoUrl: z.string().nullable(),
+});
+
+// A well-formed new-format document never has `brandName` (that's the legacy shape) and a
+// well-formed legacy document never has `steps` -- matches `normalizeHistoryEntry`'s own
+// `'steps' in raw` discrimination below, so the two schemas never both match the same
+// document, and never both reject a genuinely well-formed one.
+export const historyEntryShapeSchema = z.union([formulaHistoryEntryShapeSchema, legacyFormulaHistoryEntryShapeSchema]);
+
 export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHistoryEntry): FormulaHistoryEntry {
   if ('steps' in raw && raw.steps !== undefined) return raw;
 
@@ -207,9 +273,19 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
 export async function fetchFormulaHistory(): Promise<FormulaHistoryEntry[]> {
   const q = query(collection(db, HISTORY_COLLECTION), orderBy("appliedAt", "desc"));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc =>
-    normalizeHistoryEntry({ id: doc.id, ...doc.data() } as LegacyFormulaHistoryEntry | FormulaHistoryEntry)
-  );
+  const entries: FormulaHistoryEntry[] = [];
+  for (const doc of snapshot.docs) {
+    const result = historyEntryShapeSchema.safeParse({ id: doc.id, ...doc.data() });
+    if (!result.success) {
+      console.error(`Skipping malformed history document "${doc.id}":`, result.error);
+      continue;
+    }
+    // See historyEntryShapeSchema's comment above for why this is shallow (result.data's
+    // nested fields are validated as "some object", not deep-checked against FullFormula/
+    // BleachFormula) -- the cast trusts only the fields the schema left unvalidated.
+    entries.push(normalizeHistoryEntry(result.data as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
+  }
+  return entries;
 }
 
 export interface RepeatFormulaRequest {

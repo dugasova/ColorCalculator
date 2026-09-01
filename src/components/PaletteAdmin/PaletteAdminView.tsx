@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { addCustomBrand, addShadeToBrand, setShadeDisabled, usePaletteAdmin } from "../../palette";
 import { BRANDS, getDisabledShadeKeys, getFullBrandShades, shadeKey, type MixingRatioConfig } from "../../engine/brands";
@@ -233,7 +234,7 @@ export function PaletteAdminView() {
         ) : (
           <ul className="palette-admin__shade-list">
             {fullShades.map(shade => (
-              <li key={shadeKey(shade)} className={`palette-admin__shade-row ${disabledKeys.has(shadeKey(shade)) ? 'palette-admin__shade-row--disabled' : ''}`}>
+              <li key={shadeKey(shade)} className={clsx('palette-admin__shade-row', disabledKeys.has(shadeKey(shade)) && 'palette-admin__shade-row--disabled')}>
                 <span className="shade-swatch" style={{ backgroundColor: shadeToHexColor(shade) }} />
                 <span className="palette-admin__shade-code">{shade.code}</span>
                 <span className="palette-admin__shade-detail">

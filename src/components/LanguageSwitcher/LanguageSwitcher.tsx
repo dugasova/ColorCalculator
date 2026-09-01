@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 import { SUPPORTED_LANGUAGES } from "../../i18n";
 import "./LanguageSwitcher.css";
 
@@ -11,7 +12,7 @@ export function LanguageSwitcher() {
         <button
           key={lang}
           type="button"
-          className={`button button--secondary ${i18n.resolvedLanguage === lang ? 'button--active' : ''}`}
+          className={clsx('button button--secondary', i18n.resolvedLanguage === lang && 'button--active')}
           onClick={() => i18n.changeLanguage(lang)}
         >
           {t(`language.${lang}`)}

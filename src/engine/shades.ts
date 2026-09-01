@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { DeveloperVolume, Level, LiftTable } from "./levels";
 
 export type ToneFamily = 'natural' | 'ash' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
@@ -18,6 +19,36 @@ export interface Shade {
   developerLiftTable?: LiftTable
   developerVolumeChoices?: DeveloperVolume[]
 }
+
+const mixingRatioSchema = z.object({
+  colorParts: z.number(),
+  developerParts: z.number(),
+});
+
+const levelSchema = z.number().int().min(1).max(12) as unknown as z.ZodType<Level>;
+const developerVolumeSchema = z.union([
+  z.literal(6), z.literal(10), z.literal(13), z.literal(20), z.literal(30), z.literal(40),
+]) satisfies z.ZodType<DeveloperVolume>;
+const toneFamilySchema = z.enum([
+  'natural', 'ash', 'matt', 'gold', 'copper', 'red', 'violet', 'chocolate', 'pearl', 'slate-grey', 'mahogany',
+]) satisfies z.ZodType<ToneFamily>;
+
+// Validates a Shade document read from Firestore (admin-added via PaletteAdminView -- see
+// palette.ts's subscribeToPaletteOverrides). Deliberately excludes `developerLiftTable`: it's
+// a function, Firestore can't store functions, so it's never legitimately present on a
+// Firestore-sourced shade -- only hardcoded built-in shades (e.g. Wella's Special Blonde,
+// see brands/wella.ts) set it in code.
+export const shadeSchema: z.ZodType<Shade> = z.object({
+  code: z.string(),
+  level: levelSchema,
+  tone: toneFamilySchema,
+  line: z.string().optional(),
+  secondaryTone: toneFamilySchema.optional(),
+  fixedMixingRatio: mixingRatioSchema.optional(),
+  minStartLevel: levelSchema.optional(),
+  developerVolumeChoices: z.array(developerVolumeSchema).optional(),
+});
+
 export const code = (level: Level, tone: ToneFamily) => `${level}.${toneId(tone)}`;
 export const toneId = (tone: ToneFamily): number => {
   switch (tone) {

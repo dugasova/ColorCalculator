@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateColorCorrection, calculateCorrectorGrams, type UnwantedTone } from "../../engine/correction";
@@ -76,7 +77,7 @@ export function ColorCorrectionCalculator() {
                 type="button"
                 role="radio"
                 aria-checked={unwantedTone === tone}
-                className={`tone-btn ${unwantedTone === tone ? 'tone-btn--active' : ''}`}
+                className={clsx('tone-btn', unwantedTone === tone && 'tone-btn--active')}
                 style={{ '--tone-color': TONE_COLORS[tone] } as CSSProperties}
                 onClick={() => setUnwantedTone(tone)}
               >

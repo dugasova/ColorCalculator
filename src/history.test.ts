@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  normalizeHistoryEntry, buildRepeatFormulaRequest,
+  normalizeHistoryEntry, buildRepeatFormulaRequest, historyEntryShapeSchema,
   type ColorHistoryStep, type BleachHistoryStep, type FormulaHistoryEntry, type LegacyFormulaHistoryEntry,
 } from './history';
 import { BRANDS } from './engine/brands';
@@ -246,5 +246,61 @@ describe('buildRepeatFormulaRequest', () => {
   it('returns null when the saved brand no longer exists', () => {
     const entry = makeEntry({ clientName: 'Anna', steps: [makeColorStep({ brandName: 'Deleted Brand' })] });
     expect(buildRepeatFormulaRequest(entry, BRANDS)).toBeNull();
+  });
+});
+
+// Firestore documents are untrusted input -- see fetchFormulaHistory, which safeParses
+// against this before calling normalizeHistoryEntry, and skips (logging) any document
+// that fails.
+describe('historyEntryShapeSchema', () => {
+  it('accepts a well-formed modern steps-based entry', () => {
+    const entry = makeEntry({ clientName: 'Anna' });
+    expect(historyEntryShapeSchema.safeParse(entry).success).toBe(true);
+  });
+
+  it('accepts a well-formed legacy flat entry', () => {
+    const legacy: LegacyFormulaHistoryEntry = {
+      id: 'legacy-1',
+      clientName: 'Old Client',
+      note: 'note',
+      appliedBy: 'stylist',
+      appliedAt: null,
+      brandName: 'Wella',
+      line: 'color-touch',
+      targetShade: { code: '8/73', level: 8, tone: 'chocolate', secondaryTone: 'gold', line: 'color-touch' },
+      startLevel: 8,
+      grayPercent: 20,
+      result: colorFullFormula,
+      processingMinutes: 30,
+      applicationZone: 'full-head',
+      pricePerGram: 0.2,
+      markupMultiplier: 3,
+      productCost: 12,
+      servicePrice: 36,
+      patchTestDate: '2026-01-01T00:00',
+      allergyNotes: 'none',
+      patchTestOverride: false,
+      beforePhotoUrl: null,
+      afterPhotoUrl: null,
+    };
+    expect(historyEntryShapeSchema.safeParse(legacy).success).toBe(true);
+  });
+
+  it('rejects a document missing a required top-level field', () => {
+    const entry = makeEntry({ clientName: 'Anna' }) as unknown as Record<string, unknown>;
+    delete entry.clientName;
+    expect(historyEntryShapeSchema.safeParse(entry).success).toBe(false);
+  });
+
+  it('rejects a document whose step is missing the `kind` discriminant HistoryView switches on', () => {
+    const entry = makeEntry({ clientName: 'Anna' });
+    const brokenStep = { ...entry.steps[0] } as Record<string, unknown>;
+    delete brokenStep.kind;
+    expect(historyEntryShapeSchema.safeParse({ ...entry, steps: [brokenStep] }).success).toBe(false);
+  });
+
+  it('rejects a document whose scalar field has the wrong type', () => {
+    const entry = makeEntry({ clientName: 'Anna' });
+    expect(historyEntryShapeSchema.safeParse({ ...entry, patchTestOverride: 'yes' }).success).toBe(false);
   });
 });

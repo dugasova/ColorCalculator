@@ -2,7 +2,7 @@ import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, type Unsubscrib
 import { createContext, useContext } from "react";
 import { db } from "./firebase";
 import { sanitizeForFirestore } from "./history";
-import { BRANDS, type Brand, type BrandId, type CustomBrandRecord, type MixingRatioConfig, type PaletteOverride } from "./engine/brands";
+import { BRANDS, type Brand, type BrandId, type CustomBrandRecord, type MixingRatioConfig, type PaletteOverride, customBrandRecordSchema, paletteOverrideSchema } from "./engine/brands";
 import type { Shade } from "./engine/shades";
 
 export interface PaletteState {
@@ -46,15 +46,41 @@ function disableOverrideId(brandId: BrandId, line: string | null, code: string):
   return `${encodeURIComponent(brandId)}::${encodeURIComponent(line ?? '')}::${encodeURIComponent(code)}`;
 }
 
+// Malformed documents (a hand-edited Firestore console change, a future schema change
+// read by an old client, ...) are skipped and logged rather than propagated: previously
+// an unchecked `as` cast let one bad document produce garbage that would crash deep
+// inside the formula engine, far from this read, with no clue which document caused it.
 export function subscribeToCustomBrands(onChange: (brands: CustomBrandRecord[]) => void): Unsubscribe {
   return onSnapshot(collection(db, CUSTOM_BRANDS_COLLECTION), snapshot => {
-    onChange(snapshot.docs.map(d => ({ id: d.id, ...(d.data() as Omit<CustomBrandRecord, 'id'>) })));
+    const brands: CustomBrandRecord[] = [];
+    for (const d of snapshot.docs) {
+      const result = customBrandRecordSchema.safeParse(d.data());
+      if (!result.success) {
+        console.error(`Skipping malformed custom brand document "${d.id}":`, result.error);
+        continue;
+      }
+      brands.push({ id: d.id, ...result.data });
+    }
+    onChange(brands);
   });
 }
 
 export function subscribeToPaletteOverrides(onChange: (overrides: PaletteOverride[]) => void): Unsubscribe {
   return onSnapshot(collection(db, PALETTE_OVERRIDES_COLLECTION), snapshot => {
-    onChange(snapshot.docs.map(d => ({ id: d.id, ...(d.data() as object) }) as PaletteOverride));
+    const overrides: PaletteOverride[] = [];
+    for (const d of snapshot.docs) {
+      const result = paletteOverrideSchema.safeParse(d.data());
+      if (!result.success) {
+        console.error(`Skipping malformed palette override document "${d.id}":`, result.error);
+        continue;
+      }
+      // TS collapses a discriminated union's members to their common fields when spread
+      // into a new object literal -- the branch discrimination is still real, just not
+      // something `{ ...result.data }` can prove statically. `result.data` already
+      // conforms to the `kind`-matched branch of paletteOverrideSchema above.
+      overrides.push({ id: d.id, ...result.data } as PaletteOverride);
+    }
+    onChange(overrides);
   });
 }
 

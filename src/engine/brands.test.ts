@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  buildBrandCatalog, getDisabledShadeKeys, getFullBrandShades, resolveMixingRatio, shadeKey,
+  buildBrandCatalog, customBrandRecordSchema, getDisabledShadeKeys, getFullBrandShades,
+  paletteOverrideSchema, resolveMixingRatio, shadeKey,
   type Brand, type CustomBrandRecord, type PaletteOverride,
 } from './brands';
 import { getMixingRatio } from './formula';
@@ -166,5 +167,54 @@ describe('buildBrandCatalog', () => {
     }];
     const catalog = buildBrandCatalog(baseBrands, customBrands, []);
     expect(catalog['empty-line'].shades).toEqual([]);
+  });
+});
+
+// Firestore documents are untrusted input: a hand edit in the console, or a future
+// schema change read by an old client, shouldn't crash deep inside the formula engine.
+// See palette.ts's subscribeToCustomBrands/subscribeToPaletteOverrides, which safeParse
+// against these before merging a document into the live catalog.
+describe('customBrandRecordSchema', () => {
+  it('accepts a well-formed customBrands document payload', () => {
+    const result = customBrandRecordSchema.safeParse({
+      name: 'Acme Color', pricePerGram: 0.22, mixingRatioConfig: { kind: 'fixed', fixedRatio: { colorParts: 1, developerParts: 1.5 } },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a document missing a required field', () => {
+    const result = customBrandRecordSchema.safeParse({ name: 'Acme Color', mixingRatioConfig: { kind: 'generic' } });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a document whose field has the wrong type', () => {
+    const result = customBrandRecordSchema.safeParse({ name: 'Acme Color', pricePerGram: '0.22', mixingRatioConfig: { kind: 'generic' } });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('paletteOverrideSchema', () => {
+  it('accepts a well-formed "add" override, including its nested shade', () => {
+    const result = paletteOverrideSchema.safeParse({
+      kind: 'add', brandId: 'wella', shade: { code: '8/38', level: 8, tone: 'gold', secondaryTone: 'pearl', line: 'koleston-perfect' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a well-formed "disable" override with a null line', () => {
+    const result = paletteOverrideSchema.safeParse({ kind: 'disable', brandId: 'generic', line: null, code: '7.1' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an "add" override whose nested shade has an out-of-range level', () => {
+    const result = paletteOverrideSchema.safeParse({
+      kind: 'add', brandId: 'wella', shade: { code: '13/0', level: 13, tone: 'natural' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a document whose kind matches neither branch', () => {
+    const result = paletteOverrideSchema.safeParse({ kind: 'rename', brandId: 'wella', newName: 'Wella Pro' });
+    expect(result.success).toBe(false);
   });
 });

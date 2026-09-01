@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import clsx from "clsx";
 import "./Select.css";
 
 export interface SelectOption {
@@ -146,7 +147,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
   const listboxId = `${id}-listbox`;
 
   return (
-    <div className={`select ${open ? 'select--open' : ''} ${className ?? ''}`} ref={rootRef}>
+    <div className={clsx('select', open && 'select--open', className)} ref={rootRef}>
       <button
         type="button"
         id={id}
@@ -172,6 +173,11 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
       {open && (
         <ul id={listboxId} role="listbox" className="select__popup">
           {options.map((option, index) => (
+            // Keyboard selection is handled entirely by the trigger button's onKeyDown
+            // (ArrowUp/Down/Enter move `activeIndex` and commit it via aria-activedescendant,
+            // see handleTriggerKeyDown above); this li's onClick is the mouse-only path and
+            // is never meant to receive keyboard focus itself.
+            // eslint-disable-next-line jsx-a11y/click-events-have-key-events
             <li
               key={option.value}
               id={`${listboxId}-option-${index}`}
@@ -179,7 +185,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
               data-value={option.value}
               aria-selected={option.value === value}
               ref={el => { optionRefs.current[index] = el; }}
-              className={`select__option ${index === activeIndex ? 'select__option--active' : ''} ${option.value === value ? 'select__option--selected' : ''}`}
+              className={clsx('select__option', index === activeIndex && 'select__option--active', option.value === value && 'select__option--selected')}
               onMouseEnter={() => setActiveIndex(index)}
               onClick={() => commit(index)}
             >

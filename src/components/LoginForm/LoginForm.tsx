@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
@@ -56,14 +57,14 @@ export default function LoginForm() {
       <div className="login-form__tabs">
         <button
           type="button"
-          className={`button button--secondary ${mode === 'sign-in' ? 'button--active' : ''}`}
+          className={clsx('button button--secondary', mode === 'sign-in' && 'button--active')}
           onClick={() => switchMode('sign-in')}
         >
           {t('login.signIn')}
         </button>
         <button
           type="button"
-          className={`button button--secondary ${mode === 'sign-up' ? 'button--active' : ''}`}
+          className={clsx('button button--secondary', mode === 'sign-up' && 'button--active')}
           onClick={() => switchMode('sign-up')}
         >
           {t('login.signUp')}
