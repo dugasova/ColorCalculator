@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GENERIC_SHADE_CHART } from "../../engine/shades";
+import { GENERIC_SHADE_CHART, compareShadesForDisplay } from "../../engine/shades";
 import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
@@ -36,7 +36,7 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
 
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
-  const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line);
+  const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line).sort(compareShadesForDisplay);
 
   // Shared by every handler that changes which target shade is in play (see
   // resetShadePoolOverrides for the additional resets when the whole shade POOL changes,

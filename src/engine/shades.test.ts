@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canBlendShades, suggestBlendComponents } from './shades';
+import { canBlendShades, suggestBlendComponents, compareShadesForDisplay } from './shades';
 import type { Shade } from './shades';
 
 describe('canBlendShades', () => {
@@ -68,5 +68,46 @@ describe('suggestBlendComponents', () => {
     const { primary } = suggestBlendComponents(target, chart);
     // Only a level-7 '7/1' exists in the chart for tone 'ash'; the level-10 target must not match it.
     expect(primary).toBeNull();
+  });
+});
+
+describe('compareShadesForDisplay', () => {
+  it('orders by level first, regardless of code', () => {
+    const shades: Shade[] = [
+      { code: '9/1', level: 9, tone: 'ash' },
+      { code: '6/0', level: 6, tone: 'natural' },
+    ];
+    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(['6/0', '9/1']);
+  });
+
+  it('orders same-level reflects ascending by their code suffix, not by transcription order', () => {
+    // Regression: raw brand charts group codes by tone family (natural, ash, gold, ...)
+    // rather than sorting them, so a chart can list e.g. "8/96" before "8/34" -- a select
+    // rendering that raw order looks chaotic to a colorist scanning for a specific number.
+    const shades: Shade[] = [
+      { code: '8/38', level: 8, tone: 'gold', secondaryTone: 'pearl' },
+      { code: '8/96', level: 8, tone: 'slate-grey', secondaryTone: 'violet' },
+      { code: '8/97', level: 8, tone: 'slate-grey', secondaryTone: 'chocolate' },
+      { code: '8/34', level: 8, tone: 'gold', secondaryTone: 'red' },
+      { code: '8/41', level: 8, tone: 'red', secondaryTone: 'ash' },
+    ];
+    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(['8/34', '8/38', '8/41', '8/96', '8/97']);
+  });
+
+  it('sorts a bare level-only code (no reflect suffix) before any of its reflects', () => {
+    const shades: Shade[] = [
+      { code: '6.1', level: 6, tone: 'ash' },
+      { code: '6', level: 6, tone: 'natural' },
+    ];
+    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(['6', '6.1']);
+  });
+
+  it('strips both dot and slash separators so L\u2019Or\u00e9al and Wella codes sort the same way', () => {
+    const shades: Shade[] = [
+      { code: '6.35', level: 6, tone: 'gold', secondaryTone: 'mahogany' },
+      { code: '6/91', level: 6, tone: 'slate-grey', secondaryTone: 'ash' },
+      { code: '6.13', level: 6, tone: 'ash', secondaryTone: 'gold' },
+    ];
+    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(['6.13', '6.35', '6/91']);
   });
 });

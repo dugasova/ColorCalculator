@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../../engine/levels";
 
-const START_LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const START_LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export interface StartLevelFieldProps {
   startLevel: Level;

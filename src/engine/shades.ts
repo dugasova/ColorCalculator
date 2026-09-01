@@ -47,6 +47,19 @@ export function canBlendShades(a: Shade, b: Shade): boolean {
     && JSON.stringify(a.developerVolumeChoices ?? null) === JSON.stringify(b.developerVolumeChoices ?? null);
 }
 
+// Raw brand charts (see engine/brands/*) are transcribed grouped by tone family
+// (natural, ash, gold, ...), which is the order a printed swatch book uses but reads as
+// chaotic in a <select> -- e.g. Wella's chart lists 8/38 then 8/96, 8/97 before 8/34,
+// 8/41. Sort by level, then by the reflect code with its level prefix stripped (so
+// "6/91" and "4.15" both compare on "91"/"15"), giving every select a plain ascending
+// numeric order regardless of how the source chart happened to be transcribed.
+export function compareShadesForDisplay(a: Shade, b: Shade): number {
+  if (a.level !== b.level) return a.level - b.level;
+  const suffixA = a.code.replace(/^\d+[./]?/, '');
+  const suffixB = b.code.replace(/^\d+[./]?/, '');
+  return suffixA < suffixB ? -1 : suffixA > suffixB ? 1 : 0;
+}
+
 // Best-effort default pair for a substitute blend of `target` -- a shade whose tone
 // matches just `target`'s primary reflect, and (only if `target` has one) a shade whose
 // tone matches just its secondary reflect. E.g. target 7/17 (tone 'ash', secondaryTone

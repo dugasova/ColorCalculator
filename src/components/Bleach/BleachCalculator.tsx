@@ -10,7 +10,7 @@ import "./BleachCalculator.css";
 // FormulaCalculator's generic-brand default.
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
 
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export interface BleachResultsProps {
   result: BleachFormula;

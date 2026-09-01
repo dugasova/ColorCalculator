@@ -7,7 +7,7 @@ import "./ColorCorrectionCalculator.css";
 import { NeutralizationWheel } from "./NeutralizationWheel";
 import { TONES, TONE_COLORS } from "./toneColors";
 
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 function getTipKey(tone: UnwantedTone, technique: 'deposit' | 'lift-tone' | 'multi-step'): string {
   if (technique === 'multi-step') {
