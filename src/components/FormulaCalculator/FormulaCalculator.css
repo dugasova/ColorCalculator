@@ -63,6 +63,14 @@
   letter-spacing: 0.05em;
 }
 
+.results__client-name,
+.results__note,
+.results__patch-test,
+.results__allergy-notes,
+.results__photo {
+  gap: 18px;
+}
+
 .field select,
 .field input:not([type="checkbox"]),
 .field textarea {
@@ -460,6 +468,10 @@
   line-height: 1.3;
 }
 
+.results__note {
+  margin-top: 20px;
+}
+
 .results__patch-test {
   margin-top: 20px;
 }
@@ -476,6 +488,10 @@
   font-size: 0.85rem;
   color: var(--muted);
   cursor: pointer;
+}
+
+.results__patch-test-override + .warning {
+  margin-top: 20px;
 }
 
 .results__neutralization-toggle {
