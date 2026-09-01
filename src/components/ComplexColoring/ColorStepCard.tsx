@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GENERIC_SHADE_CHART } from "../../engine/shades";
-import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
 import { buildMixSummary } from "../../engine/formatFormula";
-import type { DeveloperVolume, Level } from "../../engine/levels";
-import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
-import type { BrandId } from "../../engine/brands";
 import { usePalette } from "../../palette";
 import type { ColorHistoryStep } from "../../history";
+import { useShadeFormulaState } from "../FormulaCalculator/useShadeFormulaState";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
 import { StartLevelField } from "../FormulaCalculator/fields/StartLevelField";
@@ -27,86 +23,48 @@ export interface ColorStepCardProps {
   onRemove: () => void;
 }
 
-// One color/tone step within a complex-coloring session. Mirrors FormulaCalculator's field
-// composition and calculation, minus the parts that only make sense once per session
-// (repeat-formula replay, overall markup/service price) — those live at the session level
-// in ComplexColoringCalculator, aggregated across every step.
+// One color/tone step within a complex-coloring session. Shares its brand/line/shade and
+// formula calculation with FormulaCalculator (see useShadeFormulaState), minus the parts
+// that only make sense once per session (repeat-formula replay, substitute-blend mode,
+// cross-brand match, overall markup/service price) — those live at the session level in
+// ComplexColoringCalculator, aggregated across every step. `pricePerGram` here is a plain
+// flat field, unlike FormulaCalculator's manual-override-over-a-brand-default pattern.
 export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const idSuffix = `-${stepId}`;
 
-  const [brandId, setBrandId] = useState<BrandId>('generic');
-  const [line, setLine] = useState<string | null>(null);
-  const [targetShadeCode, setTargetShadeCode] = useState(GENERIC_SHADE_CHART[0].code);
-  const [startLevel, setStartLevel] = useState<Level>(10);
-  const [grayPercent, setGrayPercent] = useState(0);
-  const [applicationZone, setApplicationZone] = useState<ApplicationZone>('full-head');
-  const [totalGrams, setTotalGrams] = useState(APPLICATION_ZONE_DEFAULT_GRAMS['full-head']);
-  const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(undefined);
-  const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(null);
-  const [additionalShadeGrams, setAdditionalShadeGrams] = useState(0);
-  const [neutralizationApplied, setNeutralizationApplied] = useState(false);
-  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_PRICE_PER_GRAM);
 
-  const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
-  const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line);
+  const {
+    startLevel, setStartLevel,
+    grayPercent, setGrayPercent,
+    targetShadeCode,
+    applicationZone,
+    totalGrams, setTotalGrams,
+    brandId,
+    line,
+    manualDeveloperVolume, setManualDeveloperVolume,
+    setManualProcessingMinutes,
+    additionalShadeCode,
+    additionalShadeGrams, setAdditionalShadeGrams,
+    neutralizationApplied, setNeutralizationApplied,
 
-  const handleBrandIdChange = (newBrandId: BrandId) => {
-    const firstShade = brands[newBrandId].shades[0];
-    setBrandId(newBrandId);
-    setLine(firstShade.line ?? null);
-    setTargetShadeCode(firstShade.code);
-    setManualDeveloperVolume(undefined);
-    setManualProcessingMinutes(undefined);
-    setAdditionalShadeCode(null);
-    setAdditionalShadeGrams(0);
-    setNeutralizationApplied(false);
-  };
+    availableLines,
+    lineShades,
+    targetShade,
+    result,
+    additionalShade,
+    grams,
+    effectiveResult,
+    processingMinutes,
 
-  const handleLineChange = (newLine: string | null) => {
-    const firstShade = brands[brandId].shades.find(s => (s.line ?? null) === newLine)!;
-    setLine(newLine);
-    setTargetShadeCode(firstShade.code);
-    setManualDeveloperVolume(undefined);
-    setManualProcessingMinutes(undefined);
-    setAdditionalShadeCode(null);
-    setAdditionalShadeGrams(0);
-    setNeutralizationApplied(false);
-  };
-
-  const handleTargetShadeCodeChange = (code: string) => {
-    setTargetShadeCode(code);
-    setManualDeveloperVolume(undefined);
-    setManualProcessingMinutes(undefined);
-    setNeutralizationApplied(false);
-  };
-
-  const handleApplicationZoneChange = (zone: ApplicationZone) => {
-    setApplicationZone(zone);
-    setTotalGrams(APPLICATION_ZONE_DEFAULT_GRAMS[zone]);
-  };
-
-  const handleAdditionalShadeCodeChange = (code: string | null) => {
-    setAdditionalShadeCode(code);
-    setAdditionalShadeGrams(0);
-  };
-
-  const targetShade = lineShades.find(s => s.code === targetShadeCode) ?? lineShades[0];
-  const effectiveManualDeveloperVolume = targetShade.developerVolumeChoices
-    ? (manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])
-    : undefined;
-  const result = calculateFullFormula(
-    startLevel, targetShade, grayPercent, totalGrams,
-    brands[brandId].mixingRatio, effectiveManualDeveloperVolume
-  );
-  const additionalShade = additionalShadeCode !== null ? lineShades.find(s => s.code === additionalShadeCode) ?? null : null;
-  const grams = result.grams !== null && additionalShade !== null && additionalShadeGrams > 0
-    ? applyAdditionalShade(result.grams, result.mixingRatio, additionalShadeGrams)
-    : result.grams;
-  const effectiveResult = grams !== result.grams ? { ...result, grams } : result;
-  const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
+    handleBrandIdChange,
+    handleLineChange,
+    handleTargetShadeCodeChange,
+    handleApplicationZoneChange,
+    handleAdditionalShadeCodeChange,
+  } = useShadeFormulaState({ brands });
 
   const step: ColorHistoryStep = {
     kind: 'color',
@@ -133,7 +91,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   }, [
     brandId, line, targetShadeCode, startLevel, grayPercent, applicationZone, totalGrams,
     manualDeveloperVolume, additionalShadeCode, additionalShadeGrams, neutralizationApplied,
-    manualProcessingMinutes, pricePerGram,
+    processingMinutes, pricePerGram,
   ]);
 
   return (

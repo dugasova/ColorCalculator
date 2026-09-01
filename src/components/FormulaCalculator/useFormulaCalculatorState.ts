@@ -1,40 +1,37 @@
 import { useState } from "react";
-import { GENERIC_SHADE_CHART, canBlendShades, suggestBlendComponents } from "../../engine/shades";
-import { applyAdditionalShade, calculateFullFormula, splitShadeBlend } from "../../engine/formula";
-import type { DeveloperVolume, Level } from "../../engine/levels";
-import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
+import { canBlendShades, suggestBlendComponents } from "../../engine/shades";
+import { splitShadeBlend } from "../../engine/formula";
 import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
+import { useShadeFormulaState } from "./useShadeFormulaState";
 
 const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
 
-// Owns every piece of state, derived value, and change handler behind FormulaCalculator's
-// form -- extracted so the component itself stays a thin render of already-computed values.
-// Not (yet) shared with ColorStepCard, which duplicates a similar but smaller subset of this
-// same state (no repeat-request replay, blend mode, cross-brand match, or markup/service
-// price) -- unifying the two is a reasonable follow-up but a separate, larger change.
+// Layers FormulaCalculator's own state -- repeat-request replay, substitute-blend mode,
+// cross-brand match, markup/service price -- on top of the brand/line/shade/formula state
+// shared with ColorStepCard (see useShadeFormulaState). The component itself stays a thin
+// render of already-computed values.
 export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeatRequest?: RepeatFormulaRequest | null) {
-  const [startLevel, setStartLevel] = useState<Level>(10);
-  const [grayPercent, setGrayPercent] = useState(0);
-  const [targetShadeCode, setTargetShadeCode] = useState(GENERIC_SHADE_CHART[0].code);
-  const [applicationZone, setApplicationZone] = useState<ApplicationZone>('full-head');
-  const [totalGrams, setTotalGrams] = useState(APPLICATION_ZONE_DEFAULT_GRAMS['full-head']);
-  const [brandId, setBrandId] = useState<BrandId>('generic');
-  const [line, setLine] = useState<string | null>(null);
-  const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(undefined);
-  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
   const [manualPricePerGram, setManualPricePerGram] = useState<number | undefined>(undefined);
   const [markupMultiplier, setMarkupMultiplier] = useState(DEFAULT_MARKUP_MULTIPLIER);
   const [manualServicePrice, setManualServicePrice] = useState<number | undefined>(undefined);
-  const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(null);
-  const [additionalShadeGrams, setAdditionalShadeGrams] = useState(0);
   const [blendModeEnabled, setBlendModeEnabled] = useState(false);
   const [blendShadeACode, setBlendShadeACode] = useState<string | null>(null);
   const [blendShadeBCode, setBlendShadeBCode] = useState<string | null>(null);
   const [blendPrimaryPercent, setBlendPrimaryPercent] = useState(DEFAULT_BLEND_PRIMARY_PERCENT);
-  const [neutralizationApplied, setNeutralizationApplied] = useState(false);
   const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+
+  const base = useShadeFormulaState({ brands, suppressAdditionalShade: blendModeEnabled });
+  const {
+    startLevel, setStartLevel, grayPercent, setGrayPercent, targetShadeCode, setTargetShadeCode,
+    applicationZone, setApplicationZone, totalGrams, setTotalGrams, brandId, setBrandId, line, setLine,
+    manualDeveloperVolume, setManualDeveloperVolume, setManualProcessingMinutes,
+    additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
+    neutralizationApplied, setNeutralizationApplied,
+    availableLines, lineShades, targetShade, result, additionalShade, effectiveResult, processingMinutes,
+    resetShadePoolOverrides,
+  } = base;
 
   // Replay a "Repeat formula" request from history right during render — this is React's
   // documented pattern for adjusting state when a prop changes (no effect/extra render
@@ -64,65 +61,47 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setNeutralizationApplied(false);
   }
 
-  const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
-  const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line);
-
-  // Shared by every handler that changes which target shade is in play: a blend picked
-  // for the previous target may no longer be a physically valid pairing for the new one
-  // (different level/reflect), and per-shade manual overrides (developer volume,
-  // processing time, price) don't necessarily carry over either.
-  function resetShadeDependentOverrides() {
-    setManualDeveloperVolume(undefined);
-    setManualProcessingMinutes(undefined);
+  const handleBrandIdChange = (newBrandId: BrandId) => {
+    base.handleBrandIdChange(newBrandId);
+    setManualPricePerGram(undefined);
     setManualServicePrice(undefined);
+    setBlendModeEnabled(false);
     setBlendShadeACode(null);
     setBlendShadeBCode(null);
     setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
-    setNeutralizationApplied(false);
-  }
-
-  // Additionally used whenever the whole available-shade pool changes (new brand, new
-  // line, or a cross-brand substitute): an additional-shade or blend-mode selection may
-  // no longer exist in the new pool at all, unlike a same-pool target change.
-  function resetShadePoolOverrides() {
-    resetShadeDependentOverrides();
-    setAdditionalShadeCode(null);
-    setAdditionalShadeGrams(0);
-    setBlendModeEnabled(false);
-  }
-
-  const handleBrandIdChange = (newBrandId: BrandId) => {
-    const firstShade = brands[newBrandId].shades[0];
-    setBrandId(newBrandId);
-    setLine(firstShade.line ?? null);
-    setTargetShadeCode(firstShade.code);
-    setManualPricePerGram(undefined);
-    resetShadePoolOverrides();
   };
 
   const handleLineChange = (newLine: string | null) => {
-    const firstShade = brands[brandId].shades.find(s => (s.line ?? null) === newLine)!;
-    setLine(newLine);
-    setTargetShadeCode(firstShade.code);
-    resetShadePoolOverrides();
+    base.handleLineChange(newLine);
+    setManualServicePrice(undefined);
+    setBlendModeEnabled(false);
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
   };
 
   const handleTargetShadeCodeChange = (code: string) => {
-    setTargetShadeCode(code);
-    resetShadeDependentOverrides();
+    base.handleTargetShadeCodeChange(code);
+    setManualServicePrice(undefined);
+    // A blend picked for the previous target may no longer be a physically valid pairing
+    // for the new one (different level/reflect); drop it so suggestBlendComponents below
+    // proposes a fresh default for the new target instead of silently keeping a stale one.
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
   };
 
   const handleCrossBrandMatchSelect = (newBrandId: BrandId, newLine: string | null, newShadeCode: string) => {
     setBrandId(newBrandId);
     setLine(newLine);
     setTargetShadeCode(newShadeCode);
-    setManualPricePerGram(undefined);
     resetShadePoolOverrides();
-  };
-
-  const handleAdditionalShadeCodeChange = (code: string | null) => {
-    setAdditionalShadeCode(code);
-    setAdditionalShadeGrams(0);
+    setManualPricePerGram(undefined);
+    setManualServicePrice(undefined);
+    setBlendModeEnabled(false);
+    setBlendShadeACode(null);
+    setBlendShadeBCode(null);
+    setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
   };
 
   const handleBlendModeChange = (enabled: boolean) => {
@@ -133,25 +112,6 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
       setBlendPrimaryPercent(DEFAULT_BLEND_PRIMARY_PERCENT);
     }
   };
-
-  const handleApplicationZoneChange = (zone: ApplicationZone) => {
-    setApplicationZone(zone);
-    setTotalGrams(APPLICATION_ZONE_DEFAULT_GRAMS[zone]);
-  };
-
-  const targetShade = lineShades.find(s => s.code === targetShadeCode) ?? lineShades[0];
-  const effectiveManualDeveloperVolume = targetShade.developerVolumeChoices
-    ? (manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])
-    : undefined;
-  const result = calculateFullFormula(
-    startLevel, targetShade, grayPercent, totalGrams,
-    brands[brandId].mixingRatio, effectiveManualDeveloperVolume
-  );
-  const additionalShade = additionalShadeCode !== null ? lineShades.find(s => s.code === additionalShadeCode) ?? null : null;
-  const grams = !blendModeEnabled && result.grams !== null && additionalShade !== null && additionalShadeGrams > 0
-    ? applyAdditionalShade(result.grams, result.mixingRatio, additionalShadeGrams)
-    : result.grams;
-  const effectiveResult = grams !== result.grams ? { ...result, grams } : result;
 
   // Two dedicated fields for the substitute-blend components (see BlendComponentField),
   // fully independent of targetShade/additionalShade above -- targetShade stays the
@@ -173,9 +133,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
       }
     : null;
 
-  const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
   const pricePerGram = manualPricePerGram ?? brands[brandId].pricePerGram;
-  const totalProductGrams = grams !== null ? grams.colorGrams + grams.developerGrams : null;
+  const totalProductGrams = effectiveResult.grams !== null ? effectiveResult.grams.colorGrams + effectiveResult.grams.developerGrams : null;
   const productCost = totalProductGrams !== null ? calculateProductCost(totalProductGrams, pricePerGram) : null;
   const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
   const servicePrice = manualServicePrice ?? recommendedServicePrice;
@@ -222,8 +181,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     handleLineChange,
     handleTargetShadeCodeChange,
     handleCrossBrandMatchSelect,
-    handleAdditionalShadeCodeChange,
+    handleAdditionalShadeCodeChange: base.handleAdditionalShadeCodeChange,
     handleBlendModeChange,
-    handleApplicationZoneChange,
+    handleApplicationZoneChange: base.handleApplicationZoneChange,
   };
 }
