@@ -1,5 +1,6 @@
 import type { Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
+import { Select } from "../../common/Select";
 
 export interface BlendComponentFieldProps {
   label: string;
@@ -21,19 +22,20 @@ export function BlendComponentField({ label, placeholder, candidates, shadeCode,
     <div className="field">
       <label htmlFor={id}>{label}</label>
       <div className="shade-field">
-        <select
-          name={id}
+        <Select
           id={id}
           value={shadeCode ?? ''}
-          onChange={e => onShadeCodeChange(e.target.value === '' ? null : e.target.value)}
-        >
-          <option value="">{placeholder}</option>
-          {candidates.map(candidate => (
-            <option key={candidate.code} value={candidate.code}>
-              {candidate.code} {candidate.tone}{candidate.secondaryTone ? `/${candidate.secondaryTone}` : ''}
-            </option>
-          ))}
-        </select>
+          onChange={value => onShadeCodeChange(value === '' ? null : value)}
+          options={[
+            { value: '', label: placeholder },
+            ...candidates.map(candidate => ({
+              value: candidate.code,
+              label: `${candidate.code} ${candidate.tone}${candidate.secondaryTone ? `/${candidate.secondaryTone}` : ''}`,
+              searchText: candidate.code,
+              swatchColor: shadeToHexColor(candidate),
+            })),
+          ]}
+        />
         {shade !== null && (
           <span
             className="shade-swatch"

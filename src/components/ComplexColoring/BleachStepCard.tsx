@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
+import { Select } from "../common/Select";
 import type { BleachHistoryStep } from "../../history";
 
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
@@ -55,26 +56,22 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
       <div className="calculator__form">
         <div className="field">
           <label htmlFor={`bleachCurrentLevel${idSuffix}`}>{t('bleach.currentLevel')}</label>
-          <select
+          <Select
             id={`bleachCurrentLevel${idSuffix}`}
-            value={startLevel}
-            onChange={e => setStartLevel(Number(e.target.value) as Level)}>
-            {LEVELS.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
+            value={String(startLevel)}
+            onChange={value => setStartLevel(Number(value) as Level)}
+            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+          />
         </div>
 
         <div className="field">
           <label htmlFor={`bleachTargetLevel${idSuffix}`}>{t('bleach.targetLevel')}</label>
-          <select
+          <Select
             id={`bleachTargetLevel${idSuffix}`}
-            value={targetLevel}
-            onChange={e => setTargetLevel(Number(e.target.value) as Level)}>
-            {LEVELS.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
+            value={String(targetLevel)}
+            onChange={value => setTargetLevel(Number(value) as Level)}
+            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+          />
         </div>
 
         <div className="field">

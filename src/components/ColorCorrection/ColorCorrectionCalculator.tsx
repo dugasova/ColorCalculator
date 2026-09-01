@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateColorCorrection, calculateCorrectorGrams, type UnwantedTone } from "../../engine/correction";
+import { Select } from "../common/Select";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./ColorCorrectionCalculator.css";
 import { NeutralizationWheel } from "./NeutralizationWheel";
@@ -48,28 +49,22 @@ export function ColorCorrectionCalculator() {
       <div className="calculator__form">
         <div className="field">
           <label htmlFor="currentLevel">{t('correction.currentLevel')}</label>
-          <select
-            name="currentLevel"
+          <Select
             id="currentLevel"
-            value={currentLevel}
-            onChange={e => setCurrentLevel(Number(e.target.value) as Level)}>
-            {LEVELS.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
+            value={String(currentLevel)}
+            onChange={value => setCurrentLevel(Number(value) as Level)}
+            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+          />
         </div>
 
         <div className="field">
           <label htmlFor="targetLevel">{t('correction.targetLevel')}</label>
-          <select
-            name="targetLevel"
+          <Select
             id="targetLevel"
-            value={targetLevel}
-            onChange={e => setTargetLevel(Number(e.target.value) as Level)}>
-            {LEVELS.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
+            value={String(targetLevel)}
+            onChange={value => setTargetLevel(Number(value) as Level)}
+            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+          />
         </div>
 
         <div className="field correction__tone-field">

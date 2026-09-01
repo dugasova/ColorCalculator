@@ -35,6 +35,11 @@ describe('ColorCorrectionCalculator', () => {
 
     expect(html).toContain('class="neutralization-wheel"');
     expect(html).toContain('Neutralization wheel');
-    expect((html.match(/<path /g) || []).length).toBe(6);
+    // Scoped to the wheel's own <svg>...</svg> -- the page also renders a chevron <path>
+    // per Select trigger button (see components/common/Select), which a page-wide count
+    // would otherwise pick up.
+    const svgStart = html.indexOf('class="neutralization-wheel__svg"');
+    const svgMarkup = html.slice(svgStart, html.indexOf('</svg>', svgStart));
+    expect((svgMarkup.match(/<path /g) || []).length).toBe(6);
   });
 });

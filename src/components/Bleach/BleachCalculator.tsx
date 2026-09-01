@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
+import { Select } from "../common/Select";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./BleachCalculator.css";
 
@@ -137,28 +138,22 @@ export function BleachCalculator() {
       <div className="calculator__form">
         <div className="field">
           <label htmlFor="currentLevel">{t('bleach.currentLevel')}</label>
-          <select
-            name="currentLevel"
+          <Select
             id="currentLevel"
-            value={currentLevel}
-            onChange={e => setCurrentLevel(Number(e.target.value) as Level)}>
-            {LEVELS.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
+            value={String(currentLevel)}
+            onChange={value => setCurrentLevel(Number(value) as Level)}
+            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+          />
         </div>
 
         <div className="field">
           <label htmlFor="targetLevel">{t('bleach.targetLevel')}</label>
-          <select
-            name="targetLevel"
+          <Select
             id="targetLevel"
-            value={targetLevel}
-            onChange={e => setTargetLevel(Number(e.target.value) as Level)}>
-            {LEVELS.map(level => (
-              <option key={level} value={level}>{level}</option>
-            ))}
-          </select>
+            value={String(targetLevel)}
+            onChange={value => setTargetLevel(Number(value) as Level)}
+            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+          />
         </div>
 
         <div className="field">

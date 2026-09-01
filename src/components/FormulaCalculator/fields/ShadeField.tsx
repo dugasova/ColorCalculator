@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
+import { Select } from "../../common/Select";
 
 export interface ShadeFieldProps {
   lineShades: Shade[];
@@ -16,13 +17,17 @@ export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetS
     <div className="field">
       <label htmlFor={`targetShadeCode${idSuffix}`}>{t('fields.shade')}</label>
       <div className="shade-field">
-        <select name={`targetShadeCode${idSuffix}`} id={`targetShadeCode${idSuffix}`} value={targetShadeCode} onChange={e => onTargetShadeCodeChange(e.target.value)}>
-          {lineShades.map(shade => (
-            <option key={shade.code} value={shade.code}>
-              {shade.code} {shade.tone}{shade.secondaryTone ? `/${shade.secondaryTone}` : ''}
-            </option>
-          ))}
-        </select>
+        <Select
+          id={`targetShadeCode${idSuffix}`}
+          value={targetShadeCode}
+          onChange={onTargetShadeCodeChange}
+          options={lineShades.map(shade => ({
+            value: shade.code,
+            label: `${shade.code} ${shade.tone}${shade.secondaryTone ? `/${shade.secondaryTone}` : ''}`,
+            searchText: shade.code,
+            swatchColor: shadeToHexColor(shade),
+          }))}
+        />
         <span
           className="shade-swatch"
           style={{ backgroundColor: shadeToHexColor(targetShade) }}

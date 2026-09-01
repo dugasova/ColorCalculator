@@ -22,9 +22,13 @@ import { FormulaResults } from "./FormulaResults";
 export interface FormulaCalculatorProps {
   appliedBy: string;
   repeatRequest?: RepeatFormulaRequest | null;
+  // Bubbled up to the caller once a save's "Saved!" confirmation has finished showing --
+  // App.tsx uses it to remount this whole calculator with a fresh key, resetting every
+  // field (brand/shade/level down through the client-details panel) for the next client.
+  onSaved?: () => void;
 }
 
-export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaCalculatorProps) {
+export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }: FormulaCalculatorProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const {
@@ -172,6 +176,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest }: FormulaC
         recommendedServicePrice={recommendedServicePrice}
         servicePrice={servicePrice}
         onServicePriceChange={setManualServicePrice}
+        onSaved={onSaved}
       />
     </div>
   );

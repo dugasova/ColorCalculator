@@ -67,12 +67,24 @@ function AuthenticatedApp({ user }: { user: User }) {
   const isAdmin = useIsAdmin(user.uid);
   const [view, setView] = useState<AppView>('calculator');
   const [repeatRequest, setRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+  // Bumped after a formula/session save finishes showing its "Saved!" confirmation --
+  // passed as `key` to whichever calculator is mounted below, forcing React to unmount
+  // and remount it from scratch (brand/shade/level state, session-panel client fields,
+  // everything) instead of leaving the just-saved client's values in place.
+  const [formResetKey, setFormResetKey] = useState(0);
 
   const handleRepeat = (entry: FormulaHistoryEntry) => {
     const request = buildRepeatFormulaRequest(entry, brands);
     if (request === null) return;
     setRepeatRequest(request);
     setView('calculator');
+  };
+
+  const handleFormulaSaved = () => {
+    // A stale repeatRequest would otherwise replay itself into the freshly remounted
+    // calculator (see useFormulaCalculatorState's apply-on-render effect).
+    setRepeatRequest(null);
+    setFormResetKey(key => key + 1);
   };
 
   return (
@@ -92,14 +104,16 @@ function AuthenticatedApp({ user }: { user: User }) {
       <main className="app-main" id="main-content" tabIndex={-1}>
         {view === 'calculator' && (
           <FormulaCalculator
+            key={formResetKey}
             appliedBy={user.email ?? 'unknown'}
             repeatRequest={repeatRequest}
+            onSaved={handleFormulaSaved}
           />
         )}
         <Suspense fallback={null}>
           {view === 'correction' && <ColorCorrectionCalculator />}
           {view === 'bleach' && <BleachCalculator />}
-          {view === 'complex' && <ComplexColoringCalculator appliedBy={user.email ?? 'unknown'} />}
+          {view === 'complex' && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? 'unknown'} onSaved={handleFormulaSaved} />}
           {view === 'history' && <HistoryView onRepeat={handleRepeat} />}
           {view === 'analytics' && <AnalyticsView />}
           {view === 'palette' && isAdmin && <PaletteAdminView />}

@@ -19,6 +19,10 @@ export interface SessionDetailsPanelProps {
   // Extra condition (beyond client name + patch test) the caller may need to gate saving on
   // — e.g. a complex-coloring session needs at least one step before it's savable.
   saveDisabled?: boolean;
+  // Called once the "Saved!" confirmation has finished showing -- lets the caller reset
+  // the whole form (this panel's own fields plus the brand/shade/level state above it) so
+  // the next client starts from a blank calculator instead of the just-saved one's values.
+  onSaved?: () => void;
 }
 
 const COPIED_FEEDBACK_MS = 1500;
@@ -31,7 +35,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 // that produces a formula text and a set of history-savable fields: the single-formula
 // FormulaResults panel and the multi-step Complex Coloring session both compute their own
 // formula/pricing, then hand off to this panel for the client-facing wrap-up.
-export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, saveDisabled }: SessionDetailsPanelProps) {
+export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, saveDisabled, onSaved }: SessionDetailsPanelProps) {
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
   const [clientName, setClientName] = useState("");
@@ -101,7 +105,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         afterPhotoFile,
       });
       setSaveState('saved');
-      setTimeout(() => setSaveState('idle'), SAVED_FEEDBACK_MS);
+      setTimeout(() => { setSaveState('idle'); onSaved?.(); }, SAVED_FEEDBACK_MS);
     } catch {
       setSaveState('error');
     }

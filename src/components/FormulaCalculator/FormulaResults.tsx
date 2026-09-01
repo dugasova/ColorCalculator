@@ -32,6 +32,10 @@ export interface FormulaResultsProps {
   recommendedServicePrice: number | null;
   servicePrice: number | null;
   onServicePriceChange: (value: number) => void;
+  // Bubbled from SessionDetailsPanel's onSaved -- lets the caller reset the whole
+  // calculator (brand/shade/level, not just this panel's client fields) once the "Saved!"
+  // confirmation has finished showing.
+  onSaved?: () => void;
 }
 
 const MAX_PROCESSING_MINUTES = 180;
@@ -41,7 +45,7 @@ export function FormulaResults({
   additionalShade, additionalShadeGrams, blend, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
-  productCost, recommendedServicePrice, servicePrice, onServicePriceChange,
+  productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved,
 }: FormulaResultsProps) {
   const { t } = useTranslation();
   const { inputProps: processingMinutesInputProps } = useClampedNumberText(
@@ -223,6 +227,7 @@ export function FormulaResults({
         formulaText={formulaText}
         processingMinutes={processingMinutes}
         onSave={handleSave}
+        onSaved={onSaved}
       />
     </div>
   );

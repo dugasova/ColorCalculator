@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../../engine/levels";
+import { Select } from "../../common/Select";
 
 const START_LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
@@ -14,15 +15,12 @@ export function StartLevelField({ startLevel, onStartLevelChange, idSuffix = '' 
   return (
     <div className="field">
       <label htmlFor={`startLevel${idSuffix}`}>{t('fields.startLevel')}</label>
-      <select
-        name={`startLevel${idSuffix}`}
+      <Select
         id={`startLevel${idSuffix}`}
-        value={startLevel}
-        onChange={e => onStartLevelChange(Number(e.target.value) as Level)}>
-        {START_LEVELS.map(level => (
-          <option key={level} value={level}>{level}</option>
-        ))}
-      </select>
+        value={String(startLevel)}
+        onChange={value => onStartLevelChange(Number(value) as Level)}
+        options={START_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+      />
     </div>
   );
 }

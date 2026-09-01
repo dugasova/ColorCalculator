@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { BrandId } from "../../../engine/brands";
 import { usePalette } from "../../../palette";
+import { Select } from "../../common/Select";
 
 export interface BrandFieldProps {
   brandId: BrandId;
@@ -17,15 +18,12 @@ export function BrandField({ brandId, onBrandIdChange, idSuffix = '' }: BrandFie
   return (
     <div className="field">
       <label htmlFor={`brandId${idSuffix}`}>{t('fields.brand')}</label>
-      <select
-        name={`brandId${idSuffix}`}
+      <Select
         id={`brandId${idSuffix}`}
         value={brandId}
-        onChange={e => onBrandIdChange(e.target.value as BrandId)}>
-        {selectableBrands.map(brand => (
-          <option key={brand.id} value={brand.id}>{brand.name}</option>
-        ))}
-      </select>
+        onChange={value => onBrandIdChange(value as BrandId)}
+        options={selectableBrands.map(brand => ({ value: brand.id, label: brand.name }))}
+      />
     </div>
   );
 }

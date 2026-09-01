@@ -1,0 +1,155 @@
+/* Custom listbox replacing the native <select>. Reuses the same field surface tokens
+   (--ink, --muted, --gold, --field-bg, --border-field, --surface) the rest of the
+   calculator's form controls use — see FormulaCalculator.css .field input/textarea —
+   so it reads as part of the same design instead of a bolted-on widget. */
+
+.select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-field);
+  border-radius: 0.65rem;
+  background: var(--field-bg);
+  color: var(--ink);
+  font-size: 1rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.select__trigger:hover {
+  border-color: rgba(124, 58, 237, 0.4);
+  background-color: var(--surface);
+}
+
+.select__trigger:focus-visible,
+.select--open .select__trigger {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.select__value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.select__value-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select__chevron {
+  flex-shrink: 0;
+  width: 11px;
+  height: 8px;
+  color: var(--muted);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+
+.select--open .select__chevron {
+  color: var(--gold);
+  transform: rotate(180deg);
+}
+
+.select__swatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(22, 18, 31, 0.15);
+}
+
+.select__popup {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border-field);
+  border-radius: 0.85rem;
+  box-shadow: var(--brand-shadow-md);
+  animation: select-popup-enter 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.select__popup::-webkit-scrollbar {
+  width: 8px;
+}
+
+.select__popup::-webkit-scrollbar-thumb {
+  background: var(--border-field);
+  border-radius: 999px;
+}
+
+@keyframes select-popup-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.select__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 0.55rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+  cursor: pointer;
+  scroll-margin: 6px;
+}
+
+.select__option--active {
+  background: var(--field-bg);
+}
+
+.select__option--selected {
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+
+.select__option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select__check {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--gold);
+}
+
+.shade-field .select {
+  flex: 1;
+  min-width: 0;
+}

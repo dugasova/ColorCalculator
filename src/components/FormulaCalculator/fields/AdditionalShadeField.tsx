@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
+import { Select } from "../../common/Select";
 
 export interface AdditionalShadeFieldProps {
   lineShades: Shade[];
@@ -19,19 +20,20 @@ export function AdditionalShadeField({ lineShades, additionalShadeCode, onAdditi
     <div className="field">
       <label htmlFor={`additionalShadeCode${idSuffix}`}>{t('fields.additionalShade')}</label>
       <div className="shade-field">
-        <select
-          name={`additionalShadeCode${idSuffix}`}
+        <Select
           id={`additionalShadeCode${idSuffix}`}
           value={additionalShadeCode ?? ''}
-          onChange={e => onAdditionalShadeCodeChange(e.target.value === '' ? null : e.target.value)}
-        >
-          <option value="">{t('fields.additionalShadeNone')}</option>
-          {lineShades.map(shade => (
-            <option key={shade.code} value={shade.code}>
-              {shade.code} {shade.tone}{shade.secondaryTone ? `/${shade.secondaryTone}` : ''}
-            </option>
-          ))}
-        </select>
+          onChange={value => onAdditionalShadeCodeChange(value === '' ? null : value)}
+          options={[
+            { value: '', label: t('fields.additionalShadeNone') },
+            ...lineShades.map(shade => ({
+              value: shade.code,
+              label: `${shade.code} ${shade.tone}${shade.secondaryTone ? `/${shade.secondaryTone}` : ''}`,
+              searchText: shade.code,
+              swatchColor: shadeToHexColor(shade),
+            })),
+          ]}
+        />
         {additionalShade !== null && (
           <span
             className="shade-swatch"

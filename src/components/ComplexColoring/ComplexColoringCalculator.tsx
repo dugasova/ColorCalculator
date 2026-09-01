@@ -12,6 +12,10 @@ import "./ComplexColoringCalculator.css";
 
 export interface ComplexColoringCalculatorProps {
   appliedBy: string;
+  // Bubbled up to the caller once a save's "Saved!" confirmation has finished showing --
+  // App.tsx uses it to remount this whole calculator with a fresh key, resetting every
+  // step and the client-details panel for the next client.
+  onSaved?: () => void;
 }
 
 interface StepScaffold {
@@ -31,7 +35,7 @@ function stepTotalGrams(step: HistoryStep): number {
 // then a permanent color to tone the rest. Each step is calculated independently by its own
 // card; this page only aggregates their totals (time, cost) and hands the combined recipe
 // off to the shared save/copy/share panel.
-export default function ComplexColoringCalculator({ appliedBy }: ComplexColoringCalculatorProps) {
+export default function ComplexColoringCalculator({ appliedBy, onSaved }: ComplexColoringCalculatorProps) {
   const { t } = useTranslation();
   const [scaffold, setScaffold] = useState<StepScaffold[]>([]);
   const [computedSteps, setComputedSteps] = useState<Record<string, HistoryStep>>({});
@@ -186,6 +190,7 @@ export default function ComplexColoringCalculator({ appliedBy }: ComplexColoring
             formulaText={formulaText}
             processingMinutes={totalProcessingMinutes}
             onSave={handleSave}
+            onSaved={onSaved}
           />
         </div>
       )}

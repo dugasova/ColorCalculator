@@ -5,6 +5,7 @@ import { BRANDS, getDisabledShadeKeys, getFullBrandShades, shadeKey, type Mixing
 import type { Level } from "../../engine/levels";
 import type { Shade, ToneFamily } from "../../engine/shades";
 import { shadeToHexColor } from "../../engine/color";
+import { Select } from "../common/Select";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./PaletteAdminView.css";
 
@@ -185,10 +186,15 @@ export function PaletteAdminView() {
           </div>
           <div className="field">
             <label htmlFor="paletteMixingKind">{t('palette.mixingRatioKind')}</label>
-            <select id="paletteMixingKind" value={mixingKind} onChange={e => setMixingKind(e.target.value as MixingRatioConfig['kind'])}>
-              <option value="fixed">{t('palette.mixingRatioFixed')}</option>
-              <option value="generic">{t('palette.mixingRatioGeneric')}</option>
-            </select>
+            <Select
+              id="paletteMixingKind"
+              value={mixingKind}
+              onChange={value => setMixingKind(value as MixingRatioConfig['kind'])}
+              options={[
+                { value: 'fixed', label: t('palette.mixingRatioFixed') },
+                { value: 'generic', label: t('palette.mixingRatioGeneric') },
+              ]}
+            />
           </div>
           {mixingKind === 'fixed' && (
             <>
@@ -214,11 +220,12 @@ export function PaletteAdminView() {
         <h2 className="results__section-heading">{t('palette.shadesTitle')}</h2>
         <div className="field">
           <label htmlFor="paletteSelectedBrand">{t('palette.selectBrandLabel')}</label>
-          <select id="paletteSelectedBrand" value={effectiveSelectedBrandId} onChange={e => setSelectedBrandId(e.target.value)}>
-            {brandIds.map(id => (
-              <option key={id} value={id}>{brands[id].name}</option>
-            ))}
-          </select>
+          <Select
+            id="paletteSelectedBrand"
+            value={effectiveSelectedBrandId}
+            onChange={setSelectedBrandId}
+            options={brandIds.map(id => ({ value: id, label: brands[id].name }))}
+          />
         </div>
 
         {fullShades.length === 0 ? (
@@ -259,22 +266,33 @@ export function PaletteAdminView() {
           </div>
           <div className="field">
             <label htmlFor="paletteShadeLevel">{t('palette.level')}</label>
-            <select id="paletteShadeLevel" value={shadeLevel} onChange={e => setShadeLevel(Number(e.target.value) as Level)}>
-              {LEVELS.map(level => <option key={level} value={level}>{level}</option>)}
-            </select>
+            <Select
+              id="paletteShadeLevel"
+              value={String(shadeLevel)}
+              onChange={value => setShadeLevel(Number(value) as Level)}
+              options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            />
           </div>
           <div className="field">
             <label htmlFor="paletteShadeTone">{t('palette.tone')}</label>
-            <select id="paletteShadeTone" value={shadeTone} onChange={e => setShadeTone(e.target.value as ToneFamily)}>
-              {TONE_FAMILIES.map(tone => <option key={tone} value={tone}>{t(`palette.toneFamily.${tone}`)}</option>)}
-            </select>
+            <Select
+              id="paletteShadeTone"
+              value={shadeTone}
+              onChange={value => setShadeTone(value as ToneFamily)}
+              options={TONE_FAMILIES.map(tone => ({ value: tone, label: t(`palette.toneFamily.${tone}`) }))}
+            />
           </div>
           <div className="field">
             <label htmlFor="paletteShadeSecondaryTone">{t('palette.secondaryTone')}</label>
-            <select id="paletteShadeSecondaryTone" value={shadeSecondaryTone} onChange={e => setShadeSecondaryTone(e.target.value as ToneFamily | '')}>
-              <option value="">{t('palette.secondaryToneNone')}</option>
-              {TONE_FAMILIES.map(tone => <option key={tone} value={tone}>{t(`palette.toneFamily.${tone}`)}</option>)}
-            </select>
+            <Select
+              id="paletteShadeSecondaryTone"
+              value={shadeSecondaryTone}
+              onChange={value => setShadeSecondaryTone(value as ToneFamily | '')}
+              options={[
+                { value: '', label: t('palette.secondaryToneNone') },
+                ...TONE_FAMILIES.map(tone => ({ value: tone, label: t(`palette.toneFamily.${tone}`) })),
+              ]}
+            />
           </div>
           <div className="field">
             <label htmlFor="paletteShadeLine">{t('palette.line')}</label>

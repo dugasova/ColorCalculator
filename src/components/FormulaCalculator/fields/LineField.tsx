@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { formatLineLabel } from "../../../engine/formatLineLabel";
+import { Select } from "../../common/Select";
 
 export interface LineFieldProps {
   availableLines: (string | null)[];
@@ -17,15 +18,12 @@ export function LineField({ availableLines, line, onLineChange, idSuffix = '' }:
   return (
     <div className="field">
       <label htmlFor={`line${idSuffix}`}>{t('fields.line')}</label>
-      <select
-        name={`line${idSuffix}`}
+      <Select
         id={`line${idSuffix}`}
         value={line ?? ''}
-        onChange={e => onLineChange(e.target.value || null)}>
-        {availableLines.map(l => (
-          <option key={l ?? ''} value={l ?? ''}>{l ? formatLineLabel(l) : t('fields.lineDefault')}</option>
-        ))}
-      </select>
+        onChange={value => onLineChange(value || null)}
+        options={availableLines.map(l => ({ value: l ?? '', label: l ? formatLineLabel(l) : t('fields.lineDefault') }))}
+      />
     </div>
   );
 }
