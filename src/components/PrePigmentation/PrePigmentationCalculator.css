@@ -1,0 +1,51 @@
+.prepigment__subtitle {
+  margin: -16px 0 20px;
+  color: var(--brand-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.prepigment__stat-value--small {
+  font-size: 1.05rem;
+}
+
+.prepigment__note {
+  margin: 12px 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--brand-primary-ink);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  animation: note-enter 0.25s ease both;
+}
+
+.prepigment__disclaimer {
+  margin: 16px 0 0;
+  font-size: 0.75rem;
+  color: var(--brand-muted);
+  font-style: italic;
+}
+
+/* The shared .calculator--wide layout (FormulaCalculator.css) splits into a
+   minmax(320px,400px) + 1fr grid at this breakpoint, matching a form on the left with
+   results in the right column -- unlike that layout, pre-pigmentation's results (the
+   need tier, filler step, and target-color step) read better as one continuous report
+   than squeezed into a side column, so the whole card stacks in a single full-width
+   column here instead: the form spans the full grid row, and results sits below it
+   spanning the same full width, with a top border replacing the FormulaCalculator
+   layout's left border to separate the two sections. */
+@media (min-width: 1024px) {
+  .calculator--wide > .calculator__form {
+    grid-column: 1 / -1;
+  }
+
+  .calculator--wide .results {
+    grid-column: 1 / -1;
+    margin-top: 24px;
+    padding-top: 24px;
+    padding-left: 0;
+    border-top: 1px solid var(--border-card);
+    border-left: none;
+  }
+}

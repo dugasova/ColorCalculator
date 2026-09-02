@@ -21,6 +21,9 @@ const BleachCalculator = lazy(() =>
   import("./components/Bleach/BleachCalculator").then(m => ({ default: m.BleachCalculator }))
 );
 const ComplexColoringCalculator = lazy(() => import("./components/ComplexColoring/ComplexColoringCalculator"));
+const PrePigmentationCalculator = lazy(() =>
+  import("./components/PrePigmentation/PrePigmentationCalculator").then(m => ({ default: m.PrePigmentationCalculator }))
+);
 const AnalyticsView = lazy(() =>
   import("./components/Analytics/AnalyticsView").then(m => ({ default: m.AnalyticsView }))
 );
@@ -114,6 +117,7 @@ function AuthenticatedApp({ user }: { user: User }) {
           {view === 'correction' && <ColorCorrectionCalculator />}
           {view === 'bleach' && <BleachCalculator />}
           {view === 'complex' && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? 'unknown'} onSaved={handleFormulaSaved} />}
+          {view === 'prepigment' && <PrePigmentationCalculator />}
           {view === 'history' && <HistoryView onRepeat={handleRepeat} />}
           {view === 'analytics' && <AnalyticsView />}
           {view === 'palette' && isAdmin && <PaletteAdminView />}

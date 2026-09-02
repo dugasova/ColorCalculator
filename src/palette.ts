@@ -56,7 +56,7 @@ export function subscribeToCustomBrands(onChange: (brands: CustomBrandRecord[]) 
     for (const d of snapshot.docs) {
       const result = customBrandRecordSchema.safeParse(d.data());
       if (!result.success) {
-        console.error(`Skipping malformed custom brand document "${d.id}":`, result.error);
+        console.error(`Skipping malformed custom brand document "${d.id}":`, result.error.issues);
         continue;
       }
       brands.push({ id: d.id, ...result.data });
@@ -71,7 +71,7 @@ export function subscribeToPaletteOverrides(onChange: (overrides: PaletteOverrid
     for (const d of snapshot.docs) {
       const result = paletteOverrideSchema.safeParse(d.data());
       if (!result.success) {
-        console.error(`Skipping malformed palette override document "${d.id}":`, result.error);
+        console.error(`Skipping malformed palette override document "${d.id}":`, result.error.issues);
         continue;
       }
       // TS collapses a discriminated union's members to their common fields when spread

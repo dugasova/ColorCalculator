@@ -277,7 +277,7 @@ export async function fetchFormulaHistory(): Promise<FormulaHistoryEntry[]> {
   for (const doc of snapshot.docs) {
     const result = historyEntryShapeSchema.safeParse({ id: doc.id, ...doc.data() });
     if (!result.success) {
-      console.error(`Skipping malformed history document "${doc.id}":`, result.error);
+      console.error(`Skipping malformed history document "${doc.id}":`, result.error.issues);
       continue;
     }
     // See historyEntryShapeSchema's comment above for why this is shallow (result.data's

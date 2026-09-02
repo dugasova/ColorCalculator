@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import "./Nav.css";
 
-export type AppView = 'calculator' | 'correction' | 'history' | 'bleach' | 'complex' | 'analytics' | 'palette';
+export type AppView = 'calculator' | 'correction' | 'history' | 'bleach' | 'complex' | 'prepigment' | 'analytics' | 'palette';
 
 const ICON_PATHS: Record<AppView, ReactNode> = {
   calculator: (
@@ -42,6 +42,12 @@ const ICON_PATHS: Record<AppView, ReactNode> = {
       <path d="M4.5 20.5h4.2M15.3 20.5h4.2" strokeLinecap="round" />
     </>
   ),
+  prepigment: (
+    <>
+      <path d="M12 3c-3.5 4-6 7.6-6 10.5A6 6 0 0 0 12 20a6 6 0 0 0 6-6.5C18 10.6 15.5 7 12 3z" />
+      <path d="M9.5 13.5c0 1.5 1.1 2.5 2.5 2.5" strokeLinecap="round" />
+    </>
+  ),
   analytics: (
     <>
       <line x1="4.5" y1="20.5" x2="19.5" y2="20.5" />
@@ -69,7 +75,7 @@ export interface NavProps {
 
 export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const items: AppView[] = ['calculator', 'correction', 'bleach', 'complex', 'history', 'analytics'];
+  const items: AppView[] = ['calculator', 'correction', 'prepigment', 'bleach', 'complex', 'history', 'analytics'];
   if (isAdmin) {
     items.push('palette');
   }

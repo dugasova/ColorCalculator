@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+    getFirestore,
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager,
+    CACHE_SIZE_UNLIMITED,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
@@ -43,6 +49,20 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+// Persistent (IndexedDB) local cache lets salon staff keep reading cached brand/shade/
+// history data and queue formula saves while the salon's connection is down, syncing
+// automatically once it's back -- multi-tab so a colorist with the app open in two tabs
+// sees consistent data rather than each tab fighting over its own cache. IndexedDB only
+// exists in a browser: this module doubles as the Firebase client for the Node-run
+// migration scripts (see the comment above), which must keep the plain in-memory client
+// or `initializeFirestore` throws immediately on startup.
+export const db = typeof indexedDB !== 'undefined'
+    ? initializeFirestore(app, {
+        localCache: persistentLocalCache({
+            cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+            tabManager: persistentMultipleTabManager(),
+        }),
+    })
+    : getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
