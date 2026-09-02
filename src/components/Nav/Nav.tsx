@@ -75,7 +75,7 @@ export interface NavProps {
 
 export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const items: AppView[] = ['calculator', 'correction', 'prepigment', 'bleach', 'complex', 'history', 'analytics'];
+  const items: AppView[] = ['calculator', 'correction', 'bleach', 'complex', 'prepigment', 'history', 'analytics'];
   if (isAdmin) {
     items.push('palette');
   }
