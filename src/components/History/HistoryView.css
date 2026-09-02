@@ -38,6 +38,13 @@
   color: var(--brand-muted);
 }
 
+.history__entry-summary {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .history__entry-text {
   margin: 0;
   white-space: pre-wrap;

@@ -2,7 +2,8 @@ import i18n from './i18n';
 import { formatFormulaText } from './engine/formatFormula';
 import { formatBleachText } from './engine/formatBleach';
 import { formatFillerStepText } from './engine/formatPrePigmentation';
-import type { HistoryStep } from './history';
+import { formatLineLabel } from './engine/formatLineLabel';
+import type { ColorHistoryStep, HistoryStep } from './history';
 
 function formatStepText(step: HistoryStep): string {
     if (step.kind === 'bleach') {
@@ -57,4 +58,21 @@ export function formatSessionText(steps: HistoryStep[]): string {
     }
 
     return blocks.join('\n\n');
+}
+
+// A one-line "at a glance" headline for a History client card, shown above the full
+// step-by-step formatSessionText block below it: the session's starting level and its
+// final visual result. "Target" favors the last color step's actual brand/line/shade
+// (e.g. "Wella Koleston Perfect — 7/17") over a bare level number, since that's the
+// product a colorist scanning past visits actually wants to see -- a bleach-only
+// session (no toning step) falls back to its last step's plain target level, since
+// there is no product/shade to name in that case.
+export function formatSessionSummary(steps: HistoryStep[]): string {
+    const startLevel = steps[0].startLevel;
+    const lastColorStep = [...steps].reverse().find((step): step is ColorHistoryStep => step.kind === 'color');
+    const lastStep = steps[steps.length - 1];
+    const target = lastColorStep !== undefined
+        ? `${lastColorStep.brandName}${lastColorStep.line ? ' ' + formatLineLabel(lastColorStep.line) : ''} — ${lastColorStep.targetShade.code}`
+        : String(lastStep.kind === 'bleach' ? lastStep.targetLevel : lastStep.targetShade.level);
+    return i18n.t('format.startingLevel', { start: startLevel, target });
 }

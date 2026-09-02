@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import '../src/i18n';
-import { formatSessionText } from './formatSession';
+import { formatSessionText, formatSessionSummary } from './formatSession';
 import type { ColorHistoryStep, BleachHistoryStep } from './history';
 
 const colorStep: ColorHistoryStep = {
@@ -113,5 +113,32 @@ describe('formatSessionText', () => {
 
     expect(() => formatSessionText([legacyStep])).not.toThrow();
     expect(formatSessionText([legacyStep])).not.toContain('Step 1 — Filler');
+  });
+});
+
+describe('formatSessionSummary', () => {
+  it('summarizes a single color step as starting level -> brand/line/shade', () => {
+    const summary = formatSessionSummary([{ ...colorStep, line: 'koleston-perfect', brandName: 'Wella', startLevel: 10, targetShade: { code: '7/17', level: 7, tone: 'ash', secondaryTone: 'chocolate' } }]);
+
+    expect(summary).toBe('Starting level: 10 → Target: Wella Koleston Perfect — 7/17');
+  });
+
+  it('omits the line when the step has none', () => {
+    const summary = formatSessionSummary([colorStep]);
+
+    expect(summary).toBe('Starting level: 6 → Target: Generic — 9.1');
+  });
+
+  it('falls back to the plain target level for a bleach-only session (no color/toning step)', () => {
+    const summary = formatSessionSummary([bleachStep]);
+
+    expect(summary).toBe('Starting level: 6 → Target: 9');
+  });
+
+  it('favors the LAST color step\'s shade in a multi-step session, not the first step\'s starting level target', () => {
+    const summary = formatSessionSummary([bleachStep, colorStep]);
+
+    // bleachStep starts at 6; colorStep (the final toning step) targets Generic 9.1.
+    expect(summary).toBe('Starting level: 6 → Target: Generic — 9.1');
   });
 });

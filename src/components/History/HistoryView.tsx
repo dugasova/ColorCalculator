@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildRepeatFormulaRequest, fetchFormulaHistory, type FormulaHistoryEntry } from "../../history";
-import { formatSessionText } from "../../formatSession";
+import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { planClientRevisits, getRevisitStatus } from "../../revisit";
 import { usePalette } from "../../palette";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -84,6 +84,7 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
                   {entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : ''}
                 </span>
               </div>
+              <p className="history__entry-summary">{formatSessionSummary(entry.steps)}</p>
               <pre className="history__entry-text">
                 {formatSessionText(entry.steps)}
               </pre>
