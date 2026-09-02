@@ -10,6 +10,7 @@ import { GrayPercentField } from "./fields/GrayPercentField";
 import { ShadeField } from "./fields/ShadeField";
 import { AdditionalShadeField } from "./fields/AdditionalShadeField";
 import { AdditionalShadeGramsField } from "./fields/AdditionalShadeGramsField";
+import { PrePigmentationField } from "./fields/PrePigmentationField";
 import { BlendModeField } from "./fields/BlendModeField";
 import { BlendComponentField } from "./fields/BlendComponentField";
 import { BlendRatioField } from "./fields/BlendRatioField";
@@ -49,6 +50,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     setBlendShadeACode, setBlendShadeBCode,
     blendPrimaryPercent, setBlendPrimaryPercent,
     neutralizationApplied, setNeutralizationApplied,
+    prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
     setManualProcessingMinutes,
 
     availableLines,
@@ -68,6 +70,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     productCost,
     recommendedServicePrice,
     servicePrice,
+    prePigmentationResult,
 
     handleBrandIdChange,
     handleLineChange,
@@ -91,6 +94,11 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}
           onTargetShadeCodeChange={handleTargetShadeCodeChange}
+        />
+        <PrePigmentationField
+          need={prePigmentationNeed}
+          enabled={prePigmentationEnabled}
+          onEnabledChange={setPrePigmentationEnabled}
         />
         <CrossBrandMatchField
           targetShade={targetShade}
@@ -163,6 +171,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         additionalShade={additionalShade}
         additionalShadeGrams={additionalShadeGrams}
         blend={blend}
+        prePigmentationResult={prePigmentationResult}
         neutralizationApplied={neutralizationApplied}
         onNeutralizationAppliedChange={setNeutralizationApplied}
         appliedBy={appliedBy}

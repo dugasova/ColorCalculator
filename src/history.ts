@@ -9,6 +9,7 @@ import type { BleachFormula } from "./engine/bleach";
 import type { ApplicationZone } from "./engine/applicationZone";
 import type { Brand, BrandId } from "./engine/brands";
 import { DEFAULT_MARKUP_MULTIPLIER } from "./engine/pricing";
+import type { PrePigmentationResult } from "./engine/prePigmentation";
 
 const HISTORY_COLLECTION = "formulaHistory";
 
@@ -32,6 +33,13 @@ export interface ColorHistoryStep {
   // the way `additionalShade`/`applyAdditionalShade` does. Mutually exclusive with
   // `additionalShade` above.
   blend: ColorBlend | null;
+  // The recommended (or colorist-opted-in) filler step's full computed result, snapshotted
+  // at save time -- see PrePigmentationField/PrePigmentationStep. Storing the computed
+  // result rather than just an "enabled" flag keeps the saved record an immutable record
+  // of what was actually recommended/applied, even if the engine's own pre-pigmentation
+  // thresholds change in a later release. Null whenever the checkbox was off or the level
+  // drop didn't warrant it.
+  prePigmentation: PrePigmentationResult | null;
   neutralizationApplied: boolean;
   processingMinutes: number;
   pricePerGram: number;
@@ -186,6 +194,7 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
     additionalShade: legacy.additionalShade ?? null,
     additionalShadeGrams: legacy.additionalShadeGrams ?? null,
     blend: null,
+    prePigmentation: null,
     neutralizationApplied: false,
     processingMinutes: legacy.processingMinutes,
     pricePerGram: legacy.pricePerGram,
@@ -306,6 +315,11 @@ export interface RepeatFormulaRequest {
   pricePerGram: number;
   markupMultiplier: number;
   servicePrice: number | undefined;
+  // Only the boolean choice, not the snapshotted PrePigmentationResult itself -- Repeat
+  // recomputes it live from the restored startLevel/targetShadeCode/totalGrams above
+  // (see useFormulaCalculatorState), the same way every other field here is a raw input
+  // rather than a frozen calculation.
+  prePigmentationEnabled: boolean;
 }
 
 // Reconstructs calculator input state from a saved history entry so it can be replayed.
@@ -362,6 +376,9 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     blendShadeACode: blend?.shadeA.code ?? null,
     blendShadeBCode: blend?.shadeB.code ?? null,
     blendPrimaryPercent,
+    // Old docs saved before this field existed lack the `prePigmentation` key entirely,
+    // reading back as `undefined` (not `null`) -- treat that the same as `null` (off).
+    prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
     processingMinutes: step.processingMinutes,
     applicationZone: step.applicationZone ?? 'full-head',
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,

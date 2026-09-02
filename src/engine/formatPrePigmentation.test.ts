@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPrePigmentationText } from './formatPrePigmentation';
+import { formatPrePigmentationText, formatFillerStepText } from './formatPrePigmentation';
 import { calculatePrePigmentation } from './prePigmentation';
 
 describe('formatPrePigmentationText', () => {
@@ -66,6 +66,43 @@ describe('formatPrePigmentationText', () => {
       'Ratio: 1:1\n' +
       'Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 10, not the filled level.\n' +
       'Basic guidance — does not replace a complete color diagnosis and strand test.'
+    );
+  });
+});
+
+describe('formatFillerStepText', () => {
+  it('returns null once the level drop is under 2 -- nothing to prepend ahead of the plain formula', () => {
+    const result = calculatePrePigmentation(8, 8, 30);
+
+    expect(formatFillerStepText(8, result)).toBeNull();
+  });
+
+  it('returns just the filler details, starting straight at "Step 1", without the standalone calculator\'s own title, need line, or "Step 2" lines', () => {
+    const result = calculatePrePigmentation(9, 5, 30);
+
+    expect(formatFillerStepText(5, result)).toBe(
+      'Step 1 — Filler\n' +
+      'Missing underlying pigment: orange\n' +
+      'Recommended filler tone: Copper\n' +
+      'Generic 5.4 (Copper)\n' +
+      'Ratio: 1:1\n' +
+      'Mix: 15.0 g filler : 15.0 g water\n' +
+      'Processing time: 15 min'
+    );
+  });
+
+  it('includes the multi-visit note for a 7+ level drop', () => {
+    const result = calculatePrePigmentation(10, 2, 60);
+
+    expect(formatFillerStepText(2, result)).toBe(
+      'Step 1 — Filler\n' +
+      'Missing underlying pigment: red\n' +
+      'Recommended filler tone: Red\n' +
+      'No dedicated Red shade at level 2 in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.\n' +
+      'Ratio: 1:1\n' +
+      'Mix: 30.0 g filler : 30.0 g water\n' +
+      'Processing time: 15 min\n' +
+      'Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.'
     );
   });
 });

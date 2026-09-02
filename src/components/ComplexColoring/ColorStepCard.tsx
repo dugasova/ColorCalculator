@@ -78,6 +78,11 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     additionalShade,
     additionalShadeGrams,
     blend: null,
+    // Pre-pigmentation is only offered in the single-formula FormulaCalculator (see
+    // PrePigmentationField) -- a complex-coloring color step almost always tones hair
+    // that was just lifted with a bleach step above it, not darkens several levels from
+    // its pre-service level, so this always stays null here.
+    prePigmentation: null,
     neutralizationApplied,
     processingMinutes,
     pricePerGram,

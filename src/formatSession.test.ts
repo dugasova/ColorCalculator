@@ -27,6 +27,7 @@ const colorStep: ColorHistoryStep = {
   additionalShade: null,
   additionalShadeGrams: null,
   blend: null,
+  prePigmentation: null,
   neutralizationApplied: false,
   processingMinutes: 30,
   pricePerGram: 0.18,
@@ -77,5 +78,40 @@ describe('formatSessionText', () => {
 
     expect(() => formatSessionText([legacyStep])).not.toThrow();
     expect(formatSessionText([legacyStep])).toContain('Mix: 9.1-20.0 g developer 40.0 g');
+  });
+
+  it('prepends the recorded filler step ahead of the target-color block when prePigmentation is set', () => {
+    const stepWithFiller: ColorHistoryStep = {
+      ...colorStep,
+      startLevel: 9,
+      targetShade: { code: '5.4', level: 5, tone: 'copper' },
+      prePigmentation: {
+        need: 'required-same-session',
+        underlyingPigment: 'orange',
+        fillerTone: 'copper',
+        exampleFillerShade: { code: '5.4', level: 5, tone: 'copper' },
+        mixingRatio: { fillerParts: 1, diluentParts: 1 },
+        grams: { fillerGrams: 15, diluentGrams: 15 },
+        fillerProcessingMinutes: 15,
+        multiVisitGapDays: null,
+        finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
+        finalStepDeveloperVolume: 10,
+      },
+    };
+
+    const text = formatSessionText([stepWithFiller]);
+
+    expect(text).toContain('Step 1 — Filler');
+    expect(text).toContain('Generic 5.4 (Copper)');
+    expect(text).toContain('Step 2 — Target color');
+    expect(text).toContain('Generic — 5.4 (copper)');
+  });
+
+  it('does not throw for a step saved before the prePigmentation field existed (reads back as undefined, not null)', () => {
+    const legacyStep = { ...colorStep };
+    delete (legacyStep as Partial<ColorHistoryStep>).prePigmentation;
+
+    expect(() => formatSessionText([legacyStep])).not.toThrow();
+    expect(formatSessionText([legacyStep])).not.toContain('Step 1 — Filler');
   });
 });

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { canBlendShades, suggestBlendComponents } from "../../engine/shades";
 import { splitShadeBlend } from "../../engine/formula";
 import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
+import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
 import { useShadeFormulaState } from "./useShadeFormulaState";
@@ -21,6 +22,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   const [blendShadeBCode, setBlendShadeBCode] = useState<string | null>(null);
   const [blendPrimaryPercent, setBlendPrimaryPercent] = useState(DEFAULT_BLEND_PRIMARY_PERCENT);
   const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+  const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(false);
 
   const base = useShadeFormulaState({ brands, suppressAdditionalShade: blendModeEnabled });
   const {
@@ -59,6 +61,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setBlendShadeBCode(repeatRequest.blendShadeBCode);
     setBlendPrimaryPercent(repeatRequest.blendPrimaryPercent);
     setNeutralizationApplied(false);
+    setPrePigmentationEnabled(repeatRequest.prePigmentationEnabled);
   }
 
   const handleBrandIdChange = (newBrandId: BrandId) => {
@@ -139,6 +142,16 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
   const servicePrice = manualServicePrice ?? recommendedServicePrice;
 
+  // Reevaluated from startLevel/targetShade on every render rather than stored -- purely
+  // derived, and needs to stay in sync the instant either field changes so the
+  // recommendation (and, once enabled, the filler step below) never lags behind a level
+  // edit. Gated on prePigmentationEnabled so toggling the checkbox off fully removes the
+  // filler step from both the results panel and the copyable formula text.
+  const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
+  const prePigmentationResult = prePigmentationEnabled && prePigmentationNeed !== 'none'
+    ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams)
+    : null;
+
   return {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
@@ -157,6 +170,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setBlendShadeACode, setBlendShadeBCode,
     blendPrimaryPercent, setBlendPrimaryPercent,
     neutralizationApplied, setNeutralizationApplied,
+    prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
     setManualProcessingMinutes,
 
     availableLines,
@@ -176,6 +190,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     productCost,
     recommendedServicePrice,
     servicePrice,
+    prePigmentationResult,
 
     handleBrandIdChange,
     handleLineChange,

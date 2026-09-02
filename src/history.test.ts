@@ -4,6 +4,7 @@ import {
   type ColorHistoryStep, type BleachHistoryStep, type FormulaHistoryEntry, type LegacyFormulaHistoryEntry,
 } from './history';
 import { BRANDS } from './engine/brands';
+import { calculatePrePigmentation } from './engine/prePigmentation';
 
 const colorFullFormula: ColorHistoryStep['result'] = {
   developerVolume: 20,
@@ -32,6 +33,7 @@ function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryS
     additionalShade: null,
     additionalShadeGrams: null,
     blend: null,
+    prePigmentation: null,
     neutralizationApplied: false,
     processingMinutes: 30,
     pricePerGram: 0.18,
@@ -120,6 +122,7 @@ describe('normalizeHistoryEntry', () => {
       additionalShade: null,
       additionalShadeGrams: null,
       blend: null,
+      prePigmentation: null,
       neutralizationApplied: false,
       processingMinutes: 30,
       pricePerGram: 0.2,
@@ -216,6 +219,24 @@ describe('buildRepeatFormulaRequest', () => {
     expect(request!.blendPrimaryPercent).toBe(70);
     expect(request!.additionalShadeCode).toBeNull();
     expect(request!.additionalShadeGrams).toBe(0);
+  });
+
+  it('marks prePigmentationEnabled true only when a filler step was actually recorded', () => {
+    const withoutFiller = makeEntry({ clientName: 'Anna', steps: [makeColorStep()] });
+    expect(buildRepeatFormulaRequest(withoutFiller, BRANDS)!.prePigmentationEnabled).toBe(false);
+
+    const step = makeColorStep({ prePigmentation: calculatePrePigmentation(9, 7, 60) });
+    const withFiller = makeEntry({ clientName: 'Anna', steps: [step] });
+    expect(buildRepeatFormulaRequest(withFiller, BRANDS)!.prePigmentationEnabled).toBe(true);
+  });
+
+  it('does not throw for a history doc saved before the prePigmentation field existed (reads back as undefined, not null)', () => {
+    const step = makeColorStep();
+    delete (step as Partial<ColorHistoryStep>).prePigmentation;
+    const entry = makeEntry({ clientName: 'Anna', steps: [step] });
+
+    expect(() => buildRepeatFormulaRequest(entry, BRANDS)).not.toThrow();
+    expect(buildRepeatFormulaRequest(entry, BRANDS)!.prePigmentationEnabled).toBe(false);
   });
 
   it('does not throw for a history doc saved before the blend field existed (blend is undefined, not null)', () => {

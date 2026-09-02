@@ -357,6 +357,28 @@
   border-top: none;
 }
 
+.prepigment__stat-value--small {
+  font-size: 1.05rem;
+}
+
+.prepigment__note {
+  margin: 12px 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--brand-primary-ink);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  animation: note-enter 0.25s ease both;
+}
+
+.prepigment__disclaimer {
+  margin: 16px 0 0;
+  font-size: 0.75rem;
+  color: var(--brand-muted);
+  font-style: italic;
+}
+
 .processing-time-hint {
   display: flex;
   align-items: center;

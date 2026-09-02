@@ -54,6 +54,7 @@ export const uk: typeof en = {
     crossBrandQualityGood: 'Гарний збіг',
     crossBrandQualityFair: 'Приблизний збіг',
     crossBrandQualityPoor: 'Слабкий збіг',
+    prePigmentationEnable: 'Додати крок передпігментації',
   },
   results: {
     developer: 'Окислювач',

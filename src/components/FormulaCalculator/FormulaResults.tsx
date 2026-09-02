@@ -4,8 +4,11 @@ import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
+import { formatFillerStepText } from "../../engine/formatPrePigmentation";
+import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
+import { PrePigmentationStep } from "./PrePigmentationStep";
 import { SessionDetailsPanel, type SessionDetails } from "./SessionDetailsPanel";
 
 export interface FormulaResultsProps {
@@ -19,6 +22,10 @@ export interface FormulaResultsProps {
   additionalShade: Shade | null;
   additionalShadeGrams: number;
   blend: BlendSummary | null;
+  // Recommended (or colorist-opted-in) filler step ahead of this target-color formula --
+  // see PrePigmentationField/PrePigmentationStep. Null whenever the checkbox is off or
+  // the level drop doesn't warrant it (getPrePigmentationNeed returns 'none').
+  prePigmentationResult: PrePigmentationResult | null;
   neutralizationApplied: boolean;
   onNeutralizationAppliedChange: (applied: boolean) => void;
   appliedBy: string;
@@ -42,7 +49,7 @@ const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
   brandName, line, targetShade, startLevel, grayPercent, applicationZone, result,
-  additionalShade, additionalShadeGrams, blend, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
+  additionalShade, additionalShadeGrams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
   productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved,
@@ -52,10 +59,20 @@ export function FormulaResults({
     processingMinutes, onProcessingMinutesChange, { min: 1, max: MAX_PROCESSING_MINUTES }
   );
 
-  const formulaText = formatFormulaText({
+  const targetColorFormulaText = formatFormulaText({
     brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
     additionalShade, additionalShadeGrams, blend, neutralizationApplied,
   });
+  // Prepend the filler ("Step 1") text ahead of the target-color formula ("Step 2") once
+  // the colorist has opted into the pre-pigmentation step -- see PrePigmentationField.
+  // fillerStepText is null whenever prePigmentationResult is null (checkbox off, or the
+  // level drop doesn't warrant it), so the plain single-step text is used unchanged.
+  const fillerStepText = prePigmentationResult !== null
+    ? formatFillerStepText(targetShade.level, prePigmentationResult)
+    : null;
+  const formulaText = fillerStepText !== null
+    ? `${fillerStepText}\n\n${t('prePigmentation.finalStepLabel')}\n${targetColorFormulaText}`
+    : targetColorFormulaText;
 
   const handleSave = async (details: SessionDetails) => {
     const step: ColorHistoryStep = {
@@ -70,6 +87,7 @@ export function FormulaResults({
       additionalShade,
       additionalShadeGrams,
       blend,
+      prePigmentation: prePigmentationResult,
       neutralizationApplied,
       processingMinutes,
       pricePerGram,
@@ -92,6 +110,12 @@ export function FormulaResults({
 
   return (
     <div className="results">
+      {prePigmentationResult !== null && (
+        <>
+          <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} />
+          <h2 className="results__section-heading">{t('prePigmentation.finalStepLabel')}</h2>
+        </>
+      )}
       <div className="results__stats">
         <div className="stat">
           <span className="stat__label">{t('results.developer')}</span>

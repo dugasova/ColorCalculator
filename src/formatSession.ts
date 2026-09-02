@@ -1,6 +1,7 @@
 import i18n from './i18n';
 import { formatFormulaText } from './engine/formatFormula';
 import { formatBleachText } from './engine/formatBleach';
+import { formatFillerStepText } from './engine/formatPrePigmentation';
 import type { HistoryStep } from './history';
 
 function formatStepText(step: HistoryStep): string {
@@ -12,7 +13,8 @@ function formatStepText(step: HistoryStep): string {
             processingMinutes: step.processingMinutes,
         });
     }
-    return formatFormulaText({
+
+    const targetColorText = formatFormulaText({
         brandName: step.brandName,
         line: step.line,
         targetShade: step.targetShade,
@@ -25,6 +27,16 @@ function formatStepText(step: HistoryStep): string {
         blend: step.blend ?? null,
         neutralizationApplied: step.neutralizationApplied,
     });
+
+    // Old docs saved before this field existed lack the `prePigmentation` key entirely,
+    // reading back as `undefined` (not `null`) -- normalize the same as history.ts does.
+    const prePigmentation = step.prePigmentation ?? null;
+    if (prePigmentation === null) return targetColorText;
+
+    const fillerStepText = formatFillerStepText(step.targetShade.level, prePigmentation);
+    if (fillerStepText === null) return targetColorText;
+
+    return `${fillerStepText}\n\n${i18n.t('prePigmentation.finalStepLabel')}\n${targetColorText}`;
 }
 
 // Renders every step of a saved (or in-progress) session as its own block. A simple

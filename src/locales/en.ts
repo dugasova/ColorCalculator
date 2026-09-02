@@ -52,6 +52,7 @@ export const en = {
     crossBrandQualityGood: 'Good match',
     crossBrandQualityFair: 'Rough match',
     crossBrandQualityPoor: 'Poor match',
+    prePigmentationEnable: 'Add pre-pigmentation step',
   },
   results: {
     developer: 'Developer',
