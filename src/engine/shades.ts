@@ -141,6 +141,8 @@ export const GENERIC_SHADE_CHART: Shade[] = [
   { code: '6.1', level: 6, tone: 'ash' },
   { code: '6.3', level: 6, tone: 'gold' },
   { code: '6.2', level: 6, tone: 'violet' },
+  { code: '6.4', level: 6, tone: 'copper' },
+  { code: '6.5', level: 6, tone: 'red' },
   { code: '6.7', level: 6, tone: 'chocolate' },
 
   { code: '7.0', level: 7, tone: 'natural' },

@@ -47,6 +47,11 @@ describe('findExampleFillerShade', () => {
     expect(findExampleFillerShade(7, 'gold')).toEqual({ code: '7.3', level: 7, tone: 'gold' });
   });
 
+  it('finds the level-6 copper/red shades -- level 6 previously had a data gap missing both tones present at every neighboring level (5, 7-10)', () => {
+    expect(findExampleFillerShade(6, 'copper')).toEqual({ code: '6.4', level: 6, tone: 'copper' });
+    expect(findExampleFillerShade(6, 'red')).toEqual({ code: '6.5', level: 6, tone: 'red' });
+  });
+
   it('returns null when the Generic chart has no shade at that level/tone', () => {
     expect(findExampleFillerShade(4, 'red')).toBeNull();
   });
