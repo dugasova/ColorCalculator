@@ -4,9 +4,10 @@ import { type MixingRatio, type Shade, shadeSchema } from './shades';
 import { GENERIC_SHADE_CHART } from './shades';
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from './brands/wella';
 import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from './brands/loreal';
+import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from './brands/igora';
 import { getMixingRatio } from './formula';
 
-// A plain string, not a closed union: built-in ids ('generic' | 'wella' | 'loreal')
+// A plain string, not a closed union: built-in ids ('generic' | 'wella' | 'loreal' | 'igora')
 // plus whatever id an admin assigns a custom dye line (see `CustomBrandRecord`).
 export type BrandId = string;
 
@@ -29,10 +30,19 @@ function wellaMixingRatio(): MixingRatio {
     return { colorParts: 1, developerParts: 1 };
 }
 
+// Igora Royal mixes 1:1 with developer standard (including the "10-" Ultra Blonde
+// Highlifts series). The "12-" Special Blonde Highlifts series is the one exception,
+// mixing 1:2 — like Koleston Perfect above, that override lives on the shade itself
+// (see `fixedMixingRatio` in IGORA_ROYAL_CHART), not here.
+function igoraMixingRatio(): MixingRatio {
+    return { colorParts: 1, developerParts: 1 };
+}
+
 export const BRANDS: Record<BrandId, Brand> = {
     generic: { id: 'generic', name: 'Generic', shades: GENERIC_SHADE_CHART, mixingRatio: getMixingRatio, pricePerGram: 0.10 },
     wella: { id: 'wella', name: 'Wella', shades: [...WELLA_SHADE_CHART, ...WELLA_COLOR_TOUCH_CHART], mixingRatio: wellaMixingRatio, pricePerGram: 0.18 },
     loreal: { id: 'loreal', name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_RICHESSE_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
+    igora: { id: 'igora', name: 'Igora', shades: [...IGORA_ROYAL_CHART, ...IGORA_VIBRANCE_CHART], mixingRatio: igoraMixingRatio, pricePerGram: 0.20 },
 };
 
 // A dye line an admin added at runtime (see PaletteAdminView), persisted in the
