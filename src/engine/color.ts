@@ -19,6 +19,7 @@ const LEVEL_BASE_HEX: Record<Level, string> = {
 const TONE_REFLECT: Record<ToneFamily, { hue: number; sat: number; lightDelta: number }> = {
   natural: { hue: 32, sat: 0.42, lightDelta: 0 },
   ash: { hue: 205, sat: 0.22, lightDelta: -0.02 },
+  cendré: { hue: 235, sat: 0.2, lightDelta: -0.02 },
   matt: { hue: 100, sat: 0.2, lightDelta: -0.02 },
   gold: { hue: 42, sat: 0.58, lightDelta: 0.015 },
   copper: { hue: 28, sat: 0.62, lightDelta: 0.015 },

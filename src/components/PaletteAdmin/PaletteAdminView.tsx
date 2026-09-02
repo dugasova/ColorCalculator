@@ -11,7 +11,7 @@ import "../FormulaCalculator/FormulaCalculator.css";
 import "./PaletteAdminView.css";
 
 const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-const TONE_FAMILIES: ToneFamily[] = ['natural', 'ash', 'matt', 'gold', 'copper', 'red', 'violet', 'chocolate', 'pearl', 'slate-grey', 'mahogany'];
+const TONE_FAMILIES: ToneFamily[] = ['natural', 'ash', 'cendré', 'matt', 'gold', 'copper', 'red', 'violet', 'chocolate', 'pearl', 'slate-grey', 'mahogany'];
 
 function slugify(name: string): string {
   return name
@@ -45,6 +45,7 @@ export function PaletteAdminView() {
   const [shadeLevel, setShadeLevel] = useState<Level>(6);
   const [shadeTone, setShadeTone] = useState<ToneFamily>('natural');
   const [shadeSecondaryTone, setShadeSecondaryTone] = useState<ToneFamily | ''>('');
+  const [shadeName, setShadeName] = useState('');
   const [shadeLine, setShadeLine] = useState('');
   const [shadeStatus, setShadeStatus] = useState<SubmitStatus>('idle');
   const [shadeError, setShadeError] = useState<string | null>(null);
@@ -122,6 +123,7 @@ export function PaletteAdminView() {
       level: shadeLevel,
       tone: shadeTone,
       ...(shadeSecondaryTone !== '' ? { secondaryTone: shadeSecondaryTone } : {}),
+      ...(shadeName.trim() !== '' ? { name: shadeName.trim() } : {}),
       ...(shadeLine.trim() !== '' ? { line: shadeLine.trim() } : {}),
     };
 
@@ -132,6 +134,7 @@ export function PaletteAdminView() {
       setShadeCode('');
       setShadeLine('');
       setShadeSecondaryTone('');
+      setShadeName('');
     } catch {
       setShadeStatus('error');
       setShadeError(t('palette.saveError'));
@@ -236,7 +239,7 @@ export function PaletteAdminView() {
             {fullShades.map(shade => (
               <li key={shadeKey(shade)} className={clsx('palette-admin__shade-row', disabledKeys.has(shadeKey(shade)) && 'palette-admin__shade-row--disabled')}>
                 <span className="shade-swatch" style={{ backgroundColor: shadeToHexColor(shade) }} />
-                <span className="palette-admin__shade-code">{shade.code}</span>
+                <span className="palette-admin__shade-code">{shade.code}{shade.name !== undefined ? ` "${shade.name}"` : ''}</span>
                 <span className="palette-admin__shade-detail">
                   {t('palette.level')} {shade.level} · {t(`palette.toneFamily.${shade.tone}`)}
                   {shade.secondaryTone ? ` / ${t(`palette.toneFamily.${shade.secondaryTone}`)}` : ''}
@@ -294,6 +297,10 @@ export function PaletteAdminView() {
                 ...TONE_FAMILIES.map(tone => ({ value: tone, label: t(`palette.toneFamily.${tone}`) })),
               ]}
             />
+          </div>
+          <div className="field">
+            <label htmlFor="paletteShadeName">{t('palette.shadeName')}</label>
+            <input id="paletteShadeName" type="text" value={shadeName} onChange={e => setShadeName(e.target.value)} />
           </div>
           <div className="field">
             <label htmlFor="paletteShadeLine">{t('palette.line')}</label>

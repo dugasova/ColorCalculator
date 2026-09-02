@@ -5,6 +5,7 @@ import { GENERIC_SHADE_CHART } from './shades';
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from './brands/wella';
 import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from './brands/loreal';
 import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from './brands/igora';
+import { REDKEN_SHADES_EQ_CHART, REDKEN_CHROMATICS_CHART } from './brands/redken';
 import { getMixingRatio } from './formula';
 
 // A plain string, not a closed union: built-in ids ('generic' | 'wella' | 'loreal' | 'igora')
@@ -38,11 +39,19 @@ function igoraMixingRatio(): MixingRatio {
     return { colorParts: 1, developerParts: 1 };
 }
 
+// Shades EQ Gloss mixes 1:1 with Shades EQ Processing Solution across the whole line,
+// no exceptions — unlike Wella/Igora above, there's no Highlift-style sub-range that
+// mixes differently, since Shades EQ never lifts (see brands/redken.ts).
+function redkenMixingRatio(): MixingRatio {
+    return { colorParts: 1, developerParts: 1 };
+}
+
 export const BRANDS: Record<BrandId, Brand> = {
     generic: { id: 'generic', name: 'Generic', shades: GENERIC_SHADE_CHART, mixingRatio: getMixingRatio, pricePerGram: 0.10 },
     wella: { id: 'wella', name: 'Wella', shades: [...WELLA_SHADE_CHART, ...WELLA_COLOR_TOUCH_CHART], mixingRatio: wellaMixingRatio, pricePerGram: 0.18 },
     loreal: { id: 'loreal', name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_RICHESSE_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
     igora: { id: 'igora', name: 'Igora', shades: [...IGORA_ROYAL_CHART, ...IGORA_VIBRANCE_CHART], mixingRatio: igoraMixingRatio, pricePerGram: 0.20 },
+    redken: { id: 'redken', name: 'Redken', shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_CHROMATICS_CHART], mixingRatio: redkenMixingRatio, pricePerGram: 0.20 },
 };
 
 // A dye line an admin added at runtime (see PaletteAdminView), persisted in the

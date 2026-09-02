@@ -325,6 +325,7 @@ export const en = {
     secondaryTone: 'Secondary tone',
     secondaryToneNone: 'None',
     line: 'Line (optional)',
+    shadeName: 'Name (optional)',
     addShade: 'Add shade',
     shadeAdded: 'Shade added',
     saving: 'Saving…',
@@ -332,6 +333,7 @@ export const en = {
     toneFamily: {
       natural: 'Natural',
       ash: 'Ash',
+      cendré: 'Cendré',
       matt: 'Matt',
       gold: 'Gold',
       copper: 'Copper',

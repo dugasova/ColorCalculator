@@ -56,16 +56,20 @@ const brands: Record<string, Brand> = {
 };
 
 describe('getLinePermanence', () => {
-  it("classifies Wella Koleston Perfect and L'Oréal Inoa/Majirel as permanent", () => {
+  it("classifies Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, and Redken Chromatics as permanent", () => {
     expect(getLinePermanence('koleston-perfect')).toBe('permanent');
     expect(getLinePermanence('inoa')).toBe('permanent');
     expect(getLinePermanence('majirel')).toBe('permanent');
+    expect(getLinePermanence('royal')).toBe('permanent');
+    expect(getLinePermanence('chromatics')).toBe('permanent');
   });
 
-  it("classifies Wella Color Touch and L'Oréal Dia Light/Dia Richesse as semi-permanent", () => {
+  it("classifies Wella Color Touch, L'Oréal Dia Light/Dia Richesse, Igora Vibrance, and Redken Shades EQ as semi-permanent", () => {
     expect(getLinePermanence('color-touch')).toBe('semi-permanent');
     expect(getLinePermanence('dia-light')).toBe('semi-permanent');
     expect(getLinePermanence('dia-richesse')).toBe('semi-permanent');
+    expect(getLinePermanence('vibrance')).toBe('semi-permanent');
+    expect(getLinePermanence('shades-eq')).toBe('semi-permanent');
   });
 
   it('returns null for a missing or unrecognized line', () => {

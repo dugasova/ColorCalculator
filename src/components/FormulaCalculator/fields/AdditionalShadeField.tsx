@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { Shade } from "../../../engine/shades";
+import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
 
@@ -28,7 +28,7 @@ export function AdditionalShadeField({ lineShades, additionalShadeCode, onAdditi
             { value: '', label: t('fields.additionalShadeNone') },
             ...lineShades.map(shade => ({
               value: shade.code,
-              label: `${shade.code} ${shade.tone}${shade.secondaryTone ? `/${shade.secondaryTone}` : ''}`,
+              label: shadeLabel(shade),
               searchText: shade.code,
               swatchColor: shadeToHexColor(shade),
             })),
@@ -38,7 +38,7 @@ export function AdditionalShadeField({ lineShades, additionalShadeCode, onAdditi
           <span
             className="shade-swatch"
             style={{ backgroundColor: shadeToHexColor(additionalShade) }}
-            title={`${additionalShade.code} ${additionalShade.tone}${additionalShade.secondaryTone ? `/${additionalShade.secondaryTone}` : ''}`}
+            title={shadeLabel(additionalShade)}
           />
         )}
       </div>

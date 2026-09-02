@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { Shade } from "../../../engine/shades";
+import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
 
@@ -23,7 +23,7 @@ export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetS
           onChange={onTargetShadeCodeChange}
           options={lineShades.map(shade => ({
             value: shade.code,
-            label: `${shade.code} ${shade.tone}${shade.secondaryTone ? `/${shade.secondaryTone}` : ''}`,
+            label: shadeLabel(shade),
             searchText: shade.code,
             swatchColor: shadeToHexColor(shade),
           }))}
@@ -31,7 +31,7 @@ export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetS
         <span
           className="shade-swatch"
           style={{ backgroundColor: shadeToHexColor(targetShade) }}
-          title={`${targetShade.code} ${targetShade.tone}${targetShade.secondaryTone ? `/${targetShade.secondaryTone}` : ''}`}
+          title={shadeLabel(targetShade)}
         />
       </div>
     </div>

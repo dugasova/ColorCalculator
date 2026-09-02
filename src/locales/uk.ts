@@ -327,6 +327,7 @@ export const uk: typeof en = {
     secondaryTone: 'Додатковий тон',
     secondaryToneNone: 'Немає',
     line: 'Лінія (необов’язково)',
+    shadeName: 'Назва (необов’язково)',
     addShade: 'Додати відтінок',
     shadeAdded: 'Відтінок додано',
     saving: 'Збереження…',
@@ -334,6 +335,7 @@ export const uk: typeof en = {
     toneFamily: {
       natural: 'Натуральний',
       ash: 'Попелястий',
+      cendré: 'Сандре',
       matt: 'Матовий',
       gold: 'Золотистий',
       copper: 'Мідний',

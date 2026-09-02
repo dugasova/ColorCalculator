@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { DeveloperVolume, Level, LiftTable } from "./levels";
 
-export type ToneFamily = 'natural' | 'ash' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
+export type ToneFamily = 'natural' | 'ash' | 'cendré' | 'matt' | 'gold' | 'copper' | 'red' | 'violet' | 'chocolate' | 'pearl' | 'slate-grey' | 'mahogany';
 
 export interface MixingRatio {
   colorParts: number;
@@ -14,6 +14,12 @@ export interface Shade {
   tone: ToneFamily;
   line?: string
   secondaryTone?: ToneFamily;
+  // The manufacturer's marketing name for this shade (e.g. "Brown Smoke"), distinct from
+  // `code` (e.g. "06ABn"). Optional -- most brands in this catalog (Wella, L'Oréal, Igora)
+  // are identified by colorists primarily by code, so their charts don't set it. Redken
+  // Shades EQ is the first line where the name is load-bearing: colorists commonly refer
+  // to shades by name as much as by code (see brands/redken.ts).
+  name?: string;
   fixedMixingRatio?: MixingRatio
   minStartLevel?: Level
   developerLiftTable?: LiftTable
@@ -30,7 +36,7 @@ const developerVolumeSchema = z.union([
   z.literal(6), z.literal(10), z.literal(13), z.literal(20), z.literal(30), z.literal(40),
 ]) satisfies z.ZodType<DeveloperVolume>;
 const toneFamilySchema = z.enum([
-  'natural', 'ash', 'matt', 'gold', 'copper', 'red', 'violet', 'chocolate', 'pearl', 'slate-grey', 'mahogany',
+  'natural', 'ash', 'cendré', 'matt', 'gold', 'copper', 'red', 'violet', 'chocolate', 'pearl', 'slate-grey', 'mahogany',
 ]) satisfies z.ZodType<ToneFamily>;
 
 // Validates a Shade document read from Firestore (admin-added via PaletteAdminView -- see
@@ -44,6 +50,7 @@ export const shadeSchema: z.ZodType<Shade> = z.object({
   tone: toneFamilySchema,
   line: z.string().optional(),
   secondaryTone: toneFamilySchema.optional(),
+  name: z.string().optional(),
   fixedMixingRatio: mixingRatioSchema.optional(),
   minStartLevel: levelSchema.optional(),
   developerVolumeChoices: z.array(developerVolumeSchema).optional(),
@@ -63,8 +70,20 @@ export const toneId = (tone: ToneFamily): number => {
     case 'pearl': return 8;
     case 'slate-grey': return 9;
     case 'mahogany': return 10;
+    case 'cendré': return 11;
   }
 };
+
+// Shared dropdown label builder for every shade-picker field (ShadeField,
+// AdditionalShadeField, BlendComponentField) -- was previously duplicated inline in all
+// three, and silently couldn't show `name` since it didn't exist yet. Puts the code
+// first (colorists searching by code expect it up front, and it's what the search box
+// matches against) with the marketing name, if any, quoted right after it.
+export function shadeLabel(shade: Shade): string {
+  const namePart = shade.name !== undefined ? ` "${shade.name}"` : '';
+  const tonePart = shade.secondaryTone !== undefined ? `${shade.tone}/${shade.secondaryTone}` : shade.tone;
+  return `${shade.code}${namePart} ${tonePart}`;
+}
 
 // Two shades can stand in for each other in a blend (see `splitShadeBlend` in formula.ts)
 // only if they share the level and mixing chemistry a formula was calculated for --

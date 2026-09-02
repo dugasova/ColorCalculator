@@ -1,4 +1,4 @@
-import type { Shade } from "../../../engine/shades";
+import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
 
@@ -30,7 +30,7 @@ export function BlendComponentField({ label, placeholder, candidates, shadeCode,
             { value: '', label: placeholder },
             ...candidates.map(candidate => ({
               value: candidate.code,
-              label: `${candidate.code} ${candidate.tone}${candidate.secondaryTone ? `/${candidate.secondaryTone}` : ''}`,
+              label: shadeLabel(candidate),
               searchText: candidate.code,
               swatchColor: shadeToHexColor(candidate),
             })),
@@ -40,7 +40,7 @@ export function BlendComponentField({ label, placeholder, candidates, shadeCode,
           <span
             className="shade-swatch"
             style={{ backgroundColor: shadeToHexColor(shade) }}
-            title={`${shade.code} ${shade.tone}${shade.secondaryTone ? '/' + shade.secondaryTone : ''}`}
+            title={shadeLabel(shade)}
           />
         )}
       </div>

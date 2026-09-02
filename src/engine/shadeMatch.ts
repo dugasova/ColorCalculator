@@ -11,11 +11,12 @@ export interface ShadeMatch {
 
 export type PermanenceCategory = 'permanent' | 'semi-permanent';
 
-// Wella Koleston Perfect and L'Oréal Inoa/Majirel are permanent oxidative dyes; Wella
-// Color Touch and L'Oréal Dia Light/Dia Richesse are semi-permanent (demi) dyes -- a
-// fundamentally different chemistry (little to no ammonia, shorter processing, doesn't
-// lift level) that a colorist can't just swap one for the other and expect the same
-// service. findClosestShadeByBrand uses this to keep cross-brand matches within the same
+// Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, and Redken Chromatics are
+// permanent oxidative dyes; Wella Color Touch, L'Oréal Dia Light/Dia Richesse, Igora
+// Vibrance, and Redken Shades EQ are semi-permanent (demi) dyes -- a fundamentally
+// different chemistry (little to no ammonia, shorter processing, doesn't lift level)
+// that a colorist can't just swap one for the other and expect the same service.
+// findClosestShadeByBrand uses this to keep cross-brand matches within the same
 // category. Lines this map doesn't know -- the brand-agnostic generic chart (no line at
 // all) and any custom line an admin adds -- are deliberately left unclassified rather
 // than guessed at.
@@ -23,9 +24,13 @@ const LINE_PERMANENCE: Record<string, PermanenceCategory> = {
   'koleston-perfect': 'permanent',
   inoa: 'permanent',
   majirel: 'permanent',
+  royal: 'permanent',
+  chromatics: 'permanent',
   'color-touch': 'semi-permanent',
   'dia-light': 'semi-permanent',
   'dia-richesse': 'semi-permanent',
+  vibrance: 'semi-permanent',
+  'shades-eq': 'semi-permanent',
 };
 
 export function getLinePermanence(line: string | undefined): PermanenceCategory | null {
