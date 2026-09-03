@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'Huemix — Color Calculator',
-        short_name: 'Huemix',
+        name: 'Formulist — Color Calculator',
+        short_name: 'Formulist',
         description: 'Hair-color formula calculator for salon colorists: mixing ratios, developer volume, gray coverage, color correction, bleach, and pre-pigmentation.',
         start_url: '/',
         scope: '/',

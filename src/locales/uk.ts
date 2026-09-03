@@ -2,8 +2,8 @@ import type { en } from './en';
 
 export const uk: typeof en = {
   app: {
-    titlePrefix: 'Hue',
-    titleAccent: 'mix',
+    titlePrefix: 'Formu',
+    titleAccent: 'list',
     skipToContent: 'Перейти до вмісту',
   },
   language: {

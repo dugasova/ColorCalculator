@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { readFileSync } from "node:fs";
 
-// Rasterizes the app mark (public/favicon.svg, the two-circle Huemix logo) into the PNG
+// Rasterizes the app mark (public/favicon.svg, the two-circle Formulist logo) into the PNG
 // sizes a PWA manifest and iOS home-screen icon need -- browsers/OSes don't accept an SVG
 // for these. Re-run with `npm run pwa:icons` whenever favicon.svg's artwork changes.
 //

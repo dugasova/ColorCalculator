@@ -1,4 +1,4 @@
-# Color Calculator
+# Formulist
 
 A web app for hair salons that turns manual, error-prone color-formula math into a
 guided calculator: mix ratios, developer volume, gray coverage, timing, and cost —

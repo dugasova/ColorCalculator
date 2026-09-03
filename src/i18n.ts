@@ -6,7 +6,7 @@ import { uk } from './locales/uk';
 export const SUPPORTED_LANGUAGES = ['en', 'uk'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
-const STORAGE_KEY = 'huemix.language';
+const STORAGE_KEY = 'formulist.language';
 const hasLocalStorage = typeof localStorage !== 'undefined';
 
 function isSupportedLanguage(value: string | null): value is Language {

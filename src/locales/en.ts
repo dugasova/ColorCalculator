@@ -1,7 +1,7 @@
 export const en = {
   app: {
-    titlePrefix: 'Hue',
-    titleAccent: 'mix',
+    titlePrefix: 'Formu',
+    titleAccent: 'list',
     skipToContent: 'Skip to content',
   },
   language: {
