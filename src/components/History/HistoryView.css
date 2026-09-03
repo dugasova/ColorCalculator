@@ -160,7 +160,8 @@
 
 .history__reminder-detail {
   color: var(--brand-muted);
-  flex: 1 0 auto;
+  flex: 1 1 220px;
+  min-width: 0;
 }
 
 .history__reminder-status {
