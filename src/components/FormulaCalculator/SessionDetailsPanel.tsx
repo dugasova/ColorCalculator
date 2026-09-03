@@ -77,7 +77,11 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   };
 
   const handleShareTelegram = () => {
-    window.open(`https://t.me/share/url?url=&text=${encodeURIComponent(formulaText)}`, '_blank', 'noopener,noreferrer');
+    // t.me/share/url requires a non-empty `url` -- an empty one makes Telegram bounce
+    // to telegram.org instead of opening the share/contact picker. There's no official
+    // "share plain text" endpoint, so the formula text goes in `url` itself (Telegram
+    // renders it as the shared message, same trick used for chat/link previews).
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(formulaText)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleBeforePhotoChange = (file: File | null) => {
