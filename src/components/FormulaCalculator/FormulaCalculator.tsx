@@ -29,7 +29,6 @@ export interface FormulaCalculatorProps {
   // field (brand/shade/level down through the client-details panel) for the next client.
   onSaved?: () => void;
 }
-
 export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }: FormulaCalculatorProps) {
   const { t } = useTranslation();
   const brands = usePalette();
@@ -49,6 +48,8 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     markupMultiplier, setMarkupMultiplier,
     setManualServicePrice,
     additionalShadeCode,
+    additionalShade2Code, setAdditionalShade2Code,
+    additionalShade2Grams, setAdditionalShade2Grams,
     additionalShadeGrams, setAdditionalShadeGrams,
     blendModeEnabled,
     setBlendShadeACode, setBlendShadeBCode,
@@ -62,6 +63,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     targetShade,
     result,
     additionalShade,
+    additionalShade2,
     effectiveResult,
     blendCandidates,
     blendShadeACodeEffective,
@@ -128,6 +130,21 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
               additionalShadeGrams={additionalShadeGrams}
               onAdditionalShadeGramsChange={setAdditionalShadeGrams}
             />
+            {additionalShadeCode !== null && (
+              <>
+                <AdditionalShadeField
+                  lineShades={lineShades}
+                  additionalShadeCode={additionalShade2Code}
+                  onAdditionalShadeCodeChange={setAdditionalShade2Code}
+                  label={t('fields.additionalShade2')}
+                />
+                <AdditionalShadeGramsField
+                  additionalShadeCode={additionalShade2Code}
+                  additionalShadeGrams={additionalShade2Grams}
+                  onAdditionalShadeGramsChange={setAdditionalShade2Grams}
+                />
+              </>
+            )}
           </>
         )}
         {blendModeEnabled && (
@@ -182,6 +199,8 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         result={effectiveResult}
         additionalShade={additionalShade}
         additionalShadeGrams={additionalShadeGrams}
+        additionalShade2={additionalShade2}
+        additionalShade2Grams={additionalShade2Grams}
         blend={blend}
         prePigmentationResult={prePigmentationResult}
         neutralizationApplied={neutralizationApplied}

@@ -30,6 +30,7 @@ export const en = {
     grayPercent: 'Gray percentage',
     shade: 'Shade',
     additionalShade: 'Additional shade (colorist\'s discretion)',
+    additionalShade2: 'Additional shade 2',
     additionalShadeNone: 'None',
     additionalShadeGrams: 'Additional shade, g',
     substituteBlend: 'Shade out of stock — blend instead of adding on top',

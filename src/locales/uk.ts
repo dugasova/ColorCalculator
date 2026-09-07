@@ -32,6 +32,7 @@ export const uk: typeof en = {
     grayPercent: 'Відсоток сивини',
     shade: 'Відтінок',
     additionalShade: 'Додатковий відтінок (на розсуд майстра)',
+    additionalShade2: 'Додатковий відтінок 2',
     additionalShadeNone: 'Немає',
     additionalShadeGrams: 'Додатковий відтінок, г',
     substituteBlend: 'Немає в наявності — змішати замість додавання',

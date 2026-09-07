@@ -25,6 +25,8 @@ export interface FormulaResultsProps {
   result: FullFormula;
   additionalShade: Shade | null;
   additionalShadeGrams: number;
+  additionalShade2?: Shade | null;
+  additionalShade2Grams?: number;
   blend: BlendSummary | null;
   // Recommended (or colorist-opted-in) filler step ahead of this target-color formula --
   // see PrePigmentationField/PrePigmentationStep. Null whenever the checkbox is off or
@@ -53,7 +55,7 @@ const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
   brandName, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory, applicationZone, result,
-  additionalShade, additionalShadeGrams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
+  additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
   productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved,
@@ -65,7 +67,7 @@ export function FormulaResults({
 
   const targetColorFormulaText = formatFormulaText({
     brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-    additionalShade, additionalShadeGrams, blend, neutralizationApplied,
+    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
   });
   // Prepend the filler ("Step 1") text ahead of the target-color formula ("Step 2") once
   // the colorist has opted into the pre-pigmentation step -- see PrePigmentationField.
@@ -91,6 +93,8 @@ export function FormulaResults({
       result,
       additionalShade,
       additionalShadeGrams,
+      additionalShade2: additionalShade2 ?? null,
+      additionalShade2Grams: additionalShade2Grams ?? null,
       blend,
       prePigmentation: prePigmentationResult,
       neutralizationApplied,
@@ -148,7 +152,7 @@ export function FormulaResults({
       {result.grams !== null && (
         <div className="results__row">
           <span className="results__row-label">{t('results.mix')}</span>
-          <span>{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams)}</span>
+          <span>{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
         </div>
       )}
 

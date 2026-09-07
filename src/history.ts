@@ -29,6 +29,8 @@ export interface ColorHistoryStep {
   result: FullFormula;
   additionalShade: Shade | null;
   additionalShadeGrams: number | null;
+  additionalShade2?: Shade | null;
+  additionalShade2Grams?: number | null;
   // A substitute blend for a shade that's out of stock -- two real shades split the
   // single calculated color total (see `splitShadeBlend` in engine/formula.ts) instead
   // of `targetShade` (which may not be a physical product to weigh) or growing the total
@@ -103,6 +105,8 @@ export interface LegacyFormulaHistoryEntry {
   result: FullFormula;
   additionalShade?: Shade | null;
   additionalShadeGrams?: number | null;
+  additionalShade2?: Shade | null;
+  additionalShade2Grams?: number | null;
   processingMinutes: number;
   applicationZone: ApplicationZone;
   pricePerGram: number;
@@ -202,6 +206,8 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
     result: legacy.result,
     additionalShade: legacy.additionalShade ?? null,
     additionalShadeGrams: legacy.additionalShadeGrams ?? null,
+    additionalShade2: legacy.additionalShade2 ?? null,
+    additionalShade2Grams: legacy.additionalShade2Grams ?? null,
     blend: null,
     prePigmentation: null,
     neutralizationApplied: false,
@@ -316,6 +322,8 @@ export interface RepeatFormulaRequest {
   manualDeveloperVolume: DeveloperVolume | undefined;
   additionalShadeCode: string | null;
   additionalShadeGrams: number;
+  additionalShade2Code?: string | null;
+  additionalShade2Grams?: number;
   canvas?: HairCanvas;
   blendShadeACode: string | null;
   blendShadeBCode: string | null;
@@ -359,11 +367,12 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   // don't take the "blend present" branch and crash dereferencing an undefined blend.
   const blend = step.blend ?? null;
   const additionalShadeGrams = step.additionalShadeGrams ?? 0;
+  const additionalShade2Grams = step.additionalShade2Grams ?? 0;
   let totalGrams = 60;
   if (step.result.grams !== null) {
     const primaryColorGrams = blend !== null
       ? step.result.grams.colorGrams
-      : step.result.grams.colorGrams - additionalShadeGrams;
+      : step.result.grams.colorGrams - additionalShadeGrams - additionalShade2Grams;
     const primaryDeveloperGrams = primaryColorGrams * step.result.mixingRatio.developerParts / step.result.mixingRatio.colorParts;
     totalGrams = Math.round(primaryColorGrams + primaryDeveloperGrams);
   }
@@ -383,6 +392,8 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
       : undefined,
     additionalShadeCode: blend === null ? (step.additionalShade?.code ?? null) : null,
     additionalShadeGrams: blend === null ? additionalShadeGrams : 0,
+    additionalShade2Code: blend === null ? (step.additionalShade2?.code ?? null) : null,
+    additionalShade2Grams: blend === null ? additionalShade2Grams : 0,
     blendShadeACode: blend?.shadeA.code ?? null,
     blendShadeBCode: blend?.shadeB.code ?? null,
     blendPrimaryPercent,

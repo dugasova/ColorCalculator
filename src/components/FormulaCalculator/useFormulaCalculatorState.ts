@@ -32,8 +32,9 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     applicationZone, setApplicationZone, totalGrams, setTotalGrams, brandId, setBrandId, line, setLine,
     manualDeveloperVolume, setManualDeveloperVolume, manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
+    additionalShade2Code, setAdditionalShade2Code, additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
-    availableLines, lineShades, targetShade, result, additionalShade, effectiveResult, processingMinutes,
+    availableLines, lineShades, targetShade, result, additionalShade, additionalShade2, effectiveResult, processingMinutes,
     handleAdditionalShadeCodeChange,
     handleApplicationZoneChange,
     resetShadePoolOverrides,
@@ -69,6 +70,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setManualServicePrice(repeatRequest.servicePrice);
     setAdditionalShadeCode(repeatRequest.additionalShadeCode);
     setAdditionalShadeGrams(repeatRequest.additionalShadeGrams);
+    setAdditionalShade2Code(repeatRequest.additionalShade2Code ?? null);
+    setAdditionalShade2Grams(repeatRequest.additionalShade2Grams ?? 0);
     setBlendModeEnabled(repeatRequest.blendShadeACode !== null && repeatRequest.blendShadeBCode !== null);
     setBlendShadeACode(repeatRequest.blendShadeACode);
     setBlendShadeBCode(repeatRequest.blendShadeBCode);
@@ -182,6 +185,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     manualServicePrice, setManualServicePrice,
     additionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,
+    additionalShade2Code, setAdditionalShade2Code,
+    additionalShade2Grams, setAdditionalShade2Grams,
     blendModeEnabled,
     setBlendShadeACode, setBlendShadeBCode,
     blendPrimaryPercent, setBlendPrimaryPercent,
@@ -194,6 +199,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     targetShade,
     result,
     additionalShade,
+    additionalShade2,
     effectiveResult,
     blendCandidates,
     blendShadeACodeEffective,

@@ -35,6 +35,8 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
   const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(null);
   const [additionalShadeGrams, setAdditionalShadeGrams] = useState(0);
+  const [additionalShade2Code, setAdditionalShade2Code] = useState<string | null>(null);
+  const [additionalShade2Grams, setAdditionalShade2Grams] = useState(0);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
 
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
@@ -55,6 +57,8 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
   // unlike a same-pool target change.
   function resetShadePoolOverrides() {
     resetShadeDependentOverrides();
+    setAdditionalShade2Code(null);
+    setAdditionalShade2Grams(0);
     setAdditionalShadeCode(null);
     setAdditionalShadeGrams(0);
   }
@@ -98,8 +102,12 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
     brands[brandId].mixingRatio, effectiveManualDeveloperVolume
   );
   const additionalShade = additionalShadeCode !== null ? lineShades.find(s => s.code === additionalShadeCode) ?? null : null;
-  const grams = !suppressAdditionalShade && result.grams !== null && additionalShade !== null && additionalShadeGrams > 0
-    ? applyAdditionalShade(result.grams, result.mixingRatio, additionalShadeGrams)
+  const additionalShade2 = additionalShade2Code !== null ? lineShades.find(s => s.code === additionalShade2Code) ?? null : null;
+  const hasShade1 = additionalShade !== null && additionalShadeGrams > 0;
+  const hasShade2 = additionalShade2 !== null && additionalShade2Grams > 0;
+  const totalExtra = (hasShade1 ? additionalShadeGrams : 0) + (hasShade2 ? additionalShade2Grams : 0);
+  const grams = !suppressAdditionalShade && result.grams !== null && totalExtra > 0
+    ? applyAdditionalShade(result.grams, result.mixingRatio, totalExtra)
     : result.grams;
   const effectiveResult = grams !== result.grams ? { ...result, grams } : result;
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
@@ -119,6 +127,8 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
     manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,
+    additionalShade2Code, setAdditionalShade2Code,
+    additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
 
     availableLines,
@@ -126,6 +136,7 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
     targetShade,
     result,
     additionalShade,
+    additionalShade2,
     grams,
     effectiveResult,
     processingMinutes,

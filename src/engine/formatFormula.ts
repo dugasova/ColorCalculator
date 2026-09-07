@@ -15,6 +15,8 @@ export interface FormatFormulaParams {
     applicationZone: ApplicationZone;
     additionalShade: Shade | null;
     additionalShadeGrams: number;
+    additionalShade2?: Shade | null;
+    additionalShade2Grams?: number;
     // A substitute blend for a shade that's out of stock (see BlendSummary) -- mutually
     // exclusive with additionalShade/additionalShadeGrams above, which is instead a
     // discretionary corrective addition on top of the primary mix.
@@ -50,13 +52,19 @@ export function buildMixSummary(
     grams: FormulaGrams,
     additionalShade: Shade | null,
     additionalShadeGrams: number,
+    additionalShade2?: Shade | null,
+    additionalShade2Grams?: number,
 ): string {
     const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
-    const primaryGrams = hasAdditional ? grams.colorGrams - additionalShadeGrams : grams.colorGrams;
+    const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && (additionalShade2Grams ?? 0) > 0;
+    const primaryGrams = grams.colorGrams - (hasAdditional ? additionalShadeGrams : 0) - (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
 
     const parts = [i18n.t('format.mixShade', { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
     if (hasAdditional) {
         parts.push(i18n.t('format.mixShade', { code: additionalShade.code, grams: additionalShadeGrams.toFixed(1) }));
+    }
+    if (hasAdditional2) {
+        parts.push(i18n.t('format.mixShade', { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }));
     }
     parts.push(i18n.t('format.mixDeveloper', { grams: grams.developerGrams.toFixed(1) }));
 
@@ -66,7 +74,7 @@ export function buildMixSummary(
 export function formatFormulaText(params: FormatFormulaParams): string {
     const {
         brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-        additionalShade, additionalShadeGrams, blend, neutralizationApplied,
+        additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
     } = params;
 
     const title = `${brandName}${line ? ' ' + formatLineLabel(line) : ''} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? '/' + targetShade.secondaryTone : ''})`;
@@ -96,7 +104,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
             ? i18n.t('format.mixValue', {
                 value: blend !== null
                     ? buildBlendMixSummary(blend, result.grams.developerGrams)
-                    : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams),
+                    : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams),
             })
             : i18n.t('format.mixFallback', { message: result.liftUnsupportedWarning ?? i18n.t('results.notAchievable') }),
         i18n.t('format.processingTime', { value: processingMinutes }),

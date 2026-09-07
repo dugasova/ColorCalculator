@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildMixSummary } from "../../engine/formatFormula";
 import { usePalette } from "../../palette";
-import type { ColorHistoryStep } from "../../history";
+const DEFAULT_PRICE_PER_GRAM = 0.18;
 import { useShadeFormulaState } from "../FormulaCalculator/useShadeFormulaState";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
 import { StartLevelField } from "../FormulaCalculator/fields/StartLevelField";
 import { GrayPercentField } from "../FormulaCalculator/fields/GrayPercentField";
-import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { ShadeField } from "../FormulaCalculator/fields/ShadeField";
 import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShadeField";
 import { AdditionalShadeGramsField } from "../FormulaCalculator/fields/AdditionalShadeGramsField";
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
-import { ApplicationZoneField } from "../FormulaCalculator/fields/ApplicationZoneField";
 import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
-
-const DEFAULT_PRICE_PER_GRAM = 0.18;
+import { ApplicationZoneField } from "../FormulaCalculator/fields/ApplicationZoneField";
+import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
+import { buildMixSummary } from "../../engine/formatFormula";
+import type { ColorHistoryStep } from "../../history";
 
 export interface ColorStepCardProps {
   stepId: string;
@@ -52,6 +51,8 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     setManualProcessingMinutes,
     additionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,
+    additionalShade2Code, setAdditionalShade2Code,
+    additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
 
     availableLines,
@@ -59,6 +60,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     targetShade,
     result,
     additionalShade,
+    additionalShade2,
     grams,
     effectiveResult,
     processingMinutes,
@@ -70,32 +72,33 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     handleAdditionalShadeCodeChange,
   } = useShadeFormulaState({ brands });
 
-  const step: ColorHistoryStep = {
-    kind: 'color',
-    brandName: brands[brandId].name,
-    line,
-    targetShade,
-    startLevel,
-    grayPercent,
-    canvas: { porosity, thickness, chemicalHistory },
-    applicationZone,
-    result: effectiveResult,
-    additionalShade,
-    additionalShadeGrams: additionalShade !== null ? additionalShadeGrams : null,
-    blend: null,
-    prePigmentation: null,
-    neutralizationApplied,
-    processingMinutes,
-    pricePerGram,
-  };
-
   // Report the computed step up on every change — the parent aggregates all steps'
   // totals (time, cost) and builds the combined recipe text/save payload from them.
   useEffect(() => {
-    onChange(step);
+    const stepData: ColorHistoryStep = {
+      kind: 'color',
+      brandName: brands[brandId].name,
+      line,
+      targetShade,
+      startLevel,
+      grayPercent,
+      canvas: { porosity, thickness, chemicalHistory },
+      applicationZone,
+      result: effectiveResult,
+      additionalShade,
+      additionalShadeGrams: additionalShade !== null ? additionalShadeGrams : null,
+      additionalShade2,
+      additionalShade2Grams: additionalShade2 !== null ? additionalShade2Grams : null,
+      blend: null,
+      prePigmentation: null,
+      neutralizationApplied,
+      processingMinutes,
+      pricePerGram,
+    };
+    onChange(stepData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    applicationZone, effectiveResult, additionalShade, additionalShadeGrams, neutralizationApplied, processingMinutes, pricePerGram,
+    applicationZone, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
     porosity, thickness, chemicalHistory
   ]);
 
@@ -138,6 +141,23 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
           onAdditionalShadeGramsChange={setAdditionalShadeGrams}
           idSuffix={idSuffix}
         />
+        {additionalShadeCode !== null && (
+          <>
+            <AdditionalShadeField
+              lineShades={lineShades}
+              additionalShadeCode={additionalShade2Code}
+              onAdditionalShadeCodeChange={setAdditionalShade2Code}
+              idSuffix={idSuffix + '_2'}
+              label={t('fields.additionalShade2')}
+            />
+            <AdditionalShadeGramsField
+              additionalShadeCode={additionalShade2Code}
+              additionalShadeGrams={additionalShade2Grams}
+              onAdditionalShadeGramsChange={setAdditionalShade2Grams}
+              idSuffix={idSuffix + '_2'}
+            />
+          </>
+        )}
         <DeveloperVolumeField
           targetShade={targetShade}
           manualDeveloperVolume={manualDeveloperVolume}
@@ -182,29 +202,25 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
       {grams !== null && (
         <div className="results__row">
           <span className="results__row-label">{t('results.mix')}</span>
-          <span>{buildMixSummary(targetShade, grams, additionalShade, additionalShadeGrams)}</span>
+          <span>{buildMixSummary(targetShade, grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
         </div>
       )}
-      <div className="results__row">
-        <span className="results__row-label">{t('results.developer')}</span>
-        <span>{result.developerVolume !== null ? t('format.developerVolume', { value: result.developerVolume }) : '—'}</span>
-      </div>
 
       {result.recommendedCorrectiveTone !== null && (
-        <>
-          <div className="results__row">
-            <span className="results__row-label">{t('results.recommendedTone')}</span>
-            <span>{t('results.recommendedToneValue', { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })}</span>
-          </div>
-          <label className="results__neutralization-toggle">
-            <input
-              type="checkbox"
-              checked={neutralizationApplied}
-              onChange={e => setNeutralizationApplied(e.target.checked)}
-            />
-            {t('results.applyNeutralization')}
-          </label>
-        </>
+        <div className="results__row">
+          <span className="results__row-label">{t('results.recommendedTone')}</span>
+          <span>
+            {t('results.recommendedToneValue', { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })}
+            <label className="results__neutralization-toggle">
+              <input
+                type="checkbox"
+                checked={neutralizationApplied}
+                onChange={e => setNeutralizationApplied(e.target.checked)}
+              />
+              {t('results.applyNeutralization')}
+            </label>
+          </span>
+        </div>
       )}
     </div>
   );
