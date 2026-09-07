@@ -136,10 +136,9 @@ export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({ ...sh
 // routes this line to the engine's 20-minute demi-permanent processing time instead of
 // permanent color's 30/45 (see `getRecommendedProcessingMinutes`, src/engine/formula.ts).
 //
-// The requested "Toner" ratio -- a softer, sheer 1:2 mix with Activator Lotion,
-// specifically called out for the Level 10 Toners sub-range -- is applied to the whole
-// line via `fixedMixingRatio` below, mirroring how Wella Color Touch fixes one ratio
-// for its whole demi-permanent chart rather than varying it per shade.
+// Mixes 1:1 with Vibrance Activator (lotion or gel) across the whole line, including the
+// Level 10 Toners sub-range -- per Schwarzkopf's own instructions, applied uniformly via
+// `fixedMixingRatio` below rather than varying it per shade.
 //
 // Vibrance also sells standalone 0-xx "Concentrate" boosters and a 0-00 "Clear" gloss
 // base -- both left out here, since neither has a real depth `level` (Shade.level is a
@@ -231,6 +230,6 @@ const igoraVibranceShades: Shade[] = [
 export const IGORA_VIBRANCE_CHART: Shade[] = igoraVibranceShades.map(shade => ({
   ...shade,
   line: "vibrance",
-  fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+  fixedMixingRatio: { colorParts: 1, developerParts: 1 },
   developerVolumeChoices: [6, 13],
 }));

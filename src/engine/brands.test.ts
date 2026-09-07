@@ -5,6 +5,7 @@ import {
   type Brand, type CustomBrandRecord, type PaletteOverride,
 } from "./brands";
 import { getMixingRatio } from "./formula";
+import { IGORA_VIBRANCE_CHART } from "./brands/igora";
 import type { Shade } from "./shades";
 
 const baseBrands: Record<string, Brand> = {
@@ -216,5 +217,14 @@ describe("paletteOverrideSchema", () => {
   it("rejects a document whose kind matches neither branch", () => {
     const result = paletteOverrideSchema.safeParse({ kind: "rename", brandId: "wella", newName: "Wella Pro" });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("IGORA_VIBRANCE_CHART", () => {
+  it("mixes every shade -- including the Level 10 Toners sub-range -- 1:1 with Vibrance Activator", () => {
+    expect(IGORA_VIBRANCE_CHART.length).toBeGreaterThan(0);
+    for (const shade of IGORA_VIBRANCE_CHART) {
+      expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
+    }
   });
 });
