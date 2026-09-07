@@ -9,7 +9,7 @@ export interface LineFieldProps {
   idSuffix?: string;
 }
 
-export function LineField({ availableLines, line, onLineChange, idSuffix = '' }: LineFieldProps) {
+export function LineField({ availableLines, line, onLineChange, idSuffix = "" }: LineFieldProps) {
   const { t } = useTranslation();
   if (availableLines.length <= 1) {
     return null;
@@ -17,12 +17,12 @@ export function LineField({ availableLines, line, onLineChange, idSuffix = '' }:
 
   return (
     <div className="field">
-      <label htmlFor={`line${idSuffix}`}>{t('fields.line')}</label>
+      <label htmlFor={`line${idSuffix}`}>{t("fields.line")}</label>
       <Select
         id={`line${idSuffix}`}
-        value={line ?? ''}
+        value={line ?? ""}
         onChange={value => onLineChange(value || null)}
-        options={availableLines.map(l => ({ value: l ?? '', label: l ? formatLineLabel(l) : t('fields.lineDefault') }))}
+        options={availableLines.map(l => ({ value: l ?? "", label: l ? formatLineLabel(l) : t("fields.lineDefault") }))}
       />
     </div>
   );

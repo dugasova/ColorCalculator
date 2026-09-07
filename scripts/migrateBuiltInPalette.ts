@@ -41,7 +41,7 @@ async function main() {
   const existingOverrides = (await getDocs(collection(db, "paletteOverrides"))).docs.map(d => d.data() as PaletteOverride);
   const alreadyMigrated = new Set(
     existingOverrides
-      .filter((o): o is Extract<PaletteOverride, { kind: 'add' }> => o.kind === 'add')
+      .filter((o): o is Extract<PaletteOverride, { kind: "add" }> => o.kind === "add")
       .map(o => migrationKey(o.brandId, o.shade))
   );
 

@@ -2,7 +2,7 @@ import { doc, onSnapshot, type Unsubscribe } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "./firebase";
 
-export type UserRole = 'admin' | 'stylist';
+export type UserRole = "admin" | "stylist";
 
 const USERS_COLLECTION = "users";
 
@@ -12,7 +12,7 @@ const USERS_COLLECTION = "users";
 // palette collections check this role, and only reads of `users` are allowed client-side.
 export function subscribeToUserRole(uid: string, onChange: (role: UserRole) => void): Unsubscribe {
   return onSnapshot(doc(db, USERS_COLLECTION, uid), snapshot => {
-    onChange(snapshot.data()?.role === 'admin' ? 'admin' : 'stylist');
+    onChange(snapshot.data()?.role === "admin" ? "admin" : "stylist");
   });
 }
 
@@ -21,7 +21,7 @@ export function subscribeToUserRole(uid: string, onChange: (role: UserRole) => v
 export function useIsAdmin(uid: string): boolean {
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => subscribeToUserRole(uid, role => setIsAdmin(role === 'admin')), [uid]);
+  useEffect(() => subscribeToUserRole(uid, role => setIsAdmin(role === "admin")), [uid]);
 
   return isAdmin;
 }

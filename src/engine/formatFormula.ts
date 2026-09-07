@@ -1,45 +1,45 @@
-import i18n from '../i18n';
-import type { Level } from './levels';
-import type { Shade } from './shades';
-import type { FullFormula, FormulaGrams } from './formula';
-import type { ApplicationZone } from './applicationZone';
-import { formatLineLabel } from './formatLineLabel';
+import i18n from "../i18n";
+import type { Level } from "./levels";
+import type { Shade } from "./shades";
+import type { FullFormula, FormulaGrams } from "./formula";
+import type { ApplicationZone } from "./applicationZone";
+import { formatLineLabel } from "./formatLineLabel";
 
 export interface FormatFormulaParams {
-    brandName: string;
-    line: string | null;
-    targetShade: Shade;
-    startLevel: Level;
-    result: FullFormula;
-    processingMinutes: number;
-    applicationZone: ApplicationZone;
-    additionalShade: Shade | null;
-    additionalShadeGrams: number;
-    additionalShade2?: Shade | null;
-    additionalShade2Grams?: number;
-    // A substitute blend for a shade that's out of stock (see BlendSummary) -- mutually
-    // exclusive with additionalShade/additionalShadeGrams above, which is instead a
-    // discretionary corrective addition on top of the primary mix.
-    blend: BlendSummary | null;
-    neutralizationApplied: boolean;
+  brandName: string;
+  line: string | null;
+  targetShade: Shade;
+  startLevel: Level;
+  result: FullFormula;
+  processingMinutes: number;
+  applicationZone: ApplicationZone;
+  additionalShade: Shade | null;
+  additionalShadeGrams: number;
+  additionalShade2?: Shade | null;
+  additionalShade2Grams?: number;
+  // A substitute blend for a shade that's out of stock (see BlendSummary) -- mutually
+  // exclusive with additionalShade/additionalShadeGrams above, which is instead a
+  // discretionary corrective addition on top of the primary mix.
+  blend: BlendSummary | null;
+  neutralizationApplied: boolean;
 }
 
 export interface BlendSummary {
-    shadeA: Shade;
-    shadeAGrams: number;
-    shadeB: Shade;
-    shadeBGrams: number;
+  shadeA: Shade;
+  shadeAGrams: number;
+  shadeB: Shade;
+  shadeBGrams: number;
 }
 
 // Mix breakdown for a substitute blend approximating a shade that's out of stock: the
 // target shade (the visual goal named in the title above) never appears here, since it
 // isn't a real product to weigh -- only the two components standing in for it.
 export function buildBlendMixSummary(blend: BlendSummary, developerGrams: number): string {
-    return [
-        i18n.t('format.mixShade', { code: blend.shadeA.code, grams: blend.shadeAGrams.toFixed(1) }),
-        i18n.t('format.mixShade', { code: blend.shadeB.code, grams: blend.shadeBGrams.toFixed(1) }),
-        i18n.t('format.mixDeveloper', { grams: developerGrams.toFixed(1) }),
-    ].join(' ');
+  return [
+    i18n.t("format.mixShade", { code: blend.shadeA.code, grams: blend.shadeAGrams.toFixed(1) }),
+    i18n.t("format.mixShade", { code: blend.shadeB.code, grams: blend.shadeBGrams.toFixed(1) }),
+    i18n.t("format.mixDeveloper", { grams: developerGrams.toFixed(1) }),
+  ].join(" ");
 }
 
 // Renders the mix as a per-shade breakdown (e.g. "7/71-30.0 g 7/17-15.0 g developer 45.0 g")
@@ -48,80 +48,80 @@ export function buildBlendMixSummary(blend: BlendSummary, developerGrams: number
 // weigh out. `grams.colorGrams` already includes the additional shade's grams (see
 // applyAdditionalShade), so it's subtracted back out here to get the primary shade's share.
 export function buildMixSummary(
-    targetShade: Shade,
-    grams: FormulaGrams,
-    additionalShade: Shade | null,
-    additionalShadeGrams: number,
-    additionalShade2?: Shade | null,
-    additionalShade2Grams?: number,
+  targetShade: Shade,
+  grams: FormulaGrams,
+  additionalShade: Shade | null,
+  additionalShadeGrams: number,
+  additionalShade2?: Shade | null,
+  additionalShade2Grams?: number,
 ): string {
-    const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
-    const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && (additionalShade2Grams ?? 0) > 0;
-    const primaryGrams = grams.colorGrams - (hasAdditional ? additionalShadeGrams : 0) - (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
+  const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
+  const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && (additionalShade2Grams ?? 0) > 0;
+  const primaryGrams = grams.colorGrams - (hasAdditional ? additionalShadeGrams : 0) - (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
 
-    const parts = [i18n.t('format.mixShade', { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
-    if (hasAdditional) {
-        parts.push(i18n.t('format.mixShade', { code: additionalShade.code, grams: additionalShadeGrams.toFixed(1) }));
-    }
-    if (hasAdditional2) {
-        parts.push(i18n.t('format.mixShade', { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }));
-    }
-    parts.push(i18n.t('format.mixDeveloper', { grams: grams.developerGrams.toFixed(1) }));
+  const parts = [i18n.t("format.mixShade", { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
+  if (hasAdditional) {
+    parts.push(i18n.t("format.mixShade", { code: additionalShade.code, grams: additionalShadeGrams.toFixed(1) }));
+  }
+  if (hasAdditional2) {
+    parts.push(i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }));
+  }
+  parts.push(i18n.t("format.mixDeveloper", { grams: grams.developerGrams.toFixed(1) }));
 
-    return parts.join(' ');
+  return parts.join(" ");
 }
 
 export function formatFormulaText(params: FormatFormulaParams): string {
-    const {
-        brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-        additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
-    } = params;
+  const {
+    brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
+    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
+  } = params;
 
-    const title = `${brandName}${line ? ' ' + formatLineLabel(line) : ''} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? '/' + targetShade.secondaryTone : ''})`;
+  const title = `${brandName}${line ? " " + formatLineLabel(line) : ""} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? "/" + targetShade.secondaryTone : ""})`;
 
-    const developer = result.developerVolume !== null
-        ? i18n.t('format.developerVolume', { value: result.developerVolume })
-        : '—';
+  const developer = result.developerVolume !== null
+    ? i18n.t("format.developerVolume", { value: result.developerVolume })
+    : "—";
 
-    const applyNeutralization = neutralizationApplied && result.recommendedCorrectiveTone !== null;
-    const correctiveToneLine = applyNeutralization
-        ? i18n.t('format.neutralizationApplied', { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
-        : i18n.t('format.recommendedTone', {
-            value: result.recommendedCorrectiveTone !== null
-                ? i18n.t('results.recommendedToneValue', { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
-                : i18n.t('results.none'),
-        });
+  const applyNeutralization = neutralizationApplied && result.recommendedCorrectiveTone !== null;
+  const correctiveToneLine = applyNeutralization
+    ? i18n.t("format.neutralizationApplied", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
+    : i18n.t("format.recommendedTone", {
+      value: result.recommendedCorrectiveTone !== null
+        ? i18n.t("results.recommendedToneValue", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
+        : i18n.t("results.none"),
+    });
 
-    const lines = [
-        title,
-        i18n.t('format.startingLevel', { start: startLevel, target: targetShade.level }),
-        i18n.t('format.applicationZone', {
-            value: applicationZone === 'full-head' ? i18n.t('fields.applicationZoneFullHead') : i18n.t('fields.applicationZoneRootTouchUp'),
-        }),
-        i18n.t('format.developer', { value: developer }),
-        i18n.t('format.ratio', { color: result.mixingRatio.colorParts, developer: result.mixingRatio.developerParts }),
-        result.grams !== null
-            ? i18n.t('format.mixValue', {
-                value: blend !== null
-                    ? buildBlendMixSummary(blend, result.grams.developerGrams)
-                    : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams),
-            })
-            : i18n.t('format.mixFallback', { message: result.liftUnsupportedWarning ?? i18n.t('results.notAchievable') }),
-        i18n.t('format.processingTime', { value: processingMinutes }),
-        i18n.t('format.grayCoverage', {
-            note: result.grayCoverage.note,
-            natural: Math.round(result.grayCoverage.naturalRatio * 100),
-            fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-        }),
-        correctiveToneLine,
-    ];
+  const lines = [
+    title,
+    i18n.t("format.startingLevel", { start: startLevel, target: targetShade.level }),
+    i18n.t("format.applicationZone", {
+      value: applicationZone === "full-head" ? i18n.t("fields.applicationZoneFullHead") : i18n.t("fields.applicationZoneRootTouchUp"),
+    }),
+    i18n.t("format.developer", { value: developer }),
+    i18n.t("format.ratio", { color: result.mixingRatio.colorParts, developer: result.mixingRatio.developerParts }),
+    result.grams !== null
+      ? i18n.t("format.mixValue", {
+        value: blend !== null
+          ? buildBlendMixSummary(blend, result.grams.developerGrams)
+          : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams),
+      })
+      : i18n.t("format.mixFallback", { message: result.liftUnsupportedWarning ?? i18n.t("results.notAchievable") }),
+    i18n.t("format.processingTime", { value: processingMinutes }),
+    i18n.t("format.grayCoverage", {
+      note: result.grayCoverage.note,
+      natural: Math.round(result.grayCoverage.naturalRatio * 100),
+      fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+    }),
+    correctiveToneLine,
+  ];
 
-    if (result.toneWarning !== null && !applyNeutralization) {
-        lines.push(i18n.t('format.warning', { message: result.toneWarning }));
-    }
-    if (result.eligibilityWarning !== null) {
-        lines.push(i18n.t('format.warning', { message: result.eligibilityWarning }));
-    }
+  if (result.toneWarning !== null && !applyNeutralization) {
+    lines.push(i18n.t("format.warning", { message: result.toneWarning }));
+  }
+  if (result.eligibilityWarning !== null) {
+    lines.push(i18n.t("format.warning", { message: result.eligibilityWarning }));
+  }
 
-    return lines.join('\n');
+  return lines.join("\n");
 }

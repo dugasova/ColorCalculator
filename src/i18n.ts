@@ -1,13 +1,13 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import { en } from './locales/en';
-import { uk } from './locales/uk';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import { en } from "./locales/en";
+import { uk } from "./locales/uk";
 
-export const SUPPORTED_LANGUAGES = ['en', 'uk'] as const;
+export const SUPPORTED_LANGUAGES = ["en", "uk"] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 
-const STORAGE_KEY = 'formulist.language';
-const hasLocalStorage = typeof localStorage !== 'undefined';
+const STORAGE_KEY = "formulist.language";
+const hasLocalStorage = typeof localStorage !== "undefined";
 
 function isSupportedLanguage(value: string | null): value is Language {
   return value !== null && (SUPPORTED_LANGUAGES as readonly string[]).includes(value);
@@ -20,10 +20,10 @@ function getInitialLanguage(): Language {
       return stored;
     }
   }
-  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('uk')) {
-    return 'uk';
+  if (typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("uk")) {
+    return "uk";
   }
-  return 'en';
+  return "en";
 }
 
 void i18n
@@ -34,7 +34,7 @@ void i18n
       uk: { translation: uk },
     },
     lng: getInitialLanguage(),
-    fallbackLng: 'en',
+    fallbackLng: "en",
     interpolation: { escapeValue: false },
   });
 
@@ -42,13 +42,13 @@ void i18n
 // pronunciation/voice, and it's static in index.html -- keep it in sync with the actual
 // UI language, both on initial load and on every subsequent switch.
 function syncDocumentLanguage(lng: string): void {
-  if (typeof document !== 'undefined') {
+  if (typeof document !== "undefined") {
     document.documentElement.lang = lng;
   }
 }
 
 syncDocumentLanguage(getInitialLanguage());
-i18n.on('languageChanged', lng => {
+i18n.on("languageChanged", lng => {
   if (hasLocalStorage) {
     localStorage.setItem(STORAGE_KEY, lng);
   }

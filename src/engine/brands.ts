@@ -1,26 +1,26 @@
-import { z } from 'zod';
-import type { Level } from './levels';
-import { type MixingRatio, type Shade, shadeSchema } from './shades';
-import { GENERIC_SHADE_CHART } from './shades';
-import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from './brands/wella';
-import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from './brands/loreal';
-import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from './brands/igora';
-import { REDKEN_SHADES_EQ_CHART, REDKEN_CHROMATICS_CHART } from './brands/redken';
-import { getMixingRatio } from './formula';
+import { z } from "zod";
+import type { Level } from "./levels";
+import { type MixingRatio, type Shade, shadeSchema } from "./shades";
+import { GENERIC_SHADE_CHART } from "./shades";
+import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
+import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from "./brands/loreal";
+import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from "./brands/igora";
+import { REDKEN_SHADES_EQ_CHART, REDKEN_CHROMATICS_CHART } from "./brands/redken";
+import { getMixingRatio } from "./formula";
 
 // A plain string, not a closed union: built-in ids ('generic' | 'wella' | 'loreal' | 'igora')
 // plus whatever id an admin assigns a custom dye line (see `CustomBrandRecord`).
 export type BrandId = string;
 
 export interface Brand {
-    id: BrandId;
-    name: string;
-    shades: Shade[];
-    mixingRatio: (startLevel: Level, targetLevel: Level) => MixingRatio;
-    // Rough estimated product cost per gram of mixed color, in whatever currency the
-    // salon uses — a starting point for the service-pricing calculator, not a real
-    // supplier price. Fully editable in the results panel.
-    pricePerGram: number;
+  id: BrandId;
+  name: string;
+  shades: Shade[];
+  mixingRatio: (startLevel: Level, targetLevel: Level) => MixingRatio;
+  // Rough estimated product cost per gram of mixed color, in whatever currency the
+  // salon uses — a starting point for the service-pricing calculator, not a real
+  // supplier price. Fully editable in the results panel.
+  pricePerGram: number;
 }
 
 // Koleston Perfect mixes 1:1 with developer across the whole range. The "12"
@@ -28,7 +28,7 @@ export interface Brand {
 // lives on the shade itself (see `fixedMixingRatio` in WELLA_SHADE_CHART),
 // not here, since it applies to a subset of shades rather than the whole brand.
 function wellaMixingRatio(): MixingRatio {
-    return { colorParts: 1, developerParts: 1 };
+  return { colorParts: 1, developerParts: 1 };
 }
 
 // Igora Royal mixes 1:1 with developer standard (including the "10-" Ultra Blonde
@@ -36,22 +36,22 @@ function wellaMixingRatio(): MixingRatio {
 // mixing 1:2 — like Koleston Perfect above, that override lives on the shade itself
 // (see `fixedMixingRatio` in IGORA_ROYAL_CHART), not here.
 function igoraMixingRatio(): MixingRatio {
-    return { colorParts: 1, developerParts: 1 };
+  return { colorParts: 1, developerParts: 1 };
 }
 
 // Shades EQ Gloss mixes 1:1 with Shades EQ Processing Solution across the whole line,
 // no exceptions — unlike Wella/Igora above, there's no Highlift-style sub-range that
 // mixes differently, since Shades EQ never lifts (see brands/redken.ts).
 function redkenMixingRatio(): MixingRatio {
-    return { colorParts: 1, developerParts: 1 };
+  return { colorParts: 1, developerParts: 1 };
 }
 
 export const BRANDS: Record<BrandId, Brand> = {
-    generic: { id: 'generic', name: 'Generic', shades: GENERIC_SHADE_CHART, mixingRatio: getMixingRatio, pricePerGram: 0.10 },
-    wella: { id: 'wella', name: 'Wella', shades: [...WELLA_SHADE_CHART, ...WELLA_COLOR_TOUCH_CHART], mixingRatio: wellaMixingRatio, pricePerGram: 0.18 },
-    loreal: { id: 'loreal', name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_RICHESSE_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
-    igora: { id: 'igora', name: 'Igora', shades: [...IGORA_ROYAL_CHART, ...IGORA_VIBRANCE_CHART], mixingRatio: igoraMixingRatio, pricePerGram: 0.20 },
-    redken: { id: 'redken', name: 'Redken', shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_CHROMATICS_CHART], mixingRatio: redkenMixingRatio, pricePerGram: 0.20 },
+  generic: { id: "generic", name: "Generic", shades: GENERIC_SHADE_CHART, mixingRatio: getMixingRatio, pricePerGram: 0.10 },
+  wella: { id: "wella", name: "Wella", shades: [...WELLA_SHADE_CHART, ...WELLA_COLOR_TOUCH_CHART], mixingRatio: wellaMixingRatio, pricePerGram: 0.18 },
+  loreal: { id: "loreal", name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_RICHESSE_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
+  igora: { id: "igora", name: "Igora", shades: [...IGORA_ROYAL_CHART, ...IGORA_VIBRANCE_CHART], mixingRatio: igoraMixingRatio, pricePerGram: 0.20 },
+  redken: { id: "redken", name: "Redken", shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_CHROMATICS_CHART], mixingRatio: redkenMixingRatio, pricePerGram: 0.20 },
 };
 
 // A dye line an admin added at runtime (see PaletteAdminView), persisted in the
@@ -60,37 +60,37 @@ export const BRANDS: Record<BrandId, Brand> = {
 // functions), so it's described data-first via `MixingRatioConfig` and resolved to a
 // real strategy function with `resolveMixingRatio`.
 export interface MixingRatioConfig {
-    kind: 'fixed' | 'generic';
-    // Required when kind is 'fixed'; ignored otherwise.
-    fixedRatio?: MixingRatio;
+  kind: "fixed" | "generic";
+  // Required when kind is 'fixed'; ignored otherwise.
+  fixedRatio?: MixingRatio;
 }
 
 export function resolveMixingRatio(config: MixingRatioConfig): (startLevel: Level, targetLevel: Level) => MixingRatio {
-    if (config.kind === 'fixed') {
-        const ratio = config.fixedRatio ?? { colorParts: 1, developerParts: 1 };
-        return () => ratio;
-    }
-    return getMixingRatio;
+  if (config.kind === "fixed") {
+    const ratio = config.fixedRatio ?? { colorParts: 1, developerParts: 1 };
+    return () => ratio;
+  }
+  return getMixingRatio;
 }
 
 const mixingRatioConfigSchema: z.ZodType<MixingRatioConfig> = z.object({
-    kind: z.enum(['fixed', 'generic']),
-    fixedRatio: z.object({ colorParts: z.number(), developerParts: z.number() }).optional(),
+  kind: z.enum(["fixed", "generic"]),
+  fixedRatio: z.object({ colorParts: z.number(), developerParts: z.number() }).optional(),
 });
 
 export interface CustomBrandRecord {
-    id: string;
-    name: string;
-    pricePerGram: number;
-    mixingRatioConfig: MixingRatioConfig;
+  id: string;
+  name: string;
+  pricePerGram: number;
+  mixingRatioConfig: MixingRatioConfig;
 }
 
 // Validates a customBrands Firestore document's payload -- everything but `id`, which
 // comes from the document id itself (see palette.ts's subscribeToCustomBrands).
-export const customBrandRecordSchema: z.ZodType<Omit<CustomBrandRecord, 'id'>> = z.object({
-    name: z.string(),
-    pricePerGram: z.number(),
-    mixingRatioConfig: mixingRatioConfigSchema,
+export const customBrandRecordSchema: z.ZodType<Omit<CustomBrandRecord, "id">> = z.object({
+  name: z.string(),
+  pricePerGram: z.number(),
+  mixingRatioConfig: mixingRatioConfigSchema,
 });
 
 // A single correction an admin makes to a brand's shade chart at runtime, persisted in
@@ -104,34 +104,34 @@ export const customBrandRecordSchema: z.ZodType<Omit<CustomBrandRecord, 'id'>> =
 // L'Oréal lines (Majirel/Inoa/Dia Light/Dia Richesse) — so `disable` carries `line`
 // alongside `code` to target exactly one shade.
 export type PaletteOverride =
-    | { id: string; kind: 'add'; brandId: BrandId; shade: Shade }
-    | { id: string; kind: 'disable'; brandId: BrandId; line: string | null; code: string };
+  | { id: string; kind: "add"; brandId: BrandId; shade: Shade }
+  | { id: string; kind: "disable"; brandId: BrandId; line: string | null; code: string };
 
 // Validates a paletteOverrides Firestore document's payload -- everything but `id`, same
 // as customBrandRecordSchema above (see palette.ts's subscribeToPaletteOverrides).
-export const paletteOverrideSchema: z.ZodType<Omit<PaletteOverride, 'id'>> = z.union([
-    z.object({ kind: z.literal('add'), brandId: z.string(), shade: shadeSchema }),
-    z.object({ kind: z.literal('disable'), brandId: z.string(), line: z.string().nullable(), code: z.string() }),
+export const paletteOverrideSchema: z.ZodType<Omit<PaletteOverride, "id">> = z.union([
+  z.object({ kind: z.literal("add"), brandId: z.string(), shade: shadeSchema }),
+  z.object({ kind: z.literal("disable"), brandId: z.string(), line: z.string().nullable(), code: z.string() }),
 ]);
 
 function addedShadesFor(overrides: PaletteOverride[], brandId: BrandId): Shade[] {
-    return overrides
-        .filter((o): o is Extract<PaletteOverride, { kind: 'add' }> => o.kind === 'add' && o.brandId === brandId)
-        .map(o => o.shade);
+  return overrides
+    .filter((o): o is Extract<PaletteOverride, { kind: "add" }> => o.kind === "add" && o.brandId === brandId)
+    .map(o => o.shade);
 }
 
 // A shade's identity within a brand is (line, code), not code alone: several Wella and
 // L'Oréal lines legitimately reuse the same numeric code across different product lines.
 export function shadeKey(shade: { line?: string; code: string }): string {
-    return `${shade.line ?? ''}|${shade.code}`;
+  return `${shade.line ?? ""}|${shade.code}`;
 }
 
 export function getDisabledShadeKeys(overrides: PaletteOverride[], brandId: BrandId): Set<string> {
-    return new Set(
-        overrides
-            .filter((o): o is Extract<PaletteOverride, { kind: 'disable' }> => o.kind === 'disable' && o.brandId === brandId)
-            .map(o => shadeKey({ line: o.line ?? undefined, code: o.code }))
-    );
+  return new Set(
+    overrides
+      .filter((o): o is Extract<PaletteOverride, { kind: "disable" }> => o.kind === "disable" && o.brandId === brandId)
+      .map(o => shadeKey({ line: o.line ?? undefined, code: o.code }))
+  );
 }
 
 // The shade chart PaletteAdminView edits: a brand's built-in/custom shades plus every
@@ -146,11 +146,11 @@ export function getDisabledShadeKeys(overrides: PaletteOverride[], brandId: Bran
 // duplicate row. Keying by (line, code) instead of bare code matters here: two different
 // lines legitimately share the same numeric code, and must not shadow each other.
 export function getFullBrandShades(baseBrands: Record<BrandId, Brand>, customBrands: CustomBrandRecord[], overrides: PaletteOverride[], brandId: BrandId): Shade[] {
-    void customBrands; // custom brands never ship their own shades; they only gain them through `add` overrides.
-    const added = addedShadesFor(overrides, brandId);
-    const addedKeys = new Set(added.map(shadeKey));
-    const base = (baseBrands[brandId]?.shades ?? []).filter(s => !addedKeys.has(shadeKey(s)));
-    return [...base, ...added];
+  void customBrands; // custom brands never ship their own shades; they only gain them through `add` overrides.
+  const added = addedShadesFor(overrides, brandId);
+  const addedKeys = new Set(added.map(shadeKey));
+  const base = (baseBrands[brandId]?.shades ?? []).filter(s => !addedKeys.has(shadeKey(s)));
+  return [...base, ...added];
 }
 
 // Merges built-in brands with admin-managed custom brands and overrides into the
@@ -158,20 +158,20 @@ export function getFullBrandShades(baseBrands: Record<BrandId, Brand>, customBra
 // included, custom lines resolved to a real `Brand`. Pure and Firestore-agnostic so it
 // can be unit tested without a backend — see `PaletteContext` for the live wiring.
 export function buildBrandCatalog(baseBrands: Record<BrandId, Brand>, customBrands: CustomBrandRecord[], overrides: PaletteOverride[]): Record<BrandId, Brand> {
-    const ids = new Set<BrandId>([...Object.keys(baseBrands), ...customBrands.map(c => c.id)]);
-    const catalog: Record<BrandId, Brand> = {};
-    for (const id of ids) {
-        const base = baseBrands[id];
-        const custom = customBrands.find(c => c.id === id);
-        const disabled = getDisabledShadeKeys(overrides, id);
-        const shades = getFullBrandShades(baseBrands, customBrands, overrides, id).filter(s => !disabled.has(shadeKey(s)));
-        catalog[id] = {
-            id,
-            name: custom?.name ?? base!.name,
-            shades,
-            mixingRatio: custom ? resolveMixingRatio(custom.mixingRatioConfig) : base!.mixingRatio,
-            pricePerGram: custom?.pricePerGram ?? base!.pricePerGram,
-        };
-    }
-    return catalog;
+  const ids = new Set<BrandId>([...Object.keys(baseBrands), ...customBrands.map(c => c.id)]);
+  const catalog: Record<BrandId, Brand> = {};
+  for (const id of ids) {
+    const base = baseBrands[id];
+    const custom = customBrands.find(c => c.id === id);
+    const disabled = getDisabledShadeKeys(overrides, id);
+    const shades = getFullBrandShades(baseBrands, customBrands, overrides, id).filter(s => !disabled.has(shadeKey(s)));
+    catalog[id] = {
+      id,
+      name: custom?.name ?? base!.name,
+      shades,
+      mixingRatio: custom ? resolveMixingRatio(custom.mixingRatioConfig) : base!.mixingRatio,
+      pricePerGram: custom?.pricePerGram ?? base!.pricePerGram,
+    };
+  }
+  return catalog;
 }

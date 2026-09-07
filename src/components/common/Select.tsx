@@ -33,7 +33,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
   const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
-  const typeahead = useRef({ text: '', timeout: 0 as number });
+  const typeahead = useRef({ text: "", timeout: 0 as number });
 
   const selectedIndex = options.findIndex(o => o.value === value);
   const selected = selectedIndex >= 0 ? options[selectedIndex] : null;
@@ -45,13 +45,13 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
         setOpen(false);
       }
     }
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [open]);
 
   useEffect(() => {
     if (open && activeIndex >= 0) {
-      optionRefs.current[activeIndex]?.scrollIntoView?.({ block: 'nearest' });
+      optionRefs.current[activeIndex]?.scrollIntoView?.({ block: "nearest" });
     }
   }, [open, activeIndex]);
 
@@ -80,12 +80,12 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
     const buffer = typeahead.current;
     clearTimeout(buffer.timeout);
     buffer.text += char.toLowerCase();
-    buffer.timeout = setTimeout(() => { buffer.text = ''; }, TYPEAHEAD_RESET_MS);
+    buffer.timeout = setTimeout(() => { buffer.text = ""; }, TYPEAHEAD_RESET_MS);
     const anchor = buffer.text.length > 1 ? 0 : (activeIndex >= 0 ? activeIndex + 1 : selectedIndex + 1);
     for (let offset = 0; offset < options.length; offset++) {
       const index = (anchor + offset) % options.length;
       const option = options[index];
-      const text = (option.searchText ?? (typeof option.label === 'string' ? option.label : '')).toLowerCase();
+      const text = (option.searchText ?? (typeof option.label === "string" ? option.label : "")).toLowerCase();
       if (text.startsWith(buffer.text)) {
         setActiveIndex(index);
         if (autoCommitWhenClosed) commit(index);
@@ -97,10 +97,10 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
   function handleTriggerKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
     if (!open) {
       switch (e.key) {
-        case 'ArrowDown':
-        case 'ArrowUp':
-        case 'Enter':
-        case ' ':
+        case "ArrowDown":
+        case "ArrowUp":
+        case "Enter":
+        case " ":
           e.preventDefault();
           openList();
           return;
@@ -111,32 +111,32 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
     }
     if (options.length === 0) return;
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
         setActiveIndex(i => Math.min(options.length - 1, i < 0 ? 0 : i + 1));
         return;
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
         setActiveIndex(i => Math.max(0, i < 0 ? 0 : i - 1));
         return;
-      case 'Home':
+      case "Home":
         e.preventDefault();
         setActiveIndex(0);
         return;
-      case 'End':
+      case "End":
         e.preventDefault();
         setActiveIndex(options.length - 1);
         return;
-      case 'Enter':
-      case ' ':
+      case "Enter":
+      case " ":
         e.preventDefault();
         commit(activeIndex);
         return;
-      case 'Escape':
+      case "Escape":
         e.preventDefault();
         setOpen(false);
         return;
-      case 'Tab':
+      case "Tab":
         setOpen(false);
         return;
       default:
@@ -147,7 +147,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
   const listboxId = `${id}-listbox`;
 
   return (
-    <div className={clsx('select', open && 'select--open', className)} ref={rootRef}>
+    <div className={clsx("select", open && "select--open", className)} ref={rootRef}>
       <button
         type="button"
         id={id}
@@ -185,7 +185,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
               data-value={option.value}
               aria-selected={option.value === value}
               ref={el => { optionRefs.current[index] = el; }}
-              className={clsx('select__option', index === activeIndex && 'select__option--active', option.value === value && 'select__option--selected')}
+              className={clsx("select__option", index === activeIndex && "select__option--active", option.value === value && "select__option--selected")}
               onMouseEnter={() => setActiveIndex(index)}
               onClick={() => commit(index)}
             >

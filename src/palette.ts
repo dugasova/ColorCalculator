@@ -43,7 +43,7 @@ const PALETTE_OVERRIDES_COLLECTION = "paletteOverrides";
 // Firestore document ids can't contain "/" — several Wella codes do (e.g. "5/41") — so
 // every part is URI-encoded before joining.
 function disableOverrideId(brandId: BrandId, line: string | null, code: string): string {
-  return `${encodeURIComponent(brandId)}::${encodeURIComponent(line ?? '')}::${encodeURIComponent(code)}`;
+  return `${encodeURIComponent(brandId)}::${encodeURIComponent(line ?? "")}::${encodeURIComponent(code)}`;
 }
 
 // Malformed documents (a hand-edited Firestore console change, a future schema change
@@ -104,7 +104,7 @@ export async function addCustomBrand(input: AddCustomBrandInput): Promise<void> 
 
 export async function addShadeToBrand(brandId: BrandId, shade: Shade): Promise<void> {
   await addDoc(collection(db, PALETTE_OVERRIDES_COLLECTION), sanitizeForFirestore({
-    kind: 'add' as const,
+    kind: "add" as const,
     brandId,
     shade,
   }));
@@ -113,7 +113,7 @@ export async function addShadeToBrand(brandId: BrandId, shade: Shade): Promise<v
 export async function setShadeDisabled(brandId: BrandId, line: string | null, code: string, disabled: boolean): Promise<void> {
   const overrideRef = doc(db, PALETTE_OVERRIDES_COLLECTION, disableOverrideId(brandId, line, code));
   if (disabled) {
-    await setDoc(overrideRef, { kind: 'disable', brandId, line, code });
+    await setDoc(overrideRef, { kind: "disable", brandId, line, code });
   } else {
     await deleteDoc(overrideRef);
   }

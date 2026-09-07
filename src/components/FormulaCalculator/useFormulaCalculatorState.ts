@@ -49,8 +49,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
       setThickness(repeatRequest.canvas.thickness);
       setChemicalHistory(repeatRequest.canvas.chemicalHistory);
     } else {
-      setPorosity('normal');
-      setThickness('medium');
+      setPorosity("normal");
+      setThickness("medium");
       setChemicalHistory([]);
     }
   // `repeatRequest` is a fresh object each time History's "Repeat" button is clicked, so
@@ -164,7 +164,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   // edit. Gated on prePigmentationEnabled so toggling the checkbox off fully removes the
   // filler step from both the results panel and the copyable formula text.
   const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
-  const prePigmentationResult = prePigmentationEnabled && prePigmentationNeed !== 'none'
+  const prePigmentationResult = prePigmentationEnabled && prePigmentationNeed !== "none"
     ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams)
     : null;
 

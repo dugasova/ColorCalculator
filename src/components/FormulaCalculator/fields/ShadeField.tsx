@@ -11,11 +11,11 @@ export interface ShadeFieldProps {
   idSuffix?: string;
 }
 
-export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetShadeCodeChange, idSuffix = '' }: ShadeFieldProps) {
+export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetShadeCodeChange, idSuffix = "" }: ShadeFieldProps) {
   const { t } = useTranslation();
   return (
     <div className="field">
-      <label htmlFor={`targetShadeCode${idSuffix}`}>{t('fields.shade')}</label>
+      <label htmlFor={`targetShadeCode${idSuffix}`}>{t("fields.shade")}</label>
       <div className="shade-field">
         <Select
           id={`targetShadeCode${idSuffix}`}

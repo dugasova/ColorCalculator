@@ -24,10 +24,10 @@ export function BlendComponentField({ label, placeholder, candidates, shadeCode,
       <div className="shade-field">
         <Select
           id={id}
-          value={shadeCode ?? ''}
-          onChange={value => onShadeCodeChange(value === '' ? null : value)}
+          value={shadeCode ?? ""}
+          onChange={value => onShadeCodeChange(value === "" ? null : value)}
           options={[
-            { value: '', label: placeholder },
+            { value: "", label: placeholder },
             ...candidates.map(candidate => ({
               value: candidate.code,
               label: shadeLabel(candidate),

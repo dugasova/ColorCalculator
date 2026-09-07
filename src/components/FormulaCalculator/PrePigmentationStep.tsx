@@ -24,38 +24,38 @@ export function PrePigmentationStep({ targetLevel, result }: PrePigmentationStep
 
   return (
     <>
-      <h2 className="results__section-heading">{t('prePigmentation.fillerSectionLabel')}</h2>
+      <h2 className="results__section-heading">{t("prePigmentation.fillerSectionLabel")}</h2>
       <div className="results__stats">
         <div className="stat">
-          <span className="stat__label">{t('prePigmentation.underlyingPigmentLabel')}</span>
+          <span className="stat__label">{t("prePigmentation.underlyingPigmentLabel")}</span>
           <span className="stat__value prepigment__stat-value--small">{result.underlyingPigment}</span>
         </div>
         <div className="stat">
-          <span className="stat__label">{t('prePigmentation.fillerToneLabel')}</span>
+          <span className="stat__label">{t("prePigmentation.fillerToneLabel")}</span>
           <span className="stat__value prepigment__stat-value--small">{fillerToneName}</span>
         </div>
         <div className="stat">
-          <span className="stat__label">{t('prePigmentation.exampleFillerShadeLabel')}</span>
+          <span className="stat__label">{t("prePigmentation.exampleFillerShadeLabel")}</span>
           <span className="stat__value prepigment__stat-value--small">
             {result.exampleFillerShade !== null
-              ? t('prePigmentation.exampleFillerShadeValue', { code: result.exampleFillerShade.code, tone: fillerToneName })
-              : t('prePigmentation.noExampleFillerShade', { tone: fillerToneName, level: targetLevel })}
+              ? t("prePigmentation.exampleFillerShadeValue", { code: result.exampleFillerShade.code, tone: fillerToneName })
+              : t("prePigmentation.noExampleFillerShade", { tone: fillerToneName, level: targetLevel })}
           </span>
         </div>
         <div className="stat">
-          <span className="stat__label">{t('prePigmentation.fillerMixLabel')}</span>
+          <span className="stat__label">{t("prePigmentation.fillerMixLabel")}</span>
           <span className="stat__value prepigment__stat-value--small">
-            {t('prePigmentation.fillerMixValue', { filler: result.grams.fillerGrams.toFixed(1), diluent: result.grams.diluentGrams.toFixed(1) })}
+            {t("prePigmentation.fillerMixValue", { filler: result.grams.fillerGrams.toFixed(1), diluent: result.grams.diluentGrams.toFixed(1) })}
           </span>
         </div>
       </div>
-      <p className="prepigment__note">{t('format.processingTime', { value: result.fillerProcessingMinutes })}</p>
+      <p className="prepigment__note">{t("format.processingTime", { value: result.fillerProcessingMinutes })}</p>
       {result.multiVisitGapDays !== null && (
         <p className="warning" role="alert">
-          {t('prePigmentation.multiVisitNote', { min: result.multiVisitGapDays.min, max: result.multiVisitGapDays.max })}
+          {t("prePigmentation.multiVisitNote", { min: result.multiVisitGapDays.min, max: result.multiVisitGapDays.max })}
         </p>
       )}
-      <p className="prepigment__disclaimer">{t('prePigmentation.disclaimer')}</p>
+      <p className="prepigment__disclaimer">{t("prePigmentation.disclaimer")}</p>
     </>
   );
 }

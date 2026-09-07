@@ -38,13 +38,13 @@ export function BleachResults({
     <div className="results">
       <div className="results__stats">
         <div className="stat">
-          <span className="stat__label">{t('results.developer')}</span>
+          <span className="stat__label">{t("results.developer")}</span>
           <span className="stat__value">
-            {result.developerVolume !== null ? t('format.developerVolume', { value: result.developerVolume }) : '—'}
+            {result.developerVolume !== null ? t("format.developerVolume", { value: result.developerVolume }) : "—"}
           </span>
         </div>
         <div className="stat">
-          <span className="stat__label">{t('results.ratio')}</span>
+          <span className="stat__label">{t("results.ratio")}</span>
           <span className="stat__value">
             {result.mixingRatio.powderParts} : {result.mixingRatio.developerParts}
           </span>
@@ -52,30 +52,30 @@ export function BleachResults({
       </div>
 
       {result.liftNeeded === 0 && (
-        <p className="warning" role="alert">{t('bleach.noLiftWarning')}</p>
+        <p className="warning" role="alert">{t("bleach.noLiftWarning")}</p>
       )}
 
       {result.multiStepRequired && (
-        <p className="warning" role="alert">{t('bleach.multiStepWarning')}</p>
+        <p className="warning" role="alert">{t("bleach.multiStepWarning")}</p>
       )}
 
       {result.grams !== null && (
         <>
           <div className="results__row">
-            <span className="results__row-label">{t('results.mix')}</span>
-            <span>{t('bleach.mixValue', { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) })}</span>
+            <span className="results__row-label">{t("results.mix")}</span>
+            <span>{t("bleach.mixValue", { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) })}</span>
           </div>
           <div className="results__row">
-            <span className="results__row-label">{t('bleach.processingTimeLabel')}</span>
-            <span>{t('results.processingTimeHint', { minutes: result.recommendedProcessingMinutes })}</span>
+            <span className="results__row-label">{t("bleach.processingTimeLabel")}</span>
+            <span>{t("results.processingTimeHint", { minutes: result.recommendedProcessingMinutes })}</span>
           </div>
-          <p className="bleach__note">{t('bleach.maxScalpTimeNote', { max: result.maxScalpProcessingMinutes })}</p>
-          <p className="bleach__note">{t('bleach.checkIntervalNote', { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>
-          <p className="bleach__note bleach__note--strand">{t('bleach.strandTestNote')}</p>
+          <p className="bleach__note">{t("bleach.maxScalpTimeNote", { max: result.maxScalpProcessingMinutes })}</p>
+          <p className="bleach__note">{t("bleach.checkIntervalNote", { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>
+          <p className="bleach__note bleach__note--strand">{t("bleach.strandTestNote")}</p>
 
           <div className="results__pricing">
             <div className="field">
-              <label htmlFor="bleachPricePerGram">{t('results.pricePerGram')}</label>
+              <label htmlFor="bleachPricePerGram">{t("results.pricePerGram")}</label>
               <input
                 id="bleachPricePerGram"
                 type="number"
@@ -86,7 +86,7 @@ export function BleachResults({
               />
             </div>
             <div className="field">
-              <label htmlFor="bleachMarkupMultiplier">{t('results.markupMultiplier')}</label>
+              <label htmlFor="bleachMarkupMultiplier">{t("results.markupMultiplier")}</label>
               <input
                 id="bleachMarkupMultiplier"
                 type="number"
@@ -100,14 +100,14 @@ export function BleachResults({
 
           {productCost !== null && (
             <div className="results__row">
-              <span className="results__row-label">{t('results.productCost')}</span>
+              <span className="results__row-label">{t("results.productCost")}</span>
               <span>{productCost.toFixed(2)}</span>
             </div>
           )}
 
           {recommendedServicePrice !== null && (
             <div className="results__row">
-              <span className="results__row-label">{t('bleach.recommendedServicePrice')}</span>
+              <span className="results__row-label">{t("bleach.recommendedServicePrice")}</span>
               <span>{recommendedServicePrice.toFixed(2)}</span>
             </div>
           )}
@@ -132,12 +132,12 @@ export function BleachCalculator() {
 
   return (
     <div className="calculator calculator--wide">
-      <h1 className="calculator__title">{t('bleach.titlePrefix')} <span className="calculator__title-accent">{t('bleach.titleAccent')}</span></h1>
-      <p className="bleach__subtitle">{t('bleach.subtitle')}</p>
+      <h1 className="calculator__title">{t("bleach.titlePrefix")} <span className="calculator__title-accent">{t("bleach.titleAccent")}</span></h1>
+      <p className="bleach__subtitle">{t("bleach.subtitle")}</p>
 
       <div className="calculator__form">
         <div className="field">
-          <label htmlFor="currentLevel">{t('bleach.currentLevel')}</label>
+          <label htmlFor="currentLevel">{t("bleach.currentLevel")}</label>
           <Select
             id="currentLevel"
             value={String(currentLevel)}
@@ -147,7 +147,7 @@ export function BleachCalculator() {
         </div>
 
         <div className="field">
-          <label htmlFor="targetLevel">{t('bleach.targetLevel')}</label>
+          <label htmlFor="targetLevel">{t("bleach.targetLevel")}</label>
           <Select
             id="targetLevel"
             value={String(targetLevel)}
@@ -157,7 +157,7 @@ export function BleachCalculator() {
         </div>
 
         <div className="field">
-          <label htmlFor="totalGrams">{t('fields.totalGrams')}</label>
+          <label htmlFor="totalGrams">{t("fields.totalGrams")}</label>
           <input
             type="number"
             id="totalGrams"

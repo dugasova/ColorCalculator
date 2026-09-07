@@ -9,7 +9,7 @@ export interface BrandFieldProps {
   idSuffix?: string;
 }
 
-export function BrandField({ brandId, onBrandIdChange, idSuffix = '' }: BrandFieldProps) {
+export function BrandField({ brandId, onBrandIdChange, idSuffix = "" }: BrandFieldProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   // A custom brand an admin has just created but hasn't added any shades to yet has
@@ -17,7 +17,7 @@ export function BrandField({ brandId, onBrandIdChange, idSuffix = '' }: BrandFie
   const selectableBrands = Object.values(brands).filter(brand => brand.shades.length > 0);
   return (
     <div className="field">
-      <label htmlFor={`brandId${idSuffix}`}>{t('fields.brand')}</label>
+      <label htmlFor={`brandId${idSuffix}`}>{t("fields.brand")}</label>
       <Select
         id={`brandId${idSuffix}`}
         value={brandId}

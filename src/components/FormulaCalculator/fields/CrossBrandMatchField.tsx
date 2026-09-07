@@ -14,7 +14,7 @@ export interface CrossBrandMatchFieldProps {
 }
 
 function shadeLabel(shade: Shade): string {
-  return `${shade.code} ${shade.tone}${shade.secondaryTone ? '/' + shade.secondaryTone : ''}`;
+  return `${shade.code} ${shade.tone}${shade.secondaryTone ? "/" + shade.secondaryTone : ""}`;
 }
 
 // For when the current brand/shade is out of stock: ranks the single closest-looking shade
@@ -23,7 +23,7 @@ function shadeLabel(shade: Shade): string {
 // pass for the same result -- and a plain-language match quality (describeShadeMatchQuality)
 // instead of a raw delta-E number nobody but a color scientist would recognize. Collapsed by
 // default; computing every brand's closest shade is cheap but pointless until asked for.
-export function CrossBrandMatchField({ targetShade, currentBrandId, brands, onSelectMatch, idSuffix = '' }: CrossBrandMatchFieldProps) {
+export function CrossBrandMatchField({ targetShade, currentBrandId, brands, onSelectMatch, idSuffix = "" }: CrossBrandMatchFieldProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const panelId = `crossBrandMatchPanel${idSuffix}`;
@@ -39,14 +39,14 @@ export function CrossBrandMatchField({ targetShade, currentBrandId, brands, onSe
         aria-controls={panelId}
         onClick={() => setExpanded(value => !value)}
       >
-        {t('fields.crossBrandFind')}
+        {t("fields.crossBrandFind")}
       </button>
       {expanded && (
         <div id={panelId}>
           {targetPermanence === null ? (
-            <p className="cross-brand-match-empty">{t('fields.crossBrandUnknownPermanence')}</p>
+            <p className="cross-brand-match-empty">{t("fields.crossBrandUnknownPermanence")}</p>
           ) : matches.length === 0 ? (
-            <p className="cross-brand-match-empty">{t('fields.crossBrandEmpty')}</p>
+            <p className="cross-brand-match-empty">{t("fields.crossBrandEmpty")}</p>
           ) : (
             <ul className="cross-brand-match-list">
               {matches.map(match => {
@@ -70,7 +70,7 @@ export function CrossBrandMatchField({ targetShade, currentBrandId, brands, onSe
                       className="button button--secondary"
                       onClick={() => onSelectMatch(match.brandId, match.shade.line ?? null, match.shade.code)}
                     >
-                      {t('fields.crossBrandUse')}
+                      {t("fields.crossBrandUse")}
                     </button>
                   </li>
                 );

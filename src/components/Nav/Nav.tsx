@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import "./Nav.css";
 
-export type AppView = 'calculator' | 'correction' | 'history' | 'bleach' | 'complex' | 'prepigment' | 'analytics' | 'palette';
+export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "palette";
 
 const ICON_PATHS: Record<AppView, ReactNode> = {
   calculator: (
@@ -75,20 +75,20 @@ export interface NavProps {
 
 export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const items: AppView[] = ['calculator', 'correction', 'bleach', 'complex', 'prepigment', 'history', 'analytics'];
+  const items: AppView[] = ["calculator", "correction", "bleach", "complex", "prepigment", "history", "analytics"];
   if (isAdmin) {
-    items.push('palette');
+    items.push("palette");
   }
 
   return (
-    <div className="app-nav" role="tablist" aria-label={t('nav.ariaLabel')}>
+    <div className="app-nav" role="tablist" aria-label={t("nav.ariaLabel")}>
       {items.map(item => (
         <button
           key={item}
           type="button"
           role="tab"
           aria-selected={view === item}
-          className={clsx('app-nav__item', view === item && 'app-nav__item--active')}
+          className={clsx("app-nav__item", view === item && "app-nav__item--active")}
           onClick={() => onViewChange(item)}
         >
           <svg className="app-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

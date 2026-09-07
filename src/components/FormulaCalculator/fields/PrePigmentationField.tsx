@@ -13,9 +13,9 @@ export interface PrePigmentationFieldProps {
 // threshold `need` is 'none' and this renders nothing. Opting in via the checkbox adds
 // the filler step FormulaResults renders ahead of the target-color formula (see
 // PrePigmentationStep) and prepends to the copyable/shareable formula text.
-export function PrePigmentationField({ need, enabled, onEnabledChange, idSuffix = '' }: PrePigmentationFieldProps) {
+export function PrePigmentationField({ need, enabled, onEnabledChange, idSuffix = "" }: PrePigmentationFieldProps) {
   const { t } = useTranslation();
-  if (need === 'none') return null;
+  if (need === "none") return null;
 
   return (
     <div className="field">
@@ -27,7 +27,7 @@ export function PrePigmentationField({ need, enabled, onEnabledChange, idSuffix 
           checked={enabled}
           onChange={e => onEnabledChange(e.target.checked)}
         />
-        {t('fields.prePigmentationEnable')}
+        {t("fields.prePigmentationEnable")}
       </label>
     </div>
   );

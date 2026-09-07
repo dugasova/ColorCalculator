@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import type { HairCanvas, Porosity, HairThickness, ChemicalHistory } from '../../engine/canvas';
-import { createDefaultCanvas } from '../../engine/canvas';
+import { useState } from "react";
+import type { HairCanvas, Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
+import { createDefaultCanvas } from "../../engine/canvas";
 
 export function useHairCanvasState(initialCanvas?: HairCanvas) {
   const defaultCanvas = createDefaultCanvas();

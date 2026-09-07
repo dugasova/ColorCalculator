@@ -1,10 +1,10 @@
 import { initializeApp } from "firebase/app";
 import {
-    getFirestore,
-    initializeFirestore,
-    persistentLocalCache,
-    persistentMultipleTabManager,
-    CACHE_SIZE_UNLIMITED,
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  CACHE_SIZE_UNLIMITED,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
@@ -22,12 +22,12 @@ import { getStorage } from "firebase/storage";
 // build time. Route it through a helper and the browser build silently ships `undefined`
 // for every value — Firebase then fails to initialize with no build-time warning.
 function readEnv(viteValue: string | undefined, key: string): string | undefined {
-    if (viteValue !== undefined) return viteValue;
-    // `process` isn't declared without @types/node, which this browser-facing file
-    // doesn't (and shouldn't) depend on; one-off environment-detection cast, not a read
-    // of untrusted external data.
-    const nodeGlobal = globalThis as unknown as { process?: { env?: Record<string, string | undefined> } };
-    return nodeGlobal.process?.env?.[key];
+  if (viteValue !== undefined) return viteValue;
+  // `process` isn't declared without @types/node, which this browser-facing file
+  // doesn't (and shouldn't) depend on; one-off environment-detection cast, not a read
+  // of untrusted external data.
+  const nodeGlobal = globalThis as unknown as { process?: { env?: Record<string, string | undefined> } };
+  return nodeGlobal.process?.env?.[key];
 }
 
 // These are public client identifiers, not secrets — a Firebase web app's config ships
@@ -40,12 +40,12 @@ function readEnv(viteValue: string | undefined, key: string): string | undefined
 // harden it with an API key restriction (Google Cloud Console) and Firebase App Check,
 // not by hiding the config.
 const firebaseConfig = {
-    apiKey: readEnv(import.meta.env?.VITE_FIREBASE_API_KEY, 'VITE_FIREBASE_API_KEY'),
-    authDomain: readEnv(import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN, 'VITE_FIREBASE_AUTH_DOMAIN'),
-    projectId: readEnv(import.meta.env?.VITE_FIREBASE_PROJECT_ID, 'VITE_FIREBASE_PROJECT_ID'),
-    storageBucket: readEnv(import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET, 'VITE_FIREBASE_STORAGE_BUCKET'),
-    messagingSenderId: readEnv(import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID, 'VITE_FIREBASE_MESSAGING_SENDER_ID'),
-    appId: readEnv(import.meta.env?.VITE_FIREBASE_APP_ID, 'VITE_FIREBASE_APP_ID'),
+  apiKey: readEnv(import.meta.env?.VITE_FIREBASE_API_KEY, "VITE_FIREBASE_API_KEY"),
+  authDomain: readEnv(import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN, "VITE_FIREBASE_AUTH_DOMAIN"),
+  projectId: readEnv(import.meta.env?.VITE_FIREBASE_PROJECT_ID, "VITE_FIREBASE_PROJECT_ID"),
+  storageBucket: readEnv(import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET, "VITE_FIREBASE_STORAGE_BUCKET"),
+  messagingSenderId: readEnv(import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID, "VITE_FIREBASE_MESSAGING_SENDER_ID"),
+  appId: readEnv(import.meta.env?.VITE_FIREBASE_APP_ID, "VITE_FIREBASE_APP_ID"),
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -56,13 +56,13 @@ export const app = initializeApp(firebaseConfig);
 // exists in a browser: this module doubles as the Firebase client for the Node-run
 // migration scripts (see the comment above), which must keep the plain in-memory client
 // or `initializeFirestore` throws immediately on startup.
-export const db = typeof indexedDB !== 'undefined'
-    ? initializeFirestore(app, {
-        localCache: persistentLocalCache({
-            cacheSizeBytes: CACHE_SIZE_UNLIMITED,
-            tabManager: persistentMultipleTabManager(),
-        }),
-    })
-    : getFirestore(app);
+export const db = typeof indexedDB !== "undefined"
+  ? initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+      tabManager: persistentMultipleTabManager(),
+    }),
+  })
+  : getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);

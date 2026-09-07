@@ -89,7 +89,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
 
   return (
     <div className="calculator calculator--wide">
-      <h1 className="calculator__title">{t('app.titlePrefix')} <span className="calculator__title-accent">{t('app.titleAccent')}</span></h1>
+      <h1 className="calculator__title">{t("app.titlePrefix")} <span className="calculator__title-accent">{t("app.titleAccent")}</span></h1>
       <div className="calculator__form">
         <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} />
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} />
@@ -136,7 +136,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
                   lineShades={lineShades}
                   additionalShadeCode={additionalShade2Code}
                   onAdditionalShadeCodeChange={setAdditionalShade2Code}
-                  label={t('fields.additionalShade2')}
+                  label={t("fields.additionalShade2")}
                 />
                 <AdditionalShadeGramsField
                   additionalShadeCode={additionalShade2Code}
@@ -152,16 +152,16 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
             <div className="blend-group__fields">
               <BlendComponentField
                 id="blendShadeA"
-                label={t('fields.blendShadeA')}
-                placeholder={t('fields.blendShadeNone')}
+                label={t("fields.blendShadeA")}
+                placeholder={t("fields.blendShadeNone")}
                 candidates={blendCandidates}
                 shadeCode={blendShadeACodeEffective}
                 onShadeCodeChange={setBlendShadeACode}
               />
               <BlendComponentField
                 id="blendShadeB"
-                label={t('fields.blendShadeB')}
-                placeholder={t('fields.blendShadeNone')}
+                label={t("fields.blendShadeB")}
+                placeholder={t("fields.blendShadeNone")}
                 candidates={blendCandidates}
                 shadeCode={blendShadeBCodeEffective}
                 onShadeCodeChange={setBlendShadeBCode}

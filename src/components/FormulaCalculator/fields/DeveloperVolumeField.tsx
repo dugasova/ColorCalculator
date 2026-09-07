@@ -10,7 +10,7 @@ export interface DeveloperVolumeFieldProps {
   idSuffix?: string;
 }
 
-export function DeveloperVolumeField({ targetShade, manualDeveloperVolume, onManualDeveloperVolumeChange, idSuffix = '' }: DeveloperVolumeFieldProps) {
+export function DeveloperVolumeField({ targetShade, manualDeveloperVolume, onManualDeveloperVolumeChange, idSuffix = "" }: DeveloperVolumeFieldProps) {
   const { t } = useTranslation();
   if (!targetShade.developerVolumeChoices) {
     return null;
@@ -18,14 +18,14 @@ export function DeveloperVolumeField({ targetShade, manualDeveloperVolume, onMan
 
   return (
     <div className="field">
-      <label htmlFor={`manualDeveloperVolume${idSuffix}`}>{t('fields.developerVolume')}</label>
+      <label htmlFor={`manualDeveloperVolume${idSuffix}`}>{t("fields.developerVolume")}</label>
       <Select
         id={`manualDeveloperVolume${idSuffix}`}
         value={String(manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])}
         onChange={value => onManualDeveloperVolumeChange(Number(value) as DeveloperVolume)}
         options={targetShade.developerVolumeChoices.map(volume => ({
           value: String(volume),
-          label: t('format.developerVolume', { value: volume }),
+          label: t("format.developerVolume", { value: volume }),
         }))}
       />
     </div>

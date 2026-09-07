@@ -12,15 +12,15 @@ export interface CanvasFieldsProps {
   idSuffix?: string;
 }
 
-const POROSITY_OPTIONS: Porosity[] = ['low', 'normal', 'high'];
-const THICKNESS_OPTIONS: HairThickness[] = ['fine', 'medium', 'coarse'];
-const CHEMICAL_HISTORY_OPTIONS: ChemicalHistory[] = ['keratin', 'perm', 'henna', 'direct_dye'];
+const POROSITY_OPTIONS: Porosity[] = ["low", "normal", "high"];
+const THICKNESS_OPTIONS: HairThickness[] = ["fine", "medium", "coarse"];
+const CHEMICAL_HISTORY_OPTIONS: ChemicalHistory[] = ["keratin", "perm", "henna", "direct_dye"];
 
 export function CanvasFields({
   porosity, onPorosityChange,
   thickness, onThicknessChange,
   chemicalHistory, onChemicalHistoryChange,
-  idSuffix = ''
+  idSuffix = ""
 }: CanvasFieldsProps) {
   const { t } = useTranslation();
 
@@ -35,7 +35,7 @@ export function CanvasFields({
   return (
     <>
       <div className="field">
-        <label htmlFor={`porosity${idSuffix}`}>{t('canvas.porosity.label')}</label>
+        <label htmlFor={`porosity${idSuffix}`}>{t("canvas.porosity.label")}</label>
         <Select
           id={`porosity${idSuffix}`}
           value={porosity}
@@ -45,7 +45,7 @@ export function CanvasFields({
       </div>
 
       <div className="field">
-        <label htmlFor={`thickness${idSuffix}`}>{t('canvas.thickness.label')}</label>
+        <label htmlFor={`thickness${idSuffix}`}>{t("canvas.thickness.label")}</label>
         <Select
           id={`thickness${idSuffix}`}
           value={thickness}
@@ -55,15 +55,15 @@ export function CanvasFields({
       </div>
 
       <div className="field chemical-history">
-        <label>{t('canvas.chemicalHistory.label')}</label>
-        <div className="checkbox-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '2px' }}>
+        <label>{t("canvas.chemicalHistory.label")}</label>
+        <div className="checkbox-group" style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "2px" }}>
           {CHEMICAL_HISTORY_OPTIONS.map(ch => (
-            <label key={ch} className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.95rem', color: 'var(--ink)', cursor: 'pointer', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
+            <label key={ch} className="checkbox-label" style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.95rem", color: "var(--ink)", cursor: "pointer", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}>
               <input
                 type="checkbox"
                 checked={chemicalHistory.includes(ch)}
                 onChange={() => handleChemicalHistoryChange(ch)}
-                style={{ width: '18px', height: '18px', flex: 'none', margin: 0, padding: 0 }}
+                style={{ width: "18px", height: "18px", flex: "none", margin: 0, padding: 0 }}
               />
               {t(`canvas.chemicalHistory.${ch}`)}
             </label>

@@ -13,20 +13,20 @@ export interface AdditionalShadeFieldProps {
 
 // Lets the colorist blend in an extra shade at their own discretion — e.g. a small
 // corrective addition — independent of the primary target shade selected above.
-export function AdditionalShadeField({ lineShades, additionalShadeCode, onAdditionalShadeCodeChange, idSuffix = '', label }: AdditionalShadeFieldProps) {
+export function AdditionalShadeField({ lineShades, additionalShadeCode, onAdditionalShadeCodeChange, idSuffix = "", label }: AdditionalShadeFieldProps) {
   const { t } = useTranslation();
   const additionalShade = lineShades.find(s => s.code === additionalShadeCode) ?? null;
 
   return (
     <div className="field">
-      <label htmlFor={`additionalShadeCode${idSuffix}`}>{label ?? t('fields.additionalShade')}</label>
+      <label htmlFor={`additionalShadeCode${idSuffix}`}>{label ?? t("fields.additionalShade")}</label>
       <div className="shade-field">
         <Select
           id={`additionalShadeCode${idSuffix}`}
-          value={additionalShadeCode ?? ''}
-          onChange={value => onAdditionalShadeCodeChange(value === '' ? null : value)}
+          value={additionalShadeCode ?? ""}
+          onChange={value => onAdditionalShadeCodeChange(value === "" ? null : value)}
           options={[
-            { value: '', label: t('fields.additionalShadeNone') },
+            { value: "", label: t("fields.additionalShadeNone") },
             ...lineShades.map(shade => ({
               value: shade.code,
               label: shadeLabel(shade),

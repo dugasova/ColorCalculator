@@ -1,59 +1,59 @@
-import i18n from './i18n';
-import { formatFormulaText } from './engine/formatFormula';
-import { formatBleachText } from './engine/formatBleach';
-import { formatFillerStepText } from './engine/formatPrePigmentation';
-import { formatLineLabel } from './engine/formatLineLabel';
-import type { ColorHistoryStep, HistoryStep } from './history';
+import i18n from "./i18n";
+import { formatFormulaText } from "./engine/formatFormula";
+import { formatBleachText } from "./engine/formatBleach";
+import { formatFillerStepText } from "./engine/formatPrePigmentation";
+import { formatLineLabel } from "./engine/formatLineLabel";
+import type { ColorHistoryStep, HistoryStep } from "./history";
 
-function formatCanvasText(canvas: HistoryStep['canvas']): string {
-    if (!canvas) return '';
-    const porosityText = i18n.t(`canvas.porosity.${canvas.porosity}`);
-    const thicknessText = i18n.t(`canvas.thickness.${canvas.thickness}`);
-    let text = `${i18n.t('canvas.porosity.label')}: ${porosityText}\n${i18n.t('canvas.thickness.label')}: ${thicknessText}`;
-    
-    if (canvas.chemicalHistory.length > 0) {
-        const chemText = canvas.chemicalHistory.map(ch => i18n.t(`canvas.chemicalHistory.${ch}`)).join(', ');
-        text += `\n${i18n.t('canvas.chemicalHistory.label')}: ${chemText}`;
-    }
-    return text;
+function formatCanvasText(canvas: HistoryStep["canvas"]): string {
+  if (!canvas) return "";
+  const porosityText = i18n.t(`canvas.porosity.${canvas.porosity}`);
+  const thicknessText = i18n.t(`canvas.thickness.${canvas.thickness}`);
+  let text = `${i18n.t("canvas.porosity.label")}: ${porosityText}\n${i18n.t("canvas.thickness.label")}: ${thicknessText}`;
+  
+  if (canvas.chemicalHistory.length > 0) {
+    const chemText = canvas.chemicalHistory.map(ch => i18n.t(`canvas.chemicalHistory.${ch}`)).join(", ");
+    text += `\n${i18n.t("canvas.chemicalHistory.label")}: ${chemText}`;
+  }
+  return text;
 }
 
 function formatStepText(step: HistoryStep): string {
-    const canvasText = formatCanvasText(step.canvas);
+  const canvasText = formatCanvasText(step.canvas);
 
-    if (step.kind === 'bleach') {
-        const bleachText = formatBleachText({
-            startLevel: step.startLevel,
-            targetLevel: step.targetLevel,
-            result: step.result,
-            processingMinutes: step.processingMinutes,
-        });
-        return canvasText ? `${canvasText}\n\n${bleachText}` : bleachText;
-    }
-
-    const targetColorText = formatFormulaText({
-        brandName: step.brandName,
-        line: step.line,
-        targetShade: step.targetShade,
-        startLevel: step.startLevel,
-        result: step.result,
-        processingMinutes: step.processingMinutes,
-        applicationZone: step.applicationZone,
-        additionalShade: step.additionalShade,
-        additionalShadeGrams: step.additionalShadeGrams ?? 0,
-        blend: step.blend ?? null,
-        neutralizationApplied: step.neutralizationApplied,
+  if (step.kind === "bleach") {
+    const bleachText = formatBleachText({
+      startLevel: step.startLevel,
+      targetLevel: step.targetLevel,
+      result: step.result,
+      processingMinutes: step.processingMinutes,
     });
+    return canvasText ? `${canvasText}\n\n${bleachText}` : bleachText;
+  }
 
-    // Old docs saved before this field existed lack the `prePigmentation` key entirely,
-    // reading back as `undefined` (not `null`) -- normalize the same as history.ts does.
-    const prePigmentation = step.prePigmentation ?? null;
-    const fillerStepText = prePigmentation !== null ? formatFillerStepText(step.targetShade.level, prePigmentation) : null;
-    const combinedText = fillerStepText !== null 
-        ? `${fillerStepText}\n\n${i18n.t('prePigmentation.finalStepLabel')}\n${targetColorText}`
-        : targetColorText;
+  const targetColorText = formatFormulaText({
+    brandName: step.brandName,
+    line: step.line,
+    targetShade: step.targetShade,
+    startLevel: step.startLevel,
+    result: step.result,
+    processingMinutes: step.processingMinutes,
+    applicationZone: step.applicationZone,
+    additionalShade: step.additionalShade,
+    additionalShadeGrams: step.additionalShadeGrams ?? 0,
+    blend: step.blend ?? null,
+    neutralizationApplied: step.neutralizationApplied,
+  });
 
-    return canvasText ? `${canvasText}\n\n${combinedText}` : combinedText;
+  // Old docs saved before this field existed lack the `prePigmentation` key entirely,
+  // reading back as `undefined` (not `null`) -- normalize the same as history.ts does.
+  const prePigmentation = step.prePigmentation ?? null;
+  const fillerStepText = prePigmentation !== null ? formatFillerStepText(step.targetShade.level, prePigmentation) : null;
+  const combinedText = fillerStepText !== null 
+    ? `${fillerStepText}\n\n${i18n.t("prePigmentation.finalStepLabel")}\n${targetColorText}`
+    : targetColorText;
+
+  return canvasText ? `${canvasText}\n\n${combinedText}` : combinedText;
 }
 
 // Renders every step of a saved (or in-progress) session as its own block. A simple
@@ -62,18 +62,18 @@ function formatStepText(step: HistoryStep): string {
 // processing time across all of them, since that's what the colorist actually needs to plan
 // for a multi-hour appointment.
 export function formatSessionText(steps: HistoryStep[]): string {
-    const blocks = steps.map((step, index) =>
-        steps.length > 1
-            ? `${i18n.t('history.stepLabel', { number: index + 1 })}\n${formatStepText(step)}`
-            : formatStepText(step)
-    );
+  const blocks = steps.map((step, index) =>
+    steps.length > 1
+      ? `${i18n.t("history.stepLabel", { number: index + 1 })}\n${formatStepText(step)}`
+      : formatStepText(step)
+  );
 
-    if (steps.length > 1) {
-        const totalMinutes = steps.reduce((sum, step) => sum + step.processingMinutes, 0);
-        blocks.push(i18n.t('format.totalProcessingTime', { value: totalMinutes }));
-    }
+  if (steps.length > 1) {
+    const totalMinutes = steps.reduce((sum, step) => sum + step.processingMinutes, 0);
+    blocks.push(i18n.t("format.totalProcessingTime", { value: totalMinutes }));
+  }
 
-    return blocks.join('\n\n');
+  return blocks.join("\n\n");
 }
 
 // A one-line "at a glance" headline for a History client card, shown above the full
@@ -84,11 +84,11 @@ export function formatSessionText(steps: HistoryStep[]): string {
 // session (no toning step) falls back to its last step's plain target level, since
 // there is no product/shade to name in that case.
 export function formatSessionSummary(steps: HistoryStep[]): string {
-    const startLevel = steps[0].startLevel;
-    const lastColorStep = [...steps].reverse().find((step): step is ColorHistoryStep => step.kind === 'color');
-    const lastStep = steps[steps.length - 1];
-    const target = lastColorStep !== undefined
-        ? `${lastColorStep.brandName}${lastColorStep.line ? ' ' + formatLineLabel(lastColorStep.line) : ''} — ${lastColorStep.targetShade.code}`
-        : String(lastStep.kind === 'bleach' ? lastStep.targetLevel : lastStep.targetShade.level);
-    return i18n.t('format.startingLevel', { start: startLevel, target });
+  const startLevel = steps[0].startLevel;
+  const lastColorStep = [...steps].reverse().find((step): step is ColorHistoryStep => step.kind === "color");
+  const lastStep = steps[steps.length - 1];
+  const target = lastColorStep !== undefined
+    ? `${lastColorStep.brandName}${lastColorStep.line ? " " + formatLineLabel(lastColorStep.line) : ""} — ${lastColorStep.targetShade.code}`
+    : String(lastStep.kind === "bleach" ? lastStep.targetLevel : lastStep.targetShade.level);
+  return i18n.t("format.startingLevel", { start: startLevel, target });
 }

@@ -29,7 +29,7 @@ const COPIED_FEEDBACK_MS = 1500;
 const SAVED_FEEDBACK_MS = 1500;
 const PATCH_TEST_MIN_HOURS = 48;
 
-type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+type SaveState = "idle" | "saving" | "saved" | "error";
 
 // Client name/note/patch-test/photos + copy/share/save actions, shared by any calculator
 // that produces a formula text and a set of history-savable fields: the single-formula
@@ -40,7 +40,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   const [isCopied, setIsCopied] = useState(false);
   const [clientName, setClientName] = useState("");
   const [note, setNote] = useState("");
-  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [saveState, setSaveState] = useState<SaveState>("idle");
   const [patchTestDate, setPatchTestDate] = useState("");
   const [allergyNotes, setAllergyNotes] = useState("");
   const [patchTestOverride, setPatchTestOverride] = useState(false);
@@ -63,7 +63,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   }, [beforePhotoPreviewUrl, afterPhotoPreviewUrl]);
 
   const patchTestOk = patchTestOverride || (
-    patchTestDate !== '' && nowMs - new Date(patchTestDate).getTime() >= PATCH_TEST_MIN_HOURS * 60 * 60 * 1000
+    patchTestDate !== "" && nowMs - new Date(patchTestDate).getTime() >= PATCH_TEST_MIN_HOURS * 60 * 60 * 1000
   );
 
   const handleCopy = async () => {
@@ -73,7 +73,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   };
 
   const handleShareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(formulaText)}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://wa.me/?text=${encodeURIComponent(formulaText)}`, "_blank", "noopener,noreferrer");
   };
 
   const handleShareTelegram = () => {
@@ -81,7 +81,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     // to telegram.org instead of opening the share/contact picker. There's no official
     // "share plain text" endpoint, so the formula text goes in `url` itself (Telegram
     // renders it as the shared message, same trick used for chat/link previews).
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(formulaText)}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(formulaText)}`, "_blank", "noopener,noreferrer");
   };
 
   const handleBeforePhotoChange = (file: File | null) => {
@@ -97,7 +97,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   };
 
   const handleSave = async () => {
-    setSaveState('saving');
+    setSaveState("saving");
     try {
       await onSave({
         clientName: clientName.trim(),
@@ -108,10 +108,10 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         beforePhotoFile,
         afterPhotoFile,
       });
-      setSaveState('saved');
-      setTimeout(() => { setSaveState('idle'); onSaved?.(); }, SAVED_FEEDBACK_MS);
+      setSaveState("saved");
+      setTimeout(() => { setSaveState("idle"); onSaved?.(); }, SAVED_FEEDBACK_MS);
     } catch {
-      setSaveState('error');
+      setSaveState("error");
     }
   };
 
@@ -119,32 +119,32 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     <>
       <ProcessingTimer minutes={processingMinutes} />
 
-      <h2 className="results__section-heading">{t('results.clientDetailsSectionTitle')}</h2>
+      <h2 className="results__section-heading">{t("results.clientDetailsSectionTitle")}</h2>
 
       <div className="field results__client-name">
-        <label htmlFor="clientName">{t('results.clientNameLabel')}</label>
+        <label htmlFor="clientName">{t("results.clientNameLabel")}</label>
         <input
           id="clientName"
           value={clientName}
           onChange={e => setClientName(e.target.value)}
-          placeholder={t('results.clientNamePlaceholder')}
+          placeholder={t("results.clientNamePlaceholder")}
           required
         />
       </div>
 
       <div className="field results__note">
-        <label htmlFor="note">{t('results.noteLabel')}</label>
+        <label htmlFor="note">{t("results.noteLabel")}</label>
         <textarea
           id="note"
           value={note}
           onChange={e => setNote(e.target.value)}
-          placeholder={t('results.notePlaceholder')}
+          placeholder={t("results.notePlaceholder")}
           rows={2}
         />
       </div>
 
       <div className="field results__patch-test">
-        <label htmlFor="patchTestDate">{t('results.patchTestDateLabel')}</label>
+        <label htmlFor="patchTestDate">{t("results.patchTestDateLabel")}</label>
         <input
           id="patchTestDate"
           type="datetime-local"
@@ -155,30 +155,30 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
       </div>
 
       <div className="field results__allergy-notes">
-        <label htmlFor="allergyNotes">{t('results.allergyNotesLabel')}</label>
+        <label htmlFor="allergyNotes">{t("results.allergyNotesLabel")}</label>
         <input
           id="allergyNotes"
           value={allergyNotes}
           onChange={e => setAllergyNotes(e.target.value)}
-          placeholder={t('results.allergyNotesPlaceholder')}
+          placeholder={t("results.allergyNotesPlaceholder")}
         />
       </div>
 
       <label className="results__patch-test-override">
         <input type="checkbox" checked={patchTestOverride} onChange={e => setPatchTestOverride(e.target.checked)} />
-        {t('results.patchTestOverrideLabel')}
+        {t("results.patchTestOverrideLabel")}
       </label>
 
-      {!patchTestOk && <p className="warning" role="alert">{t('results.patchTestRequired')}</p>}
+      {!patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}
 
       <div className="results__photos">
         <div className="field results__photo">
-          <label htmlFor="beforePhoto">{t('results.beforePhotoLabel')}</label>
+          <label htmlFor="beforePhoto">{t("results.beforePhotoLabel")}</label>
           <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => handleBeforePhotoChange(e.target.files?.[0] ?? null)} />
           {beforePhotoPreviewUrl && <img className="results__photo-preview" src={beforePhotoPreviewUrl} alt="" />}
         </div>
         <div className="field results__photo">
-          <label htmlFor="afterPhoto">{t('results.afterPhotoLabel')}</label>
+          <label htmlFor="afterPhoto">{t("results.afterPhotoLabel")}</label>
           <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => handleAfterPhotoChange(e.target.files?.[0] ?? null)} />
           {afterPhotoPreviewUrl && <img className="results__photo-preview" src={afterPhotoPreviewUrl} alt="" />}
         </div>
@@ -186,25 +186,25 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
 
       <div className="results__actions">
         <button type="button" className="button" onClick={handleCopy}>
-          {isCopied ? t('results.copied') : t('results.copy')}
+          {isCopied ? t("results.copied") : t("results.copy")}
         </button>
         <button
           type="button"
           className="button button--secondary"
           onClick={handleSave}
-          disabled={clientName.trim() === '' || saveState === 'saving' || !patchTestOk || saveDisabled === true}
+          disabled={clientName.trim() === "" || saveState === "saving" || !patchTestOk || saveDisabled === true}
         >
-          {saveState === 'saved' ? t('results.saved') : saveState === 'saving' ? t('results.saving') : t('results.save')}
+          {saveState === "saved" ? t("results.saved") : saveState === "saving" ? t("results.saving") : t("results.save")}
         </button>
       </div>
-      {saveState === 'error' && <p className="warning" role="alert">{t('results.saveError')}</p>}
+      {saveState === "error" && <p className="warning" role="alert">{t("results.saveError")}</p>}
 
       <div className="results__share">
         <button type="button" className="button button--share button--whatsapp" onClick={handleShareWhatsApp}>
-          {t('results.shareWhatsApp')}
+          {t("results.shareWhatsApp")}
         </button>
         <button type="button" className="button button--share button--telegram" onClick={handleShareTelegram}>
-          {t('results.shareTelegram')}
+          {t("results.shareTelegram")}
         </button>
       </div>
     </>

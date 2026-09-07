@@ -34,7 +34,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
   const step: BleachHistoryStep = {
-    kind: 'bleach',
+    kind: "bleach",
     startLevel,
     targetLevel,
     result,
@@ -51,15 +51,15 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
   return (
     <div className="step-card">
       <div className="step-card__header">
-        <h2 className="step-card__title">{t('complexColoring.bleachStepTitle')}</h2>
+        <h2 className="step-card__title">{t("complexColoring.bleachStepTitle")}</h2>
         <button type="button" className="button button--secondary step-card__remove" onClick={onRemove}>
-          {t('complexColoring.removeStep')}
+          {t("complexColoring.removeStep")}
         </button>
       </div>
 
       <div className="calculator__form">
         <div className="field">
-          <label htmlFor={`bleachCurrentLevel${idSuffix}`}>{t('bleach.currentLevel')}</label>
+          <label htmlFor={`bleachCurrentLevel${idSuffix}`}>{t("bleach.currentLevel")}</label>
           <Select
             id={`bleachCurrentLevel${idSuffix}`}
             value={String(startLevel)}
@@ -76,7 +76,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
         />
 
         <div className="field">
-          <label htmlFor={`bleachTargetLevel${idSuffix}`}>{t('bleach.targetLevel')}</label>
+          <label htmlFor={`bleachTargetLevel${idSuffix}`}>{t("bleach.targetLevel")}</label>
           <Select
             id={`bleachTargetLevel${idSuffix}`}
             value={String(targetLevel)}
@@ -86,7 +86,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
         </div>
 
         <div className="field">
-          <label htmlFor={`bleachTotalGrams${idSuffix}`}>{t('fields.totalGrams')}</label>
+          <label htmlFor={`bleachTotalGrams${idSuffix}`}>{t("fields.totalGrams")}</label>
           <input
             id={`bleachTotalGrams${idSuffix}`}
             type="number"
@@ -99,7 +99,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
         {result.grams !== null && (
           <>
             <div className="field">
-              <label htmlFor={`bleachStepProcessingMinutes${idSuffix}`}>{t('results.processingTime')}</label>
+              <label htmlFor={`bleachStepProcessingMinutes${idSuffix}`}>{t("results.processingTime")}</label>
               <input
                 id={`bleachStepProcessingMinutes${idSuffix}`}
                 type="number"
@@ -109,7 +109,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
               />
             </div>
             <div className="field">
-              <label htmlFor={`bleachStepPricePerGram${idSuffix}`}>{t('results.pricePerGram')}</label>
+              <label htmlFor={`bleachStepPricePerGram${idSuffix}`}>{t("results.pricePerGram")}</label>
               <input
                 id={`bleachStepPricePerGram${idSuffix}`}
                 type="number"
@@ -123,21 +123,21 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
         )}
       </div>
 
-      {result.liftNeeded === 0 && <p className="warning" role="alert">{t('bleach.noLiftWarning')}</p>}
-      {result.multiStepRequired && <p className="warning" role="alert">{t('bleach.multiStepWarning')}</p>}
+      {result.liftNeeded === 0 && <p className="warning" role="alert">{t("bleach.noLiftWarning")}</p>}
+      {result.multiStepRequired && <p className="warning" role="alert">{t("bleach.multiStepWarning")}</p>}
 
       {result.grams !== null && (
         <>
           <div className="results__row">
-            <span className="results__row-label">{t('results.mix')}</span>
-            <span>{t('bleach.mixValue', { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) })}</span>
+            <span className="results__row-label">{t("results.mix")}</span>
+            <span>{t("bleach.mixValue", { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) })}</span>
           </div>
           <div className="results__row">
-            <span className="results__row-label">{t('results.developer')}</span>
-            <span>{result.developerVolume !== null ? t('format.developerVolume', { value: result.developerVolume }) : '—'}</span>
+            <span className="results__row-label">{t("results.developer")}</span>
+            <span>{result.developerVolume !== null ? t("format.developerVolume", { value: result.developerVolume }) : "—"}</span>
           </div>
-          <p className="bleach__note">{t('bleach.maxScalpTimeNote', { max: result.maxScalpProcessingMinutes })}</p>
-          <p className="bleach__note">{t('bleach.checkIntervalNote', { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>
+          <p className="bleach__note">{t("bleach.maxScalpTimeNote", { max: result.maxScalpProcessingMinutes })}</p>
+          <p className="bleach__note">{t("bleach.checkIntervalNote", { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>
         </>
       )}
     </div>

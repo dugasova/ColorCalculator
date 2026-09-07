@@ -26,8 +26,8 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
   const shadeCounts = new Map<string, ShadePopularity>();
   for (const entry of entries) {
     for (const step of entry.steps) {
-      if (step.kind !== 'color') continue;
-      const key = `${step.brandName}|${step.line ?? ''}|${step.targetShade.code}`;
+      if (step.kind !== "color") continue;
+      const key = `${step.brandName}|${step.line ?? ""}|${step.targetShade.code}`;
       const existing = shadeCounts.get(key);
       if (existing !== undefined) {
         existing.count += 1;
@@ -47,16 +47,16 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
   // into `NaN`.
   const colorGramsValues = entries
     .flatMap(e => e.steps)
-    .filter((step): step is ColorHistoryStep => step.kind === 'color')
+    .filter((step): step is ColorHistoryStep => step.kind === "color")
     .map(step => step.result.grams?.colorGrams)
-    .filter((g): g is number => typeof g === 'number');
+    .filter((g): g is number => typeof g === "number");
   const averageColorGrams = colorGramsValues.length > 0
     ? colorGramsValues.reduce((sum, g) => sum + g, 0) / colorGramsValues.length
     : null;
 
   const productCostValues = entries
     .map(e => e.productCost)
-    .filter((c): c is number => typeof c === 'number');
+    .filter((c): c is number => typeof c === "number");
   const averageProductCost = productCostValues.length > 0
     ? productCostValues.reduce((sum, c) => sum + c, 0) / productCostValues.length
     : null;
@@ -67,7 +67,7 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
   const visitsByClient = new Map<string, number>();
   for (const entry of entries) {
     const key = entry.clientName.trim().toLowerCase();
-    if (key === '') continue;
+    if (key === "") continue;
     visitsByClient.set(key, (visitsByClient.get(key) ?? 0) + 1);
   }
   const uniqueClients = visitsByClient.size;

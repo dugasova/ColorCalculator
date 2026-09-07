@@ -5,7 +5,7 @@ export interface ProcessingTimerProps {
   minutes: number;
 }
 
-type TimerStatus = 'idle' | 'running' | 'paused';
+type TimerStatus = "idle" | "running" | "paused";
 
 // Safari-only vendor-prefixed AudioContext; no standard lib type declares it.
 interface WebkitWindow extends Window {
@@ -15,7 +15,7 @@ interface WebkitWindow extends Window {
 function formatClock(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 // Two short ascending beeps via Web Audio — no external asset needed, and it still
@@ -47,15 +47,15 @@ function playChime() {
 
 export function ProcessingTimer({ minutes }: ProcessingTimerProps) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<TimerStatus>('idle');
+  const [status, setStatus] = useState<TimerStatus>("idle");
   const [remainingSeconds, setRemainingSeconds] = useState(minutes * 60);
   const [syncedMinutes, setSyncedMinutes] = useState(minutes);
-  const isDone = status === 'running' && remainingSeconds === 0;
+  const isDone = status === "running" && remainingSeconds === 0;
 
   // Follow edits to the processing-time field while idle, right during render (no effect
   // needed): https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
   // Leave an active/paused countdown alone.
-  if (minutes !== syncedMinutes && status === 'idle') {
+  if (minutes !== syncedMinutes && status === "idle") {
     setSyncedMinutes(minutes);
     setRemainingSeconds(minutes * 60);
   }
@@ -64,7 +64,7 @@ export function ProcessingTimer({ minutes }: ProcessingTimerProps) {
   // use case for an effect; the setState call lives inside the interval callback, not
   // synchronously in the effect body.
   useEffect(() => {
-    if (status !== 'running') return;
+    if (status !== "running") return;
     const id = setInterval(() => {
       setRemainingSeconds(prev => {
         if (prev <= 1) {
@@ -82,48 +82,48 @@ export function ProcessingTimer({ minutes }: ProcessingTimerProps) {
   useEffect(() => {
     if (!isDone) return;
     playChime();
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(t('results.timerDoneTitle'));
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(t("results.timerDoneTitle"));
     }
   }, [isDone, t]);
 
   const handleStart = () => {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if ("Notification" in window && Notification.permission === "default") {
       void Notification.requestPermission();
     }
-    setStatus('running');
+    setStatus("running");
   };
-  const handlePause = () => setStatus('paused');
-  const handleResume = () => setStatus('running');
+  const handlePause = () => setStatus("paused");
+  const handleResume = () => setStatus("running");
   const handleReset = () => {
-    setStatus('idle');
+    setStatus("idle");
     setRemainingSeconds(minutes * 60);
     setSyncedMinutes(minutes);
   };
 
   return (
-    <div className={`processing-timer processing-timer--${isDone ? 'done' : status}`}>
+    <div className={`processing-timer processing-timer--${isDone ? "done" : status}`}>
       <div className="processing-timer__row">
         <span className="processing-timer__clock">{formatClock(remainingSeconds)}</span>
         <div className="processing-timer__controls">
-          {status === 'idle' && (
-            <button type="button" className="button button--secondary" onClick={handleStart}>{t('results.timerStart')}</button>
+          {status === "idle" && (
+            <button type="button" className="button button--secondary" onClick={handleStart}>{t("results.timerStart")}</button>
           )}
-          {status === 'running' && !isDone && (
-            <button type="button" className="button button--secondary" onClick={handlePause}>{t('results.timerPause')}</button>
+          {status === "running" && !isDone && (
+            <button type="button" className="button button--secondary" onClick={handlePause}>{t("results.timerPause")}</button>
           )}
-          {status === 'paused' && (
-            <button type="button" className="button button--secondary" onClick={handleResume}>{t('results.timerResume')}</button>
+          {status === "paused" && (
+            <button type="button" className="button button--secondary" onClick={handleResume}>{t("results.timerResume")}</button>
           )}
-          {status !== 'idle' && (
-            <button type="button" className="button button--secondary" onClick={handleReset}>{t('results.timerReset')}</button>
+          {status !== "idle" && (
+            <button type="button" className="button button--secondary" onClick={handleReset}>{t("results.timerReset")}</button>
           )}
         </div>
       </div>
       {/* Only the completion message is a live region -- announcing the clock every
           second would spam screen readers with a running countdown, a known anti-pattern
           for live regions. The one-shot "done" text is the announcement that matters. */}
-      {isDone && <p className="processing-timer__done" role="status" aria-live="polite">{t('results.timerDone')}</p>}
+      {isDone && <p className="processing-timer__done" role="status" aria-live="polite">{t("results.timerDone")}</p>}
     </div>
   );
 }

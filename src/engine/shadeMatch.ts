@@ -1,6 +1,6 @@
-import type { Brand, BrandId } from './brands';
-import type { Shade } from './shades';
-import { shadeColorDistance } from './color';
+import type { Brand, BrandId } from "./brands";
+import type { Shade } from "./shades";
+import { shadeColorDistance } from "./color";
 
 export interface ShadeMatch {
   brandId: BrandId;
@@ -9,7 +9,7 @@ export interface ShadeMatch {
   distance: number;
 }
 
-export type PermanenceCategory = 'permanent' | 'semi-permanent';
+export type PermanenceCategory = "permanent" | "semi-permanent";
 
 // Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, and Redken Chromatics are
 // permanent oxidative dyes; Wella Color Touch, L'Oréal Dia Light/Dia Richesse, Igora
@@ -21,16 +21,16 @@ export type PermanenceCategory = 'permanent' | 'semi-permanent';
 // all) and any custom line an admin adds -- are deliberately left unclassified rather
 // than guessed at.
 const LINE_PERMANENCE: Record<string, PermanenceCategory> = {
-  'koleston-perfect': 'permanent',
-  inoa: 'permanent',
-  majirel: 'permanent',
-  royal: 'permanent',
-  chromatics: 'permanent',
-  'color-touch': 'semi-permanent',
-  'dia-light': 'semi-permanent',
-  'dia-richesse': 'semi-permanent',
-  vibrance: 'semi-permanent',
-  'shades-eq': 'semi-permanent',
+  "koleston-perfect": "permanent",
+  inoa: "permanent",
+  majirel: "permanent",
+  royal: "permanent",
+  chromatics: "permanent",
+  "color-touch": "semi-permanent",
+  "dia-light": "semi-permanent",
+  "dia-richesse": "semi-permanent",
+  vibrance: "semi-permanent",
+  "shades-eq": "semi-permanent",
 };
 
 export function getLinePermanence(line: string | undefined): PermanenceCategory | null {
@@ -78,7 +78,7 @@ export function findClosestShadeByBrand(
   return matches;
 }
 
-export type ShadeMatchQuality = 'excellent' | 'good' | 'fair' | 'poor';
+export type ShadeMatchQuality = "excellent" | "good" | "fair" | "poor";
 
 // CIEDE2000 delta-E is roughly perceptually uniform (see ciede2000 in color.ts): ~2 is
 // only noticeable on close side-by-side inspection, ~5 is clearly noticeable but still a
@@ -86,8 +86,8 @@ export type ShadeMatchQuality = 'excellent' | 'good' | 'fair' | 'poor';
 // turn that into a plain-language label a colorist can act on without knowing what
 // delta-E means.
 export function describeShadeMatchQuality(distance: number): ShadeMatchQuality {
-  if (distance <= 2) return 'excellent';
-  if (distance <= 5) return 'good';
-  if (distance <= 10) return 'fair';
-  return 'poor';
+  if (distance <= 2) return "excellent";
+  if (distance <= 5) return "good";
+  if (distance <= 10) return "fair";
+  return "poor";
 }

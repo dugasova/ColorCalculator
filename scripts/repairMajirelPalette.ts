@@ -42,7 +42,7 @@ async function main() {
   const snapshot = await getDocs(collection(db, "paletteOverrides"));
   const staleMajirelAdds = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
-    return data.kind === 'add' && data.brandId === 'loreal' && data.shade.line === 'majirel';
+    return data.kind === "add" && data.brandId === "loreal" && data.shade.line === "majirel";
   });
 
   for (const d of staleMajirelAdds) {

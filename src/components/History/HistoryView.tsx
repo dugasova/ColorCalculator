@@ -24,7 +24,7 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
   useEffect(() => {
     fetchFormulaHistory()
       .then(setEntries)
-      .catch(() => setError(t('history.loadError')))
+      .catch(() => setError(t("history.loadError")))
       .finally(() => setIsLoading(false));
   }, [t]);
 
@@ -34,11 +34,11 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
 
   return (
     <div className="calculator">
-      <h1 className="calculator__title">{t('history.titlePrefix')} <span className="calculator__title-accent">{t('history.titleAccent')}</span></h1>
+      <h1 className="calculator__title">{t("history.titlePrefix")} <span className="calculator__title-accent">{t("history.titleAccent")}</span></h1>
 
       {!isLoading && error === null && revisitPlans.length > 0 && (
         <section className="history__reminders">
-          <h2 className="history__reminders-title">{t('history.remindersTitle')}</h2>
+          <h2 className="history__reminders-title">{t("history.remindersTitle")}</h2>
           <ul className="history__reminders-list">
             {revisitPlans.map(plan => {
               const status = getRevisitStatus(plan.recommendedDate, new Date(nowMs));
@@ -47,7 +47,7 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
                 <li key={plan.clientKey} className={`history__reminder history__reminder--${status}`}>
                   <span className="history__reminder-client">{plan.clientName}</span>
                   <span className="history__reminder-detail">
-                    {t('history.reminderDetail', { weeks, date: plan.recommendedDate.toLocaleDateString() })}
+                    {t("history.reminderDetail", { weeks, date: plan.recommendedDate.toLocaleDateString() })}
                   </span>
                   <span className="history__reminder-status">{t(`history.reminderStatus.${status}`)}</span>
                 </li>
@@ -58,19 +58,19 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
       )}
 
       <div className="field">
-        <label htmlFor="historySearch">{t('history.searchLabel')}</label>
+        <label htmlFor="historySearch">{t("history.searchLabel")}</label>
         <input
           id="historySearch"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder={t('history.searchPlaceholder')}
+          placeholder={t("history.searchPlaceholder")}
         />
       </div>
 
-      {isLoading && <p className="history__status" aria-live="polite">{t('history.loading')}</p>}
+      {isLoading && <p className="history__status" aria-live="polite">{t("history.loading")}</p>}
       {error !== null && <p className="warning" role="alert">{error}</p>}
       {!isLoading && error === null && filtered.length === 0 && (
-        <p className="history__status" aria-live="polite">{t('history.empty')}</p>
+        <p className="history__status" aria-live="polite">{t("history.empty")}</p>
       )}
 
       <ul className="history__list">
@@ -81,7 +81,7 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
               <div className="history__entry-header">
                 <strong>{entry.clientName}</strong>
                 <span className="history__entry-date">
-                  {entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : ''}
+                  {entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : ""}
                 </span>
               </div>
               <p className="history__entry-summary">{formatSessionSummary(entry.steps)}</p>
@@ -90,29 +90,29 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
               </pre>
               {(entry.productCost != null || entry.servicePrice != null) && (
                 <div className="history__entry-pricing">
-                  {entry.productCost != null && <span>{t('results.productCost')}: {entry.productCost.toFixed(2)}</span>}
-                  {entry.servicePrice != null && <span>{t('results.servicePrice')}: {entry.servicePrice.toFixed(2)}</span>}
+                  {entry.productCost != null && <span>{t("results.productCost")}: {entry.productCost.toFixed(2)}</span>}
+                  {entry.servicePrice != null && <span>{t("results.servicePrice")}: {entry.servicePrice.toFixed(2)}</span>}
                 </div>
               )}
               {entry.note && <p className="history__entry-note">{entry.note}</p>}
               {(entry.patchTestDate || entry.allergyNotes) && (
                 <p className="history__entry-patch-test">
-                  {entry.patchTestDate && t('history.patchTestOn', { date: new Date(entry.patchTestDate).toLocaleString() })}
-                  {entry.patchTestDate && entry.allergyNotes && ' — '}
+                  {entry.patchTestDate && t("history.patchTestOn", { date: new Date(entry.patchTestDate).toLocaleString() })}
+                  {entry.patchTestDate && entry.allergyNotes && " — "}
                   {entry.allergyNotes}
                 </p>
               )}
               {(entry.beforePhotoUrl || entry.afterPhotoUrl) && (
                 <div className="history__entry-photos">
-                  {entry.beforePhotoUrl && <img src={entry.beforePhotoUrl} alt={t('results.beforePhotoLabel')} />}
-                  {entry.afterPhotoUrl && <img src={entry.afterPhotoUrl} alt={t('results.afterPhotoLabel')} />}
+                  {entry.beforePhotoUrl && <img src={entry.beforePhotoUrl} alt={t("results.beforePhotoLabel")} />}
+                  {entry.afterPhotoUrl && <img src={entry.afterPhotoUrl} alt={t("results.afterPhotoLabel")} />}
                 </div>
               )}
               <div className="history__entry-footer">
-                <span>{t('history.appliedBy', { name: entry.appliedBy })}</span>
+                <span>{t("history.appliedBy", { name: entry.appliedBy })}</span>
                 {repeatRequest !== null && (
                   <button type="button" className="button button--secondary history__entry-repeat" onClick={() => onRepeat(entry)}>
-                    {t('history.repeat')}
+                    {t("history.repeat")}
                   </button>
                 )}
               </div>

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { shadeToHexColor, blendShadeHexColors, hexToLab, ciede2000 } from './color';
+import { describe, it, expect } from "vitest";
+import { shadeToHexColor, blendShadeHexColors, hexToLab, ciede2000 } from "./color";
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
@@ -9,38 +9,38 @@ function luminance(hex: string): number {
   return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
-describe('shadeToHexColor', () => {
-  it('returns a valid 6-digit hex color', () => {
-    expect(shadeToHexColor({ code: '5.0', level: 5, tone: 'natural' })).toMatch(HEX_RE);
+describe("shadeToHexColor", () => {
+  it("returns a valid 6-digit hex color", () => {
+    expect(shadeToHexColor({ code: "5.0", level: 5, tone: "natural" })).toMatch(HEX_RE);
   });
 
-  it('produces lighter output for higher levels at the same tone', () => {
-    const dark = shadeToHexColor({ code: '1.0', level: 1, tone: 'natural' });
-    const light = shadeToHexColor({ code: '10.0', level: 10, tone: 'natural' });
+  it("produces lighter output for higher levels at the same tone", () => {
+    const dark = shadeToHexColor({ code: "1.0", level: 1, tone: "natural" });
+    const light = shadeToHexColor({ code: "10.0", level: 10, tone: "natural" });
     expect(luminance(light)).toBeGreaterThan(luminance(dark));
   });
 
-  it('secondary tone changes the resulting color', () => {
-    const withoutSecondary = shadeToHexColor({ code: '5/0', level: 5, tone: 'natural' });
-    const withSecondary = shadeToHexColor({ code: '5/07', level: 5, tone: 'natural', secondaryTone: 'chocolate' });
+  it("secondary tone changes the resulting color", () => {
+    const withoutSecondary = shadeToHexColor({ code: "5/0", level: 5, tone: "natural" });
+    const withSecondary = shadeToHexColor({ code: "5/07", level: 5, tone: "natural", secondaryTone: "chocolate" });
     expect(withSecondary).not.toBe(withoutSecondary);
   });
 
-  it('supports every tone family without throwing', () => {
-    const tones: Array<Parameters<typeof shadeToHexColor>[0]['tone']> = [
-      'natural', 'ash', 'matt', 'gold', 'copper', 'red', 'violet', 'chocolate', 'pearl', 'slate-grey', 'mahogany',
+  it("supports every tone family without throwing", () => {
+    const tones: Array<Parameters<typeof shadeToHexColor>[0]["tone"]> = [
+      "natural", "ash", "matt", "gold", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany",
     ];
     for (const tone of tones) {
-      expect(shadeToHexColor({ code: 'x', level: 6, tone })).toMatch(HEX_RE);
+      expect(shadeToHexColor({ code: "x", level: 6, tone })).toMatch(HEX_RE);
     }
   });
 
-  it('keeps very dark levels close to black even with a saturated reflect tone', () => {
-    const swatch = shadeToHexColor({ code: '1.3', level: 1, tone: 'gold' });
+  it("keeps very dark levels close to black even with a saturated reflect tone", () => {
+    const swatch = shadeToHexColor({ code: "1.3", level: 1, tone: "gold" });
     expect(luminance(swatch)).toBeLessThan(40);
   });
 
-  it('shows the tone reflect more strongly on lighter levels than darker levels', () => {
+  it("shows the tone reflect more strongly on lighter levels than darker levels", () => {
     function channelDelta(a: string, b: string): number {
       const an = parseInt(a.slice(1), 16), bn = parseInt(b.slice(1), 16);
       const ar = (an >> 16) & 255, ag = (an >> 8) & 255, ab = an & 255;
@@ -48,34 +48,34 @@ describe('shadeToHexColor', () => {
       return Math.abs(ar - br) + Math.abs(ag - bg) + Math.abs(ab - bb);
     }
     const level1Delta = channelDelta(
-      shadeToHexColor({ code: '1.0', level: 1, tone: 'natural' }),
-      shadeToHexColor({ code: '1.3', level: 1, tone: 'gold' }),
+      shadeToHexColor({ code: "1.0", level: 1, tone: "natural" }),
+      shadeToHexColor({ code: "1.3", level: 1, tone: "gold" }),
     );
     const level10Delta = channelDelta(
-      shadeToHexColor({ code: '10.0', level: 10, tone: 'natural' }),
-      shadeToHexColor({ code: '10.3', level: 10, tone: 'gold' }),
+      shadeToHexColor({ code: "10.0", level: 10, tone: "natural" }),
+      shadeToHexColor({ code: "10.3", level: 10, tone: "gold" }),
     );
     expect(level10Delta).toBeGreaterThan(level1Delta);
   });
 });
 
-describe('blendShadeHexColors', () => {
-  const ash = { code: '7/1', level: 7, tone: 'ash' } as const;
-  const gold = { code: '7/3', level: 7, tone: 'gold' } as const;
+describe("blendShadeHexColors", () => {
+  const ash = { code: "7/1", level: 7, tone: "ash" } as const;
+  const gold = { code: "7/3", level: 7, tone: "gold" } as const;
 
-  it('returns a valid 6-digit hex color', () => {
+  it("returns a valid 6-digit hex color", () => {
     expect(blendShadeHexColors(ash, gold, 50)).toMatch(HEX_RE);
   });
 
-  it('matches the primary shade alone at 100%', () => {
+  it("matches the primary shade alone at 100%", () => {
     expect(blendShadeHexColors(ash, gold, 100)).toBe(shadeToHexColor(ash));
   });
 
-  it('matches the secondary shade alone at 0%', () => {
+  it("matches the secondary shade alone at 0%", () => {
     expect(blendShadeHexColors(ash, gold, 0)).toBe(shadeToHexColor(gold));
   });
 
-  it('lands strictly between the two swatches at 50%', () => {
+  it("lands strictly between the two swatches at 50%", () => {
     const blended = blendShadeHexColors(ash, gold, 50);
     expect(blended).not.toBe(shadeToHexColor(ash));
     expect(blended).not.toBe(shadeToHexColor(gold));
@@ -124,30 +124,30 @@ const CIEDE2000_REFERENCE_PAIRS: Array<[number, number, number, number, number, 
   [2.0776, 0.0795, -1.1350, 0.9033, -0.0636, -0.5514, 0.9082],
 ];
 
-describe('ciede2000', () => {
-  it('matches every pair of the Sharma/Wu/Dalal (2005) reference test dataset to 3 decimal places', () => {
+describe("ciede2000", () => {
+  it("matches every pair of the Sharma/Wu/Dalal (2005) reference test dataset to 3 decimal places", () => {
     for (const [l1, a1, b1, l2, a2, b2, expected] of CIEDE2000_REFERENCE_PAIRS) {
       expect(ciede2000([l1, a1, b1], [l2, a2, b2])).toBeCloseTo(expected, 3);
     }
   });
 
-  it('is zero for identical colors', () => {
+  it("is zero for identical colors", () => {
     expect(ciede2000([50, 10, -20], [50, 10, -20])).toBeCloseTo(0, 10);
   });
 
-  it('is symmetric', () => {
+  it("is symmetric", () => {
     const a: [number, number, number] = [40, 20, -30];
     const b: [number, number, number] = [60, -10, 15];
     expect(ciede2000(a, b)).toBeCloseTo(ciede2000(b, a), 10);
   });
 
-  it('rates black vs white at exactly 100', () => {
-    expect(ciede2000(hexToLab('#000000'), hexToLab('#ffffff'))).toBeCloseTo(100, 1);
+  it("rates black vs white at exactly 100", () => {
+    expect(ciede2000(hexToLab("#000000"), hexToLab("#ffffff"))).toBeCloseTo(100, 1);
   });
 
-  it('rates two shades of the same tone/level pair as closer than two very different colors', () => {
-    const near = ciede2000(hexToLab(shadeToHexColor({ code: 'a', level: 7, tone: 'natural' })), hexToLab(shadeToHexColor({ code: 'b', level: 7, tone: 'ash' })));
-    const far = ciede2000(hexToLab('#000000'), hexToLab('#ffffff'));
+  it("rates two shades of the same tone/level pair as closer than two very different colors", () => {
+    const near = ciede2000(hexToLab(shadeToHexColor({ code: "a", level: 7, tone: "natural" })), hexToLab(shadeToHexColor({ code: "b", level: 7, tone: "ash" })));
+    const far = ciede2000(hexToLab("#000000"), hexToLab("#ffffff"));
     expect(near).toBeLessThan(far);
   });
 });

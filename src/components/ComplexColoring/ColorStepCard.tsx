@@ -76,7 +76,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   // totals (time, cost) and builds the combined recipe text/save payload from them.
   useEffect(() => {
     const stepData: ColorHistoryStep = {
-      kind: 'color',
+      kind: "color",
       brandName: brands[brandId].name,
       line,
       targetShade,
@@ -105,9 +105,9 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   return (
     <div className="step-card">
       <div className="step-card__header">
-        <h2 className="step-card__title">{t('complexColoring.colorStepTitle')}</h2>
+        <h2 className="step-card__title">{t("complexColoring.colorStepTitle")}</h2>
         <button type="button" className="button button--secondary step-card__remove" onClick={onRemove}>
-          {t('complexColoring.removeStep')}
+          {t("complexColoring.removeStep")}
         </button>
       </div>
 
@@ -147,14 +147,14 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
               lineShades={lineShades}
               additionalShadeCode={additionalShade2Code}
               onAdditionalShadeCodeChange={setAdditionalShade2Code}
-              idSuffix={idSuffix + '_2'}
-              label={t('fields.additionalShade2')}
+              idSuffix={idSuffix + "_2"}
+              label={t("fields.additionalShade2")}
             />
             <AdditionalShadeGramsField
               additionalShadeCode={additionalShade2Code}
               additionalShadeGrams={additionalShade2Grams}
               onAdditionalShadeGramsChange={setAdditionalShade2Grams}
-              idSuffix={idSuffix + '_2'}
+              idSuffix={idSuffix + "_2"}
             />
           </>
         )}
@@ -167,7 +167,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
         <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} idSuffix={idSuffix} />
         <TotalGramsField totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} idSuffix={idSuffix} />
         <div className="field">
-          <label htmlFor={`stepProcessingMinutes${idSuffix}`}>{t('results.processingTime')}</label>
+          <label htmlFor={`stepProcessingMinutes${idSuffix}`}>{t("results.processingTime")}</label>
           <input
             id={`stepProcessingMinutes${idSuffix}`}
             type="number"
@@ -177,7 +177,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
           />
         </div>
         <div className="field">
-          <label htmlFor={`stepPricePerGram${idSuffix}`}>{t('results.pricePerGram')}</label>
+          <label htmlFor={`stepPricePerGram${idSuffix}`}>{t("results.pricePerGram")}</label>
           <input
             id={`stepPricePerGram${idSuffix}`}
             type="number"
@@ -191,33 +191,33 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
 
       {result.liftUnsupportedWarning !== null && <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning" role="alert">{t('results.notAchievable')}</p>
+        <p className="warning" role="alert">{t("results.notAchievable")}</p>
       )}
       {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
       {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
-      {porosity === 'high' && (
-        <p className="warning" role="alert">{t('results.porousWarning')}</p>
+      {porosity === "high" && (
+        <p className="warning" role="alert">{t("results.porousWarning")}</p>
       )}
 
       {grams !== null && (
         <div className="results__row">
-          <span className="results__row-label">{t('results.mix')}</span>
+          <span className="results__row-label">{t("results.mix")}</span>
           <span>{buildMixSummary(targetShade, grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
         </div>
       )}
 
       {result.recommendedCorrectiveTone !== null && (
         <div className="results__row">
-          <span className="results__row-label">{t('results.recommendedTone')}</span>
+          <span className="results__row-label">{t("results.recommendedTone")}</span>
           <span>
-            {t('results.recommendedToneValue', { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })}
+            {t("results.recommendedToneValue", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })}
             <label className="results__neutralization-toggle">
               <input
                 type="checkbox"
                 checked={neutralizationApplied}
                 onChange={e => setNeutralizationApplied(e.target.checked)}
               />
-              {t('results.applyNeutralization')}
+              {t("results.applyNeutralization")}
             </label>
           </span>
         </div>

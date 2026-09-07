@@ -12,7 +12,7 @@ export function LanguageSwitcher() {
         <button
           key={lang}
           type="button"
-          className={clsx('button button--secondary', i18n.resolvedLanguage === lang && 'button--active')}
+          className={clsx("button button--secondary", i18n.resolvedLanguage === lang && "button--active")}
           onClick={() => i18n.changeLanguage(lang)}
         >
           {t(`language.${lang}`)}

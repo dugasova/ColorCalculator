@@ -1,29 +1,29 @@
 export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
-export type UnderlyingPigment = 'red' |
-  'red-orange' |
-  'orange' |
-  'orange-yellow' |
-  'yellow-orange' |
-  'yellow' |
-  'pale-yellow' |
-  'very-light-yellow';
+export type UnderlyingPigment = "red" |
+  "red-orange" |
+  "orange" |
+  "orange-yellow" |
+  "yellow-orange" |
+  "yellow" |
+  "pale-yellow" |
+  "very-light-yellow";
 export type DeveloperVolume = 6 | 10 | 13 | 20 | 30 | 40;
 
 export function getUnderlyingPigment(level: Level): UnderlyingPigment {
   switch (level) {
-    case 1: return 'red';
-    case 2: return 'red';
-    case 3: return 'red-orange';
-    case 4: return 'red-orange';
-    case 5: return 'orange';
-    case 6: return 'orange-yellow';
-    case 7: return 'yellow-orange';
-    case 8: return 'yellow';
-    case 9: return 'pale-yellow';
-    case 10: return 'pale-yellow';
-    case 11: return 'very-light-yellow';
-    case 12: return 'very-light-yellow';
+    case 1: return "red";
+    case 2: return "red";
+    case 3: return "red-orange";
+    case 4: return "red-orange";
+    case 5: return "orange";
+    case 6: return "orange-yellow";
+    case 7: return "yellow-orange";
+    case 8: return "yellow";
+    case 9: return "pale-yellow";
+    case 10: return "pale-yellow";
+    case 11: return "very-light-yellow";
+    case 12: return "very-light-yellow";
   }
 }
 

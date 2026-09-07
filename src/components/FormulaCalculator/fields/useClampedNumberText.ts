@@ -23,9 +23,9 @@ export function useClampedNumberText(value: number, onChange: (value: number) =>
   }, [value]);
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
-    const digitsOnly = e.target.value.replace(/\D/g, '');
-    if (digitsOnly === '') {
-      setText('');
+    const digitsOnly = e.target.value.replace(/\D/g, "");
+    if (digitsOnly === "") {
+      setText("");
       return;
     }
     const clamped = max !== undefined ? Math.min(max, Number(digitsOnly)) : Number(digitsOnly);
@@ -39,7 +39,7 @@ export function useClampedNumberText(value: number, onChange: (value: number) =>
   }
 
   function handleBlur() {
-    if (text === '' || Number(text) < min) {
+    if (text === "" || Number(text) < min) {
       setText(String(min));
       lastEmitted.current = min;
       onChange(min);
@@ -49,9 +49,9 @@ export function useClampedNumberText(value: number, onChange: (value: number) =>
   return {
     text,
     inputProps: {
-      type: 'text' as const,
-      inputMode: 'numeric' as const,
-      pattern: '[0-9]*',
+      type: "text" as const,
+      inputMode: "numeric" as const,
+      pattern: "[0-9]*",
       value: text,
       onFocus: handleFocus,
       onChange: handleChange,
@@ -59,10 +59,10 @@ export function useClampedNumberText(value: number, onChange: (value: number) =>
       // `type="text"` above (see comment) forfeits the native <input type="number">
       // spinbutton role/min/max/now exposed to assistive tech -- restore it explicitly
       // so screen readers still announce this as a bounded number field.
-      role: 'spinbutton' as const,
-      'aria-valuemin': min,
-      'aria-valuemax': max,
-      'aria-valuenow': value,
+      role: "spinbutton" as const,
+      "aria-valuemin": min,
+      "aria-valuemax": max,
+      "aria-valuenow": value,
     },
   };
 }

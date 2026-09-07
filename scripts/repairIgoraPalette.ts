@@ -43,8 +43,8 @@ async function main() {
   const snapshot = await getDocs(collection(db, "paletteOverrides"));
   const staleIgoraAdds = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
-    return data.kind === 'add' && data.brandId === 'igora'
-      && (data.shade.line === 'royal' || data.shade.line === 'vibrance');
+    return data.kind === "add" && data.brandId === "igora"
+      && (data.shade.line === "royal" || data.shade.line === "vibrance");
   });
 
   for (const d of staleIgoraAdds) {

@@ -10,11 +10,11 @@ export interface StartLevelFieldProps {
   idSuffix?: string;
 }
 
-export function StartLevelField({ startLevel, onStartLevelChange, idSuffix = '' }: StartLevelFieldProps) {
+export function StartLevelField({ startLevel, onStartLevelChange, idSuffix = "" }: StartLevelFieldProps) {
   const { t } = useTranslation();
   return (
     <div className="field">
-      <label htmlFor={`startLevel${idSuffix}`}>{t('fields.startLevel')}</label>
+      <label htmlFor={`startLevel${idSuffix}`}>{t("fields.startLevel")}</label>
       <Select
         id={`startLevel${idSuffix}`}
         value={String(startLevel)}

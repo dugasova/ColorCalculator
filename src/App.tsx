@@ -68,7 +68,7 @@ function AuthenticatedApp({ user }: { user: User }) {
   const { t } = useTranslation();
   const brands = usePalette();
   const isAdmin = useIsAdmin(user.uid);
-  const [view, setView] = useState<AppView>('calculator');
+  const [view, setView] = useState<AppView>("calculator");
   const [repeatRequest, setRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
   // Bumped after a formula/session save finishes showing its "Saved!" confirmation --
   // passed as `key` to whichever calculator is mounted below, forcing React to unmount
@@ -80,7 +80,7 @@ function AuthenticatedApp({ user }: { user: User }) {
     const request = buildRepeatFormulaRequest(entry, brands);
     if (request === null) return;
     setRepeatRequest(request);
-    setView('calculator');
+    setView("calculator");
   };
 
   const handleFormulaSaved = () => {
@@ -92,35 +92,35 @@ function AuthenticatedApp({ user }: { user: User }) {
 
   return (
     <div>
-      <a href="#main-content" className="skip-link">{t('app.skipToContent')}</a>
+      <a href="#main-content" className="skip-link">{t("app.skipToContent")}</a>
       <header className="app-header">
         <div className="app-topbar">
-          <button type="button" className="app-brand" onClick={() => setView('calculator')} aria-label={t('nav.calculator')}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t('app.titlePrefix')}<em>{t('app.titleAccent')}</em></button>
+          <button type="button" className="app-brand" onClick={() => setView("calculator")} aria-label={t("nav.calculator")}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t("app.titlePrefix")}<em>{t("app.titleAccent")}</em></button>
           <Nav view={view} onViewChange={setView} isAdmin={isAdmin} />
           <div className="app-topbar__account">
             <LanguageSwitcher />
             <span>{user.email}</span>
-            <button className="button button--secondary" onClick={() => signOut(auth)}>{t('account.signOut')}</button>
+            <button className="button button--secondary" onClick={() => signOut(auth)}>{t("account.signOut")}</button>
           </div>
         </div>
       </header>
       <main className="app-main" id="main-content" tabIndex={-1}>
-        {view === 'calculator' && (
+        {view === "calculator" && (
           <FormulaCalculator
             key={formResetKey}
-            appliedBy={user.email ?? 'unknown'}
+            appliedBy={user.email ?? "unknown"}
             repeatRequest={repeatRequest}
             onSaved={handleFormulaSaved}
           />
         )}
         <Suspense fallback={null}>
-          {view === 'correction' && <ColorCorrectionCalculator />}
-          {view === 'bleach' && <BleachCalculator />}
-          {view === 'complex' && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? 'unknown'} onSaved={handleFormulaSaved} />}
-          {view === 'prepigment' && <PrePigmentationCalculator />}
-          {view === 'history' && <HistoryView onRepeat={handleRepeat} />}
-          {view === 'analytics' && <AnalyticsView />}
-          {view === 'palette' && isAdmin && <PaletteAdminView />}
+          {view === "correction" && <ColorCorrectionCalculator />}
+          {view === "bleach" && <BleachCalculator />}
+          {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} onSaved={handleFormulaSaved} />}
+          {view === "prepigment" && <PrePigmentationCalculator />}
+          {view === "history" && <HistoryView onRepeat={handleRepeat} />}
+          {view === "analytics" && <AnalyticsView />}
+          {view === "palette" && isAdmin && <PaletteAdminView />}
         </Suspense>
       </main>
     </div>

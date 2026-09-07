@@ -23,7 +23,7 @@ export interface ClientRevisitPlan {
   clientName: string;      // display name, from the most recent visit
   lastVisitAt: Date;
   intervalDays: number;    // rounded to the nearest whole day
-  intervalBasis: 'history' | 'default';
+  intervalBasis: "history" | "default";
   recommendedDate: Date;
 }
 
@@ -33,7 +33,7 @@ function groupByClient(entries: FormulaHistoryEntry[]): Map<string, FormulaHisto
   const groups = new Map<string, FormulaHistoryEntry[]>();
   for (const entry of entries) {
     const key = entry.clientName.trim().toLowerCase();
-    if (key === '' || entry.appliedAt === null) continue;
+    if (key === "" || entry.appliedAt === null) continue;
     const list = groups.get(key) ?? [];
     list.push(entry);
     groups.set(key, list);
@@ -45,7 +45,7 @@ function groupByClient(entries: FormulaHistoryEntry[]): Map<string, FormulaHisto
 // 0% (the lightest tier, longest default interval) is the safe direction to be wrong in —
 // it under-recommends a revisit rather than nagging a client who came in for a pure lift.
 function getEntryGrayPercent(entry: FormulaHistoryEntry): number {
-  const lastColorStep = [...entry.steps].reverse().find(step => step.kind === 'color');
+  const lastColorStep = [...entry.steps].reverse().find(step => step.kind === "color");
   return lastColorStep?.grayPercent ?? 0;
 }
 
@@ -56,17 +56,17 @@ function planForClient(clientEntries: FormulaHistoryEntry[]): ClientRevisitPlan 
   const last = visits[visits.length - 1];
 
   let intervalDays: number;
-  let intervalBasis: ClientRevisitPlan['intervalBasis'];
+  let intervalBasis: ClientRevisitPlan["intervalBasis"];
   if (visits.length >= 2) {
     let totalDays = 0;
     for (let i = 1; i < visits.length; i++) {
       totalDays += (visits[i].date.getTime() - visits[i - 1].date.getTime()) / MS_PER_DAY;
     }
     intervalDays = totalDays / (visits.length - 1);
-    intervalBasis = 'history';
+    intervalBasis = "history";
   } else {
     intervalDays = getDefaultRevisitIntervalDays(getEntryGrayPercent(last.entry));
-    intervalBasis = 'default';
+    intervalBasis = "default";
   }
   intervalDays = Math.round(intervalDays);
 
@@ -88,12 +88,12 @@ export function planClientRevisits(entries: FormulaHistoryEntry[]): ClientRevisi
     .sort((a, b) => a.recommendedDate.getTime() - b.recommendedDate.getTime());
 }
 
-export type RevisitStatus = 'overdue' | 'due-soon' | 'upcoming';
+export type RevisitStatus = "overdue" | "due-soon" | "upcoming";
 const DUE_SOON_WINDOW_DAYS = 7;
 
 export function getRevisitStatus(recommendedDate: Date, now: Date): RevisitStatus {
   const daysUntil = (recommendedDate.getTime() - now.getTime()) / MS_PER_DAY;
-  if (daysUntil <= 0) return 'overdue';
-  if (daysUntil <= DUE_SOON_WINDOW_DAYS) return 'due-soon';
-  return 'upcoming';
+  if (daysUntil <= 0) return "overdue";
+  if (daysUntil <= DUE_SOON_WINDOW_DAYS) return "due-soon";
+  return "upcoming";
 }

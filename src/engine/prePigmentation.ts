@@ -1,9 +1,9 @@
-import { getUnderlyingPigment, pickDeveloperVolume } from './levels';
-import type { DeveloperVolume, Level, UnderlyingPigment } from './levels';
-import { GENERIC_SHADE_CHART } from './shades';
-import type { Shade, ToneFamily } from './shades';
-import { getMixingRatio } from './formula';
-import type { MixingRatio } from './shades';
+import { getUnderlyingPigment, pickDeveloperVolume } from "./levels";
+import type { DeveloperVolume, Level, UnderlyingPigment } from "./levels";
+import { GENERIC_SHADE_CHART } from "./shades";
+import type { Shade, ToneFamily } from "./shades";
+import { getMixingRatio } from "./formula";
+import type { MixingRatio } from "./shades";
 
 // Going more than ~1 level darker than the current level risks losing the natural warm
 // "underlying pigment" the target level would normally still carry (the same
@@ -27,7 +27,7 @@ import type { MixingRatio } from './shades';
 // 10vol, since canReachTarget short-circuits true whenever the target is at or below the
 // start level -- so both are reused directly instead of reimplemented here.
 
-export type PrePigmentationNeed = 'none' | 'recommended' | 'required-same-session' | 'required-multi-visit';
+export type PrePigmentationNeed = "none" | "recommended" | "required-same-session" | "required-multi-visit";
 
 export interface FillerMixingRatio {
   fillerParts: number;
@@ -58,10 +58,10 @@ const MULTI_VISIT_MIN_DIFF = 7;
 
 const FILLER_MIXING_RATIO: FillerMixingRatio = Object.freeze({ fillerParts: 1, diluentParts: 1 });
 
-const FILLER_PROCESSING_MINUTES: Record<Exclude<PrePigmentationNeed, 'none'>, number> = {
+const FILLER_PROCESSING_MINUTES: Record<Exclude<PrePigmentationNeed, "none">, number> = {
   recommended: 10,
-  'required-same-session': 15,
-  'required-multi-visit': 15,
+  "required-same-session": 15,
+  "required-multi-visit": 15,
 };
 
 const MULTI_VISIT_MIN_GAP_DAYS = 7;
@@ -69,25 +69,25 @@ const MULTI_VISIT_MAX_GAP_DAYS = 14;
 
 export function getPrePigmentationNeed(startLevel: Level, targetLevel: Level): PrePigmentationNeed {
   const diff = startLevel - targetLevel; // positive = going darker
-  if (diff < RECOMMENDED_MIN_DIFF) return 'none';
-  if (diff < REQUIRED_MIN_DIFF) return 'recommended';
-  if (diff < MULTI_VISIT_MIN_DIFF) return 'required-same-session';
-  return 'required-multi-visit';
+  if (diff < RECOMMENDED_MIN_DIFF) return "none";
+  if (diff < REQUIRED_MIN_DIFF) return "recommended";
+  if (diff < MULTI_VISIT_MIN_DIFF) return "required-same-session";
+  return "required-multi-visit";
 }
 
 export function getPrePigmentFillerTone(pigment: UnderlyingPigment): ToneFamily {
   switch (pigment) {
-    case 'red':
-    case 'red-orange':
-      return 'red';
-    case 'orange':
-    case 'orange-yellow':
-      return 'copper';
-    case 'yellow-orange':
-    case 'yellow':
-    case 'pale-yellow':
-    case 'very-light-yellow':
-      return 'gold';
+    case "red":
+    case "red-orange":
+      return "red";
+    case "orange":
+    case "orange-yellow":
+      return "copper";
+    case "yellow-orange":
+    case "yellow":
+    case "pale-yellow":
+    case "very-light-yellow":
+      return "gold";
   }
 }
 
@@ -112,13 +112,13 @@ export function calculateFillerGrams(totalGrams: number, ratio: FillerMixingRati
 
 export function calculatePrePigmentation(startLevel: Level, targetLevel: Level, totalGrams: number): PrePigmentationResult {
   const need = getPrePigmentationNeed(startLevel, targetLevel);
-  const underlyingPigment = need !== 'none' ? getUnderlyingPigment(targetLevel) : null;
+  const underlyingPigment = need !== "none" ? getUnderlyingPigment(targetLevel) : null;
   const fillerTone = underlyingPigment !== null ? getPrePigmentFillerTone(underlyingPigment) : null;
   const exampleFillerShade = fillerTone !== null ? findExampleFillerShade(targetLevel, fillerTone) : null;
-  const mixingRatio = need !== 'none' ? FILLER_MIXING_RATIO : null;
+  const mixingRatio = need !== "none" ? FILLER_MIXING_RATIO : null;
   const grams = mixingRatio !== null ? calculateFillerGrams(totalGrams, mixingRatio) : null;
-  const fillerProcessingMinutes = need !== 'none' ? FILLER_PROCESSING_MINUTES[need] : null;
-  const multiVisitGapDays = need === 'required-multi-visit'
+  const fillerProcessingMinutes = need !== "none" ? FILLER_PROCESSING_MINUTES[need] : null;
+  const multiVisitGapDays = need === "required-multi-visit"
     ? { min: MULTI_VISIT_MIN_GAP_DAYS, max: MULTI_VISIT_MAX_GAP_DAYS }
     : null;
 

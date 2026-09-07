@@ -52,7 +52,7 @@ export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectT
 
   const activeToneName = t(`correction.tones.${activeTone}`);
   const complementColorName = t(`correction.tones.${complementTone}`);
-  const complementName = t('correction.correctorName', {
+  const complementName = t("correction.correctorName", {
     color: complementColorName,
     qualifier: t(`correction.qualifiers.${activeCorrector.qualifier}`),
   });
@@ -62,7 +62,7 @@ export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectT
 
   return (
     <div className="neutralization-wheel" aria-hidden="true">
-      <p className="neutralization-wheel__title">{t('correction.wheelTitle')}</p>
+      <p className="neutralization-wheel__title">{t("correction.wheelTitle")}</p>
       <svg
         className="neutralization-wheel__svg"
         viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}
@@ -82,7 +82,7 @@ export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectT
               key={tone}
               d={wedgePath(angleOf(tone))}
               fill={toneColors[tone]}
-              className={clsx('neutralization-wheel__wedge', active && 'neutralization-wheel__wedge--active')}
+              className={clsx("neutralization-wheel__wedge", active && "neutralization-wheel__wedge--active")}
               onMouseEnter={() => setHoveredTone(tone)}
               onClick={() => onSelectTone(tone)}
             />
@@ -91,7 +91,7 @@ export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectT
         <circle className="neutralization-wheel__hub" cx={CENTER} cy={CENTER} r={RADIUS * 0.28} />
       </svg>
       <p className="neutralization-wheel__label">
-        {t('correction.explanation', { corrector: complementName, tone: activeToneName })}
+        {t("correction.explanation", { corrector: complementName, tone: activeToneName })}
       </p>
     </div>
   );

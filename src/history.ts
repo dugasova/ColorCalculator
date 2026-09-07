@@ -18,7 +18,7 @@ const HISTORY_COLLECTION = "formulaHistory";
 // multiple for complex work like balayage: one or more `BleachHistoryStep`s to lift
 // sections, followed by a `ColorHistoryStep` to tone).
 export interface ColorHistoryStep {
-  kind: 'color';
+  kind: "color";
   brandName: string;
   line: string | null;
   targetShade: Shade;
@@ -57,7 +57,7 @@ export interface ColorBlend {
 }
 
 export interface BleachHistoryStep {
-  kind: 'bleach';
+  kind: "bleach";
   startLevel: Level;
   canvas?: HairCanvas;
   targetLevel: Level;
@@ -130,14 +130,14 @@ export interface LegacyFormulaHistoryEntry {
 // still catches the realistic corruption case (a document missing/mistyped the top-level
 // scalar fields the UI reads directly: client name, pricing, patch-test/photo metadata)
 const canvasShapeSchema = z.object({
-  porosity: z.enum(['low', 'normal', 'high']),
-  thickness: z.enum(['fine', 'medium', 'coarse']),
-  chemicalHistory: z.array(z.enum(['keratin', 'perm', 'henna', 'direct_dye'])),
+  porosity: z.enum(["low", "normal", "high"]),
+  thickness: z.enum(["fine", "medium", "coarse"]),
+  chemicalHistory: z.array(z.enum(["keratin", "perm", "henna", "direct_dye"])),
 });
 
 const historyStepShapeSchema = z.union([
-  z.looseObject({ kind: z.literal('color'), canvas: canvasShapeSchema.optional() }),
-  z.looseObject({ kind: z.literal('bleach'), canvas: canvasShapeSchema.optional() }),
+  z.looseObject({ kind: z.literal("color"), canvas: canvasShapeSchema.optional() }),
+  z.looseObject({ kind: z.literal("bleach"), canvas: canvasShapeSchema.optional() }),
 ]);
 
 const formulaHistoryEntryShapeSchema = z.object({
@@ -172,7 +172,7 @@ const legacyFormulaHistoryEntryShapeSchema = z.object({
   additionalShade: z.looseObject({ code: z.string() }).nullable().optional(),
   additionalShadeGrams: z.number().nullable().optional(),
   processingMinutes: z.number(),
-  applicationZone: z.enum(['full-head', 'root-touch-up']),
+  applicationZone: z.enum(["full-head", "root-touch-up"]),
   pricePerGram: z.number(),
   markupMultiplier: z.number(),
   productCost: z.number().nullable(),
@@ -191,17 +191,17 @@ const legacyFormulaHistoryEntryShapeSchema = z.object({
 export const historyEntryShapeSchema = z.union([formulaHistoryEntryShapeSchema, legacyFormulaHistoryEntryShapeSchema]);
 
 export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHistoryEntry): FormulaHistoryEntry {
-  if ('steps' in raw && raw.steps !== undefined) return raw;
+  if ("steps" in raw && raw.steps !== undefined) return raw;
 
   const legacy = raw as LegacyFormulaHistoryEntry;
   const colorStep: ColorHistoryStep = {
-    kind: 'color',
+    kind: "color",
     brandName: legacy.brandName,
     line: legacy.line,
     targetShade: legacy.targetShade,
     startLevel: legacy.startLevel,
     grayPercent: legacy.grayPercent,
-    canvas: { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
+    canvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
     applicationZone: legacy.applicationZone,
     result: legacy.result,
     additionalShade: legacy.additionalShade ?? null,
@@ -255,7 +255,7 @@ export function sanitizeForFirestore<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
-async function uploadFormulaPhoto(historyId: string, slot: 'before' | 'after', file: File): Promise<string> {
+async function uploadFormulaPhoto(historyId: string, slot: "before" | "after", file: File): Promise<string> {
   const photoRef = ref(storage, `formulaHistory/${historyId}/${slot}`);
   await uploadBytes(photoRef, file);
   return getDownloadURL(photoRef);
@@ -282,8 +282,8 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
   // attach the resulting URLs with a follow-up update rather than blocking doc creation
   // on the (much slower) file upload.
   const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
-    params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, 'before', params.beforePhotoFile) : Promise.resolve(null),
-    params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, 'after', params.afterPhotoFile) : Promise.resolve(null),
+    params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile) : Promise.resolve(null),
+    params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, "after", params.afterPhotoFile) : Promise.resolve(null),
   ]);
 
   if (beforePhotoUrl !== null || afterPhotoUrl !== null) {
@@ -351,7 +351,7 @@ export interface RepeatFormulaRequest {
 // null if the brand no longer exists (e.g. it was renamed or removed since the entry was
 // saved).
 export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Record<BrandId, Brand>): RepeatFormulaRequest | null {
-  if (entry.steps.length !== 1 || entry.steps[0].kind !== 'color') return null;
+  if (entry.steps.length !== 1 || entry.steps[0].kind !== "color") return null;
   const step = entry.steps[0];
 
   const brand = Object.values(brands).find(b => b.name === step.brandName);
@@ -386,7 +386,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     startLevel: step.startLevel,
     grayPercent: step.grayPercent,
     totalGrams,
-    canvas: step.canvas ?? { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
+    canvas: step.canvas ?? { porosity: "normal", thickness: "medium", chemicalHistory: [] },
     manualDeveloperVolume: step.targetShade.developerVolumeChoices !== undefined
       ? (step.result.developerVolume ?? undefined)
       : undefined,
@@ -401,7 +401,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     // reading back as `undefined` (not `null`) -- treat that the same as `null` (off).
     prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
     processingMinutes: step.processingMinutes,
-    applicationZone: step.applicationZone ?? 'full-head',
+    applicationZone: step.applicationZone ?? "full-head",
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,
     markupMultiplier: entry.markupMultiplier ?? DEFAULT_MARKUP_MULTIPLIER,
     servicePrice: entry.servicePrice ?? undefined,

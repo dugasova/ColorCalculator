@@ -1,19 +1,19 @@
-import type { Level } from './levels';
-import type { Shade, ToneFamily } from './shades';
+import type { Level } from "./levels";
+import type { Shade, ToneFamily } from "./shades";
 
 const LEVEL_BASE_HEX: Record<Level, string> = {
-  1: '#1b1410',
-  2: '#2c1e18',
-  3: '#3d2820',
-  4: '#4f3328',
-  5: '#6b4432',
-  6: '#8a5a3c',
-  7: '#a87548',
-  8: '#c79761',
-  9: '#dbb37e',
-  10: '#e8c99a',
-  11: '#f0dcb8',
-  12: '#f7ecd4',
+  1: "#1b1410",
+  2: "#2c1e18",
+  3: "#3d2820",
+  4: "#4f3328",
+  5: "#6b4432",
+  6: "#8a5a3c",
+  7: "#a87548",
+  8: "#c79761",
+  9: "#dbb37e",
+  10: "#e8c99a",
+  11: "#f0dcb8",
+  12: "#f7ecd4",
 };
 
 const TONE_REFLECT: Record<ToneFamily, { hue: number; sat: number; lightDelta: number }> = {
@@ -27,7 +27,7 @@ const TONE_REFLECT: Record<ToneFamily, { hue: number; sat: number; lightDelta: n
   violet: { hue: 283, sat: 0.32, lightDelta: -0.01 },
   chocolate: { hue: 22, sat: 0.45, lightDelta: -0.03 },
   pearl: { hue: 248, sat: 0.14, lightDelta: 0.03 },
-  'slate-grey': { hue: 212, sat: 0.08, lightDelta: -0.01 },
+  "slate-grey": { hue: 212, sat: 0.08, lightDelta: -0.01 },
   mahogany: { hue: 350, sat: 0.42, lightDelta: -0.02 },
 };
 
@@ -38,10 +38,10 @@ function hexToRgb(hex: string): [number, number, number] {
 
 function rgbToHex([r, g, b]: [number, number, number]): string {
   return (
-    '#' +
+    "#" +
     [r, g, b]
-      .map((c) => Math.round(Math.min(255, Math.max(0, c))).toString(16).padStart(2, '0'))
-      .join('')
+      .map((c) => Math.round(Math.min(255, Math.max(0, c))).toString(16).padStart(2, "0"))
+      .join("")
   );
 }
 

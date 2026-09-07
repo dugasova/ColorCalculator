@@ -7,13 +7,13 @@ export interface TotalGramsFieldProps {
   idSuffix?: string;
 }
 
-export function TotalGramsField({ totalGrams, onTotalGramsChange, idSuffix = '' }: TotalGramsFieldProps) {
+export function TotalGramsField({ totalGrams, onTotalGramsChange, idSuffix = "" }: TotalGramsFieldProps) {
   const { t } = useTranslation();
   const { inputProps } = useClampedNumberText(totalGrams, onTotalGramsChange, { min: 1 });
 
   return (
     <div className="field">
-      <label htmlFor={`totalGrams${idSuffix}`}>{t('fields.totalGrams')}</label>
+      <label htmlFor={`totalGrams${idSuffix}`}>{t("fields.totalGrams")}</label>
       <input id={`totalGrams${idSuffix}`} {...inputProps} />
     </div>
   );

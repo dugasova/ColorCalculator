@@ -77,12 +77,12 @@ export function FormulaResults({
     ? formatFillerStepText(targetShade.level, prePigmentationResult)
     : null;
   const formulaText = fillerStepText !== null
-    ? `${fillerStepText}\n\n${t('prePigmentation.finalStepLabel')}\n${targetColorFormulaText}`
+    ? `${fillerStepText}\n\n${t("prePigmentation.finalStepLabel")}\n${targetColorFormulaText}`
     : targetColorFormulaText;
 
   const handleSave = async (details: SessionDetails) => {
     const step: ColorHistoryStep = {
-      kind: 'color',
+      kind: "color",
       brandName,
       line,
       targetShade,
@@ -122,18 +122,18 @@ export function FormulaResults({
       {prePigmentationResult !== null && (
         <>
           <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} />
-          <h2 className="results__section-heading">{t('prePigmentation.finalStepLabel')}</h2>
+          <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
         </>
       )}
       <div className="results__stats">
         <div className="stat">
-          <span className="stat__label">{t('results.developer')}</span>
+          <span className="stat__label">{t("results.developer")}</span>
           <span className="stat__value">
-            {result.developerVolume !== null ? t('format.developerVolume', { value: result.developerVolume }) : '—'}
+            {result.developerVolume !== null ? t("format.developerVolume", { value: result.developerVolume }) : "—"}
           </span>
         </div>
         <div className="stat">
-          <span className="stat__label">{t('results.ratio')}</span>
+          <span className="stat__label">{t("results.ratio")}</span>
           <span className="stat__value">
             {result.mixingRatio.colorParts} : {result.mixingRatio.developerParts}
           </span>
@@ -144,26 +144,26 @@ export function FormulaResults({
         <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>
       )}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning" role="alert">{t('results.notAchievable')}</p>
+        <p className="warning" role="alert">{t("results.notAchievable")}</p>
       )}
-      {porosity === 'high' && (
-        <p className="warning" role="alert">{t('results.porousWarning')}</p>
+      {porosity === "high" && (
+        <p className="warning" role="alert">{t("results.porousWarning")}</p>
       )}
       {result.grams !== null && (
         <div className="results__row">
-          <span className="results__row-label">{t('results.mix')}</span>
+          <span className="results__row-label">{t("results.mix")}</span>
           <span>{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
         </div>
       )}
 
       <div className="results__row">
-        <span className="results__row-label">{t('results.applicationZone')}</span>
-        <span>{t(applicationZone === 'full-head' ? 'fields.applicationZoneFullHead' : 'fields.applicationZoneRootTouchUp')}</span>
+        <span className="results__row-label">{t("results.applicationZone")}</span>
+        <span>{t(applicationZone === "full-head" ? "fields.applicationZoneFullHead" : "fields.applicationZoneRootTouchUp")}</span>
       </div>
 
       <div className="results__row">
-        <span className="results__row-label">{t('results.grayCoverage')}</span>
-        <span>{t('results.grayCoverageValue', {
+        <span className="results__row-label">{t("results.grayCoverage")}</span>
+        <span>{t("results.grayCoverageValue", {
           note: result.grayCoverage.note,
           natural: Math.round(result.grayCoverage.naturalRatio * 100),
           fashion: Math.round(result.grayCoverage.fashionRatio * 100),
@@ -171,10 +171,10 @@ export function FormulaResults({
       </div>
 
       <div className="results__row">
-        <span className="results__row-label">{t('results.recommendedTone')}</span>
+        <span className="results__row-label">{t("results.recommendedTone")}</span>
         <span>{result.recommendedCorrectiveTone !== null
-          ? t('results.recommendedToneValue', { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
-          : t('results.none')}</span>
+          ? t("results.recommendedToneValue", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
+          : t("results.none")}</span>
       </div>
 
       {result.recommendedCorrectiveTone !== null && (
@@ -184,30 +184,30 @@ export function FormulaResults({
             checked={neutralizationApplied}
             onChange={e => onNeutralizationAppliedChange(e.target.checked)}
           />
-          {t('results.applyNeutralization')}
+          {t("results.applyNeutralization")}
         </label>
       )}
 
       {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
       {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
 
-      <h2 className="results__section-heading">{t('results.timingPricingSectionTitle')}</h2>
+      <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>
 
       <div className="results__control-grid">
         <div className="field">
-          <label htmlFor="processingMinutes">{t('results.processingTime')}</label>
+          <label htmlFor="processingMinutes">{t("results.processingTime")}</label>
           <input id="processingMinutes" {...processingMinutesInputProps} />
           <span className="processing-time-hint">
-            {t('results.processingTimeHint', { minutes: result.recommendedProcessingMinutes })}
+            {t("results.processingTimeHint", { minutes: result.recommendedProcessingMinutes })}
             {processingMinutes !== result.recommendedProcessingMinutes && (
               <button type="button" onClick={() => onProcessingMinutesChange(result.recommendedProcessingMinutes)}>
-                {t('results.useRecommended')}
+                {t("results.useRecommended")}
               </button>
             )}
           </span>
         </div>
         <div className="field">
-          <label htmlFor="pricePerGram">{t('results.pricePerGram')}</label>
+          <label htmlFor="pricePerGram">{t("results.pricePerGram")}</label>
           <input
             id="pricePerGram"
             type="number"
@@ -218,7 +218,7 @@ export function FormulaResults({
           />
         </div>
         <div className="field">
-          <label htmlFor="markupMultiplier">{t('results.markupMultiplier')}</label>
+          <label htmlFor="markupMultiplier">{t("results.markupMultiplier")}</label>
           <input
             id="markupMultiplier"
             type="number"
@@ -229,21 +229,21 @@ export function FormulaResults({
           />
         </div>
         <div className="field">
-          <label htmlFor="servicePrice">{t('results.servicePrice')}</label>
+          <label htmlFor="servicePrice">{t("results.servicePrice")}</label>
           <input
             id="servicePrice"
             type="number"
             min={0}
             step={0.01}
-            value={servicePrice ?? ''}
+            value={servicePrice ?? ""}
             onChange={e => onServicePriceChange(Number(e.target.value))}
           />
           {recommendedServicePrice !== null && (
             <span className="processing-time-hint">
-              {t('results.servicePriceHint', { price: recommendedServicePrice.toFixed(2) })}
+              {t("results.servicePriceHint", { price: recommendedServicePrice.toFixed(2) })}
               {servicePrice !== recommendedServicePrice && (
                 <button type="button" onClick={() => onServicePriceChange(recommendedServicePrice)}>
-                  {t('results.useRecommended')}
+                  {t("results.useRecommended")}
                 </button>
               )}
             </span>
@@ -253,7 +253,7 @@ export function FormulaResults({
 
       {productCost !== null && (
         <div className="results__row">
-          <span className="results__row-label">{t('results.productCost')}</span>
+          <span className="results__row-label">{t("results.productCost")}</span>
           <span>{productCost.toFixed(2)}</span>
         </div>
       )}

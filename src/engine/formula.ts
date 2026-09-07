@@ -33,13 +33,13 @@ export const GRAY_LIGHT_THRESHOLD = 30;
 export const GRAY_MEDIUM_THRESHOLD = 50;
 export const GRAY_HEAVY_THRESHOLD = 80;
 
-const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fashionRatio: 1, get note() { return i18n.t('engine.grayCoverage.fashionOnly'); } });
-const EQUAL_MIX: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5, get note() { return i18n.t('engine.grayCoverage.equalMix'); } });
-const BASE_DOMINANT: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.67, fashionRatio: 0.33, get note() { return i18n.t('engine.grayCoverage.baseDominant'); } });
+const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fashionRatio: 1, get note() { return i18n.t("engine.grayCoverage.fashionOnly"); } });
+const EQUAL_MIX: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5, get note() { return i18n.t("engine.grayCoverage.equalMix"); } });
+const BASE_DOMINANT: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.67, fashionRatio: 0.33, get note() { return i18n.t("engine.grayCoverage.baseDominant"); } });
 const NATURAL_ONLY: GrayCoverageStrategy = Object.freeze({
   naturalRatio: 1,
   fashionRatio: 0,
-  get note() { return i18n.t('engine.grayCoverage.naturalOnly'); },
+  get note() { return i18n.t("engine.grayCoverage.naturalOnly"); },
 });
 
 export function getGrayCoverageStrategy(grayPercent: number): GrayCoverageStrategy {
@@ -134,7 +134,7 @@ export function calculateFullFormula(
 
   let liftUnsupportedWarning: string | null = null;
   if (targetShade.developerVolumeChoices !== undefined && isLifting) {
-    liftUnsupportedWarning = i18n.t('engine.liftUnsupportedWarning', { code: targetShade.code, level: targetShade.level, startLevel });
+    liftUnsupportedWarning = i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel });
   }
 
   // No pigment is actually revealed if the line can't lift in the first place.
@@ -152,12 +152,12 @@ export function calculateFullFormula(
 
   let toneWarning: string | null = null;
   if (isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone) {
-    toneWarning = i18n.t('engine.toneWarning', { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone });
+    toneWarning = i18n.t("engine.toneWarning", { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone });
   }
 
   let eligibilityWarning: string | null = null;
   if (targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel) {
-    eligibilityWarning = i18n.t('engine.eligibilityWarning', { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel });
+    eligibilityWarning = i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel });
   }
 
   const grams = developerVolume !== null ? calculateFormulaGrams(totalGrams, mixingRatio) : null;

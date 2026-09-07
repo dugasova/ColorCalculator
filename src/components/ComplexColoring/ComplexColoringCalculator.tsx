@@ -20,11 +20,11 @@ export interface ComplexColoringCalculatorProps {
 
 interface StepScaffold {
   id: string;
-  kind: HistoryStep['kind'];
+  kind: HistoryStep["kind"];
 }
 
 function stepTotalGrams(step: HistoryStep): number {
-  if (step.kind === 'color') {
+  if (step.kind === "color") {
     return step.result.grams !== null ? step.result.grams.colorGrams + step.result.grams.developerGrams : 0;
   }
   return step.result.grams !== null ? step.result.grams.powderGrams + step.result.grams.developerGrams : 0;
@@ -45,12 +45,12 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
 
   const handleAddColorStep = () => {
     const id = `step-${nextIdRef.current++}`;
-    setScaffold(prev => [...prev, { id, kind: 'color' }]);
+    setScaffold(prev => [...prev, { id, kind: "color" }]);
   };
 
   const handleAddBleachStep = () => {
     const id = `step-${nextIdRef.current++}`;
-    setScaffold(prev => [...prev, { id, kind: 'bleach' }]);
+    setScaffold(prev => [...prev, { id, kind: "bleach" }]);
   };
 
   const handleRemoveStep = (id: string) => {
@@ -78,7 +78,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
     ? calculateRecommendedServicePrice(totalProductCost, markupMultiplier)
     : null;
   const servicePrice = manualServicePrice ?? recommendedServicePrice;
-  const formulaText = orderedSteps.length > 0 ? formatSessionText(orderedSteps) : '';
+  const formulaText = orderedSteps.length > 0 ? formatSessionText(orderedSteps) : "";
 
   const handleSave = async (details: SessionDetails) => {
     await saveFormulaToHistory({
@@ -100,16 +100,16 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
   return (
     <div className="calculator calculator--complex">
       <h1 className="calculator__title">
-        {t('complexColoring.titlePrefix')} <span className="calculator__title-accent">{t('complexColoring.titleAccent')}</span>
+        {t("complexColoring.titlePrefix")} <span className="calculator__title-accent">{t("complexColoring.titleAccent")}</span>
       </h1>
-      <p className="complex-coloring__subtitle">{t('complexColoring.subtitle')}</p>
+      <p className="complex-coloring__subtitle">{t("complexColoring.subtitle")}</p>
 
       {scaffold.length === 0 && (
-        <p className="complex-coloring__empty">{t('complexColoring.empty')}</p>
+        <p className="complex-coloring__empty">{t("complexColoring.empty")}</p>
       )}
 
       <div className="complex-coloring__steps">
-        {scaffold.map(s => s.kind === 'color' ? (
+        {scaffold.map(s => s.kind === "color" ? (
           <ColorStepCard
             key={s.id}
             stepId={s.id}
@@ -128,25 +128,25 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
 
       <div className="complex-coloring__add-actions">
         <button type="button" className="button button--secondary" onClick={handleAddBleachStep}>
-          {t('complexColoring.addBleachStep')}
+          {t("complexColoring.addBleachStep")}
         </button>
         <button type="button" className="button button--secondary" onClick={handleAddColorStep}>
-          {t('complexColoring.addColorStep')}
+          {t("complexColoring.addColorStep")}
         </button>
       </div>
 
       {orderedSteps.length > 0 && (
         <div className="results">
           <div className="results__row">
-            <span className="results__row-label">{t('complexColoring.totalProcessingTime')}</span>
+            <span className="results__row-label">{t("complexColoring.totalProcessingTime")}</span>
             <span>{totalProcessingMinutes}</span>
           </div>
 
-          <h2 className="results__section-heading">{t('results.timingPricingSectionTitle')}</h2>
+          <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>
 
           <div className="results__control-grid">
             <div className="field">
-              <label htmlFor="complexMarkupMultiplier">{t('results.markupMultiplier')}</label>
+              <label htmlFor="complexMarkupMultiplier">{t("results.markupMultiplier")}</label>
               <input
                 id="complexMarkupMultiplier"
                 type="number"
@@ -157,21 +157,21 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
               />
             </div>
             <div className="field">
-              <label htmlFor="complexServicePrice">{t('results.servicePrice')}</label>
+              <label htmlFor="complexServicePrice">{t("results.servicePrice")}</label>
               <input
                 id="complexServicePrice"
                 type="number"
                 min={0}
                 step={0.01}
-                value={servicePrice ?? ''}
+                value={servicePrice ?? ""}
                 onChange={e => setManualServicePrice(Number(e.target.value))}
               />
               {recommendedServicePrice !== null && (
                 <span className="processing-time-hint">
-                  {t('results.servicePriceHint', { price: recommendedServicePrice.toFixed(2) })}
+                  {t("results.servicePriceHint", { price: recommendedServicePrice.toFixed(2) })}
                   {servicePrice !== recommendedServicePrice && (
                     <button type="button" onClick={() => setManualServicePrice(recommendedServicePrice)}>
-                      {t('results.useRecommended')}
+                      {t("results.useRecommended")}
                     </button>
                   )}
                 </span>
@@ -181,7 +181,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
 
           {totalProductCost !== null && (
             <div className="results__row">
-              <span className="results__row-label">{t('results.productCost')}</span>
+              <span className="results__row-label">{t("results.productCost")}</span>
               <span>{totalProductCost.toFixed(2)}</span>
             </div>
           )}

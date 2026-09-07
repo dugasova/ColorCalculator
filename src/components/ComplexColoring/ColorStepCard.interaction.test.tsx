@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach, type Mock } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import '../../i18n';
-import { ColorStepCard } from './ColorStepCard';
-import type { ColorHistoryStep } from '../../history';
+import { describe, it, expect, vi, afterEach, type Mock } from "vitest";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import "../../i18n";
+import { ColorStepCard } from "./ColorStepCard";
+import type { ColorHistoryStep } from "../../history";
 
 // This project doesn't set vitest's `test.globals: true` (every test file imports
 // describe/it/expect explicitly), so @testing-library/react's automatic afterEach
@@ -49,47 +49,47 @@ function lastStep(onChange: StepChangeMock): ColorHistoryStep {
   return onChange.mock.calls[onChange.mock.calls.length - 1][0];
 }
 
-describe('ColorStepCard interaction', () => {
-  it('reports the initial step to the parent on mount', () => {
+describe("ColorStepCard interaction", () => {
+  it("reports the initial step to the parent on mount", () => {
     const { onChange } = renderStep();
     expect(onChange).toHaveBeenCalled();
-    expect(lastStep(onChange).brandName).toBe('Generic');
-    expect(lastStep(onChange).targetShade.code).toBe('1.0');
+    expect(lastStep(onChange).brandName).toBe("Generic");
+    expect(lastStep(onChange).targetShade.code).toBe("1.0");
     expect(lastStep(onChange).pricePerGram).toBe(0.18);
   });
 
-  it('keeps the additional shade when the target shade changes within the same line', () => {
+  it("keeps the additional shade when the target shade changes within the same line", () => {
     const { onChange } = renderStep();
-    chooseOption("Additional shade (colorist's discretion)", '2.1');
-    expect(lastStep(onChange).additionalShade?.code).toBe('2.1');
+    chooseOption("Additional shade (colorist's discretion)", "2.1");
+    expect(lastStep(onChange).additionalShade?.code).toBe("2.1");
 
-    chooseOption('Shade', '2.3');
-    expect(lastStep(onChange).targetShade.code).toBe('2.3');
-    expect(lastStep(onChange).additionalShade?.code).toBe('2.1');
+    chooseOption("Shade", "2.3");
+    expect(lastStep(onChange).targetShade.code).toBe("2.3");
+    expect(lastStep(onChange).additionalShade?.code).toBe("2.1");
   });
 
-  it('drops the additional shade when the brand changes -- the new pool may not have it', () => {
+  it("drops the additional shade when the brand changes -- the new pool may not have it", () => {
     const { onChange } = renderStep();
-    chooseOption("Additional shade (colorist's discretion)", '2.1');
-    expect(lastStep(onChange).additionalShade?.code).toBe('2.1');
+    chooseOption("Additional shade (colorist's discretion)", "2.1");
+    expect(lastStep(onChange).additionalShade?.code).toBe("2.1");
 
-    chooseOption('Brand', 'wella');
-    expect(lastStep(onChange).brandName).toBe('Wella');
+    chooseOption("Brand", "wella");
+    expect(lastStep(onChange).brandName).toBe("Wella");
     expect(lastStep(onChange).additionalShade).toBeNull();
   });
 
-  it('keeps price-per-gram untouched by a brand change, unlike the additional shade', () => {
+  it("keeps price-per-gram untouched by a brand change, unlike the additional shade", () => {
     const { onChange } = renderStep();
-    fireEvent.change(screen.getByLabelText('Price per gram'), { target: { value: '0.25' } });
+    fireEvent.change(screen.getByLabelText("Price per gram"), { target: { value: "0.25" } });
     expect(lastStep(onChange).pricePerGram).toBe(0.25);
 
-    chooseOption('Brand', 'wella');
+    chooseOption("Brand", "wella");
     expect(lastStep(onChange).pricePerGram).toBe(0.25);
   });
 
-  it('calls onRemove exactly once when the remove button is clicked', () => {
+  it("calls onRemove exactly once when the remove button is clicked", () => {
     const { onRemove } = renderStep();
-    fireEvent.click(screen.getByRole('button', { name: 'Remove step' }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove step" }));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });
