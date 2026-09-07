@@ -174,12 +174,12 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
       <div className="results__photos">
         <div className="field results__photo">
           <label htmlFor="beforePhoto">{t('results.beforePhotoLabel')}</label>
-          <input id="beforePhoto" type="file" accept="image/*" onChange={e => handleBeforePhotoChange(e.target.files?.[0] ?? null)} />
+          <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => handleBeforePhotoChange(e.target.files?.[0] ?? null)} />
           {beforePhotoPreviewUrl && <img className="results__photo-preview" src={beforePhotoPreviewUrl} alt="" />}
         </div>
         <div className="field results__photo">
           <label htmlFor="afterPhoto">{t('results.afterPhotoLabel')}</label>
-          <input id="afterPhoto" type="file" accept="image/*" onChange={e => handleAfterPhotoChange(e.target.files?.[0] ?? null)} />
+          <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => handleAfterPhotoChange(e.target.files?.[0] ?? null)} />
           {afterPhotoPreviewUrl && <img className="results__photo-preview" src={afterPhotoPreviewUrl} alt="" />}
         </div>
       </div>
