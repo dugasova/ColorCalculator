@@ -5,14 +5,30 @@ import { formatFillerStepText } from './engine/formatPrePigmentation';
 import { formatLineLabel } from './engine/formatLineLabel';
 import type { ColorHistoryStep, HistoryStep } from './history';
 
+function formatCanvasText(canvas: HistoryStep['canvas']): string {
+    if (!canvas) return '';
+    const porosityText = i18n.t(`canvas.porosity.${canvas.porosity}`);
+    const thicknessText = i18n.t(`canvas.thickness.${canvas.thickness}`);
+    let text = `${i18n.t('canvas.porosity.label')}: ${porosityText}\n${i18n.t('canvas.thickness.label')}: ${thicknessText}`;
+    
+    if (canvas.chemicalHistory.length > 0) {
+        const chemText = canvas.chemicalHistory.map(ch => i18n.t(`canvas.chemicalHistory.${ch}`)).join(', ');
+        text += `\n${i18n.t('canvas.chemicalHistory.label')}: ${chemText}`;
+    }
+    return text;
+}
+
 function formatStepText(step: HistoryStep): string {
+    const canvasText = formatCanvasText(step.canvas);
+
     if (step.kind === 'bleach') {
-        return formatBleachText({
+        const bleachText = formatBleachText({
             startLevel: step.startLevel,
             targetLevel: step.targetLevel,
             result: step.result,
             processingMinutes: step.processingMinutes,
         });
+        return canvasText ? `${canvasText}\n\n${bleachText}` : bleachText;
     }
 
     const targetColorText = formatFormulaText({
@@ -32,12 +48,12 @@ function formatStepText(step: HistoryStep): string {
     // Old docs saved before this field existed lack the `prePigmentation` key entirely,
     // reading back as `undefined` (not `null`) -- normalize the same as history.ts does.
     const prePigmentation = step.prePigmentation ?? null;
-    if (prePigmentation === null) return targetColorText;
+    const fillerStepText = prePigmentation !== null ? formatFillerStepText(step.targetShade.level, prePigmentation) : null;
+    const combinedText = fillerStepText !== null 
+        ? `${fillerStepText}\n\n${i18n.t('prePigmentation.finalStepLabel')}\n${targetColorText}`
+        : targetColorText;
 
-    const fillerStepText = formatFillerStepText(step.targetShade.level, prePigmentation);
-    if (fillerStepText === null) return targetColorText;
-
-    return `${fillerStepText}\n\n${i18n.t('prePigmentation.finalStepLabel')}\n${targetColorText}`;
+    return canvasText ? `${canvasText}\n\n${combinedText}` : combinedText;
 }
 
 // Renders every step of a saved (or in-progress) session as its own block. A simple

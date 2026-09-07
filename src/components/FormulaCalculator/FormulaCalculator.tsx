@@ -8,6 +8,7 @@ import { LineField } from "./fields/LineField";
 import { StartLevelField } from "./fields/StartLevelField";
 import { GrayPercentField } from "./fields/GrayPercentField";
 import { ShadeField } from "./fields/ShadeField";
+import { CanvasFields } from "./fields/CanvasFields";
 import { AdditionalShadeField } from "./fields/AdditionalShadeField";
 import { AdditionalShadeGramsField } from "./fields/AdditionalShadeGramsField";
 import { PrePigmentationField } from "./fields/PrePigmentationField";
@@ -35,6 +36,9 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
   const {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
+    porosity, setPorosity,
+    thickness, setThickness,
+    chemicalHistory, setChemicalHistory,
     targetShadeCode,
     applicationZone,
     totalGrams, setTotalGrams,
@@ -89,6 +93,11 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} />
         <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} />
         <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} />
+        <CanvasFields
+          porosity={porosity} onPorosityChange={setPorosity}
+          thickness={thickness} onThicknessChange={setThickness}
+          chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+        />
         <ShadeField
           lineShades={lineShades}
           targetShadeCode={targetShadeCode}
@@ -167,6 +176,9 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         startLevel={startLevel}
         grayPercent={grayPercent}
         applicationZone={applicationZone}
+        porosity={porosity}
+        thickness={thickness}
+        chemicalHistory={chemicalHistory}
         result={effectiveResult}
         additionalShade={additionalShade}
         additionalShadeGrams={additionalShadeGrams}

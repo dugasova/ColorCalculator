@@ -4,6 +4,7 @@ import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
 import type { Brand, BrandId } from "../../engine/brands";
+import { useHairCanvasState } from "./useHairCanvasState";
 
 export interface UseShadeFormulaStateOptions {
   brands: Record<BrandId, Brand>;
@@ -22,6 +23,7 @@ export interface UseShadeFormulaStateOptions {
 // field) -- see resetShadeDependentOverrides/resetShadePoolOverrides for how a caller with
 // its own overrides plugs into the same shade-changed/pool-changed reset points.
 export function useShadeFormulaState({ brands, suppressAdditionalShade = false }: UseShadeFormulaStateOptions) {
+  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState();
   const [startLevel, setStartLevel] = useState<Level>(10);
   const [grayPercent, setGrayPercent] = useState(0);
   const [targetShadeCode, setTargetShadeCode] = useState(GENERIC_SHADE_CHART[0].code);
@@ -105,13 +107,16 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
   return {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
+    porosity, setPorosity,
+    thickness, setThickness,
+    chemicalHistory, setChemicalHistory,
     targetShadeCode, setTargetShadeCode,
     applicationZone, setApplicationZone,
     totalGrams, setTotalGrams,
     brandId, setBrandId,
     line, setLine,
     manualDeveloperVolume, setManualDeveloperVolume,
-    setManualProcessingMinutes,
+    manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,
     neutralizationApplied, setNeutralizationApplied,

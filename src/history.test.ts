@@ -28,6 +28,7 @@ function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryS
     targetShade: { code: '7.1', level: 7, tone: 'ash' },
     startLevel: 7,
     grayPercent: 0,
+    canvas: { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
     applicationZone: 'full-head',
     result: colorFullFormula,
     additionalShade: null,
@@ -45,6 +46,7 @@ function makeBleachStep(overrides: Partial<BleachHistoryStep> = {}): BleachHisto
   return {
     kind: 'bleach',
     startLevel: 6,
+    canvas: { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
     targetLevel: 9,
     result: {
       startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
@@ -117,6 +119,7 @@ describe('normalizeHistoryEntry', () => {
       targetShade: legacy.targetShade,
       startLevel: 8,
       grayPercent: 20,
+      canvas: { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
       applicationZone: 'full-head',
       result: colorFullFormula,
       additionalShade: null,

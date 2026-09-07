@@ -2,8 +2,9 @@ import { useTranslation } from "react-i18next";
 import type { FullFormula } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
-import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
+import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
+import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../engine/formatPrePigmentation";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
@@ -18,6 +19,9 @@ export interface FormulaResultsProps {
   startLevel: Level;
   grayPercent: number;
   applicationZone: ApplicationZone;
+  porosity: Porosity;
+  thickness: HairThickness;
+  chemicalHistory: ChemicalHistory[];
   result: FullFormula;
   additionalShade: Shade | null;
   additionalShadeGrams: number;
@@ -48,7 +52,7 @@ export interface FormulaResultsProps {
 const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
-  brandName, line, targetShade, startLevel, grayPercent, applicationZone, result,
+  brandName, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory, applicationZone, result,
   additionalShade, additionalShadeGrams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
@@ -83,6 +87,7 @@ export function FormulaResults({
       startLevel,
       grayPercent,
       applicationZone,
+      canvas: { porosity, thickness, chemicalHistory },
       result,
       additionalShade,
       additionalShadeGrams,
@@ -137,7 +142,9 @@ export function FormulaResults({
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
         <p className="warning" role="alert">{t('results.notAchievable')}</p>
       )}
-
+      {porosity === 'high' && (
+        <p className="warning" role="alert">{t('results.porousWarning')}</p>
+      )}
       {result.grams !== null && (
         <div className="results__row">
           <span className="results__row-label">{t('results.mix')}</span>

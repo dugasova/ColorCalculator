@@ -8,6 +8,7 @@ import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
 import { StartLevelField } from "../FormulaCalculator/fields/StartLevelField";
 import { GrayPercentField } from "../FormulaCalculator/fields/GrayPercentField";
+import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { ShadeField } from "../FormulaCalculator/fields/ShadeField";
 import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShadeField";
 import { AdditionalShadeGramsField } from "../FormulaCalculator/fields/AdditionalShadeGramsField";
@@ -39,6 +40,9 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   const {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
+    porosity, setPorosity,
+    thickness, setThickness,
+    chemicalHistory, setChemicalHistory,
     targetShadeCode,
     applicationZone,
     totalGrams, setTotalGrams,
@@ -73,15 +77,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     targetShade,
     startLevel,
     grayPercent,
+    canvas: { porosity, thickness, chemicalHistory },
     applicationZone,
     result: effectiveResult,
     additionalShade,
-    additionalShadeGrams,
+    additionalShadeGrams: additionalShade !== null ? additionalShadeGrams : null,
     blend: null,
-    // Pre-pigmentation is only offered in the single-formula FormulaCalculator (see
-    // PrePigmentationField) -- a complex-coloring color step almost always tones hair
-    // that was just lifted with a bleach step above it, not darkens several levels from
-    // its pre-service level, so this always stays null here.
     prePigmentation: null,
     neutralizationApplied,
     processingMinutes,
@@ -94,9 +95,8 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     onChange(step);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    brandId, line, targetShadeCode, startLevel, grayPercent, applicationZone, totalGrams,
-    manualDeveloperVolume, additionalShadeCode, additionalShadeGrams, neutralizationApplied,
-    processingMinutes, pricePerGram,
+    applicationZone, effectiveResult, additionalShade, additionalShadeGrams, neutralizationApplied, processingMinutes, pricePerGram,
+    porosity, thickness, chemicalHistory
   ]);
 
   return (
@@ -113,6 +113,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} idSuffix={idSuffix} />
         <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} idSuffix={idSuffix} />
         <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} idSuffix={idSuffix} />
+        <CanvasFields
+          porosity={porosity} onPorosityChange={setPorosity}
+          thickness={thickness} onThicknessChange={setThickness}
+          chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+          idSuffix={idSuffix}
+        />
         <ShadeField
           lineShades={lineShades}
           targetShadeCode={targetShadeCode}
@@ -169,6 +175,9 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
       )}
       {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
       {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
+      {porosity === 'high' && (
+        <p className="warning" role="alert">{t('results.porousWarning')}</p>
+      )}
 
       {grams !== null && (
         <div className="results__row">

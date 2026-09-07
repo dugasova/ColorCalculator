@@ -13,6 +13,7 @@ function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryS
     targetShade: { code: '7.1', level: 7, tone: 'ash' },
     startLevel: 7,
     grayPercent: 0,
+    canvas: { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
     applicationZone: 'full-head',
     result: {
       developerVolume: 20,

@@ -6,10 +6,11 @@ import type { Shade } from "./engine/shades";
 import type { DeveloperVolume, Level } from "./engine/levels";
 import type { FullFormula } from "./engine/formula";
 import type { BleachFormula } from "./engine/bleach";
+import type { PrePigmentationResult } from "./engine/prePigmentation";
 import type { ApplicationZone } from "./engine/applicationZone";
 import type { Brand, BrandId } from "./engine/brands";
 import { DEFAULT_MARKUP_MULTIPLIER } from "./engine/pricing";
-import type { PrePigmentationResult } from "./engine/prePigmentation";
+import type { HairCanvas } from "./engine/canvas";
 
 const HISTORY_COLLECTION = "formulaHistory";
 
@@ -24,6 +25,7 @@ export interface ColorHistoryStep {
   startLevel: Level;
   grayPercent: number;
   applicationZone: ApplicationZone;
+  canvas?: HairCanvas;
   result: FullFormula;
   additionalShade: Shade | null;
   additionalShadeGrams: number | null;
@@ -55,6 +57,7 @@ export interface ColorBlend {
 export interface BleachHistoryStep {
   kind: 'bleach';
   startLevel: Level;
+  canvas?: HairCanvas;
   targetLevel: Level;
   result: BleachFormula;
   processingMinutes: number;
@@ -122,10 +125,15 @@ export interface LegacyFormulaHistoryEntry {
 // lockstep with the engine, for a read-only history/repeat feature -- a bad trade. This
 // still catches the realistic corruption case (a document missing/mistyped the top-level
 // scalar fields the UI reads directly: client name, pricing, patch-test/photo metadata)
-// and each step's `kind` discriminant, which HistoryView/formatSession switch on.
+const canvasShapeSchema = z.object({
+  porosity: z.enum(['low', 'normal', 'high']),
+  thickness: z.enum(['fine', 'medium', 'coarse']),
+  chemicalHistory: z.array(z.enum(['keratin', 'perm', 'henna', 'direct_dye'])),
+});
+
 const historyStepShapeSchema = z.union([
-  z.looseObject({ kind: z.literal('color') }),
-  z.looseObject({ kind: z.literal('bleach') }),
+  z.looseObject({ kind: z.literal('color'), canvas: canvasShapeSchema.optional() }),
+  z.looseObject({ kind: z.literal('bleach'), canvas: canvasShapeSchema.optional() }),
 ]);
 
 const formulaHistoryEntryShapeSchema = z.object({
@@ -189,6 +197,7 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
     targetShade: legacy.targetShade,
     startLevel: legacy.startLevel,
     grayPercent: legacy.grayPercent,
+    canvas: { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
     applicationZone: legacy.applicationZone,
     result: legacy.result,
     additionalShade: legacy.additionalShade ?? null,
@@ -307,6 +316,7 @@ export interface RepeatFormulaRequest {
   manualDeveloperVolume: DeveloperVolume | undefined;
   additionalShadeCode: string | null;
   additionalShadeGrams: number;
+  canvas?: HairCanvas;
   blendShadeACode: string | null;
   blendShadeBCode: string | null;
   blendPrimaryPercent: number;
@@ -345,7 +355,6 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   // the total on top of the primary mix (see `applyAdditionalShade`), so its grams are
   // subtracted back out here first, and re-applied on top from restored state on repeat.
   // The two are mutually exclusive (see ColorHistoryStep), so only one branch applies.
-  // Old history docs saved before this field existed lack it entirely, reading back as
   // `undefined` (not `null`) from Firestore -- normalize so the `!== null` checks below
   // don't take the "blend present" branch and crash dereferencing an undefined blend.
   const blend = step.blend ?? null;
@@ -368,6 +377,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     startLevel: step.startLevel,
     grayPercent: step.grayPercent,
     totalGrams,
+    canvas: step.canvas ?? { porosity: 'normal', thickness: 'medium', chemicalHistory: [] },
     manualDeveloperVolume: step.targetShade.developerVolumeChoices !== undefined
       ? (step.result.developerVolume ?? undefined)
       : undefined,

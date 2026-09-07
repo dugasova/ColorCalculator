@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
 import { Select } from "../common/Select";
+import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import type { BleachHistoryStep } from "../../history";
+import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
 const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -22,6 +24,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
   const idSuffix = `-${stepId}`;
 
   const [startLevel, setStartLevel] = useState<Level>(6);
+  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState();
   const [targetLevel, setTargetLevel] = useState<Level>(8);
   const [totalGrams, setTotalGrams] = useState(60);
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
@@ -37,12 +40,13 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
     result,
     processingMinutes,
     pricePerGram,
+    canvas: { porosity, thickness, chemicalHistory },
   };
 
   useEffect(() => {
     onChange(step);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startLevel, targetLevel, totalGrams, manualProcessingMinutes, pricePerGram]);
+  }, [startLevel, targetLevel, totalGrams, manualProcessingMinutes, pricePerGram, porosity, thickness, chemicalHistory]);
 
   return (
     <div className="step-card">
@@ -63,6 +67,13 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
             options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
+
+        <CanvasFields
+          porosity={porosity} onPorosityChange={setPorosity}
+          thickness={thickness} onThicknessChange={setThickness}
+          chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+          idSuffix={idSuffix}
+        />
 
         <div className="field">
           <label htmlFor={`bleachTargetLevel${idSuffix}`}>{t('bleach.targetLevel')}</label>

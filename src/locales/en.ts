@@ -54,7 +54,29 @@ export const en = {
     crossBrandQualityPoor: 'Poor match',
     prePigmentationEnable: 'Add pre-pigmentation step',
   },
+  canvas: {
+    porosity: {
+      label: 'Porosity',
+      low: 'Low',
+      normal: 'Normal',
+      high: 'High',
+    },
+    thickness: {
+      label: 'Hair Thickness',
+      fine: 'Fine',
+      medium: 'Medium',
+      coarse: 'Coarse',
+    },
+    chemicalHistory: {
+      label: 'Chemical History',
+      keratin: 'Keratin',
+      perm: 'Perm',
+      henna: 'Henna',
+      direct_dye: 'Direct Dye',
+    },
+  },
   results: {
+    porousWarning: 'Warning: hair is porous. It is recommended to reduce processing time on the ends by 5-10 minutes.',
     developer: 'Developer',
     ratio: 'Ratio',
     notAchievable: 'Not achievable in a single process — multi-step lightening required',

@@ -26,21 +26,34 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
 
   const base = useShadeFormulaState({ brands, suppressAdditionalShade: blendModeEnabled });
   const {
-    startLevel, setStartLevel, grayPercent, setGrayPercent, targetShadeCode, setTargetShadeCode,
+    startLevel, setStartLevel, grayPercent, setGrayPercent,
+    porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory,
+    targetShadeCode, setTargetShadeCode,
     applicationZone, setApplicationZone, totalGrams, setTotalGrams, brandId, setBrandId, line, setLine,
-    manualDeveloperVolume, setManualDeveloperVolume, setManualProcessingMinutes,
+    manualDeveloperVolume, setManualDeveloperVolume, manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
     neutralizationApplied, setNeutralizationApplied,
     availableLines, lineShades, targetShade, result, additionalShade, effectiveResult, processingMinutes,
+    handleAdditionalShadeCodeChange,
+    handleApplicationZoneChange,
     resetShadePoolOverrides,
   } = base;
 
   // Replay a "Repeat formula" request from history right during render — this is React's
   // documented pattern for adjusting state when a prop changes (no effect/extra render
   // tick needed): https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
+  if (repeatRequest && repeatRequest !== appliedRepeatRequest) {
+    if (repeatRequest.canvas) {
+      setPorosity(repeatRequest.canvas.porosity);
+      setThickness(repeatRequest.canvas.thickness);
+      setChemicalHistory(repeatRequest.canvas.chemicalHistory);
+    } else {
+      setPorosity('normal');
+      setThickness('medium');
+      setChemicalHistory([]);
+    }
   // `repeatRequest` is a fresh object each time History's "Repeat" button is clicked, so
   // comparing by reference here is enough to apply each click exactly once.
-  if (repeatRequest && repeatRequest !== appliedRepeatRequest) {
     setAppliedRepeatRequest(repeatRequest);
     setBrandId(repeatRequest.brandId);
     setLine(repeatRequest.line);
@@ -155,15 +168,18 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   return {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
+    porosity, setPorosity,
+    thickness, setThickness,
+    chemicalHistory, setChemicalHistory,
     targetShadeCode,
     applicationZone,
     totalGrams, setTotalGrams,
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
-    setManualPricePerGram,
+    manualPricePerGram, setManualPricePerGram,
     markupMultiplier, setMarkupMultiplier,
-    setManualServicePrice,
+    manualServicePrice, setManualServicePrice,
     additionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,
     blendModeEnabled,
@@ -171,7 +187,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     blendPrimaryPercent, setBlendPrimaryPercent,
     neutralizationApplied, setNeutralizationApplied,
     prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
-    setManualProcessingMinutes,
+    manualProcessingMinutes, setManualProcessingMinutes,
 
     availableLines,
     lineShades,
@@ -196,8 +212,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     handleLineChange,
     handleTargetShadeCodeChange,
     handleCrossBrandMatchSelect,
-    handleAdditionalShadeCodeChange: base.handleAdditionalShadeCodeChange,
+    handleAdditionalShadeCodeChange,
     handleBlendModeChange,
-    handleApplicationZoneChange: base.handleApplicationZoneChange,
+    handleApplicationZoneChange,
   };
 }

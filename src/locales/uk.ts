@@ -56,7 +56,29 @@ export const uk: typeof en = {
     crossBrandQualityPoor: 'Слабкий збіг',
     prePigmentationEnable: 'Додати крок передпігментації',
   },
+  canvas: {
+    porosity: {
+      label: 'Пористість',
+      low: 'Низька',
+      normal: 'Нормальна',
+      high: 'Висока',
+    },
+    thickness: {
+      label: 'Товщина волосся',
+      fine: 'Тонке',
+      medium: 'Середнє',
+      coarse: 'Жорстке',
+    },
+    chemicalHistory: {
+      label: 'Хімічна історія',
+      keratin: 'Кератин',
+      perm: 'Хім. завивка',
+      henna: 'Хна',
+      direct_dye: 'Прямі пігменти',
+    },
+  },
   results: {
+    porousWarning: 'Увага: волосся пористе, час витримки на кінцях рекомендується скоротити на 5-10 хвилин.',
     developer: 'Окислювач',
     ratio: 'Пропорція',
     notAchievable: 'Недосяжно за один процес — потрібне багатоетапне освітлення',
