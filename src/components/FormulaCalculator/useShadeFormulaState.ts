@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { GENERIC_SHADE_CHART, compareShadesForDisplay } from "../../engine/shades";
+import { compareShadesForDisplay } from "../../engine/shades";
+import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
 import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";

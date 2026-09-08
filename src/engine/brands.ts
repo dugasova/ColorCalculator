@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { Level } from "./levels";
 import { type MixingRatio, type Shade, shadeSchema } from "./shades";
-import { GENERIC_SHADE_CHART } from "./shades";
+import { GENERIC_SHADE_CHART } from "./brands/generic";
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
 import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from "./brands/loreal";
 import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from "./brands/igora";

@@ -1,6 +1,6 @@
 import { getUnderlyingPigment, pickDeveloperVolume } from "./levels";
 import type { DeveloperVolume, Level, UnderlyingPigment } from "./levels";
-import { GENERIC_SHADE_CHART } from "./shades";
+import { GENERIC_SHADE_CHART } from "./brands/generic";
 import type { Shade, ToneFamily } from "./shades";
 import { getMixingRatio } from "./formula";
 import type { MixingRatio } from "./shades";
@@ -91,7 +91,7 @@ export function getPrePigmentFillerTone(pigment: UnderlyingPigment): ToneFamily 
   }
 }
 
-// Worked example against the built-in Generic chart (GENERIC_SHADE_CHART, ./shades.ts):
+// Worked example against the built-in Generic chart (GENERIC_SHADE_CHART, ./brands/generic.ts):
 // startLevel 9 -> targetLevel 5 needs a 'copper' filler (underlying pigment 'orange') and
 // Generic has a 5.4 copper shade, so this resolves to that shade. startLevel 9 ->
 // targetLevel 4 needs a 'red' filler (underlying pigment 'red-orange'), but Generic's
