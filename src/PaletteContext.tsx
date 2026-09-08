@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { BRANDS, buildBrandCatalog, type CustomBrandRecord, type PaletteOverride } from "./engine/brands";
+import { BRANDS } from "./engine/brands";
+import { buildBrandCatalog, type CustomBrandRecord, type PaletteOverride } from "./engine/paletteOverrides";
 import { PaletteReactContext, subscribeToCustomBrands, subscribeToPaletteOverrides, type PaletteState } from "./palette";
 
 export function PaletteProvider({ children }: { children: ReactNode }) {

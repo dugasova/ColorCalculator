@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { addShadeToBrand } from "../../palette";
-import { shadeKey, type BrandId } from "../../engine/brands";
+import type { BrandId } from "../../engine/brands";
+import { shadeKey } from "../../engine/paletteOverrides";
 import type { Level } from "../../engine/levels";
 import type { Shade, ToneFamily } from "../../engine/shades";
 import { Select } from "../common/Select";

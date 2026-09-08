@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePaletteAdmin } from "../../palette";
-import { BRANDS, getDisabledShadeKeys, getFullBrandShades } from "../../engine/brands";
+import { BRANDS } from "../../engine/brands";
+import { getDisabledShadeKeys, getFullBrandShades } from "../../engine/paletteOverrides";
 import { AddBrandForm } from "./AddBrandForm";
 import { BrandShadeList } from "./BrandShadeList";
 import { AddShadeForm } from "./AddShadeForm";

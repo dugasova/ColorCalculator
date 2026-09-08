@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { addCustomBrand } from "../../palette";
-import type { Brand, BrandId, MixingRatioConfig } from "../../engine/brands";
+import type { Brand, BrandId } from "../../engine/brands";
+import type { MixingRatioConfig } from "../../engine/paletteOverrides";
 import { Select } from "../common/Select";
 
 export interface AddBrandFormProps {

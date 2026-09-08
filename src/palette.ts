@@ -2,7 +2,10 @@ import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, type Unsubscrib
 import { createContext, useContext } from "react";
 import { db } from "./firebase";
 import { sanitizeForFirestore } from "./history";
-import { BRANDS, type Brand, type BrandId, type CustomBrandRecord, type MixingRatioConfig, type PaletteOverride, customBrandRecordSchema, paletteOverrideSchema } from "./engine/brands";
+import { BRANDS, type Brand, type BrandId } from "./engine/brands";
+import {
+  type CustomBrandRecord, type MixingRatioConfig, type PaletteOverride, customBrandRecordSchema, paletteOverrideSchema,
+} from "./engine/paletteOverrides";
 import type { Shade } from "./engine/shades";
 
 export interface PaletteState {

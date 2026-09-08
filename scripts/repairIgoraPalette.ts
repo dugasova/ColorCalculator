@@ -6,7 +6,7 @@
 // that correction landed.
 //
 // Why this is needed: `getFullBrandShades` drops a base shade in favor of an
-// `add` override sharing its (line, code) — see src/engine/brands.ts. If Igora
+// `add` override sharing its (line, code) — see src/engine/paletteOverrides.ts. If Igora
 // was migrated into Firestore while the chart still approximated 'cendré' as
 // 'ash', those stale override documents keep shadowing the corrected built-in
 // chart even after the source file is fixed. Deleting them lets the (now-
@@ -27,7 +27,7 @@
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { auth, db } from "../src/firebase";
-import type { PaletteOverride } from "../src/engine/brands";
+import type { PaletteOverride } from "../src/engine/paletteOverrides";
 
 async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;

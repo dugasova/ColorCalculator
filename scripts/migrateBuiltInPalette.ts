@@ -21,7 +21,8 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "../src/firebase";
 import { addShadeToBrand } from "../src/palette";
-import { BRANDS, shadeKey, type PaletteOverride } from "../src/engine/brands";
+import { BRANDS } from "../src/engine/brands";
+import { shadeKey, type PaletteOverride } from "../src/engine/paletteOverrides";
 
 function migrationKey(brandId: string, shade: { line?: string; code: string }): string {
   return `${brandId}::${shadeKey(shade)}`;
