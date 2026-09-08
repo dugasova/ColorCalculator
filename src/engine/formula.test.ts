@@ -8,27 +8,15 @@ describe("getGrayCoverageStrategy", () => {
     expect(getGrayCoverageStrategy(29)).toEqual({ naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" });
   });
 
-  it("returns a 50/50 split in the [30, 50) range", () => {
-    expect(getGrayCoverageStrategy(30)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts base and fashion tone" });
-    expect(getGrayCoverageStrategy(49)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts base and fashion tone" });
+  it("returns a one-third natural dose in the [30, 50) range -- Wella's Pure Naturals ratio for that gray tier", () => {
+    expect(getGrayCoverageStrategy(30)).toEqual({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, note: "one-third natural base blended in for extra gray coverage" });
+    expect(getGrayCoverageStrategy(49)).toEqual({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, note: "one-third natural base blended in for extra gray coverage" });
   });
 
-  it("favors natural base in the [50, 80) range", () => {
-    expect(getGrayCoverageStrategy(50)).toEqual({ naturalRatio: 0.67, fashionRatio: 0.33, note: "base-dominant mix" });
-    expect(getGrayCoverageStrategy(79)).toEqual({ naturalRatio: 0.67, fashionRatio: 0.33, note: "base-dominant mix" });
-  });
-
-  it("returns pure natural base at 80% and above, including 100%", () => {
-    expect(getGrayCoverageStrategy(80)).toEqual({
-      naturalRatio: 1,
-      fashionRatio: 0,
-      note: "resistant gray — use the natural series, consider pre-pigmentation",
-    });
-    expect(getGrayCoverageStrategy(100)).toEqual({
-      naturalRatio: 1,
-      fashionRatio: 0,
-      note: "resistant gray — use the natural series, consider pre-pigmentation",
-    });
+  it("returns a 50/50 split at 50% gray and above, capped there even at 100% -- never past Wella's documented half-natural ratio", () => {
+    expect(getGrayCoverageStrategy(50)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
+    expect(getGrayCoverageStrategy(79)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
+    expect(getGrayCoverageStrategy(100)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
   });
 
   it("always sums natural and fashion ratios to 1", () => {

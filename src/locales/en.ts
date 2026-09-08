@@ -179,9 +179,8 @@ export const en = {
   engine: {
     grayCoverage: {
       fashionOnly: "apply the fashion tone as-is",
-      equalMix: "equal parts base and fashion tone",
-      baseDominant: "base-dominant mix",
-      naturalOnly: "resistant gray — use the natural series, consider pre-pigmentation",
+      oneThirdNatural: "one-third natural base blended in for extra gray coverage",
+      halfNatural: "equal parts natural base and fashion tone",
     },
     liftUnsupportedWarning:
       "'{{code}}' can't lift level — it only deposits color at level {{level}} or lower, but the starting level is {{startLevel}}",

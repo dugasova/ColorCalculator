@@ -8,7 +8,7 @@ import type { Shade } from "../shades";
 // 5 mahogany, 6 violet, 7 brown, 8 pearl, 9 cendré. ToneFamily has no 'cendré'
 // entry, so that one is still approximated: cendré -> 'slate-grey'.
 
-import type { LiftTable } from "../levels";
+import type { DeveloperVolume, LiftTable } from "../levels";
 
 const specialBlondeLiftTable: LiftTable = (volume) => {
   switch (volume) {
@@ -17,6 +17,21 @@ const specialBlondeLiftTable: LiftTable = (volume) => {
     default: return 0;
   }
 };
+
+// Special Blonde's own instructions call for a longer, heat-free process regardless of
+// gray coverage -- "50-60 min without heat" -- unlike the rest of Koleston Perfect, whose
+// processing time is picked from gray percentage alone (see getRecommendedProcessingMinutes,
+// ../formula.ts). Midpoint of that range, matching this engine's existing convention of a
+// single recommended number rather than a range (see EXTENDED_PROCESSING_MINUTES there).
+const SPECIAL_BLONDE_PROCESSING_MINUTES = 55;
+
+// Wella's own Koleston Perfect guide calls for a gentler 4% Welloxon Perfect (rather than
+// the engine's generic 3%/10 vol "no lift" default) when depositing at the same depth or
+// darker with no significant gray to cover -- "30-40 min without heat". Doesn't apply to
+// Special Blonde below (which keeps the generic default in the same-depth/darker edge case
+// its own instructions don't cover) or to Color Touch (a separate demi-permanent chart
+// with its own manual 1.9%/4% developerVolumeChoices, untouched by this default at all).
+const KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME: DeveloperVolume = 13;
 
 const kolestonPerfectShades: Shade[] = [
   // Level 2
@@ -153,18 +168,24 @@ const kolestonPerfectShades: Shade[] = [
   { code: "10/96", level: 10, tone: "slate-grey", secondaryTone: "violet" },
   { code: "10/97", level: 10, tone: "slate-grey", secondaryTone: "chocolate" },
   // Level 12
-  { code: "12/0", level: 12, tone: "natural", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/1", level: 12, tone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/3", level: 12, tone: "gold", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/11", level: 12, tone: "ash", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/16", level: 12, tone: "ash", secondaryTone: "violet", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/81", level: 12, tone: "pearl", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/86", level: 12, tone: "pearl", secondaryTone: "violet", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/89", level: 12, tone: "pearl", secondaryTone: "slate-grey", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
-  { code: "12/61", level: 12, tone: "violet", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6 },
+  { code: "12/0", level: 12, tone: "natural", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/1", level: 12, tone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/3", level: 12, tone: "gold", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/11", level: 12, tone: "ash", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/16", level: 12, tone: "ash", secondaryTone: "violet", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/81", level: 12, tone: "pearl", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/86", level: 12, tone: "pearl", secondaryTone: "violet", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/89", level: 12, tone: "pearl", secondaryTone: "slate-grey", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  { code: "12/61", level: 12, tone: "violet", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
 ];
 
-export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({ ...shade, line: "koleston-perfect" }));
+export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({
+  ...shade,
+  line: "koleston-perfect",
+  // Special Blonde (the developerLiftTable-bearing entries above) is excluded -- its own
+  // instructions don't cover the same-depth/darker case, so it keeps the engine default.
+  ...(shade.developerLiftTable === undefined ? { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME } : {}),
+}));
 
 //color touch
 const colorTouchBaseShades: Shade[] = [

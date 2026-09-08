@@ -24,6 +24,19 @@ export interface Shade {
   minStartLevel?: Level
   developerLiftTable?: LiftTable
   developerVolumeChoices?: DeveloperVolume[]
+  // Overrides the engine's default 3% (10 vol) "gentlest" developer pick for same-depth-
+  // or-darker work with no significant gray to cover -- e.g. Wella Koleston Perfect's own
+  // "4% Welloxon Perfect... 30-40 min without heat" alternative (see brands/wella.ts). No
+  // effect once gray coverage reaches GRAY_LIGHT_THRESHOLD (the dedicated
+  // GRAY_COVERAGE_MIN_DEVELOPER_VOLUME floor wins instead) or once any lift is needed (the
+  // level-diff ladder already calls for 20+ vol by then).
+  noLiftDeveloperVolume?: DeveloperVolume
+  // Overrides getRecommendedProcessingMinutes' gray-percent-based default (30/45 min) with
+  // a fixed value -- for shades whose manufacturer instructions call for a specific
+  // processing window regardless of gray coverage, e.g. Wella Koleston Perfect Special
+  // Blonde's "50-60 min without heat" (see brands/wella.ts), independent of this shade's
+  // developerLiftTable/fixedMixingRatio overrides above.
+  fixedProcessingMinutes?: number
 }
 
 const mixingRatioSchema = z.object({
@@ -54,6 +67,8 @@ export const shadeSchema: z.ZodType<Shade> = z.object({
   fixedMixingRatio: mixingRatioSchema.optional(),
   minStartLevel: levelSchema.optional(),
   developerVolumeChoices: z.array(developerVolumeSchema).optional(),
+  noLiftDeveloperVolume: developerVolumeSchema.optional(),
+  fixedProcessingMinutes: z.number().optional(),
 });
 
 export const code = (level: Level, tone: ToneFamily) => `${level}.${toneId(tone)}`;

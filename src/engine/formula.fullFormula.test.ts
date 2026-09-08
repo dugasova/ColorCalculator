@@ -19,6 +19,7 @@ const specialBlondeShade: Shade = {
   fixedMixingRatio: { colorParts: 1, developerParts: 2 },
   minStartLevel: 6,
   developerLiftTable: specialBlondeLiftTable,
+  fixedProcessingMinutes: 55,
 };
 
 const colorTouchShade: Shade = {
@@ -81,7 +82,7 @@ describe("calculateFullFormula", () => {
 
     expect(result.developerVolume).toBeNull();
     expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 2 });
-    expect(result.grayCoverage.naturalRatio).toBeCloseTo(1);
+    expect(result.grayCoverage.naturalRatio).toBeCloseTo(0.5);
     expect(result.grams).toBeNull();
   });
 
@@ -89,7 +90,7 @@ describe("calculateFullFormula", () => {
     const targetShade: Shade = { code: "7.1", level: 7, tone: "ash" };
     const result = calculateFullFormula(7, targetShade, 65, 60);
 
-    expect(result.grayCoverage).toEqual({ naturalRatio: 0.67, fashionRatio: 0.33, note: "base-dominant mix" });
+    expect(result.grayCoverage).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
   });
 
   it("threads recommendedProcessingMinutes through: demi-permanent lines get 20 min regardless of gray, permanent gets 30/45 by gray threshold", () => {
@@ -97,6 +98,13 @@ describe("calculateFullFormula", () => {
     expect(calculateFullFormula(7, permanentShade, 20, 60).recommendedProcessingMinutes).toBe(30);
     expect(calculateFullFormula(7, permanentShade, 60, 60).recommendedProcessingMinutes).toBe(45);
     expect(calculateFullFormula(6, colorTouchShade, 90, 60, undefined, 13).recommendedProcessingMinutes).toBe(20);
+  });
+
+  it("a shade's own fixedProcessingMinutes overrides the gray-percent-based default outright", () => {
+    // Special Blonde calls for 50-60 min without heat regardless of gray coverage --
+    // neither the low- nor high-gray branch of the default 30/45 ladder should apply.
+    expect(calculateFullFormula(6, specialBlondeShade, 0, 60).recommendedProcessingMinutes).toBe(55);
+    expect(calculateFullFormula(6, specialBlondeShade, 90, 60).recommendedProcessingMinutes).toBe(55);
   });
 
   it("splits totalGrams according to the computed mixing ratio", () => {
@@ -176,5 +184,80 @@ describe("calculateFullFormula", () => {
     const result = calculateFullFormula(6, targetShade, 0, 60);
 
     expect(result.liftUnsupportedWarning).toBeNull();
+  });
+
+  describe("gray-coverage developer-volume floor", () => {
+    it("raises the gentlest no-lift developer (10 vol) to 20 vol once gray coverage reaches the 30% threshold", () => {
+      const targetShade: Shade = { code: "7.1", level: 7, tone: "ash" };
+      const result = calculateFullFormula(7, targetShade, 30, 60);
+
+      expect(result.developerVolume).toBe(20);
+    });
+
+    it("leaves the gentlest developer alone just below the threshold", () => {
+      const targetShade: Shade = { code: "7.1", level: 7, tone: "ash" };
+      const result = calculateFullFormula(7, targetShade, 29, 60);
+
+      expect(result.developerVolume).toBe(10);
+    });
+
+    it("applies the same floor when depositing darker, not just at the same level", () => {
+      const targetShade: Shade = { code: "5.1", level: 5, tone: "ash" };
+      const result = calculateFullFormula(8, targetShade, 40, 60);
+
+      expect(result.developerVolume).toBe(20);
+    });
+
+    it("is a no-op once the level-lift itself already calls for 20 vol or higher", () => {
+      // start 6 -> target 8 needs a 2-level lift, which the default ladder already mixes at 30 vol.
+      const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
+      const result = calculateFullFormula(6, targetShade, 90, 60);
+
+      expect(result.developerVolume).toBe(30);
+    });
+
+    it("never applies to a manual-choice (demi-permanent) shade, even with heavy gray", () => {
+      // colorTouchShade only offers 6/13 vol -- the permanent-line gray floor must not
+      // override the colorist's own manual choice with an unsupported volume.
+      const result = calculateFullFormula(8, colorTouchShade, 90, 60, undefined, 6);
+
+      expect(result.developerVolume).toBe(6);
+    });
+  });
+
+  describe("shade-level noLiftDeveloperVolume override", () => {
+    it("uses the shade's own no-lift volume instead of the generic 10 vol default", () => {
+      const targetShade: Shade = { code: "7.1", level: 7, tone: "ash", noLiftDeveloperVolume: 13 };
+      const result = calculateFullFormula(7, targetShade, 0, 60);
+
+      expect(result.developerVolume).toBe(13);
+    });
+
+    it("also applies when depositing darker, not just at the same level", () => {
+      const targetShade: Shade = { code: "5.1", level: 5, tone: "ash", noLiftDeveloperVolume: 13 };
+      const result = calculateFullFormula(8, targetShade, 0, 60);
+
+      expect(result.developerVolume).toBe(13);
+    });
+
+    it("yields to the gray-coverage floor once gray coverage reaches the 30% threshold", () => {
+      const targetShade: Shade = { code: "7.1", level: 7, tone: "ash", noLiftDeveloperVolume: 13 };
+      const result = calculateFullFormula(7, targetShade, 30, 60);
+
+      expect(result.developerVolume).toBe(20);
+    });
+
+    it("has no effect once any lift is needed -- the level-diff ladder already exceeds it", () => {
+      const targetShade: Shade = { code: "8.1", level: 8, tone: "ash", noLiftDeveloperVolume: 13 };
+      const result = calculateFullFormula(7, targetShade, 0, 60);
+
+      expect(result.developerVolume).toBe(20);
+    });
+
+    it("never applies to a manual-choice (demi-permanent) shade", () => {
+      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6);
+
+      expect(result.developerVolume).toBe(6);
+    });
   });
 });

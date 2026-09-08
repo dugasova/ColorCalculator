@@ -33,37 +33,52 @@ export const GRAY_LIGHT_THRESHOLD = 30;
 export const GRAY_MEDIUM_THRESHOLD = 50;
 export const GRAY_HEAVY_THRESHOLD = 80;
 
+// Wella's own Koleston Perfect / Welloxon Perfect developer guide requires at least 6%
+// (20 vol) to properly cover resistant gray/white hair, even when the target is the same
+// depth or darker (no lift) -- where the level-diff-only pickDeveloperVolume (levels.ts)
+// would otherwise pick the gentlest 3% (10 vol), which isn't strong enough to open the
+// cuticle and deposit oxidative pigment into resistant gray. Applied as a floor in
+// calculateFullFormula below once gray coverage is significant (the same >=30% threshold
+// as GRAY_LIGHT_THRESHOLD, which is where gray coverage first starts driving the mix at
+// all -- see getGrayCoverageStrategy); a no-op whenever the level-lift itself already
+// calls for 20 vol or higher.
+export const GRAY_COVERAGE_MIN_DEVELOPER_VOLUME: DeveloperVolume = 20;
+
+// Wella's own "Pure Naturals" dosing guide for stubborn gray/white coverage: blend a
+// natural-base shade into the target (fashion) formula at 1/3 for 30-50% gray and 1/2 for
+// 50-100% gray -- capped at half-and-half even at 100% gray, never going further toward
+// pure natural. `naturalRatio`/`fashionRatio` below mirror those two documented ratios
+// directly (1/3, 1/2); below GRAY_LIGHT_THRESHOLD no natural-base dose is called for at
+// all. GRAY_HEAVY_THRESHOLD plays no part in this mix -- it's a separate threshold (see
+// revisit.ts) for how soon a heavily-gray client should rebook, not for this ratio.
 const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fashionRatio: 1, get note() { return i18n.t("engine.grayCoverage.fashionOnly"); } });
-const EQUAL_MIX: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5, get note() { return i18n.t("engine.grayCoverage.equalMix"); } });
-const BASE_DOMINANT: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.67, fashionRatio: 0.33, get note() { return i18n.t("engine.grayCoverage.baseDominant"); } });
-const NATURAL_ONLY: GrayCoverageStrategy = Object.freeze({
-  naturalRatio: 1,
-  fashionRatio: 0,
-  get note() { return i18n.t("engine.grayCoverage.naturalOnly"); },
-});
+const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, get note() { return i18n.t("engine.grayCoverage.oneThirdNatural"); } });
+const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5, get note() { return i18n.t("engine.grayCoverage.halfNatural"); } });
 
 export function getGrayCoverageStrategy(grayPercent: number): GrayCoverageStrategy {
   if (grayPercent < GRAY_LIGHT_THRESHOLD) {
     return FASHION_ONLY;
   }
   if (grayPercent < GRAY_MEDIUM_THRESHOLD) {
-    return EQUAL_MIX;
+    return ONE_THIRD_NATURAL;
   }
-  if (grayPercent < GRAY_HEAVY_THRESHOLD) {
-    return BASE_DOMINANT;
-  }
-  return NATURAL_ONLY;
+  return HALF_NATURAL;
 }
 
-// Processing time recommendations mirror standard manufacturer instructions: demi-permanent,
-// deposit-only lines (e.g. Wella Color Touch, identified by developerVolumeChoices) process in
-// 20 minutes; permanent color processes in 30 minutes, extended to 45 for resistant/heavy gray
-// coverage (the same >=50% gray threshold that drives a base-dominant mix above).
+// Processing time recommendations mirror standard manufacturer instructions: a shade's own
+// `fixedProcessingMinutes` (e.g. Wella Special Blonde's 50-60 min without heat, see
+// brands/wella.ts) wins outright when set; otherwise demi-permanent, deposit-only lines
+// (e.g. Wella Color Touch, identified by developerVolumeChoices) process in 20 minutes,
+// and permanent color processes in 30 minutes, extended to 45 for resistant/heavy gray
+// coverage (the same >=50% gray threshold that drives the half-natural Pure Naturals dose above).
 const DEMI_PERMANENT_PROCESSING_MINUTES = 20;
 const STANDARD_PROCESSING_MINUTES = 30;
 const EXTENDED_PROCESSING_MINUTES = 45;
 
 export function getRecommendedProcessingMinutes(targetShade: Shade, grayPercent: number): number {
+  if (targetShade.fixedProcessingMinutes !== undefined) {
+    return targetShade.fixedProcessingMinutes;
+  }
   if (targetShade.developerVolumeChoices !== undefined) {
     return DEMI_PERMANENT_PROCESSING_MINUTES;
   }
@@ -144,11 +159,18 @@ export function calculateFullFormula(
   const correctorGrams = recommendedCorrectiveTone !== null ? calculateCorrectorGrams(targetShade.level, totalGrams) : null;
   const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
 
-  const developerVolume = liftUnsupportedWarning !== null
+  let developerVolume = liftUnsupportedWarning !== null
     ? null
     : targetShade.developerVolumeChoices
       ? (manualDeveloperVolume ?? null)
       : pickDeveloperVolume(startLevel, targetShade.level, targetShade.developerLiftTable);
+  if (developerVolume !== null && targetShade.developerVolumeChoices === undefined) {
+    if (grayPercent >= GRAY_LIGHT_THRESHOLD && developerVolume < GRAY_COVERAGE_MIN_DEVELOPER_VOLUME) {
+      developerVolume = GRAY_COVERAGE_MIN_DEVELOPER_VOLUME;
+    } else if (!isLifting && targetShade.noLiftDeveloperVolume !== undefined) {
+      developerVolume = targetShade.noLiftDeveloperVolume;
+    }
+  }
 
   let toneWarning: string | null = null;
   if (isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone) {
