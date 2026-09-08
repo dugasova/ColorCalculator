@@ -10,7 +10,6 @@ import { GrayPercentField } from "./fields/GrayPercentField";
 import { ShadeField } from "./fields/ShadeField";
 import { CanvasFields } from "./fields/CanvasFields";
 import { AdditionalShadeField } from "./fields/AdditionalShadeField";
-import { AdditionalShadeGramsField } from "./fields/AdditionalShadeGramsField";
 import { PrePigmentationField } from "./fields/PrePigmentationField";
 import { BlendModeField } from "./fields/BlendModeField";
 import { BlendComponentField } from "./fields/BlendComponentField";
@@ -124,9 +123,6 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
               lineShades={lineShades}
               additionalShadeCode={additionalShadeCode}
               onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
-            />
-            <AdditionalShadeGramsField
-              additionalShadeCode={additionalShadeCode}
               additionalShadeGrams={additionalShadeGrams}
               onAdditionalShadeGramsChange={setAdditionalShadeGrams}
             />
@@ -136,12 +132,10 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
                   lineShades={lineShades}
                   additionalShadeCode={additionalShade2Code}
                   onAdditionalShadeCodeChange={setAdditionalShade2Code}
-                  label={t("fields.additionalShade2")}
-                />
-                <AdditionalShadeGramsField
-                  additionalShadeCode={additionalShade2Code}
                   additionalShadeGrams={additionalShade2Grams}
                   onAdditionalShadeGramsChange={setAdditionalShade2Grams}
+                  idSuffix="_2"
+                  label={t("fields.additionalShade2")}
                 />
               </>
             )}

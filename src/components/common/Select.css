@@ -80,7 +80,15 @@
   z-index: 30;
   top: calc(100% + 8px);
   left: 0;
-  right: 0;
+  /* At least as wide as the trigger (matches every select whose trigger already has
+     room for its longest option label), but never narrower than min-width -- a select
+     sharing a row with other controls (e.g. the shade grams input in .shade-field) can
+     have a trigger too narrow for its own option text, which used to collapse
+     `.select__option-label` to ~0 width and leave only the swatch circle visible. Capped
+     by max-width so it doesn't run off narrow viewports. */
+  min-width: max(100%, 220px);
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
   margin: 0;
   padding: 6px;
   max-height: 280px;

@@ -7,13 +7,15 @@ export interface BlendModeFieldProps {
 }
 
 // Lets the colorist flag that the target shade isn't in stock: instead of the additional
-// shade adding on top of the primary mix (see AdditionalShadeGramsField), the two shades
+// shade adding on top of the primary mix (see AdditionalShadeField), the two shades
 // split the single calculated color total between them — e.g. no 7/13 on hand, blend 7/1
-// and 7/3 at a chosen ratio (see BlendRatioField) to approximate it.
+// and 7/3 at a chosen ratio (see BlendRatioField) to approximate it. Spans the full form
+// row (blend-toggle-field) so the additional-shade fields below always start their own
+// row instead of sharing this one, regardless of this checkbox's state.
 export function BlendModeField({ substituteBlend, onSubstituteBlendChange, idSuffix = "" }: BlendModeFieldProps) {
   const { t } = useTranslation();
   return (
-    <div className="field">
+    <div className="field blend-toggle-field">
       <label className="blend-toggle" htmlFor={`substituteBlend${idSuffix}`}>
         <input
           type="checkbox"

@@ -116,6 +116,28 @@
   transform: scale(1.08);
 }
 
+/* The additional-shade grams input rendered inline in .shade-field (see
+   AdditionalShadeField) -- fixed narrow width so it reads as a small companion value
+   next to the shade select/swatch rather than competing with them for space. The
+   `.shade-field` ancestor plus `input` element together match the specificity of the
+   general `.field input:not([type="checkbox"])` rule above, so this narrows it without
+   `!important`. */
+.shade-field input.shade-field__grams {
+  width: 4.5em;
+  flex-shrink: 0;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
+}
+
+.additional-shade-field {
+  grid-column: 1 / -1;
+}
+
+.blend-toggle-field {
+  grid-column: 1 / -1;
+}
+
 .cross-brand-match-group {
   grid-column: 1 / -1;
 }

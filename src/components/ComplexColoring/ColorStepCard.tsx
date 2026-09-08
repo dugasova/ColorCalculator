@@ -9,7 +9,6 @@ import { StartLevelField } from "../FormulaCalculator/fields/StartLevelField";
 import { GrayPercentField } from "../FormulaCalculator/fields/GrayPercentField";
 import { ShadeField } from "../FormulaCalculator/fields/ShadeField";
 import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShadeField";
-import { AdditionalShadeGramsField } from "../FormulaCalculator/fields/AdditionalShadeGramsField";
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
 import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
 import { ApplicationZoneField } from "../FormulaCalculator/fields/ApplicationZoneField";
@@ -133,10 +132,6 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
           lineShades={lineShades}
           additionalShadeCode={additionalShadeCode}
           onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
-          idSuffix={idSuffix}
-        />
-        <AdditionalShadeGramsField
-          additionalShadeCode={additionalShadeCode}
           additionalShadeGrams={additionalShadeGrams}
           onAdditionalShadeGramsChange={setAdditionalShadeGrams}
           idSuffix={idSuffix}
@@ -147,14 +142,10 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
               lineShades={lineShades}
               additionalShadeCode={additionalShade2Code}
               onAdditionalShadeCodeChange={setAdditionalShade2Code}
-              idSuffix={idSuffix + "_2"}
-              label={t("fields.additionalShade2")}
-            />
-            <AdditionalShadeGramsField
-              additionalShadeCode={additionalShade2Code}
               additionalShadeGrams={additionalShade2Grams}
               onAdditionalShadeGramsChange={setAdditionalShade2Grams}
               idSuffix={idSuffix + "_2"}
+              label={t("fields.additionalShade2")}
             />
           </>
         )}
