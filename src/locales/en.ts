@@ -1,4 +1,7 @@
 export const en = {
+  common: {
+    close: "Close",
+  },
   app: {
     titlePrefix: "Formu",
     titleAccent: "list",

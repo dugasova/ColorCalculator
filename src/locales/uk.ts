@@ -1,6 +1,9 @@
 import type { en } from "./en";
 
 export const uk: typeof en = {
+  common: {
+    close: "Закрити",
+  },
   app: {
     titlePrefix: "Formu",
     titleAccent: "list",

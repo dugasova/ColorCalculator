@@ -1,0 +1,129 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(22, 18, 31, 0.45);
+  backdrop-filter: blur(2px);
+  animation: modal-overlay-enter 0.15s ease both;
+}
+
+.modal {
+  /* Re-declares FormulaCalculator.css's `.calculator` aliases -- see Modal.tsx's comment
+     for why: content portaled here (e.g. SessionDetailsPanel's `.field`s) needs them and
+     can't inherit from `.calculator`, which this isn't a descendant of. */
+  --ink: var(--brand-ink);
+  --muted: var(--brand-muted);
+  --gold: var(--brand-primary);
+  --gold-ink: var(--brand-primary-ink);
+  --surface: var(--brand-surface);
+  --field-bg: var(--brand-field);
+  --border-card: rgba(22, 18, 31, 0.05);
+  --border-field: rgba(22, 18, 31, 0.08);
+
+  width: 100%;
+  max-width: 480px;
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 1.25rem;
+  box-shadow: var(--brand-shadow-md);
+  outline: none;
+  animation: modal-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 0;
+}
+
+.modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.modal__close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal__close svg {
+  width: 15px;
+  height: 15px;
+}
+
+.modal__close:hover {
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--gold-ink);
+}
+
+.modal__body {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+}
+
+@keyframes modal-overlay-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: 92vh;
+    border-radius: 1.25rem 1.25rem 0 0;
+    animation-name: modal-enter-sheet;
+  }
+
+  @keyframes modal-enter-sheet {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

@@ -589,7 +589,7 @@
 }
 
 .results__client-name {
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .results__actions {
@@ -600,6 +600,20 @@
 
 .results__actions .button {
   flex: 1;
+}
+
+.results__client-summary {
+  margin-top: 12px;
+}
+
+.results__client-summary-trigger {
+  width: 100%;
+}
+
+.results__client-summary-name {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .results__share {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProcessingTimer } from "./ProcessingTimer";
+import { Modal } from "../common/Modal";
 
 export interface SessionDetails {
   clientName: string;
@@ -19,7 +20,7 @@ export interface SessionDetailsPanelProps {
   // Extra condition (beyond client name + patch test) the caller may need to gate saving on
   // — e.g. a complex-coloring session needs at least one step before it's savable.
   saveDisabled?: boolean;
-  // Called once the "Saved!" confirmation has finished showing -- lets the caller reset
+  // Called once the "Saved!" confirmation has finished showing - lets the caller reset
   // the whole form (this panel's own fields plus the brand/shade/level state above it) so
   // the next client starts from a blank calculator instead of the just-saved one's values.
   onSaved?: () => void;
@@ -31,13 +32,19 @@ const PATCH_TEST_MIN_HOURS = 48;
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
-// Client name/note/patch-test/photos + copy/share/save actions, shared by any calculator
-// that produces a formula text and a set of history-savable fields: the single-formula
-// FormulaResults panel and the multi-step Complex Coloring session both compute their own
-// formula/pricing, then hand off to this panel for the client-facing wrap-up.
+// Copy/share actions (need only the already-computed formula text) plus the
+// client name/note/patch-test/photos + save action (need a real client identity), shared
+// by any calculator that produces a formula text and a set of history-savable fields: the
+// single-formula FormulaResults panel and the multi-step Complex Coloring session both
+// compute their own formula/pricing, then hand off to this panel for the client-facing
+// wrap-up. The client/visit fields live behind a modal (opened from a trigger button)
+// rather than inline in the results panel -- they're a distinct, only-needed-once-per-save
+// task, and previously took up permanent scroll space (plus two photo pickers) even before
+// a colorist was ready to save.
 export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, saveDisabled, onSaved }: SessionDetailsPanelProps) {
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [clientName, setClientName] = useState("");
   const [note, setNote] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -109,7 +116,7 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         afterPhotoFile,
       });
       setSaveState("saved");
-      setTimeout(() => { setSaveState("idle"); onSaved?.(); }, SAVED_FEEDBACK_MS);
+      setTimeout(() => { setSaveState("idle"); setIsDetailsModalOpen(false); onSaved?.(); }, SAVED_FEEDBACK_MS);
     } catch {
       setSaveState("error");
     }
@@ -119,85 +126,11 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     <>
       <ProcessingTimer minutes={processingMinutes} />
 
-      <h2 className="results__section-heading">{t("results.clientDetailsSectionTitle")}</h2>
-
-      <div className="field results__client-name">
-        <label htmlFor="clientName">{t("results.clientNameLabel")}</label>
-        <input
-          id="clientName"
-          value={clientName}
-          onChange={e => setClientName(e.target.value)}
-          placeholder={t("results.clientNamePlaceholder")}
-          required
-        />
-      </div>
-
-      <div className="field results__note">
-        <label htmlFor="note">{t("results.noteLabel")}</label>
-        <textarea
-          id="note"
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          placeholder={t("results.notePlaceholder")}
-          rows={2}
-        />
-      </div>
-
-      <div className="field results__patch-test">
-        <label htmlFor="patchTestDate">{t("results.patchTestDateLabel")}</label>
-        <input
-          id="patchTestDate"
-          type="datetime-local"
-          value={patchTestDate}
-          onChange={e => setPatchTestDate(e.target.value)}
-          aria-required={!patchTestOverride}
-        />
-      </div>
-
-      <div className="field results__allergy-notes">
-        <label htmlFor="allergyNotes">{t("results.allergyNotesLabel")}</label>
-        <input
-          id="allergyNotes"
-          value={allergyNotes}
-          onChange={e => setAllergyNotes(e.target.value)}
-          placeholder={t("results.allergyNotesPlaceholder")}
-        />
-      </div>
-
-      <label className="results__patch-test-override">
-        <input type="checkbox" checked={patchTestOverride} onChange={e => setPatchTestOverride(e.target.checked)} />
-        {t("results.patchTestOverrideLabel")}
-      </label>
-
-      {!patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}
-
-      <div className="results__photos">
-        <div className="field results__photo">
-          <label htmlFor="beforePhoto">{t("results.beforePhotoLabel")}</label>
-          <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => handleBeforePhotoChange(e.target.files?.[0] ?? null)} />
-          {beforePhotoPreviewUrl && <img className="results__photo-preview" src={beforePhotoPreviewUrl} alt="" />}
-        </div>
-        <div className="field results__photo">
-          <label htmlFor="afterPhoto">{t("results.afterPhotoLabel")}</label>
-          <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => handleAfterPhotoChange(e.target.files?.[0] ?? null)} />
-          {afterPhotoPreviewUrl && <img className="results__photo-preview" src={afterPhotoPreviewUrl} alt="" />}
-        </div>
-      </div>
-
       <div className="results__actions">
         <button type="button" className="button" onClick={handleCopy}>
           {isCopied ? t("results.copied") : t("results.copy")}
         </button>
-        <button
-          type="button"
-          className="button button--secondary"
-          onClick={handleSave}
-          disabled={clientName.trim() === "" || saveState === "saving" || !patchTestOk || saveDisabled === true}
-        >
-          {saveState === "saved" ? t("results.saved") : saveState === "saving" ? t("results.saving") : t("results.save")}
-        </button>
       </div>
-      {saveState === "error" && <p className="warning" role="alert">{t("results.saveError")}</p>}
 
       <div className="results__share">
         <button type="button" className="button button--share button--whatsapp" onClick={handleShareWhatsApp}>
@@ -207,6 +140,97 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
           {t("results.shareTelegram")}
         </button>
       </div>
+
+      <div className="results__client-summary">
+        <button
+          type="button"
+          className="button button--secondary results__client-summary-trigger"
+          onClick={() => setIsDetailsModalOpen(true)}
+        >
+          {t("results.clientDetailsSectionTitle")}
+        </button>
+        {clientName.trim() !== "" && <p className="results__client-summary-name">{clientName.trim()}</p>}
+        {clientName.trim() !== "" && !patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}
+      </div>
+
+      {isDetailsModalOpen && (
+        <Modal title={t("results.clientDetailsSectionTitle")} onClose={() => setIsDetailsModalOpen(false)}>
+          <div className="field results__client-name">
+            <label htmlFor="clientName">{t("results.clientNameLabel")}</label>
+            <input
+              id="clientName"
+              value={clientName}
+              onChange={e => setClientName(e.target.value)}
+              placeholder={t("results.clientNamePlaceholder")}
+              required
+            />
+          </div>
+
+          <div className="field results__note">
+            <label htmlFor="note">{t("results.noteLabel")}</label>
+            <textarea
+              id="note"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder={t("results.notePlaceholder")}
+              rows={2}
+            />
+          </div>
+
+          <div className="field results__patch-test">
+            <label htmlFor="patchTestDate">{t("results.patchTestDateLabel")}</label>
+            <input
+              id="patchTestDate"
+              type="datetime-local"
+              value={patchTestDate}
+              onChange={e => setPatchTestDate(e.target.value)}
+              aria-required={!patchTestOverride}
+            />
+          </div>
+
+          <div className="field results__allergy-notes">
+            <label htmlFor="allergyNotes">{t("results.allergyNotesLabel")}</label>
+            <input
+              id="allergyNotes"
+              value={allergyNotes}
+              onChange={e => setAllergyNotes(e.target.value)}
+              placeholder={t("results.allergyNotesPlaceholder")}
+            />
+          </div>
+
+          <label className="results__patch-test-override">
+            <input type="checkbox" checked={patchTestOverride} onChange={e => setPatchTestOverride(e.target.checked)} />
+            {t("results.patchTestOverrideLabel")}
+          </label>
+
+          {!patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}
+
+          <div className="results__photos">
+            <div className="field results__photo">
+              <label htmlFor="beforePhoto">{t("results.beforePhotoLabel")}</label>
+              <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => handleBeforePhotoChange(e.target.files?.[0] ?? null)} />
+              {beforePhotoPreviewUrl && <img className="results__photo-preview" src={beforePhotoPreviewUrl} alt="" />}
+            </div>
+            <div className="field results__photo">
+              <label htmlFor="afterPhoto">{t("results.afterPhotoLabel")}</label>
+              <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => handleAfterPhotoChange(e.target.files?.[0] ?? null)} />
+              {afterPhotoPreviewUrl && <img className="results__photo-preview" src={afterPhotoPreviewUrl} alt="" />}
+            </div>
+          </div>
+
+          <div className="results__actions">
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={handleSave}
+              disabled={clientName.trim() === "" || saveState === "saving" || !patchTestOk || saveDisabled === true}
+            >
+              {saveState === "saved" ? t("results.saved") : saveState === "saving" ? t("results.saving") : t("results.save")}
+            </button>
+          </div>
+          {saveState === "error" && <p className="warning" role="alert">{t("results.saveError")}</p>}
+        </Modal>
+      )}
     </>
   );
 }

@@ -9,6 +9,7 @@ import { SessionDetailsPanel } from "./SessionDetailsPanel";
 afterEach(cleanup);
 
 function fillRequiredFieldsAndSave() {
+  fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
   fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Anna K." } });
   fireEvent.click(screen.getByLabelText("Patch test not required (no new product, no reaction history)"));
   fireEvent.click(screen.getByRole("button", { name: "Save to history" }));
@@ -39,8 +40,11 @@ describe("SessionDetailsPanel onSaved", () => {
     fillRequiredFieldsAndSave();
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    // The details modal closes itself once the "Saved!" confirmation has run its course --
+    // asserting that (rather than re-querying the now-unmounted Save button) is what
+    // actually proves the omitted-onSaved codepath ran to completion without throwing.
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Save to history" })).not.toBeDisabled();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     }, { timeout: 2500 });
   });
 });
