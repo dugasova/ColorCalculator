@@ -146,6 +146,12 @@ export function FormulaResults({
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
         <p className="warning" role="alert">{t("results.notAchievable")}</p>
       )}
+      {result.achievedLevel !== null && result.achievedLevel !== targetShade.level && (
+        <div className="results__row">
+          <span className="results__row-label">{t("results.achievedLevel")}</span>
+          <span>{t("results.achievedLevelValue", { level: result.achievedLevel, target: targetShade.level })}</span>
+        </div>
+      )}
       {porosity === "high" && (
         <p className="warning" role="alert">{t("results.porousWarning")}</p>
       )}

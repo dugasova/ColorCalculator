@@ -182,9 +182,14 @@ const kolestonPerfectShades: Shade[] = [
 export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({
   ...shade,
   line: "koleston-perfect",
-  // Special Blonde (the developerLiftTable-bearing entries above) is excluded -- its own
-  // instructions don't cover the same-depth/darker case, so it keeps the engine default.
-  ...(shade.developerLiftTable === undefined ? { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME } : {}),
+  // Special Blonde (the developerLiftTable-bearing entries above) is excluded from the
+  // no-lift default -- its own instructions don't cover the same-depth/darker case, so it
+  // keeps the engine default -- but is exactly the shade routinely used as a maximum-lift
+  // tool rather than a fixed target tone, so it alone gets acceptsPartialLift (see
+  // Shade.acceptsPartialLift, ../shades.ts).
+  ...(shade.developerLiftTable === undefined
+    ? { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME }
+    : { acceptsPartialLift: true }),
 }));
 
 //color touch

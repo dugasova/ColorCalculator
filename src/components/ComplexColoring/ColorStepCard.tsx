@@ -184,6 +184,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
         <p className="warning" role="alert">{t("results.notAchievable")}</p>
       )}
+      {result.achievedLevel !== null && result.achievedLevel !== targetShade.level && (
+        <div className="results__row">
+          <span className="results__row-label">{t("results.achievedLevel")}</span>
+          <span>{t("results.achievedLevelValue", { level: result.achievedLevel, target: targetShade.level })}</span>
+        </div>
+      )}
       {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
       {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
       {porosity === "high" && (

@@ -1,5 +1,5 @@
 import i18n from "../i18n";
-import { getUnderlyingPigment, pickDeveloperVolume, type DeveloperVolume, type Level, type UnderlyingPigment } from "./levels";
+import { getUnderlyingPigment, pickDeveloperVolume, pickMaxLiftVolume, type DeveloperVolume, type Level, type UnderlyingPigment } from "./levels";
 import { suggestNeutralizingTone } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
 import type { MixingRatio, Shade, ToneFamily } from "./shades";
@@ -19,6 +19,12 @@ export interface FullFormula {
   developerVolume: DeveloperVolume | null;
   mixingRatio: MixingRatio;
   grayCoverage: GrayCoverageStrategy;
+  // The level this formula actually reaches. Equal to targetShade.level whenever the
+  // target is fully reachable (the overwhelming majority of formulas); lower than it only
+  // for a partial-lift fallback (see Shade.acceptsPartialLift, shades.ts - e.g. Wella
+  // Special Blonde used to lift as far as a single process allows). Null alongside a null
+  // developerVolume, when no lift at all is achievable.
+  achievedLevel: Level | null;
   underlyingPigment: UnderlyingPigment | null;
   recommendedCorrectiveTone: ToneFamily | null;
   correctorGrams: number | null;
@@ -152,13 +158,6 @@ export function calculateFullFormula(
     liftUnsupportedWarning = i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel });
   }
 
-  // No pigment is actually revealed if the line can't lift in the first place.
-  const isActuallyLifting = isLifting && liftUnsupportedWarning === null;
-  const underlyingPigment = isActuallyLifting ? getUnderlyingPigment(targetShade.level) : null;
-  const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
-  const correctorGrams = recommendedCorrectiveTone !== null ? calculateCorrectorGrams(targetShade.level, totalGrams) : null;
-  const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
-
   let developerVolume = liftUnsupportedWarning !== null
     ? null
     : targetShade.developerVolumeChoices
@@ -171,6 +170,34 @@ export function calculateFullFormula(
       developerVolume = targetShade.noLiftDeveloperVolume;
     }
   }
+
+  // Special Blonde-style "maximum lift" shades (Shade.acceptsPartialLift) are routinely
+  // chosen purely to lift as far as a single process safely allows, not to guarantee this
+  // shade's own nominal level - e.g. Special Blonde from level 5 toward level 12, even
+  // though its own 12%-developer ceiling only reaches level 10. Falls back to the
+  // strongest developer the shade's own lift table supports and reports the level that
+  // actually reaches (achievedLevel below), rather than refusing to compute a formula at
+  // all just because the nominal target is out of reach.
+  let achievedLevel: Level | null = developerVolume !== null ? targetShade.level : null;
+  if (
+    developerVolume === null && isLifting
+    && targetShade.acceptsPartialLift === true && targetShade.developerLiftTable !== undefined
+  ) {
+    const fallbackVolume = pickMaxLiftVolume(targetShade.developerLiftTable);
+    const fallbackLift = targetShade.developerLiftTable(fallbackVolume);
+    if (fallbackLift > 0) {
+      developerVolume = fallbackVolume;
+      achievedLevel = (startLevel + fallbackLift) as Level;
+    }
+  }
+
+  // No pigment is actually revealed if the line can't lift in the first place, or lifts
+  // to nowhere (achievedLevel null alongside developerVolume null).
+  const isActuallyLifting = isLifting && liftUnsupportedWarning === null && achievedLevel !== null;
+  const underlyingPigment = isActuallyLifting && achievedLevel !== null ? getUnderlyingPigment(achievedLevel) : null;
+  const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
+  const correctorGrams = recommendedCorrectiveTone !== null && achievedLevel !== null ? calculateCorrectorGrams(achievedLevel, totalGrams) : null;
+  const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
 
   let toneWarning: string | null = null;
   if (isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone) {
@@ -188,6 +215,7 @@ export function calculateFullFormula(
     developerVolume,
     mixingRatio,
     grayCoverage,
+    achievedLevel,
     underlyingPigment,
     recommendedCorrectiveTone,
     correctorGrams,

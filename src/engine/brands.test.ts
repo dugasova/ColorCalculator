@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { calculateFullFormula } from "./formula";
 import { IGORA_VIBRANCE_CHART } from "./brands/igora";
 import { WELLA_SHADE_CHART } from "./brands/wella";
 
@@ -41,5 +42,28 @@ describe("WELLA_SHADE_CHART processing-time and no-lift-developer overrides", ()
     for (const shade of specialBlondeShades) {
       expect(shade.noLiftDeveloperVolume).toBeUndefined();
     }
+  });
+
+  it("marks every Special Blonde shade acceptsPartialLift -- routinely used as a maximum-lift tool, not a fixed target tone", () => {
+    const specialBlondeShades = WELLA_SHADE_CHART.filter(s => s.level === 12);
+    for (const shade of specialBlondeShades) {
+      expect(shade.acceptsPartialLift).toBe(true);
+    }
+  });
+
+  it("leaves the rest of the Koleston Perfect chart without acceptsPartialLift", () => {
+    const nonSpecialBlondeShades = WELLA_SHADE_CHART.filter(s => s.level !== 12);
+    for (const shade of nonSpecialBlondeShades) {
+      expect(shade.acceptsPartialLift).toBeUndefined();
+    }
+  });
+
+  it("end-to-end: a real Special Blonde shade lifts as far as 12% Welloxon allows and reports that level, not its own nominal 12", () => {
+    const shade = WELLA_SHADE_CHART.find(s => s.code === "12/1");
+    const result = calculateFullFormula(4, shade!, 0, 60);
+
+    expect(result.developerVolume).toBe(40);
+    expect(result.achievedLevel).toBe(9); // 4 + the documented 4-5 levels of lift at 12%
+    expect(result.grams).not.toBeNull();
   });
 });

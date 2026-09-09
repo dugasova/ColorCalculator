@@ -84,6 +84,8 @@ export const en = {
     developer: "Developer",
     ratio: "Ratio",
     notAchievable: "Not achievable in a single process — multi-step lightening required",
+    achievedLevel: "Achievable level",
+    achievedLevelValue: "Level {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
     mix: "Mix",
     processingTime: "Processing time, min",
     processingTimeHint: "Recommended: {{minutes}} min",
@@ -191,6 +193,7 @@ export const en = {
   },
   format: {
     startingLevel: "Starting level: {{start}} → Target: {{target}}",
+    achievedLevel: "Achievable level: {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
     applicationZone: "Application: {{value}}",
     developer: "Developer: {{value}}",
     developerVolume: "{{value}} vol",

@@ -15,6 +15,7 @@ function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryS
       developerVolume: 20,
       mixingRatio: { colorParts: 1, developerParts: 1 },
       grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "" },
+      achievedLevel: 7,
       underlyingPigment: null,
       recommendedCorrectiveTone: null,
       correctorGrams: null,

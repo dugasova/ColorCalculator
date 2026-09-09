@@ -22,6 +22,8 @@ const specialBlondeShade: Shade = {
   fixedProcessingMinutes: 55,
 };
 
+const partialLiftSpecialBlondeShade: Shade = { ...specialBlondeShade, acceptsPartialLift: true };
+
 const colorTouchShade: Shade = {
   code: "8/73",
   level: 8,
@@ -258,6 +260,56 @@ describe("calculateFullFormula", () => {
       const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6);
 
       expect(result.developerVolume).toBe(6);
+    });
+  });
+
+  describe("acceptsPartialLift maximum-lift fallback", () => {
+    it("leaves a non-opted-in shade blocked exactly as before -- specialBlondeShade has no acceptsPartialLift", () => {
+      // start 6 -> diff 6 exceeds even 40 vol's +5 max lift; without opting in, this stays
+      // an outright refusal (see the eligibility test above), not a best-effort fallback.
+      const result = calculateFullFormula(6, specialBlondeShade, 0, 60);
+
+      expect(result.developerVolume).toBeNull();
+      expect(result.achievedLevel).toBeNull();
+      expect(result.grams).toBeNull();
+    });
+
+    it("falls back to the strongest developer and reports the level actually reached when the nominal target is out of reach", () => {
+      // start 6 -> target 12 needs +6, beyond specialBlondeLiftTable's +5 ceiling at 40 vol.
+      // Falls back to 40 vol (12%) and reaches level 11 (6 + 5), not the nominal 12.
+      const result = calculateFullFormula(6, partialLiftSpecialBlondeShade, 0, 60);
+
+      expect(result.developerVolume).toBe(40);
+      expect(result.achievedLevel).toBe(11);
+      expect(result.grams).not.toBeNull();
+    });
+
+    it("computes underlying pigment, corrective tone, and corrector grams from the achieved level, not the shade's nominal level", () => {
+      // start 3 -> achievedLevel 8 (3 + 5), whose own underlying pigment ('yellow') differs
+      // from level 12's ('very-light-yellow') -- the corrective tone/grams must track it.
+      const result = calculateFullFormula(3, partialLiftSpecialBlondeShade, 0, 60);
+
+      expect(result.achievedLevel).toBe(8);
+      expect(result.underlyingPigment).toBe("yellow");
+      expect(result.correctorGrams).not.toBeNull();
+    });
+
+    it("does not engage when the nominal target is already fully reachable -- achievedLevel matches the shade's own level", () => {
+      // start 9 -> diff 3, reachable at 30 vol without any fallback.
+      const result = calculateFullFormula(9, partialLiftSpecialBlondeShade, 0, 60);
+
+      expect(result.developerVolume).toBe(30);
+      expect(result.achievedLevel).toBe(12);
+    });
+
+    it("has no effect on shades without their own developerLiftTable, even if opted in", () => {
+      const targetShade: Shade = { code: "12.0", level: 12, tone: "natural", acceptsPartialLift: true };
+      const result = calculateFullFormula(1, targetShade, 0, 60);
+
+      // No developerLiftTable to fall back within -- stays on the default ladder (max +3
+      // at 40 vol), which can't reach a +11 lift either, so this is still unreachable.
+      expect(result.developerVolume).toBeNull();
+      expect(result.achievedLevel).toBeNull();
     });
   });
 });

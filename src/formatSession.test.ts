@@ -15,6 +15,7 @@ const colorStep: ColorHistoryStep = {
     developerVolume: 30,
     mixingRatio: { colorParts: 1, developerParts: 2 },
     grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+    achievedLevel: 9,
     underlyingPigment: "pale-yellow",
     recommendedCorrectiveTone: "violet",
     correctorGrams: 3,

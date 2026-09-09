@@ -226,4 +226,55 @@ describe("formatFormulaText", () => {
     expect(text).toContain("Mix: 8.1-30.0 g developer 30.0 g");
     expect(text).not.toContain("8.3");
   });
+
+  it("includes an achievable-level line right after the starting level when a partial-lift shade can't reach its nominal target", () => {
+    const specialBlondeLiftTable = (volume: number) => (volume === 40 ? 5 : volume === 30 ? 3 : 0);
+    const targetShade: Shade = {
+      code: "12/1", level: 12, tone: "ash",
+      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+      developerLiftTable: specialBlondeLiftTable,
+      acceptsPartialLift: true,
+    };
+    const result = calculateFullFormula(4, targetShade, 0, 60);
+
+    const text = formatFormulaText({
+      brandName: "Wella",
+      line: "koleston-perfect",
+      targetShade,
+      startLevel: 4,
+      result,
+      processingMinutes: result.recommendedProcessingMinutes,
+      applicationZone: "full-head",
+      additionalShade: null,
+      additionalShadeGrams: 0,
+      blend: null,
+      neutralizationApplied: false,
+    });
+
+    expect(text).toContain(
+      "Starting level: 4 → Target: 12\n" +
+      "Achievable level: 9 (target level 12 needs lightening or multiple sessions to reach fully)\n"
+    );
+  });
+
+  it("omits the achievable-level line entirely when the target is fully reachable", () => {
+    const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
+    const result = calculateFullFormula(8, targetShade, 0, 60);
+
+    const text = formatFormulaText({
+      brandName: "Generic",
+      line: null,
+      targetShade,
+      startLevel: 8,
+      result,
+      processingMinutes: result.recommendedProcessingMinutes,
+      applicationZone: "full-head",
+      additionalShade: null,
+      additionalShadeGrams: 0,
+      blend: null,
+      neutralizationApplied: false,
+    });
+
+    expect(text).not.toContain("Achievable level");
+  });
 });

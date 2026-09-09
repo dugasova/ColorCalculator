@@ -62,3 +62,11 @@ export function pickDeveloperVolume(
   }
   return null;
 }
+
+// The strongest developer actually capable of lifting under the given table - the
+// best-effort fallback calculateFullFormula (formula.ts) reaches for when a shade accepts
+// partial lift (Shade.acceptsPartialLift, shades.ts - e.g. Wella Special Blonde) and its
+// nominal target exceeds what any single developer can reach in one process.
+export function pickMaxLiftVolume(liftTable: LiftTable = maxLiftForDeveloper): DeveloperVolume {
+  return ALL_VOLUMES.reduce((best, volume) => liftTable(volume) > liftTable(best) ? volume : best, ALL_VOLUMES[0]);
+}

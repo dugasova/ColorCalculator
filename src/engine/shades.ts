@@ -37,6 +37,17 @@ export interface Shade {
   // Blonde's "50-60 min without heat" (see brands/wella.ts), independent of this shade's
   // developerLiftTable/fixedMixingRatio overrides above.
   fixedProcessingMinutes?: number
+  // Marks this shade as a deliberate maximum-lift tool rather than a fixed target tone --
+  // e.g. Wella Koleston Perfect Special Blonde, routinely selected purely to lift as many
+  // levels as a single process safely allows (no bleach needed), accepting whatever level
+  // that turns out to be rather than requiring this shade's own nominal level exactly.
+  // When set, calculateFullFormula (../formula.ts) falls back to this shade's own
+  // developerLiftTable's strongest developer and reports the level actually reached
+  // (FullFormula.achievedLevel) instead of refusing to compute a formula when the nominal
+  // target exceeds what any developer can lift to in one process. Requires
+  // developerLiftTable to be set too -- meaningless without a lift ceiling to fall back
+  // within.
+  acceptsPartialLift?: boolean
 }
 
 const mixingRatioSchema = z.object({
@@ -69,6 +80,7 @@ export const shadeSchema: z.ZodType<Shade> = z.object({
   developerVolumeChoices: z.array(developerVolumeSchema).optional(),
   noLiftDeveloperVolume: developerVolumeSchema.optional(),
   fixedProcessingMinutes: z.number().optional(),
+  acceptsPartialLift: z.boolean().optional(),
 });
 
 export const code = (level: Level, tone: ToneFamily) => `${level}.${toneId(tone)}`;

@@ -95,6 +95,9 @@ export function formatFormulaText(params: FormatFormulaParams): string {
   const lines = [
     title,
     i18n.t("format.startingLevel", { start: startLevel, target: targetShade.level }),
+    ...(result.achievedLevel !== null && result.achievedLevel !== targetShade.level
+      ? [i18n.t("format.achievedLevel", { level: result.achievedLevel, target: targetShade.level })]
+      : []),
     i18n.t("format.applicationZone", {
       value: applicationZone === "full-head" ? i18n.t("fields.applicationZoneFullHead") : i18n.t("fields.applicationZoneRootTouchUp"),
     }),

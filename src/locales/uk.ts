@@ -86,6 +86,8 @@ export const uk: typeof en = {
     developer: "Окислювач",
     ratio: "Пропорція",
     notAchievable: "Недосяжно за один процес — потрібне багатоетапне освітлення",
+    achievedLevel: "Досяжний рівень",
+    achievedLevelValue: "Рівень {{level}} (цільовий рівень {{target}} потребує освітлення або кількох сеансів для повного досягнення)",
     mix: "Суміш",
     processingTime: "Час витримки, хв",
     processingTimeHint: "Рекомендовано: {{minutes}} хв",
@@ -193,6 +195,7 @@ export const uk: typeof en = {
   },
   format: {
     startingLevel: "Початковий рівень: {{start}} → Ціль: {{target}}",
+    achievedLevel: "Досяжний рівень: {{level}} (цільовий рівень {{target}} потребує освітлення або кількох сеансів для повного досягнення)",
     applicationZone: "Зона нанесення: {{value}}",
     developer: "Окислювач: {{value}}",
     developerVolume: "{{value}} vol",
