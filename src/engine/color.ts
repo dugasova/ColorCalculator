@@ -22,6 +22,7 @@ const TONE_REFLECT: Record<ToneFamily, { hue: number; sat: number; lightDelta: n
   cendré: { hue: 235, sat: 0.2, lightDelta: -0.02 },
   matt: { hue: 100, sat: 0.2, lightDelta: -0.02 },
   gold: { hue: 42, sat: 0.58, lightDelta: 0.015 },
+  beige: { hue: 42, sat: 0.35, lightDelta: 0.01 },
   copper: { hue: 28, sat: 0.62, lightDelta: 0.015 },
   red: { hue: 8, sat: 0.55, lightDelta: 0.015 },
   violet: { hue: 283, sat: 0.32, lightDelta: -0.01 },

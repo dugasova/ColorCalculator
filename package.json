@@ -12,6 +12,7 @@
     "migrate:palette": "tsx --env-file=.env scripts/migrateBuiltInPalette.ts",
     "migrate:repair-majirel": "tsx --env-file=.env scripts/repairMajirelPalette.ts",
     "migrate:repair-igora": "tsx --env-file=.env scripts/repairIgoraPalette.ts",
+    "migrate:repair-igora-highlifts": "tsx --env-file=.env scripts/repairIgoraHighlifts12Palette.ts",
     "migrate:repair-wella-special-blonde": "tsx --env-file=.env scripts/repairWellaSpecialBlondePalette.ts",
     "pwa:icons": "tsx scripts/generatePwaIcons.ts"
   },

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { calculateFullFormula } from "./formula";
-import { IGORA_VIBRANCE_CHART } from "./brands/igora";
+import { IGORA_VIBRANCE_CHART, IGORA_ROYAL_CHART } from "./brands/igora";
 import { WELLA_SHADE_CHART } from "./brands/wella";
 
 describe("IGORA_VIBRANCE_CHART", () => {
@@ -9,6 +9,41 @@ describe("IGORA_VIBRANCE_CHART", () => {
     for (const shade of IGORA_VIBRANCE_CHART) {
       expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
     }
+  });
+});
+
+describe("IGORA_ROYAL_CHART Highlifts 12-series overrides", () => {
+  it("recommends 45 min for every Highlifts 12-series shade", () => {
+    const highlifts12Shades = IGORA_ROYAL_CHART.filter(s => s.level === 12);
+    expect(highlifts12Shades.length).toBeGreaterThan(0);
+    for (const shade of highlifts12Shades) {
+      expect(shade.fixedProcessingMinutes).toBe(45);
+    }
+  });
+
+  it("leaves the rest of the Igora Royal chart on the gray-percent-based default", () => {
+    const standardShades = IGORA_ROYAL_CHART.filter(s => s.level !== 12);
+    expect(standardShades.length).toBeGreaterThan(0);
+    for (const shade of standardShades) {
+      expect(shade.fixedProcessingMinutes).toBeUndefined();
+    }
+  });
+
+  it("marks every Highlifts 12-series shade acceptsPartialLift", () => {
+    const highlifts12Shades = IGORA_ROYAL_CHART.filter(s => s.level === 12);
+    for (const shade of highlifts12Shades) {
+      expect(shade.acceptsPartialLift).toBe(true);
+    }
+  });
+
+  it("end-to-end: a real Highlifts 12-series shade lifts as far as 12% developer allows and reports that level", () => {
+    const shade = IGORA_ROYAL_CHART.find(s => s.code === "12-1");
+    // Starting from level 6, should lift up to 5 levels with 40 vol
+    const result = calculateFullFormula(6, shade!, 0, 60);
+
+    expect(result.developerVolume).toBe(40);
+    expect(result.achievedLevel).toBe(11); // 6 + 5 levels of lift
+    expect(result.grams).not.toBeNull();
   });
 });
 

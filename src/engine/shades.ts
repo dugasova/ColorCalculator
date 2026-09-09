@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { DeveloperVolume, Level, LiftTable } from "./levels";
 
-export type ToneFamily = "natural" | "ash" | "cendré" | "matt" | "gold" | "copper" | "red" | "violet" | "chocolate" | "pearl" | "slate-grey" | "mahogany";
+export type ToneFamily = "natural" | "ash" | "cendré" | "matt" | "gold" | "copper" | "red" | "violet" | "chocolate" | "pearl" | "slate-grey" | "mahogany" | "beige";
 
 export interface MixingRatio {
   colorParts: number;

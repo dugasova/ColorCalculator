@@ -1,4 +1,18 @@
 import type { Shade } from "../shades";
+import type { LiftTable } from "../levels";
+
+const igoraHighlifts12LiftTable: LiftTable = (volume) => {
+  switch (volume) {
+    case 30: return 4; // 9%
+    case 40: return 5; // 12%
+    default: return 0;
+  }
+};
+
+// Igora Royal Highlifts 12-series processes for 30-45 minutes without heat.
+// Using 45 minutes as the full cure time for maximum lift.
+const HIGHLIFTS_12_PROCESSING_MINUTES = 45;
+
 
 // Transcribed from Schwarzkopf Professional's official Igora Royal numbering system
 // (igora-royal.schwarzkopf-professional.com) and its Highlifts sub-range. Level-dash-tone
@@ -103,26 +117,32 @@ const igoraRoyalShades: Shade[] = [
   // Level 10 -- Highlifts "Ultra Blonde": regular 1:1 ratio, no override.
   { code: "10-0", level: 10, tone: "natural" },
   { code: "10-1", level: 10, tone: "cendré" },
-  { code: "10-14", level: 10, tone: "cendré", secondaryTone: "gold" },
+  { code: "10-14", level: 10, tone: "cendré", secondaryTone: "beige" },
   { code: "10-19", level: 10, tone: "cendré", secondaryTone: "violet" },
   { code: "10-21", level: 10, tone: "ash", secondaryTone: "cendré" },
-  { code: "10-4", level: 10, tone: "gold" },
-  { code: "10-46", level: 10, tone: "gold", secondaryTone: "chocolate" },
-  { code: "10-49", level: 10, tone: "gold", secondaryTone: "violet" },
+  { code: "10-4", level: 10, tone: "beige" },
+  { code: "10-46", level: 10, tone: "beige", secondaryTone: "chocolate" },
+  { code: "10-49", level: 10, tone: "beige", secondaryTone: "violet" },
 
   // Level 12 -- Highlifts "Special Blonde": 1:2 ratio.
-  { code: "12-0", level: 12, tone: "natural", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-1", level: 12, tone: "cendré", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-11", level: 12, tone: "cendré", secondaryTone: "cendré", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-19", level: 12, tone: "cendré", secondaryTone: "violet", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-2", level: 12, tone: "ash", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-21", level: 12, tone: "ash", secondaryTone: "cendré", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-4", level: 12, tone: "gold", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-46", level: 12, tone: "gold", secondaryTone: "chocolate", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-49", level: 12, tone: "gold", secondaryTone: "violet", fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-0", level: 12, tone: "natural", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-1", level: 12, tone: "cendré", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-11", level: 12, tone: "cendré", secondaryTone: "cendré", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-19", level: 12, tone: "cendré", secondaryTone: "violet", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-2", level: 12, tone: "ash", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-21", level: 12, tone: "ash", secondaryTone: "cendré", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-4", level: 12, tone: "beige", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-46", level: 12, tone: "beige", secondaryTone: "chocolate", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  { code: "12-49", level: 12, tone: "beige", secondaryTone: "violet", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
 ];
 
-export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({ ...shade, line: "royal" }));
+export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({
+  ...shade,
+  line: "royal",
+  // Highlifts "Special Blonde" 12-series is routinely used as a maximum-lift
+  // tool rather than a fixed target tone, so it gets acceptsPartialLift
+  ...(shade.level === 12 ? { acceptsPartialLift: true } : {})
+}));
 
 // Igora Vibrance -- Schwarzkopf's ammonia-free demi-permanent "toner" system: used to
 // gloss/refresh/tone rather than lift, and (unlike Royal) applied for shorter,
@@ -158,7 +178,7 @@ const igoraVibranceShades: Shade[] = [
   { code: "4-00", level: 4, tone: "natural", secondaryTone: "natural" },
   { code: "4-13", level: 4, tone: "cendré", secondaryTone: "matt" },
   { code: "4-33", level: 4, tone: "matt", secondaryTone: "matt" },
-  { code: "4-46", level: 4, tone: "gold", secondaryTone: "chocolate" },
+  { code: "4-46", level: 4, tone: "beige", secondaryTone: "chocolate" },
   { code: "4-6", level: 4, tone: "chocolate" },
   { code: "4-68", level: 4, tone: "chocolate", secondaryTone: "red" },
 
@@ -168,7 +188,7 @@ const igoraVibranceShades: Shade[] = [
   { code: "5-1", level: 5, tone: "cendré" },
   { code: "5-16", level: 5, tone: "cendré", secondaryTone: "chocolate" },
   { code: "5-21", level: 5, tone: "ash", secondaryTone: "cendré" },
-  { code: "5-4", level: 5, tone: "gold" },
+  { code: "5-4", level: 5, tone: "beige" },
   { code: "5-5", level: 5, tone: "gold" },
   { code: "5-57", level: 5, tone: "gold", secondaryTone: "copper" },
   { code: "5-65", level: 5, tone: "chocolate", secondaryTone: "gold" },
@@ -194,10 +214,10 @@ const igoraVibranceShades: Shade[] = [
   { code: "7-00", level: 7, tone: "natural", secondaryTone: "natural" },
   { code: "7-1", level: 7, tone: "cendré" },
   { code: "7-21", level: 7, tone: "ash", secondaryTone: "cendré" },
-  { code: "7-24", level: 7, tone: "ash", secondaryTone: "gold" },
-  { code: "7-4", level: 7, tone: "gold" },
-  { code: "7-42", level: 7, tone: "gold", secondaryTone: "ash" },
-  { code: "7-48", level: 7, tone: "gold", secondaryTone: "red" },
+  { code: "7-24", level: 7, tone: "ash", secondaryTone: "beige" },
+  { code: "7-4", level: 7, tone: "beige" },
+  { code: "7-42", level: 7, tone: "beige", secondaryTone: "ash" },
+  { code: "7-48", level: 7, tone: "beige", secondaryTone: "red" },
   { code: "7-55", level: 7, tone: "gold", secondaryTone: "gold" },
   { code: "7-57", level: 7, tone: "gold", secondaryTone: "copper" },
   { code: "7-65", level: 7, tone: "chocolate", secondaryTone: "gold" },
@@ -209,9 +229,9 @@ const igoraVibranceShades: Shade[] = [
   { code: "9-00", level: 9, tone: "natural", secondaryTone: "natural" },
   { code: "9-1", level: 9, tone: "cendré" },
   { code: "9-12", level: 9, tone: "cendré", secondaryTone: "ash" },
-  { code: "9-24", level: 9, tone: "ash", secondaryTone: "gold" },
-  { code: "9-4", level: 9, tone: "gold" },
-  { code: "9-42", level: 9, tone: "gold", secondaryTone: "ash" },
+  { code: "9-24", level: 9, tone: "ash", secondaryTone: "beige" },
+  { code: "9-4", level: 9, tone: "beige" },
+  { code: "9-42", level: 9, tone: "beige", secondaryTone: "ash" },
   { code: "9-55", level: 9, tone: "gold", secondaryTone: "gold" },
   { code: "9-57", level: 9, tone: "gold", secondaryTone: "copper" },
   { code: "9-65", level: 9, tone: "chocolate", secondaryTone: "gold" },
@@ -221,7 +241,7 @@ const igoraVibranceShades: Shade[] = [
   { code: "10-1", level: 10, tone: "cendré" },
   { code: "10-12", level: 10, tone: "cendré", secondaryTone: "ash" },
   { code: "10-19", level: 10, tone: "cendré", secondaryTone: "violet" },
-  { code: "10-42", level: 10, tone: "gold", secondaryTone: "ash" },
+  { code: "10-42", level: 10, tone: "beige", secondaryTone: "ash" },
   { code: "10-51", level: 10, tone: "gold", secondaryTone: "cendré" },
   { code: "10-57", level: 10, tone: "gold", secondaryTone: "copper" },
   { code: "10-91", level: 10, tone: "violet", secondaryTone: "cendré" },
