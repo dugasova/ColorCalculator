@@ -41,7 +41,7 @@ export const GRAY_HEAVY_THRESHOLD = 80;
 
 // Wella's own Koleston Perfect / Welloxon Perfect developer guide requires at least 6%
 // (20 vol) to properly cover resistant gray/white hair, even when the target is the same
-// depth or darker (no lift) -- where the level-diff-only pickDeveloperVolume (levels.ts)
+// depth or darker (no lift) - where the level-diff-only pickDeveloperVolume (levels.ts)
 // would otherwise pick the gentlest 3% (10 vol), which isn't strong enough to open the
 // cuticle and deposit oxidative pigment into resistant gray. Applied as a floor in
 // calculateFullFormula below once gray coverage is significant (the same >=30% threshold
@@ -141,6 +141,84 @@ export function splitShadeBlend(colorGrams: number, primaryPercent: number): Sha
   };
 }
 
+// Step 1 of calculateFullFormula: the developer volume before any partial-lift fallback.
+// A shade with its own developerVolumeChoices (demi-permanent lines) always defers to
+// the colorist's manual pick instead of the auto-picked ladder. Otherwise picks via the
+// level-diff lift ladder, then applies two floors: gray coverage forces at least
+// GRAY_COVERAGE_MIN_DEVELOPER_VOLUME (Wella/Welloxon's own resistant-gray guidance, see
+// the const above), and a same-depth-or-darker shade with its own noLiftDeveloperVolume
+// uses that instead of the ladder's gentlest default.
+function resolveDeveloperVolume(
+  startLevel: Level,
+  targetShade: Shade,
+  grayPercent: number,
+  isLifting: boolean,
+  liftUnsupportedWarning: string | null,
+  manualDeveloperVolume: DeveloperVolume | undefined,
+): DeveloperVolume | null {
+  if (liftUnsupportedWarning !== null) return null;
+  if (targetShade.developerVolumeChoices !== undefined) return manualDeveloperVolume ?? null;
+
+  const autoPicked = pickDeveloperVolume(startLevel, targetShade.level, targetShade.developerLiftTable);
+  if (autoPicked === null) return null;
+  if (grayPercent >= GRAY_LIGHT_THRESHOLD && autoPicked < GRAY_COVERAGE_MIN_DEVELOPER_VOLUME) {
+    return GRAY_COVERAGE_MIN_DEVELOPER_VOLUME;
+  }
+  if (!isLifting && targetShade.noLiftDeveloperVolume !== undefined) {
+    return targetShade.noLiftDeveloperVolume;
+  }
+  return autoPicked;
+}
+
+// Step 2: Special Blonde-style "maximum lift" shades (Shade.acceptsPartialLift) are
+// routinely chosen purely to lift as far as a single process safely allows, not to
+// guarantee this shade's own nominal level - e.g. Special Blonde from level 5 toward
+// level 12, even though its own 12%-developer ceiling only reaches level 10. Falls back
+// to the strongest developer the shade's own lift table supports and reports the level
+// it actually reaches, rather than refusing to compute a formula at all just because the
+// nominal target is out of reach. `developerVolume` here is Step 1's result -- once it's
+// non-null, the nominal target is already fully reachable, so achievedLevel is just the
+// shade's own level and no fallback is needed.
+function resolvePartialLiftFallback(
+  startLevel: Level,
+  targetShade: Shade,
+  isLifting: boolean,
+  developerVolume: DeveloperVolume | null,
+): { developerVolume: DeveloperVolume | null; achievedLevel: Level | null } {
+  if (developerVolume !== null) return { developerVolume, achievedLevel: targetShade.level };
+  if (!isLifting || targetShade.acceptsPartialLift !== true || targetShade.developerLiftTable === undefined) {
+    return { developerVolume: null, achievedLevel: null };
+  }
+  const fallbackVolume = pickMaxLiftVolume(targetShade.developerLiftTable);
+  const fallbackLift = targetShade.developerLiftTable(fallbackVolume);
+  if (fallbackLift <= 0) return { developerVolume: null, achievedLevel: null };
+  return { developerVolume: fallbackVolume, achievedLevel: (startLevel + fallbackLift) as Level };
+}
+
+// Step 3: no pigment is actually revealed if the line can't lift in the first place, or
+// lifts to nowhere (achievedLevel null alongside developerVolume null) -- underlying
+// pigment, corrective tone, corrector grams, and the tone-mismatch warning only make
+// sense once real lift happened.
+function deriveCorrectiveGuidance(
+  targetShade: Shade,
+  isActuallyLifting: boolean,
+  achievedLevel: Level | null,
+  totalGrams: number,
+): {
+  underlyingPigment: UnderlyingPigment | null;
+  recommendedCorrectiveTone: ToneFamily | null;
+  correctorGrams: number | null;
+  toneWarning: string | null;
+} {
+  const underlyingPigment = isActuallyLifting && achievedLevel !== null ? getUnderlyingPigment(achievedLevel) : null;
+  const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
+  const correctorGrams = recommendedCorrectiveTone !== null && achievedLevel !== null ? calculateCorrectorGrams(achievedLevel, totalGrams) : null;
+  const toneWarning = isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone
+    ? i18n.t("engine.toneWarning", { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone })
+    : null;
+  return { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning };
+}
+
 export function calculateFullFormula(
   startLevel: Level,
   targetShade: Shade,
@@ -153,61 +231,23 @@ export function calculateFullFormula(
   const mixingRatio = targetShade.fixedMixingRatio ?? mixingRatioStrategy(startLevel, targetShade.level);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
-  let liftUnsupportedWarning: string | null = null;
-  if (targetShade.developerVolumeChoices !== undefined && isLifting) {
-    liftUnsupportedWarning = i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel });
-  }
+  const liftUnsupportedWarning = targetShade.developerVolumeChoices !== undefined && isLifting
+    ? i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel })
+    : null;
 
-  let developerVolume = liftUnsupportedWarning !== null
-    ? null
-    : targetShade.developerVolumeChoices
-      ? (manualDeveloperVolume ?? null)
-      : pickDeveloperVolume(startLevel, targetShade.level, targetShade.developerLiftTable);
-  if (developerVolume !== null && targetShade.developerVolumeChoices === undefined) {
-    if (grayPercent >= GRAY_LIGHT_THRESHOLD && developerVolume < GRAY_COVERAGE_MIN_DEVELOPER_VOLUME) {
-      developerVolume = GRAY_COVERAGE_MIN_DEVELOPER_VOLUME;
-    } else if (!isLifting && targetShade.noLiftDeveloperVolume !== undefined) {
-      developerVolume = targetShade.noLiftDeveloperVolume;
-    }
-  }
-
-  // Special Blonde-style "maximum lift" shades (Shade.acceptsPartialLift) are routinely
-  // chosen purely to lift as far as a single process safely allows, not to guarantee this
-  // shade's own nominal level - e.g. Special Blonde from level 5 toward level 12, even
-  // though its own 12%-developer ceiling only reaches level 10. Falls back to the
-  // strongest developer the shade's own lift table supports and reports the level that
-  // actually reaches (achievedLevel below), rather than refusing to compute a formula at
-  // all just because the nominal target is out of reach.
-  let achievedLevel: Level | null = developerVolume !== null ? targetShade.level : null;
-  if (
-    developerVolume === null && isLifting
-    && targetShade.acceptsPartialLift === true && targetShade.developerLiftTable !== undefined
-  ) {
-    const fallbackVolume = pickMaxLiftVolume(targetShade.developerLiftTable);
-    const fallbackLift = targetShade.developerLiftTable(fallbackVolume);
-    if (fallbackLift > 0) {
-      developerVolume = fallbackVolume;
-      achievedLevel = (startLevel + fallbackLift) as Level;
-    }
-  }
+  const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, liftUnsupportedWarning, manualDeveloperVolume);
+  const { developerVolume, achievedLevel } = resolvePartialLiftFallback(startLevel, targetShade, isLifting, pickedVolume);
 
   // No pigment is actually revealed if the line can't lift in the first place, or lifts
   // to nowhere (achievedLevel null alongside developerVolume null).
   const isActuallyLifting = isLifting && liftUnsupportedWarning === null && achievedLevel !== null;
-  const underlyingPigment = isActuallyLifting && achievedLevel !== null ? getUnderlyingPigment(achievedLevel) : null;
-  const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
-  const correctorGrams = recommendedCorrectiveTone !== null && achievedLevel !== null ? calculateCorrectorGrams(achievedLevel, totalGrams) : null;
+  const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning } =
+    deriveCorrectiveGuidance(targetShade, isActuallyLifting, achievedLevel, totalGrams);
   const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
 
-  let toneWarning: string | null = null;
-  if (isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone) {
-    toneWarning = i18n.t("engine.toneWarning", { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone });
-  }
-
-  let eligibilityWarning: string | null = null;
-  if (targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel) {
-    eligibilityWarning = i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel });
-  }
+  const eligibilityWarning = targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
+    ? i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel })
+    : null;
 
   const grams = developerVolume !== null ? calculateFormulaGrams(totalGrams, mixingRatio) : null;
 

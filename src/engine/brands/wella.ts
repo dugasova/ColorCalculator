@@ -167,29 +167,39 @@ const kolestonPerfectShades: Shade[] = [
   { code: "10/95", level: 10, tone: "slate-grey", secondaryTone: "mahogany" },
   { code: "10/96", level: 10, tone: "slate-grey", secondaryTone: "violet" },
   { code: "10/97", level: 10, tone: "slate-grey", secondaryTone: "chocolate" },
-  // Level 12
-  { code: "12/0", level: 12, tone: "natural", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/1", level: 12, tone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/3", level: 12, tone: "gold", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/11", level: 12, tone: "ash", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/16", level: 12, tone: "ash", secondaryTone: "violet", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/81", level: 12, tone: "pearl", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/86", level: 12, tone: "pearl", secondaryTone: "violet", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/89", level: 12, tone: "pearl", secondaryTone: "slate-grey", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
-  { code: "12/61", level: 12, tone: "violet", secondaryTone: "ash", developerLiftTable: specialBlondeLiftTable, fixedMixingRatio: { colorParts: 1, developerParts: 2 }, minStartLevel: 6, fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES },
+  // Level 12 -- Special Blonde: overrides (1:2 ratio, lift table, min start level,
+  // fixed processing time) encoded once below via WELLA_SHADE_CHART's own
+  // post-processing map, not repeated per shade here.
+  { code: "12/0", level: 12, tone: "natural" },
+  { code: "12/1", level: 12, tone: "ash" },
+  { code: "12/3", level: 12, tone: "gold" },
+  { code: "12/11", level: 12, tone: "ash", secondaryTone: "ash" },
+  { code: "12/16", level: 12, tone: "ash", secondaryTone: "violet" },
+  { code: "12/81", level: 12, tone: "pearl", secondaryTone: "ash" },
+  { code: "12/86", level: 12, tone: "pearl", secondaryTone: "violet" },
+  { code: "12/89", level: 12, tone: "pearl", secondaryTone: "slate-grey" },
+  { code: "12/61", level: 12, tone: "violet", secondaryTone: "ash" },
 ];
 
 export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({
   ...shade,
   line: "koleston-perfect",
-  // Special Blonde (the developerLiftTable-bearing entries above) is excluded from the
-  // no-lift default -- its own instructions don't cover the same-depth/darker case, so it
-  // keeps the engine default -- but is exactly the shade routinely used as a maximum-lift
-  // tool rather than a fixed target tone, so it alone gets acceptsPartialLift (see
-  // Shade.acceptsPartialLift, ../shades.ts).
-  ...(shade.developerLiftTable === undefined
-    ? { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME }
-    : { acceptsPartialLift: true }),
+  // Special Blonde (level 12) shares this exact override set across every shade in the
+  // sub-range -- centralized here, once, instead of repeated on each of the 9 individual
+  // shade literals above, where a future addition could silently miss one. Excluded from
+  // the no-lift default below -- its own instructions don't cover the same-depth/darker
+  // case -- but is exactly the shade routinely used as a maximum-lift tool rather than a
+  // fixed target tone, so it alone gets acceptsPartialLift (see Shade.acceptsPartialLift,
+  // ../shades.ts) instead.
+  ...(shade.level === 12
+    ? {
+      developerLiftTable: specialBlondeLiftTable,
+      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+      minStartLevel: 6,
+      fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES,
+      acceptsPartialLift: true,
+    }
+    : { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME }),
 }));
 
 //color touch

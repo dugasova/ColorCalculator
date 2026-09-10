@@ -4,6 +4,7 @@ import type { Shade } from "./shades";
 import type { FullFormula, FormulaGrams } from "./formula";
 import type { ApplicationZone } from "./applicationZone";
 import { formatLineLabel } from "./formatLineLabel";
+import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatFormulaParams {
   brandName: string;
@@ -79,9 +80,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
 
   const title = `${brandName}${line ? " " + formatLineLabel(line) : ""} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? "/" + targetShade.secondaryTone : ""})`;
 
-  const developer = result.developerVolume !== null
-    ? i18n.t("format.developerVolume", { value: result.developerVolume })
-    : "—";
+  const developer = formatDeveloperVolumeLine(result.developerVolume);
 
   const applyNeutralization = neutralizationApplied && result.recommendedCorrectiveTone !== null;
   const correctiveToneLine = applyNeutralization

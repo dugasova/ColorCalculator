@@ -1,6 +1,7 @@
 import i18n from "../i18n";
 import type { Level } from "./levels";
 import type { PrePigmentationResult } from "./prePigmentation";
+import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatPrePigmentationParams {
   startLevel: Level;
@@ -22,9 +23,7 @@ export function formatPrePigmentationText(params: FormatPrePigmentationParams): 
     ...buildFillerLines(targetLevel, result),
   ];
 
-  const finalDeveloper = result.finalStepDeveloperVolume !== null
-    ? i18n.t("format.developerVolume", { value: result.finalStepDeveloperVolume })
-    : "—";
+  const finalDeveloper = formatDeveloperVolumeLine(result.finalStepDeveloperVolume);
   lines.push(
     i18n.t("prePigmentation.finalStepLabel"),
     i18n.t("format.developer", { value: finalDeveloper }),

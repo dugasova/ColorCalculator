@@ -124,24 +124,35 @@ const igoraRoyalShades: Shade[] = [
   { code: "10-46", level: 10, tone: "beige", secondaryTone: "chocolate" },
   { code: "10-49", level: 10, tone: "beige", secondaryTone: "violet" },
 
-  // Level 12 -- Highlifts "Special Blonde": 1:2 ratio.
-  { code: "12-0", level: 12, tone: "natural", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-1", level: 12, tone: "cendré", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-11", level: 12, tone: "cendré", secondaryTone: "cendré", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-19", level: 12, tone: "cendré", secondaryTone: "violet", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-2", level: 12, tone: "ash", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-21", level: 12, tone: "ash", secondaryTone: "cendré", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-4", level: 12, tone: "beige", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-46", level: 12, tone: "beige", secondaryTone: "chocolate", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
-  { code: "12-49", level: 12, tone: "beige", secondaryTone: "violet", developerLiftTable: igoraHighlifts12LiftTable, minStartLevel: 6, fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES, fixedMixingRatio: { colorParts: 1, developerParts: 2 } },
+  // Level 12 -- Highlifts "Special Blonde": 1:2 ratio, encoded once below via
+  // IGORA_ROYAL_CHART's own post-processing map, not repeated per shade here.
+  { code: "12-0", level: 12, tone: "natural" },
+  { code: "12-1", level: 12, tone: "cendré" },
+  { code: "12-11", level: 12, tone: "cendré", secondaryTone: "cendré" },
+  { code: "12-19", level: 12, tone: "cendré", secondaryTone: "violet" },
+  { code: "12-2", level: 12, tone: "ash" },
+  { code: "12-21", level: 12, tone: "ash", secondaryTone: "cendré" },
+  { code: "12-4", level: 12, tone: "beige" },
+  { code: "12-46", level: 12, tone: "beige", secondaryTone: "chocolate" },
+  { code: "12-49", level: 12, tone: "beige", secondaryTone: "violet" },
 ];
 
 export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({
   ...shade,
   line: "royal",
-  // Highlifts "Special Blonde" 12-series is routinely used as a maximum-lift
-  // tool rather than a fixed target tone, so it gets acceptsPartialLift
-  ...(shade.level === 12 ? { acceptsPartialLift: true } : {})
+  // Highlifts "Special Blonde" 12-series shares this exact override set across every
+  // shade in the sub-range -- centralized here, once, instead of repeated on each of the
+  // 9 individual shade literals above, where a future addition could silently miss one
+  // (see igoraHighlifts12LiftTable/HIGHLIFTS_12_PROCESSING_MINUTES above).
+  ...(shade.level === 12
+    ? {
+      developerLiftTable: igoraHighlifts12LiftTable,
+      minStartLevel: 6,
+      fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES,
+      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+      acceptsPartialLift: true,
+    }
+    : {}),
 }));
 
 // Igora Vibrance -- Schwarzkopf's ammonia-free demi-permanent "toner" system: used to

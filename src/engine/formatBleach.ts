@@ -1,6 +1,7 @@
 import i18n from "../i18n";
 import type { Level } from "./levels";
 import type { BleachFormula } from "./bleach";
+import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatBleachParams {
   startLevel: Level;
@@ -15,9 +16,7 @@ export function formatBleachText(params: FormatBleachParams): string {
   const { startLevel, targetLevel, result, processingMinutes } = params;
 
   const title = `${i18n.t("bleach.titlePrefix")} ${i18n.t("bleach.titleAccent")}`;
-  const developer = result.developerVolume !== null
-    ? i18n.t("format.developerVolume", { value: result.developerVolume })
-    : "—";
+  const developer = formatDeveloperVolumeLine(result.developerVolume);
 
   const lines = [
     title,
