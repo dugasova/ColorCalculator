@@ -264,7 +264,7 @@ export const en = {
     ruleOfTen: {
       label: "Corrector amount (Rule of 10)",
       value: "{{correctorGrams}} g of corrector per {{baseGrams}} g of base color",
-      explanation: "10 minus the level you are coloring at ({{level}}) gives the amount of corrector, in grams (~1 g per cm of tube), to blend into 30 g of base color.",
+      explanation: "10 minus the level you are coloring at ({{level}}) gives the amount of corrector, in grams (~1 g per cm of tube), to blend into 30 g of base color. From level 10 up this settles at a fixed 0.5 g floor rather than zero, since even very light blondes still carry a faint yellow undertone that needs a touch of violet.",
     },
     disclaimer: "Basic guidance — does not replace a complete color diagnosis.",
   },

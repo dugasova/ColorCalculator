@@ -67,12 +67,24 @@ export function calculateColorCorrection(startLevel: Level, targetLevel: Level, 
 const RULE_OF_TEN_BASE_GRAMS = 30;
 const RULE_OF_TEN_BASE_LEVEL = 10;
 
+// From level 10 up, the literal "10 minus level" reading collapses to zero -- but real
+// high-lift blonde work at levels 10-12 still carries a faint pale-yellow/very-light-yellow
+// undertone (see levels.ts's getUnderlyingPigment) that shows through without a touch of
+// violet correction. Every major brand's own chart confirms this: Wella (0/66, "1cm/0.5g"),
+// Igora Royal (0-99, "1cm/0.5g", per its own rule-of-12 for the Highlifts sub-range),
+// Majirel (Mix Violet, "0.2-0.3g"), and Chromatics (Remixed Violet, "0.5-1g") all specify a
+// small fixed amount at this depth rather than scaling it down to nothing -- so it never
+// diminishes further as the target climbs from 10 to 12.
+const RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G = 0.5;
+
 // Colorimetric "Rule of 10": subtract the depth level you're coloring at from 10 to get
 // the amount of corrector needed per 30g of base color, then scale proportionally to the
 // actual amount used. Traditionally read off as a length (cm) of corrector/microtone
 // squeezed from the tube; measured out on a scale instead, the standard colorist
 // convention treats 1cm of tube as ~1g, so the same number of grams is used directly.
 export function calculateCorrectorGrams(level: Level, baseGrams: number): number {
-  const gramsPer30g = Math.max(0, RULE_OF_TEN_BASE_LEVEL - level);
+  const gramsPer30g = level >= RULE_OF_TEN_BASE_LEVEL
+    ? RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G
+    : RULE_OF_TEN_BASE_LEVEL - level;
   return Math.round(gramsPer30g * (baseGrams / RULE_OF_TEN_BASE_GRAMS) * 10) / 10;
 }

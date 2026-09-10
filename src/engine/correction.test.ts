@@ -79,7 +79,13 @@ describe("calculateCorrectorGrams", () => {
     expect(calculateCorrectorGrams(1, 15)).toBe(4.5);
   });
 
-  it("is zero at level 10 and never negative", () => {
-    expect(calculateCorrectorGrams(10, 30)).toBe(0);
+  it("floors at 0.5g per 30g from level 10 up, instead of the literal formula's zero -- pale-yellow/very-light-yellow undertones at high-lift depths still need a touch of violet", () => {
+    expect(calculateCorrectorGrams(10, 30)).toBe(0.5);
+    expect(calculateCorrectorGrams(11, 30)).toBe(0.5);
+    expect(calculateCorrectorGrams(12, 30)).toBe(0.5);
+  });
+
+  it("scales the high-lift floor proportionally with the amount of base color, like every other level", () => {
+    expect(calculateCorrectorGrams(10, 60)).toBe(1);
   });
 });
