@@ -5,6 +5,10 @@ import type { PrePigmentationResult } from "../../engine/prePigmentation";
 export interface PrePigmentationStepProps {
   targetLevel: Level;
   result: PrePigmentationResult;
+  // Brand+line label for the filler worked example (exampleFillerShadeLabel/Value) --
+  // defaults to "Generic", matching calculatePrePigmentation's own default shadeChart
+  // (../../engine/prePigmentation.ts) when the caller doesn't pass a real brand.
+  brandName?: string;
 }
 
 // Renders the filler ("Step 1") detail block ahead of the target-color formula below it,
@@ -14,7 +18,7 @@ export interface PrePigmentationStepProps {
 // Only mounted once the colorist opts in via PrePigmentationField's checkbox -- `result`
 // always has a real filler breakdown here since useFormulaCalculatorState only computes
 // it when `need` isn't 'none'.
-export function PrePigmentationStep({ targetLevel, result }: PrePigmentationStepProps) {
+export function PrePigmentationStep({ targetLevel, result, brandName = "Generic" }: PrePigmentationStepProps) {
   const { t } = useTranslation();
   if (result.underlyingPigment === null || result.fillerTone === null
     || result.mixingRatio === null || result.grams === null || result.fillerProcessingMinutes === null) {
@@ -35,10 +39,10 @@ export function PrePigmentationStep({ targetLevel, result }: PrePigmentationStep
           <span className="stat__value prepigment__stat-value--small">{fillerToneName}</span>
         </div>
         <div className="stat">
-          <span className="stat__label">{t("prePigmentation.exampleFillerShadeLabel")}</span>
+          <span className="stat__label">{t("prePigmentation.exampleFillerShadeLabel", { brandName })}</span>
           <span className="stat__value prepigment__stat-value--small">
             {result.exampleFillerShade !== null
-              ? t("prePigmentation.exampleFillerShadeValue", { code: result.exampleFillerShade.code, tone: fillerToneName })
+              ? t("prePigmentation.exampleFillerShadeValue", { brandName, code: result.exampleFillerShade.code, tone: fillerToneName })
               : t("prePigmentation.noExampleFillerShade", { tone: fillerToneName, level: targetLevel })}
           </span>
         </div>

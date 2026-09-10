@@ -162,10 +162,14 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   // derived, and needs to stay in sync the instant either field changes so the
   // recommendation (and, once enabled, the filler step below) never lags behind a level
   // edit. Gated on prePigmentationEnabled so toggling the checkbox off fully removes the
-  // filler step from both the results panel and the copyable formula text.
+  // filler step from both the results panel and the copyable formula text. Matched
+  // against the currently selected brand+line (lineShades) so the worked-example filler
+  // shade is a real product from that line, not the Generic-chart default -- no match at
+  // that level/tone (e.g. an underrepresented line) resolves to null exactly like the
+  // Generic case, and the UI already renders the "no dedicated shade" fallback text.
   const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
   const prePigmentationResult = prePigmentationEnabled && prePigmentationNeed !== "none"
-    ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams)
+    ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams, lineShades)
     : null;
 
   return {

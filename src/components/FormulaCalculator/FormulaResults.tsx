@@ -6,6 +6,7 @@ import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSum
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../engine/formatPrePigmentation";
+import { formatLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
@@ -69,12 +70,16 @@ export function FormulaResults({
     brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
     additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
   });
+  // Same brand+line display convention as the target-color title above (formatFormulaText),
+  // reused for the filler worked example so both steps of a two-part formula name the
+  // same product line consistently.
+  const fullBrandLabel = `${brandName}${line ? " " + formatLineLabel(line) : ""}`;
   // Prepend the filler ("Step 1") text ahead of the target-color formula ("Step 2") once
   // the colorist has opted into the pre-pigmentation step -- see PrePigmentationField.
   // fillerStepText is null whenever prePigmentationResult is null (checkbox off, or the
   // level drop doesn't warrant it), so the plain single-step text is used unchanged.
   const fillerStepText = prePigmentationResult !== null
-    ? formatFillerStepText(targetShade.level, prePigmentationResult)
+    ? formatFillerStepText(targetShade.level, prePigmentationResult, fullBrandLabel)
     : null;
   const formulaText = fillerStepText !== null
     ? `${fillerStepText}\n\n${t("prePigmentation.finalStepLabel")}\n${targetColorFormulaText}`
@@ -121,7 +126,7 @@ export function FormulaResults({
     <div className="results">
       {prePigmentationResult !== null && (
         <>
-          <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} />
+          <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} brandName={fullBrandLabel} />
           <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
         </>
       )}

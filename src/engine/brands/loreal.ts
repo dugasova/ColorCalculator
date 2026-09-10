@@ -1,4 +1,25 @@
 import type { Shade } from "../shades";
+import type { LiftTable } from "../levels";
+
+// Majirel High Lift / Majiblond Ultra - Majirel's own maximum-lift sub-range, sold as a
+// companion product to the numbered chart below rather than a separate product line.
+// Transcribed from L'Oréal Professionnel's official Majirel High Lift / Majiblond Ultra
+// color chart and formulation guide: 30 vol lifts up to 4 levels, 40 vol up to a
+// documented "4 to 4½" - rounded up to 5 since Level has no fractional values, matching
+// how Igora Highlifts/Wella Special Blonde (igora.ts, wella.ts) already round their own
+// developer ladders to whole levels and rely on visual confirmation near the ceiling.
+const majiblondUltraLiftTable: LiftTable = (volume) => {
+  switch (volume) {
+    case 30: return 4;
+    case 40: return 5;
+    default: return 0;
+  }
+};
+
+// Majiblond Ultra's own instructions call for a fixed 50-minute process without heat,
+// regardless of gray coverage -- unlike the rest of Majirel, whose processing time is
+// picked from gray percentage alone (see getRecommendedProcessingMinutes, ../formula.ts).
+const MAJIBLOND_ULTRA_PROCESSING_MINUTES = 50;
 
 // Majirel — permanent oxidation cream, L'Oréal's flagship line. Always mixes
 // 1:1.5 with developer (never diff-based), and developer volume is picked by
@@ -109,12 +130,35 @@ const majirelShades: Shade[] = [
   { code: "10", level: 10, tone: "natural" },
   { code: "10.1", level: 10, tone: "ash" },
   { code: "10.31", level: 10, tone: "gold", secondaryTone: "ash" },
+
+  // High Lift / Majiblond Ultra -- 1:2 ratio, lift table, min start level, and fixed
+  // processing time encoded once below via LOREAL_MAJIREL_CHART's own post-processing
+  // map, not repeated per shade here. Real tube codes have no leading depth digit --
+  // `name` carries the chart's own descriptor instead of a marketing name.
+  { code: ".0", level: 12, tone: "natural", name: "Neutral" },
+  { code: ".1", level: 12, tone: "ash", name: "Ash" },
+  { code: ".11", level: 12, tone: "ash", secondaryTone: "ash", name: "Ash+" },
+  { code: ".13", level: 12, tone: "ash", secondaryTone: "gold", name: "Beige" },
+  { code: ".2", level: 12, tone: "violet", name: "Violet" },
 ];
 
 export const LOREAL_MAJIREL_CHART: Shade[] = majirelShades.map(shade => ({
   ...shade,
   line: "majirel",
-  fixedMixingRatio: { colorParts: 1, developerParts: 1.5 },
+  // High Lift / Majiblond Ultra (level 12) overrides Majirel's own default 1:1.5 ratio
+  // with its own 1:2 and -- like Igora Highlifts/Wella Special Blonde (igora.ts,
+  // wella.ts) -- is routinely chosen purely to lift as far as a single process safely
+  // allows rather than to guarantee its own nominal level, so it alone gets
+  // acceptsPartialLift (see Shade.acceptsPartialLift, ../shades.ts) instead.
+  ...(shade.level === 12
+    ? {
+      developerLiftTable: majiblondUltraLiftTable,
+      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+      minStartLevel: 5,
+      fixedProcessingMinutes: MAJIBLOND_ULTRA_PROCESSING_MINUTES,
+      acceptsPartialLift: true,
+    }
+    : { fixedMixingRatio: { colorParts: 1, developerParts: 1.5 } }),
 }));
 
 // INOA, Dia Light, and Dia Richesse below are still approximated from publicly

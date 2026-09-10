@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { calculateFullFormula } from "./formula";
 import { IGORA_VIBRANCE_CHART, IGORA_ROYAL_CHART } from "./brands/igora";
 import { WELLA_SHADE_CHART } from "./brands/wella";
+import { LOREAL_MAJIREL_CHART } from "./brands/loreal";
 
 describe("IGORA_VIBRANCE_CHART", () => {
   it("mixes every shade -- including the Level 10 Toners sub-range -- 1:1 with Vibrance Activator", () => {
@@ -99,6 +100,57 @@ describe("WELLA_SHADE_CHART processing-time and no-lift-developer overrides", ()
 
     expect(result.developerVolume).toBe(40);
     expect(result.achievedLevel).toBe(9); // 4 + the documented 4-5 levels of lift at 12%
+    expect(result.grams).not.toBeNull();
+  });
+});
+
+describe("LOREAL_MAJIREL_CHART High Lift / Majiblond Ultra overrides", () => {
+  it("recommends 50 min for every High Lift shade", () => {
+    const highLiftShades = LOREAL_MAJIREL_CHART.filter(s => s.level === 12);
+    expect(highLiftShades.length).toBeGreaterThan(0);
+    for (const shade of highLiftShades) {
+      expect(shade.fixedProcessingMinutes).toBe(50);
+    }
+  });
+
+  it("leaves the rest of the Majirel chart on the gray-percent-based default", () => {
+    const standardShades = LOREAL_MAJIREL_CHART.filter(s => s.level !== 12);
+    expect(standardShades.length).toBeGreaterThan(0);
+    for (const shade of standardShades) {
+      expect(shade.fixedProcessingMinutes).toBeUndefined();
+    }
+  });
+
+  it("mixes High Lift 1:2, overriding the rest of Majirel's own 1:1.5", () => {
+    const highLiftShades = LOREAL_MAJIREL_CHART.filter(s => s.level === 12);
+    for (const shade of highLiftShades) {
+      expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 2 });
+    }
+    const standardShades = LOREAL_MAJIREL_CHART.filter(s => s.level !== 12);
+    expect(standardShades.length).toBeGreaterThan(0);
+    for (const shade of standardShades) {
+      expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1.5 });
+    }
+  });
+
+  it("marks every High Lift shade acceptsPartialLift, unlike the rest of the chart", () => {
+    const highLiftShades = LOREAL_MAJIREL_CHART.filter(s => s.level === 12);
+    for (const shade of highLiftShades) {
+      expect(shade.acceptsPartialLift).toBe(true);
+    }
+    const standardShades = LOREAL_MAJIREL_CHART.filter(s => s.level !== 12);
+    for (const shade of standardShades) {
+      expect(shade.acceptsPartialLift).toBeUndefined();
+    }
+  });
+
+  it("end-to-end: a real High Lift shade lifts as far as 40vol allows and reports that level", () => {
+    const shade = LOREAL_MAJIREL_CHART.find(s => s.code === ".1");
+    // Starting from level 6, should lift up to 5 levels with 40 vol
+    const result = calculateFullFormula(6, shade!, 0, 60);
+
+    expect(result.developerVolume).toBe(40);
+    expect(result.achievedLevel).toBe(11); // 6 + 5 levels of lift
     expect(result.grams).not.toBeNull();
   });
 });

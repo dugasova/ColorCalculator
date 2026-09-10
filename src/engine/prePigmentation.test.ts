@@ -6,6 +6,7 @@ import {
   calculateFillerGrams,
   calculatePrePigmentation,
 } from "./prePigmentation";
+import type { Shade } from "./shades";
 
 describe("getPrePigmentationNeed", () => {
   it("is not needed for same level or a 1-level drop", () => {
@@ -54,6 +55,16 @@ describe("findExampleFillerShade", () => {
 
   it("returns null when the Generic chart has no shade at that level/tone", () => {
     expect(findExampleFillerShade(4, "red")).toBeNull();
+  });
+
+  it("searches a passed brand/line chart instead of Generic when one is given", () => {
+    const wellaFixture: Shade[] = [{ code: "5/4", level: 5, tone: "copper", line: "koleston-perfect" }];
+    expect(findExampleFillerShade(5, "copper", wellaFixture)).toEqual(wellaFixture[0]);
+  });
+
+  it("returns null when the passed chart has no match, even where Generic would", () => {
+    // Generic has a 7.3 gold shade (see the first test above); an empty chart has none.
+    expect(findExampleFillerShade(7, "gold", [])).toBeNull();
   });
 });
 
@@ -108,6 +119,12 @@ describe("calculatePrePigmentation", () => {
       finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
       finalStepDeveloperVolume: 10,
     });
+  });
+
+  it("recommends a filler shade from the passed brand/line chart instead of Generic when one is given", () => {
+    const wellaFixture: Shade[] = [{ code: "5/4", level: 5, tone: "copper", line: "koleston-perfect" }];
+    const result = calculatePrePigmentation(9, 5, 30, wellaFixture);
+    expect(result.exampleFillerShade).toEqual(wellaFixture[0]);
   });
 
   it("requires a multi-visit red filler for a large 8-level drop, with no Generic example at level 2", () => {

@@ -380,6 +380,7 @@
 }
 
 .prepigment__stat-value--small {
+  font-family: var(--font-display);
   font-size: 1.05rem;
 }
 

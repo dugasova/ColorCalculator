@@ -2,17 +2,40 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculatePrePigmentation } from "../../engine/prePigmentation";
+import type { BrandId } from "../../engine/brands";
+import { usePalette } from "../../palette";
+import { formatLineLabel } from "../../engine/formatLineLabel";
 import { Select } from "../common/Select";
+import { BrandField } from "../FormulaCalculator/fields/BrandField";
+import { LineField } from "../FormulaCalculator/fields/LineField";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./PrePigmentationCalculator.css";
 
 export function PrePigmentationCalculator() {
   const { t } = useTranslation();
+  const brands = usePalette();
+  const [brandId, setBrandId] = useState<BrandId>("generic");
+  const [line, setLine] = useState<string | null>(null);
   const [startLevel, setStartLevel] = useState<Level>(9);
   const [targetLevel, setTargetLevel] = useState<Level>(5);
   const [totalGrams, setTotalGrams] = useState(30);
 
-  const result = calculatePrePigmentation(startLevel, targetLevel, totalGrams);
+  // Mirrors useShadeFormulaState's own brand/line derivation (FormulaCalculator) so both
+  // surfaces resolve "the current line's shades" identically.
+  const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
+  const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line);
+  const brandLabel = `${brands[brandId].name}${line ? " " + formatLineLabel(line) : ""}`;
+
+  const handleBrandIdChange = (newBrandId: BrandId) => {
+    setBrandId(newBrandId);
+    setLine(brands[newBrandId].shades[0]?.line ?? null);
+  };
+
+  // Matched against the currently selected brand+line so the worked-example filler shade
+  // is a real product from that line, not the Generic-chart default -- no match at that
+  // level/tone resolves to null exactly like the Generic case, and the UI already renders
+  // the "no dedicated shade" fallback text (see calculatePrePigmentation, ../../engine).
+  const result = calculatePrePigmentation(startLevel, targetLevel, totalGrams, lineShades);
   const fillerToneName = result.fillerTone !== null ? t(`palette.toneFamily.${result.fillerTone}`) : null;
   const showFillerStep = result.need !== "none" && result.underlyingPigment !== null && result.fillerTone !== null
     && result.mixingRatio !== null && result.grams !== null;
@@ -23,6 +46,8 @@ export function PrePigmentationCalculator() {
       <p className="prepigment__subtitle">{t("prePigmentation.subtitle")}</p>
 
       <div className="calculator__form">
+        <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} idSuffix="Prepigment" />
+        <LineField availableLines={availableLines} line={line} onLineChange={setLine} idSuffix="Prepigment" />
         <div className="field">
           <label htmlFor="prepigmentStartLevel">{t("prePigmentation.currentLevel")}</label>
           <Select
@@ -75,10 +100,10 @@ export function PrePigmentationCalculator() {
                 <span className="stat__value prepigment__stat-value--small">{fillerToneName}</span>
               </div>
               <div className="stat">
-                <span className="stat__label">{t("prePigmentation.exampleFillerShadeLabel")}</span>
+                <span className="stat__label">{t("prePigmentation.exampleFillerShadeLabel", { brandName: brandLabel })}</span>
                 <span className="stat__value prepigment__stat-value--small">
                   {result.exampleFillerShade !== null
-                    ? t("prePigmentation.exampleFillerShadeValue", { code: result.exampleFillerShade.code, tone: fillerToneName })
+                    ? t("prePigmentation.exampleFillerShadeValue", { brandName: brandLabel, code: result.exampleFillerShade.code, tone: fillerToneName })
                     : t("prePigmentation.noExampleFillerShade", { tone: fillerToneName, level: targetLevel })}
                 </span>
               </div>

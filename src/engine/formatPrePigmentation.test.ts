@@ -68,6 +68,15 @@ describe("formatPrePigmentationText", () => {
       "Basic guidance — does not replace a complete color diagnosis and strand test."
     );
   });
+
+  it("substitutes a real brand+line label for the filler example instead of the Generic default", () => {
+    const result = calculatePrePigmentation(9, 5, 30);
+
+    const text = formatPrePigmentationText({ startLevel: 9, targetLevel: 5, result, brandName: "Wella Koleston Perfect" });
+
+    expect(text).toContain("Wella Koleston Perfect 5.4 (Copper)");
+    expect(text).not.toContain("Generic 5.4");
+  });
 });
 
 describe("formatFillerStepText", () => {
@@ -103,6 +112,20 @@ describe("formatFillerStepText", () => {
       "Mix: 30.0 g filler : 30.0 g water\n" +
       "Processing time: 15 min\n" +
       "Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result."
+    );
+  });
+
+  it("substitutes a real brand+line label for the filler example instead of the Generic default", () => {
+    const result = calculatePrePigmentation(9, 5, 30);
+
+    expect(formatFillerStepText(5, result, "Igora Royal")).toBe(
+      "Step 1 — Filler\n" +
+      "Missing underlying pigment: orange\n" +
+      "Recommended filler tone: Copper\n" +
+      "Igora Royal 5.4 (Copper)\n" +
+      "Ratio: 1:1\n" +
+      "Mix: 15.0 g filler : 15.0 g water\n" +
+      "Processing time: 15 min"
     );
   });
 });

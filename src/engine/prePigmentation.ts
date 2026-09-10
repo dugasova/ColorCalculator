@@ -91,15 +91,19 @@ export function getPrePigmentFillerTone(pigment: UnderlyingPigment): ToneFamily 
   }
 }
 
-// Worked example against the built-in Generic chart (GENERIC_SHADE_CHART, ./brands/generic.ts):
-// startLevel 9 -> targetLevel 5 needs a 'copper' filler (underlying pigment 'orange') and
-// Generic has a 5.4 copper shade, so this resolves to that shade. startLevel 9 ->
-// targetLevel 4 needs a 'red' filler (underlying pigment 'red-orange'), but Generic's
-// level-4 entries are only natural/ash/gold/violet/chocolate (no red below level 5 in
-// this chart) -- resolves to null, and callers must fall back to the natural (.0) base
-// diluted, or a brand's dedicated filler product.
-export function findExampleFillerShade(targetLevel: Level, fillerTone: ToneFamily): Shade | null {
-  return GENERIC_SHADE_CHART.find(s => s.level === targetLevel && s.tone === fillerTone) ?? null;
+// Worked example, matched against whichever shade chart the caller passes-the
+// colorist's currently selected brand/line, when known, defaulting to the built-in
+// Generic chart (GENERIC_SHADE_CHART, ./brands/generic.ts) when it isn't (e.g. the
+// standalone Pre-pigmentation calculator with no brand selected, or a caller that
+// predates this parameter). Worked example against Generic: startLevel 9 -> targetLevel
+// 5 needs a 'copper' filler (underlying pigment 'orange') and Generic has a 5.4 copper
+// shade, so this resolves to that shade. startLevel 9 -> targetLevel 4 needs a 'red'
+// filler (underlying pigment 'red-orange'), but Generic's level-4 entries are only
+// natural/ash/gold/violet/chocolate (no red below level 5 in this chart) - resolves to
+// null, and callers must fall back to the natural (.0) base diluted, or a brand's
+// dedicated filler product.
+export function findExampleFillerShade(targetLevel: Level, fillerTone: ToneFamily, shadeChart: Shade[] = GENERIC_SHADE_CHART): Shade | null {
+  return shadeChart.find(s => s.level === targetLevel && s.tone === fillerTone) ?? null;
 }
 
 export function calculateFillerGrams(totalGrams: number, ratio: FillerMixingRatio): FillerGrams {
@@ -110,11 +114,14 @@ export function calculateFillerGrams(totalGrams: number, ratio: FillerMixingRati
   };
 }
 
-export function calculatePrePigmentation(startLevel: Level, targetLevel: Level, totalGrams: number): PrePigmentationResult {
+// `shadeChart` scopes the worked-example lookup (see findExampleFillerShade above) -
+// pass the colorist's currently selected brand+line shades to recommend a real product
+// from that line instead of the Generic-chart default.
+export function calculatePrePigmentation(startLevel: Level, targetLevel: Level, totalGrams: number, shadeChart: Shade[] = GENERIC_SHADE_CHART): PrePigmentationResult {
   const need = getPrePigmentationNeed(startLevel, targetLevel);
   const underlyingPigment = need !== "none" ? getUnderlyingPigment(targetLevel) : null;
   const fillerTone = underlyingPigment !== null ? getPrePigmentFillerTone(underlyingPigment) : null;
-  const exampleFillerShade = fillerTone !== null ? findExampleFillerShade(targetLevel, fillerTone) : null;
+  const exampleFillerShade = fillerTone !== null ? findExampleFillerShade(targetLevel, fillerTone, shadeChart) : null;
   const mixingRatio = need !== "none" ? FILLER_MIXING_RATIO : null;
   const grams = mixingRatio !== null ? calculateFillerGrams(totalGrams, mixingRatio) : null;
   const fillerProcessingMinutes = need !== "none" ? FILLER_PROCESSING_MINUTES[need] : null;
