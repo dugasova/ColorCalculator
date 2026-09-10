@@ -9,6 +9,7 @@ import FormulaCalculator from "./components/FormulaCalculator/FormulaCalculator"
 import { Nav, type AppView } from "./components/Nav/Nav";
 import { buildRepeatFormulaRequest, type FormulaHistoryEntry, type RepeatFormulaRequest } from "./history";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
+import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
 
 const LoginForm = lazy(() => import("./components/LoginForm/LoginForm"));
 const HistoryView = lazy(() =>
@@ -98,6 +99,7 @@ function AuthenticatedApp({ user }: { user: User }) {
           <button type="button" className="app-brand" onClick={() => setView("calculator")} aria-label={t("nav.calculator")}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t("app.titlePrefix")}<em>{t("app.titleAccent")}</em></button>
           <Nav view={view} onViewChange={setView} isAdmin={isAdmin} />
           <div className="app-topbar__account">
+            <ThemeSwitcher />
             <LanguageSwitcher />
             <span>{user.email}</span>
             <button className="button button--secondary" onClick={() => signOut(auth)}>{t("account.signOut")}</button>

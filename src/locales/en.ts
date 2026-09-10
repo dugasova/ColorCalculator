@@ -11,6 +11,10 @@ export const en = {
     en: "EN",
     uk: "UA",
   },
+  theme: {
+    switchToDark: "Switch to dark theme",
+    switchToLight: "Switch to light theme",
+  },
   nav: {
     calculator: "Calculator",
     correction: "Correction",

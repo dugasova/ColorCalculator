@@ -72,7 +72,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1px solid rgba(22, 18, 31, 0.15);
+  border: 1px solid rgba(var(--brand-ink-rgb), 0.15);
 }
 
 .select__popup {
@@ -81,7 +81,7 @@
   top: calc(100% + 8px);
   left: 0;
   /* At least as wide as the trigger (matches every select whose trigger already has
-     room for its longest option label), but never narrower than min-width -- a select
+     room for its longest option label), but never narrower than min-width - a select
      sharing a row with other controls (e.g. the shade grams input in .shade-field) can
      have a trigger too narrow for its own option text, which used to collapse
      `.select__option-label` to ~0 width and leave only the swatch circle visible. Capped
@@ -115,6 +115,7 @@
     opacity: 0;
     transform: translateY(-4px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);

@@ -5,8 +5,16 @@
   --brand-surface: #ffffff;
   --brand-field: #f5f2fb;
   --brand-ink: #16121f;
+  /* RGB triplet of --brand-ink, kept in sync by hand -- lets every flat border/tint/text
+     overlay below (and across component stylesheets) key off `rgba(var(--brand-ink-rgb), N)`
+     instead of a literal color, so it flips automatically with the dark theme override
+     further down instead of staying a near-invisible near-black smudge on a dark surface. */
+  --brand-ink-rgb: 22, 18, 31;
   --brand-muted: #6c6680;
-  --brand-border: rgba(22, 18, 31, 0.08);
+  --brand-border: rgba(var(--brand-ink-rgb), 0.08);
+  --brand-border-soft: rgba(var(--brand-ink-rgb), 0.05);
+  --brand-header-bg: rgba(255, 255, 255, 0.78);
+  color-scheme: light;
 
   /* Brand */
   --brand-primary: #7c3aed;
@@ -22,8 +30,51 @@
   --brand-shadow-sm: 0 2px 10px rgba(76, 29, 149, 0.08);
   --brand-shadow-md: 0 16px 40px -16px rgba(88, 28, 135, 0.35);
 
+  /* Small-text status/quality/brand colors placed directly on a plain or lightly-tinted
+     surface (corrective-note chips, cross-brand match quality labels, WhatsApp/Telegram
+     share buttons) -- each already WCAG-AA-tuned against a *light* surface (see the
+     WhatsApp/Telegram darkening note in FormulaCalculator.css); parametrized so the dark
+     theme below can lighten them to keep clearing AA once the surface underneath flips. */
+  --status-warning-ink: #9a3412;
+  --quality-excellent-ink: #137a45;
+  --quality-good-ink: #2e6bab;
+  --quality-fair-ink: #8f6118;
+  --quality-poor-ink: #a53a3a;
+  --brand-whatsapp-ink: #188842;
+  --brand-telegram-ink: #1b7eae;
+
   --font-display: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
 
+}
+
+/* Applied to <html> by src/theme.ts (persisted in localStorage, defaulting to the OS
+   `prefers-color-scheme`). Only the neutrals actually read *as* page/card background or
+   foreground text change here -- brand accent colors (--brand-primary, the gradients,
+   the shadow tints) stay identical in both themes since they're each used as their own
+   fixed background (buttons, active nav tab, focus rings) rather than painted onto a
+   surface whose lightness just flipped. --brand-primary-ink is the one accent exception:
+   it's used as *foreground* text over the page/card background throughout (KPI figures,
+   status pills, palette-admin codes), so it needs a lighter tone here to keep clearing
+   WCAG AA against the now-dark surfaces underneath it. The status/quality/brand text
+   tokens just above get the same treatment for the same reason. */
+:root[data-theme="dark"] {
+  --brand-bg: #15121e;
+  --brand-bg-alt: #1a1729;
+  --brand-surface: #1f1b2e;
+  --brand-field: #282235;
+  --brand-ink: #f2eefb;
+  --brand-ink-rgb: 242, 238, 251;
+  --brand-muted: #a79fc4;
+  --brand-primary-ink: #c9b6ff;
+  --brand-header-bg: rgba(21, 18, 30, 0.78);
+  --status-warning-ink: #ffb37a;
+  --quality-excellent-ink: #4ade80;
+  --quality-good-ink: #7fb8f5;
+  --quality-fair-ink: #e0b055;
+  --quality-poor-ink: #f28b84;
+  --brand-whatsapp-ink: #52d17c;
+  --brand-telegram-ink: #6cbdec;
+  color-scheme: dark;
 }
 
 *,
@@ -191,7 +242,7 @@ input[type="checkbox"]:disabled {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--brand-header-bg);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid var(--brand-border);

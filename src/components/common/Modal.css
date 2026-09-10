@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(22, 18, 31, 0.45);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
   animation: modal-overlay-enter 0.15s ease both;
 }
@@ -21,8 +21,8 @@
   --gold-ink: var(--brand-primary-ink);
   --surface: var(--brand-surface);
   --field-bg: var(--brand-field);
-  --border-card: rgba(22, 18, 31, 0.05);
-  --border-field: rgba(22, 18, 31, 0.08);
+  --border-card: var(--brand-border-soft);
+  --border-field: var(--brand-border);
 
   width: 100%;
   max-width: 480px;

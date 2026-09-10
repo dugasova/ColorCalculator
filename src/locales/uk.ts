@@ -13,6 +13,10 @@ export const uk: typeof en = {
     en: "EN",
     uk: "УКР",
   },
+  theme: {
+    switchToDark: "Увімкнути темну тему",
+    switchToLight: "Увімкнути світлу тему",
+  },
   nav: {
     calculator: "Калькулятор",
     correction: "Корекція",
