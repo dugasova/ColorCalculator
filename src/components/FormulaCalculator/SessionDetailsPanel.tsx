@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProcessingTimer } from "./ProcessingTimer";
 import { Modal } from "../common/Modal";
@@ -59,6 +59,12 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   // (impure) system clock during render. A 48h-threshold check doesn't need finer
   // freshness than "when this form was opened".
   const [nowMs] = useState(() => Date.now());
+  // Both feedback timers below are plain setTimeout calls fired from event handlers, not
+  // tied to a render's dependencies the way an effect's own timer would be -- tracked in
+  // refs purely so the unmount cleanup effect just below can cancel a still-pending one,
+  // the same concern the photo-preview-URL cleanup handles for its own resource.
+  const copyFeedbackTimeoutRef = useRef<number | undefined>(undefined);
+  const saveFeedbackTimeoutRef = useRef<number | undefined>(undefined);
 
   // Release the blob: preview URLs when the component unmounts (per-selection swaps are
   // already revoked synchronously in the change handlers below).
@@ -69,6 +75,17 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     };
   }, [beforePhotoPreviewUrl, afterPhotoPreviewUrl]);
 
+  // Cancels a still-pending copy/save feedback timer on unmount -- e.g. the colorist
+  // switches away from this view (or the parent remounts the whole calculator) before the
+  // 1.5s window elapses. Without this, the timer still fires and calls setState (and, for
+  // the save timer, the caller's onSaved) against a component that's already gone.
+  useEffect(() => {
+    return () => {
+      clearTimeout(copyFeedbackTimeoutRef.current);
+      clearTimeout(saveFeedbackTimeoutRef.current);
+    };
+  }, []);
+
   const patchTestOk = patchTestOverride || (
     patchTestDate !== "" && nowMs - new Date(patchTestDate).getTime() >= PATCH_TEST_MIN_HOURS * 60 * 60 * 1000
   );
@@ -76,7 +93,8 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   const handleCopy = async () => {
     await navigator.clipboard.writeText(formulaText);
     setIsCopied(true);
-    setTimeout(() => setIsCopied(false), COPIED_FEEDBACK_MS);
+    clearTimeout(copyFeedbackTimeoutRef.current);
+    copyFeedbackTimeoutRef.current = setTimeout(() => setIsCopied(false), COPIED_FEEDBACK_MS);
   };
 
   const handleShareWhatsApp = () => {
@@ -116,7 +134,8 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         afterPhotoFile,
       });
       setSaveState("saved");
-      setTimeout(() => { setSaveState("idle"); setIsDetailsModalOpen(false); onSaved?.(); }, SAVED_FEEDBACK_MS);
+      clearTimeout(saveFeedbackTimeoutRef.current);
+      saveFeedbackTimeoutRef.current = setTimeout(() => { setSaveState("idle"); setIsDetailsModalOpen(false); onSaved?.(); }, SAVED_FEEDBACK_MS);
     } catch {
       setSaveState("error");
     }

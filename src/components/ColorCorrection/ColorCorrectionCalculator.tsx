@@ -1,15 +1,13 @@
 import { useState, type CSSProperties } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import type { Level } from "../../engine/levels";
+import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculateColorCorrection, calculateCorrectorGrams, type UnwantedTone } from "../../engine/correction";
 import { Select } from "../common/Select";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./ColorCorrectionCalculator.css";
 import { NeutralizationWheel } from "./NeutralizationWheel";
 import { TONES, TONE_COLORS } from "./toneColors";
-
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 function getTipKey(tone: UnwantedTone, technique: "deposit" | "lift-tone" | "multi-step"): string {
   if (technique === "multi-step") {
@@ -54,7 +52,7 @@ export function ColorCorrectionCalculator() {
             id="currentLevel"
             value={String(currentLevel)}
             onChange={value => setCurrentLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 
@@ -64,7 +62,7 @@ export function ColorCorrectionCalculator() {
             id="targetLevel"
             value={String(targetLevel)}
             onChange={value => setTargetLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 

@@ -21,8 +21,8 @@ export interface UseShadeFormulaStateOptions {
 // ColorStepCard (one color/tone step within a complex-coloring session). Each caller layers
 // its own extra state on top (FormulaCalculator: repeat-request replay, substitute-blend
 // mode, cross-brand match, markup/service price; ColorStepCard: a flat price-per-gram
-// field) -- see resetShadeDependentOverrides/resetShadePoolOverrides for how a caller with
-// its own overrides plugs into the same shade-changed/pool-changed reset points.
+// field) -- see resetShadePoolOverrides for the shade-pool-changed reset point a caller
+// with its own overrides plugs into.
 export function useShadeFormulaState({ brands, suppressAdditionalShade = false }: UseShadeFormulaStateOptions) {
   const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState();
   const [startLevel, setStartLevel] = useState<Level>(10);
@@ -142,7 +142,6 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
     effectiveResult,
     processingMinutes,
 
-    resetShadeDependentOverrides,
     resetShadePoolOverrides,
     handleBrandIdChange,
     handleLineChange,

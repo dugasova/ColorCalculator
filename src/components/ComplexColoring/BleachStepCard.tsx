@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Level } from "../../engine/levels";
+import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
 import { Select } from "../common/Select";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
@@ -8,7 +8,6 @@ import type { BleachHistoryStep } from "../../history";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export interface BleachStepCardProps {
   stepId: string;
@@ -64,7 +63,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
             id={`bleachCurrentLevel${idSuffix}`}
             value={String(startLevel)}
             onChange={value => setStartLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 
@@ -81,7 +80,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
             id={`bleachTargetLevel${idSuffix}`}
             value={String(targetLevel)}
             onChange={value => setTargetLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 

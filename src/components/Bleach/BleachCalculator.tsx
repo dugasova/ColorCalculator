@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Level } from "../../engine/levels";
+import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculateBleachFormula, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
 import { Select } from "../common/Select";
@@ -10,8 +10,6 @@ import "./BleachCalculator.css";
 // Rough per-gram cost of generic bleach powder; fully editable below, mirrors
 // FormulaCalculator's generic-brand default.
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
-
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export interface BleachResultsProps {
   result: BleachFormula;
@@ -142,7 +140,7 @@ export function BleachCalculator() {
             id="currentLevel"
             value={String(currentLevel)}
             onChange={value => setCurrentLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 
@@ -152,7 +150,7 @@ export function BleachCalculator() {
             id="targetLevel"
             value={String(targetLevel)}
             onChange={value => setTargetLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 

@@ -27,12 +27,21 @@ export interface ClientRevisitPlan {
   recommendedDate: Date;
 }
 
+// Client-identity normalization shared with analytics.ts (computeSalonAnalytics) -- two
+// entries count as "the same client" iff their names match after trimming and
+// lowercasing. Centralized so the two stay in lockstep; whitespace/casing is the only
+// normalization applied deliberately -- a stricter rule (e.g. accent-folding) risks
+// merging genuinely different clients who happen to share a base name.
+export function normalizeClientKey(clientName: string): string {
+  return clientName.trim().toLowerCase();
+}
+
 // Groups by normalized client name, skipping entries with no name (can't attribute) or no
 // `appliedAt` (still pending server timestamp / malformed).
 function groupByClient(entries: FormulaHistoryEntry[]): Map<string, FormulaHistoryEntry[]> {
   const groups = new Map<string, FormulaHistoryEntry[]>();
   for (const entry of entries) {
-    const key = entry.clientName.trim().toLowerCase();
+    const key = normalizeClientKey(entry.clientName);
     if (key === "" || entry.appliedAt === null) continue;
     const list = groups.get(key) ?? [];
     list.push(entry);
@@ -71,7 +80,7 @@ function planForClient(clientEntries: FormulaHistoryEntry[]): ClientRevisitPlan 
   intervalDays = Math.round(intervalDays);
 
   return {
-    clientKey: last.entry.clientName.trim().toLowerCase(),
+    clientKey: normalizeClientKey(last.entry.clientName),
     clientName: last.entry.clientName,
     lastVisitAt: last.date,
     intervalDays,

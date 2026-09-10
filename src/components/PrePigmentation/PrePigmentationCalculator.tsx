@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Level } from "../../engine/levels";
+import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculatePrePigmentation } from "../../engine/prePigmentation";
 import { Select } from "../common/Select";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./PrePigmentationCalculator.css";
-
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export function PrePigmentationCalculator() {
   const { t } = useTranslation();
@@ -31,7 +29,7 @@ export function PrePigmentationCalculator() {
             id="prepigmentStartLevel"
             value={String(startLevel)}
             onChange={value => setStartLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 
@@ -41,7 +39,7 @@ export function PrePigmentationCalculator() {
             id="prepigmentTargetLevel"
             value={String(targetLevel)}
             onChange={value => setTargetLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
 

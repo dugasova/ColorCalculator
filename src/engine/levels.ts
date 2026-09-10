@@ -1,5 +1,11 @@
 export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
+// Every valid depth level, ascending -- the level picker in every field/form that offers
+// a plain "choose a level 1-12" dropdown (StartLevelField, AddShadeForm, and each
+// standalone calculator's own level select) shares this instead of retyping the same
+// literal array.
+export const ALL_LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
 export type UnderlyingPigment = "red" |
   "red-orange" |
   "orange" |

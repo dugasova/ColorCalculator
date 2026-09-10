@@ -44,11 +44,11 @@ applyTheme(currentTheme);
 // this small with exactly one writer (setTheme).
 const listeners = new Set<() => void>();
 
-export function getTheme(): Theme {
+function getTheme(): Theme {
   return currentTheme;
 }
 
-export function setTheme(theme: Theme): void {
+function setTheme(theme: Theme): void {
   if (theme === currentTheme) return;
   currentTheme = theme;
   applyTheme(theme);

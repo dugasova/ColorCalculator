@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { addShadeToBrand } from "../../palette";
 import type { BrandId } from "../../engine/brands";
 import { shadeKey } from "../../engine/paletteOverrides";
-import type { Level } from "../../engine/levels";
+import { ALL_LEVELS, type Level } from "../../engine/levels";
 import type { Shade, ToneFamily } from "../../engine/shades";
 import { Select } from "../common/Select";
 
@@ -15,7 +15,6 @@ export interface AddShadeFormProps {
   existingShades: Shade[];
 }
 
-const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const TONE_FAMILIES: ToneFamily[] = ["natural", "ash", "cendré", "matt", "gold", "beige", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany"];
 
 type SubmitStatus = "idle" | "saving" | "saved" | "error";
@@ -84,7 +83,7 @@ export function AddShadeForm({ brandId, existingShades }: AddShadeFormProps) {
             id="paletteShadeLevel"
             value={String(shadeLevel)}
             onChange={value => setShadeLevel(Number(value) as Level)}
-            options={LEVELS.map(level => ({ value: String(level), label: String(level) }))}
+            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
         <div className="field">

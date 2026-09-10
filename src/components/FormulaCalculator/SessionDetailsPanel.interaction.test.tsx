@@ -47,4 +47,27 @@ describe("SessionDetailsPanel onSaved", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     }, { timeout: 2500 });
   });
+
+  it("cancels the pending \"Saved!\" feedback timer on unmount -- it must not fire onSaved or warn about updating state on a gone component", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const onSaved = vi.fn();
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { unmount } = render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} onSaved={onSaved} />
+    );
+
+    fillRequiredFieldsAndSave();
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+
+    // Unmount while the "Saved!" confirmation is still showing, well before its 1.5s
+    // feedback window would otherwise elapse.
+    unmount();
+
+    // Wait past that window: an uncancelled setTimeout would fire here.
+    await new Promise<void>(resolve => setTimeout(resolve, 1700));
+
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
 });
