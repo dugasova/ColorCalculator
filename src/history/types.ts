@@ -24,14 +24,14 @@ export interface ColorHistoryStep {
   additionalShadeGrams: number | null;
   additionalShade2?: Shade | null;
   additionalShade2Grams?: number | null;
-  // A substitute blend for a shade that's out of stock -- two real shades split the
+  // A substitute blend for a shade that's out of stock - two real shades split the
   // single calculated color total (see `splitShadeBlend` in engine/formula.ts) instead
   // of `targetShade` (which may not be a physical product to weigh) or growing the total
   // the way `additionalShade`/`applyAdditionalShade` does. Mutually exclusive with
   // `additionalShade` above.
   blend: ColorBlend | null;
   // The recommended (or colorist-opted-in) filler step's full computed result, snapshotted
-  // at save time -- see PrePigmentationField/PrePigmentationStep. Storing the computed
+  // at save time - see PrePigmentationField/PrePigmentationStep. Storing the computed
   // result rather than just an "enabled" flag keeps the saved record an immutable record
   // of what was actually recommended/applied, even if the engine's own pre-pigmentation
   // thresholds change in a later release. Null whenever the checkbox was off or the level
