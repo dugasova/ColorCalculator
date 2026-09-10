@@ -16,7 +16,7 @@ export interface AddShadeFormProps {
 }
 
 const LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-const TONE_FAMILIES: ToneFamily[] = ["natural", "ash", "cendré", "matt", "gold", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany"];
+const TONE_FAMILIES: ToneFamily[] = ["natural", "ash", "cendré", "matt", "gold", "beige", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany"];
 
 type SubmitStatus = "idle" | "saving" | "saved" | "error";
 

@@ -60,7 +60,7 @@ const developerVolumeSchema = z.union([
   z.literal(6), z.literal(10), z.literal(13), z.literal(20), z.literal(30), z.literal(40),
 ]) satisfies z.ZodType<DeveloperVolume>;
 const toneFamilySchema = z.enum([
-  "natural", "ash", "cendré", "matt", "gold", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany",
+  "natural", "ash", "cendré", "matt", "gold", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany", "beige",
 ]) satisfies z.ZodType<ToneFamily>;
 
 // Validates a Shade document read from Firestore (admin-added via PaletteAdminView -- see
@@ -98,6 +98,7 @@ export const toneId = (tone: ToneFamily): number => {
     case "slate-grey": return 9;
     case "mahogany": return 10;
     case "cendré": return 11;
+    case "beige": return 12;
   }
 };
 
