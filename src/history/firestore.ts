@@ -53,17 +53,26 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
 
   // Photos upload after the doc exists so they can live at a path keyed by its id;
   // attach the resulting URLs with a follow-up update rather than blocking doc creation
-  // on the (much slower) file upload.
-  const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
-    params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile) : Promise.resolve(null),
-    params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, "after", params.afterPhotoFile) : Promise.resolve(null),
-  ]);
-
-  if (beforePhotoUrl !== null || afterPhotoUrl !== null) {
-    await updateDoc(docRef, {
-      ...(beforePhotoUrl !== null ? { beforePhotoUrl } : {}),
-      ...(afterPhotoUrl !== null ? { afterPhotoUrl } : {}),
-    });
+  // on the (much slower) file upload. A failure here (flaky salon Wi-Fi on a large phone
+  // photo, a Storage hiccup) must not fail the whole save: the doc above -- client name,
+  // formula, pricing, patch-test info -- is already durably persisted. Letting this
+  // reject would surface as a generic save error to the stylist even though the entry
+  // was in fact saved, and a plausible retry would then create a second, duplicate
+  // history entry for the same visit. Logged rather than swallowed silently, so a
+  // missing photo is still traceable after the fact.
+  try {
+    const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
+      params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile) : Promise.resolve(null),
+      params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, "after", params.afterPhotoFile) : Promise.resolve(null),
+    ]);
+    if (beforePhotoUrl !== null || afterPhotoUrl !== null) {
+      await updateDoc(docRef, {
+        ...(beforePhotoUrl !== null ? { beforePhotoUrl } : {}),
+        ...(afterPhotoUrl !== null ? { afterPhotoUrl } : {}),
+      });
+    }
+  } catch (err) {
+    console.error(`Saved formula history entry "${docRef.id}", but attaching its photo(s) failed:`, err);
   }
 }
 

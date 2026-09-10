@@ -94,7 +94,29 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
     setAdditionalShadeGrams(0);
   };
 
-  const targetShade = lineShades.find(s => s.code === targetShadeCode) ?? lineShades[0];
+  // The live palette (usePalette(), fed by Firestore onSnapshot) can change out from
+  // under an in-progress selection: an admin can discontinue the currently selected
+  // shade -- or every shade in the currently selected line -- while a stylist has it
+  // open elsewhere in the salon (see PaletteAdmin's discontinue toggle). `lineShades[0]`
+  // alone isn't a safe fallback: once every shade in the current line is gone, it's
+  // `undefined`, which used to crash render outright (this app renders no error
+  // boundary) -- falls back through the brand's own first shade, then the universal
+  // Generic chart, neither of which a real catalog is ever emptied of. Reconciles
+  // targetShadeCode/line to match, right during render (same adjusting-state-on-a-
+  // changed-value pattern as the repeat-request replay in useFormulaCalculatorState.ts)
+  // -- otherwise the shade picker keeps showing the stale, no-longer-valid code
+  // (rendering blank, since it matches nothing in `lineShades`) while the formula/
+  // swatch/price silently keep recalculating for a shade the stylist never chose.
+  const targetShade = lineShades.find(s => s.code === targetShadeCode)
+    ?? lineShades[0]
+    ?? brands[brandId].shades[0]
+    ?? GENERIC_SHADE_CHART[0];
+  if (targetShade.code !== targetShadeCode) {
+    setTargetShadeCode(targetShade.code);
+  }
+  if ((targetShade.line ?? null) !== line) {
+    setLine(targetShade.line ?? null);
+  }
   const effectiveManualDeveloperVolume = targetShade.developerVolumeChoices
     ? (manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])
     : undefined;

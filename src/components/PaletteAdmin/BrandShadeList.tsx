@@ -25,12 +25,21 @@ export interface BrandShadeListProps {
 export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBrand, shades, disabledKeys }: BrandShadeListProps) {
   const { t } = useTranslation();
   const [pendingShadeKeys, setPendingShadeKeys] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const handleToggleDisabled = async (shade: Shade, disabled: boolean) => {
     const key = shadeKey(shade);
+    setError(null);
     setPendingShadeKeys(prev => new Set(prev).add(key));
     try {
       await setShadeDisabled(selectedBrandId, shade.line ?? null, shade.code, disabled);
+    } catch {
+      // The checkbox itself already reverts to its pre-toggle state on its own, since it's
+      // driven by the unchanged `disabledKeys` prop once this write fails -- but without
+      // this, an admin trying to urgently discontinue a recalled/out-of-stock shade would
+      // get no indication the write never went through and could walk away believing it
+      // succeeded.
+      setError(t("palette.saveError"));
     } finally {
       setPendingShadeKeys(prev => {
         const next = new Set(prev);
@@ -52,6 +61,7 @@ export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBran
           options={brandIds.map(id => ({ value: id, label: brands[id].name }))}
         />
       </div>
+      {error !== null && <p className="warning" role="alert">{error}</p>}
 
       {shades.length === 0 ? (
         <p className="history__status" aria-live="polite">{t("palette.noShades")}</p>
