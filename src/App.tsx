@@ -12,6 +12,9 @@ import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
 
 const LoginForm = lazy(() => import("./components/LoginForm/LoginForm"));
+const VerifyEmailScreen = lazy(() =>
+  import("./components/VerifyEmail/VerifyEmailScreen").then(m => ({ default: m.VerifyEmailScreen }))
+);
 const HistoryView = lazy(() =>
   import("./components/History/HistoryView").then(m => ({ default: m.HistoryView }))
 );
@@ -35,6 +38,11 @@ const PaletteAdminView = lazy(() =>
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Bumped after VerifyEmailScreen's `reload(user)` call resolves -- `reload` mutates
+  // the existing `User` object in place rather than replacing it, so re-setting `user`
+  // to the same reference wouldn't make React re-render; this forces a re-render that
+  // then reads the now-fresh `user.emailVerified` off that same mutated object.
+  const [, setRefreshTick] = useState(0);
 
   useEffect(() => {
     return onAuthStateChanged(auth, u => {
@@ -51,6 +59,18 @@ export default function App() {
     return (
       <Suspense fallback={null}>
         <LoginForm />
+      </Suspense>
+    );
+  }
+
+  // Firestore rules require a verified email for every salon-data read/write (see
+  // firestore.rules' `isSignedIn()`) -- this mirrors that same invariant client-side so
+  // an unverified account sees an explanatory screen instead of a wall of permission
+  // errors from every subscription AuthenticatedApp would otherwise open.
+  if (!user.emailVerified) {
+    return (
+      <Suspense fallback={null}>
+        <VerifyEmailScreen user={user} onRefreshed={() => setRefreshTick(t => t + 1)} />
       </Suspense>
     );
   }

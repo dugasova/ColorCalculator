@@ -6,8 +6,14 @@ rules_version = '2';
 // has to be enforced here, not just hidden behind client-side UI.
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Every read/write below requires not just a signed-in account but a verified
+    // email -- src/App.tsx gates the same way client-side (VerifyEmailScreen), but
+    // this is the real boundary: it's what actually stops an unverified account from
+    // reaching salon data by calling the Firestore SDK directly. `email_verified` comes
+    // straight off the Firebase ID token, set by Firebase Auth itself once the user
+    // clicks the link from `sendEmailVerification` -- never client-supplied.
     function isSignedIn() {
-      return request.auth != null;
+      return request.auth != null && request.auth.token.email_verified == true;
     }
 
     // Role assignment has no self-service UI on purpose — an admin (or the salon owner,

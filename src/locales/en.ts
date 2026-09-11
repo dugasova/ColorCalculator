@@ -147,6 +147,17 @@ export const en = {
     creatingAccount: "Creating account…",
     createAccount: "Create account",
   },
+  verifyEmail: {
+    title: "Verify your email",
+    body: "We sent a verification link to {{email}}. Click it, then come back here.",
+    iVerified: "I've verified — continue",
+    checking: "Checking…",
+    stillUnverified: "Still not verified — check your inbox (and spam folder) for the link.",
+    resend: "Resend verification email",
+    sending: "Sending…",
+    resent: "Verification email sent. Check your inbox.",
+    resendFailed: "Could not send the verification email. Try again in a moment.",
+  },
   history: {
     titlePrefix: "Client",
     titleAccent: "History",

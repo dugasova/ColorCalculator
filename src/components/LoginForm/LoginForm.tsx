@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "../../firebase";
 import { SALON_INVITE_CODE } from "../../inviteCode";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
@@ -33,7 +33,14 @@ export default function LoginForm() {
       if (mode === "sign-in") {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        try {
+          await sendEmailVerification(credential.user);
+        } catch (err) {
+          // Account creation itself already succeeded -- the caller lands on
+          // App.tsx's verify-email gate either way, where "resend" retries this.
+          console.error("Created account, but sending the verification email failed:", err);
+        }
       }
     } catch {
       setError(mode === "sign-in" ? t("login.invalidCredentials") : t("login.signUpFailed"));

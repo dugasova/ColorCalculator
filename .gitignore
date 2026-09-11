@@ -16,6 +16,9 @@ dev-dist
 # Environment variables (local Firebase config) — see .env.example
 .env
 
+# Firebase Admin SDK service account keys (see scripts/forceVerifyEmail.ts) — never commit
+secrets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

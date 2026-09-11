@@ -14,6 +14,7 @@
     "migrate:repair-igora": "tsx --env-file=.env scripts/repairIgoraPalette.ts",
     "migrate:repair-igora-highlifts": "tsx --env-file=.env scripts/repairIgoraHighlifts12Palette.ts",
     "migrate:repair-wella-special-blonde": "tsx --env-file=.env scripts/repairWellaSpecialBlondePalette.ts",
+    "verify-email:force": "tsx --env-file=.env scripts/forceVerifyEmail.ts",
     "pwa:icons": "tsx scripts/generatePwaIcons.ts"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
+    "firebase-admin": "^14.4.0",
     "globals": "^17.7.0",
     "jsdom": "^29.1.1",
     "sharp": "^0.35.4",
