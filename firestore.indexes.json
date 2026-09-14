@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "formulaHistory",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "appliedBy", "order": "ASCENDING" },
+        { "fieldPath": "appliedAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
