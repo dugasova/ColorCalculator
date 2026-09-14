@@ -8,18 +8,23 @@ import "./AnalyticsView.css";
 
 const TOP_SHADES_LIMIT = 8;
 
-export function AnalyticsView() {
+export interface AnalyticsViewProps {
+  isAdmin: boolean;
+  currentUserEmail: string;
+}
+
+export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps) {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<FormulaHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFormulaHistory()
+    fetchFormulaHistory({ isAdmin, currentUserEmail })
       .then(setEntries)
       .catch(() => setError(t("analytics.loadError")))
       .finally(() => setIsLoading(false));
-  }, [t]);
+  }, [t, isAdmin, currentUserEmail]);
 
   const stats = computeSalonAnalytics(entries);
   const topShades = stats.popularShades.slice(0, TOP_SHADES_LIMIT);

@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
@@ -76,8 +76,22 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
   }
 }
 
-export async function fetchFormulaHistory(): Promise<FormulaHistoryEntry[]> {
-  const q = query(collection(db, HISTORY_COLLECTION), orderBy("appliedAt", "desc"));
+// Every stylist may only see the clients they personally entered (identified by the
+// `appliedBy` email captured at save time -- see App.tsx, which always passes the
+// signed-in `user.email`, never a free-typed name); an admin sees the whole salon's
+// history. `isAdmin`/`currentUserEmail` come from the caller (HistoryView/AnalyticsView),
+// which already reads them off the authenticated session (useIsAdmin/user.email).
+//
+// The `where("appliedBy", "==", currentUserEmail)` filter isn't just a client-side
+// convenience: firestore.rules denies a non-admin's read of any document whose
+// `appliedBy` doesn't match their own token email, and Firestore rejects a `list` query
+// outright unless the query itself is constrained to a result set the rule can prove
+// satisfies that condition -- so admin and non-admin genuinely need different queries,
+// not just different client-side filtering of the same fetch.
+export async function fetchFormulaHistory(scope: { isAdmin: boolean; currentUserEmail: string }): Promise<FormulaHistoryEntry[]> {
+  const q = scope.isAdmin
+    ? query(collection(db, HISTORY_COLLECTION), orderBy("appliedAt", "desc"))
+    : query(collection(db, HISTORY_COLLECTION), where("appliedBy", "==", scope.currentUserEmail), orderBy("appliedAt", "desc"));
   const snapshot = await getDocs(q);
   const entries: FormulaHistoryEntry[] = [];
   for (const doc of snapshot.docs) {

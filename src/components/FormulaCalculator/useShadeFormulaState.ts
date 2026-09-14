@@ -5,7 +5,45 @@ import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
 import type { Brand, BrandId } from "../../engine/brands";
+import type { MixingRatio, Shade } from "../../engine/shades";
 import { useHairCanvasState } from "./useHairCanvasState";
+
+// Split out of useShadeFormulaState below (not just inlined there) so this memoization
+// lives in a function body with no render-time `setState` calls of its own.
+// calculateFullFormula/applyAdditionalShade are pure functions that build a fresh object
+// literal on every call, so without memoization `result`/`grams`/`effectiveResult` would
+// get a brand-new identity on every render even when nothing actually changed.
+// ColorStepCard's "report the computed step up" effect (see ColorStepCard.tsx) depends
+// on `effectiveResult`'s identity -- an unmemoized new object every render fires that
+// effect every render, which calls the parent's setState, which re-renders this hook,
+// which produces yet another new object: an infinite "Maximum update depth exceeded"
+// loop the moment a ColorStepCard mounts.
+function useComputedFullFormula(
+  startLevel: Level,
+  targetShade: Shade,
+  grayPercent: number,
+  totalGrams: number,
+  mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio,
+  manualDeveloperVolume: DeveloperVolume | undefined,
+  suppressAdditionalShade: boolean,
+  totalExtra: number,
+) {
+  const result = useMemo(
+    () => calculateFullFormula(startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume),
+    [startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume]
+  );
+  const grams = useMemo(
+    () => (!suppressAdditionalShade && result.grams !== null && totalExtra > 0
+      ? applyAdditionalShade(result.grams, result.mixingRatio, totalExtra)
+      : result.grams),
+    [suppressAdditionalShade, result, totalExtra]
+  );
+  const effectiveResult = useMemo(
+    () => (grams !== result.grams ? { ...result, grams } : result),
+    [grams, result]
+  );
+  return { result, grams, effectiveResult };
+}
 
 export interface UseShadeFormulaStateOptions {
   brands: Record<BrandId, Brand>;
@@ -120,32 +158,14 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
   const effectiveManualDeveloperVolume = targetShade.developerVolumeChoices
     ? (manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])
     : undefined;
-  // Memoized: calculateFullFormula/applyAdditionalShade are pure functions that build a
-  // fresh object literal on every call, so without memoization `result`/`grams`/
-  // `effectiveResult` would get a brand-new identity on every render even when nothing
-  // actually changed. ColorStepCard's "report the computed step up" effect (see
-  // ColorStepCard.tsx) depends on `effectiveResult`'s identity -- an unmemoized new
-  // object every render fires that effect every render, which calls the parent's
-  // setState, which re-renders this hook, which produces yet another new object: an
-  // infinite "Maximum update depth exceeded" loop the moment a ColorStepCard mounts.
-  const result = useMemo(
-    () => calculateFullFormula(startLevel, targetShade, grayPercent, totalGrams, brands[brandId].mixingRatio, effectiveManualDeveloperVolume),
-    [startLevel, targetShade, grayPercent, totalGrams, brands, brandId, effectiveManualDeveloperVolume]
-  );
   const additionalShade = additionalShadeCode !== null ? lineShades.find(s => s.code === additionalShadeCode) ?? null : null;
   const additionalShade2 = additionalShade2Code !== null ? lineShades.find(s => s.code === additionalShade2Code) ?? null : null;
   const hasShade1 = additionalShade !== null && additionalShadeGrams > 0;
   const hasShade2 = additionalShade2 !== null && additionalShade2Grams > 0;
   const totalExtra = (hasShade1 ? additionalShadeGrams : 0) + (hasShade2 ? additionalShade2Grams : 0);
-  const grams = useMemo(
-    () => (!suppressAdditionalShade && result.grams !== null && totalExtra > 0
-      ? applyAdditionalShade(result.grams, result.mixingRatio, totalExtra)
-      : result.grams),
-    [suppressAdditionalShade, result, totalExtra]
-  );
-  const effectiveResult = useMemo(
-    () => (grams !== result.grams ? { ...result, grams } : result),
-    [grams, result]
+  const { result, grams, effectiveResult } = useComputedFullFormula(
+    startLevel, targetShade, grayPercent, totalGrams, brands[brandId].mixingRatio, effectiveManualDeveloperVolume,
+    suppressAdditionalShade, totalExtra
   );
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 

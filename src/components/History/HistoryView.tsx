@@ -9,9 +9,11 @@ import "./HistoryView.css";
 
 export interface HistoryViewProps {
   onRepeat: (entry: FormulaHistoryEntry) => void;
+  isAdmin: boolean;
+  currentUserEmail: string;
 }
 
-export function HistoryView({ onRepeat }: HistoryViewProps) {
+export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryViewProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const [entries, setEntries] = useState<FormulaHistoryEntry[]>([]);
@@ -22,11 +24,11 @@ export function HistoryView({ onRepeat }: HistoryViewProps) {
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
 
   useEffect(() => {
-    fetchFormulaHistory()
+    fetchFormulaHistory({ isAdmin, currentUserEmail })
       .then(setEntries)
       .catch(() => setError(t("history.loadError")))
       .finally(() => setIsLoading(false));
-  }, [t]);
+  }, [t, isAdmin, currentUserEmail]);
 
   const filtered = entries.filter(entry =>
     entry.clientName.toLowerCase().includes(search.trim().toLowerCase())

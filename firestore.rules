@@ -33,8 +33,19 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // A stylist may only read/write the client history entries they personally
+    // created (identified by `appliedBy`, always the signed-in user's own email --
+    // see src/App.tsx); an admin sees and manages the whole salon's history. `create`
+    // pins `appliedBy` to the caller's own token email so a client can't spoof another
+    // stylist's ownership and later have that entry excluded from their own filtered
+    // list (or, worse, injected into it). This is the real boundary: src/history/
+    // firestore.ts's `fetchFormulaHistory` scope param is the client-side UX to match,
+    // not the enforcement -- Firestore rejects an unscoped `list` query outright for a
+    // non-admin once this condition depends on `resource.data`.
     match /formulaHistory/{entryId} {
-      allow read, create, update: if isSignedIn();
+      allow read: if isAdmin() || (isSignedIn() && resource.data.appliedBy == request.auth.token.email);
+      allow create: if isAdmin() || (isSignedIn() && request.resource.data.appliedBy == request.auth.token.email);
+      allow update: if isAdmin() || (isSignedIn() && resource.data.appliedBy == request.auth.token.email);
     }
 
     // Palette management (src/palette.ts, src/components/PaletteAdmin): every stylist

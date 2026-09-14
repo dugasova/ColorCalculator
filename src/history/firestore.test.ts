@@ -1,17 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { saveFormulaToHistory } from "./firestore";
+import { fetchFormulaHistory, saveFormulaToHistory } from "./firestore";
 
 const addDocMock = vi.fn();
 const updateDocMock = vi.fn();
 const uploadBytesMock = vi.fn();
 const getDownloadURLMock = vi.fn();
 
+const getDocsMock = vi.fn();
+const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
+const whereMock = vi.fn((...args: unknown[]) => ({ kind: "where", field: args[0], op: args[1], value: args[2] }));
+const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
+
 vi.mock("firebase/firestore", () => ({
   addDoc: (...args: unknown[]) => addDocMock(...args),
   collection: vi.fn(() => "collection-ref"),
-  getDocs: vi.fn(),
-  orderBy: vi.fn(),
-  query: vi.fn(),
+  getDocs: (...args: unknown[]) => getDocsMock(...args),
+  orderBy: (...args: unknown[]) => orderByMock(...args),
+  query: (...args: unknown[]) => queryMock(...args),
+  where: (...args: unknown[]) => whereMock(...args),
   serverTimestamp: vi.fn(() => "server-timestamp"),
   updateDoc: (...args: unknown[]) => updateDocMock(...args),
   // schema.ts (imported transitively via firestore.ts) uses `Timestamp` as a
@@ -48,6 +54,7 @@ beforeEach(() => {
   updateDocMock.mockResolvedValue(undefined);
   uploadBytesMock.mockResolvedValue(undefined);
   getDownloadURLMock.mockResolvedValue("https://example.test/photo.jpg");
+  getDocsMock.mockResolvedValue({ docs: [] });
 });
 
 describe("saveFormulaToHistory", () => {
@@ -83,6 +90,27 @@ describe("saveFormulaToHistory", () => {
     expect(updateDocMock).toHaveBeenCalledWith(
       { id: "doc-1" },
       { beforePhotoUrl: "https://example.test/photo.jpg" }
+    );
+  });
+});
+
+describe("fetchFormulaHistory", () => {
+  it("queries every entry, unfiltered by owner, for an admin", async () => {
+    await fetchFormulaHistory({ isAdmin: true, currentUserEmail: "admin@salon.test" });
+
+    expect(whereMock).not.toHaveBeenCalled();
+    expect(orderByMock).toHaveBeenCalledWith("appliedAt", "desc");
+    expect(queryMock).toHaveBeenCalledWith("collection-ref", { kind: "orderBy", field: "appliedAt" });
+  });
+
+  it("scopes the query to the signed-in stylist's own entries for a non-admin (Firestore rules reject an unscoped list request for them)", async () => {
+    await fetchFormulaHistory({ isAdmin: false, currentUserEmail: "stylist@salon.test" });
+
+    expect(whereMock).toHaveBeenCalledWith("appliedBy", "==", "stylist@salon.test");
+    expect(queryMock).toHaveBeenCalledWith(
+      "collection-ref",
+      { kind: "where", field: "appliedBy", op: "==", value: "stylist@salon.test" },
+      { kind: "orderBy", field: "appliedAt" }
     );
   });
 });

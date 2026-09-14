@@ -140,8 +140,8 @@ function AuthenticatedApp({ user }: { user: User }) {
           {view === "bleach" && <BleachCalculator />}
           {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} onSaved={handleFormulaSaved} />}
           {view === "prepigment" && <PrePigmentationCalculator />}
-          {view === "history" && <HistoryView onRepeat={handleRepeat} />}
-          {view === "analytics" && <AnalyticsView />}
+          {view === "history" && <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
+          {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
           {view === "palette" && isAdmin && <PaletteAdminView />}
         </Suspense>
       </main>
