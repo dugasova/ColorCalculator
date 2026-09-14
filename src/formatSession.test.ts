@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import "../src/i18n";
+import i18n from "../src/i18n";
 import { formatSessionText, formatSessionSummary } from "./formatSession";
 import type { ColorHistoryStep, BleachHistoryStep } from "./history";
 
@@ -114,6 +114,25 @@ describe("formatSessionText", () => {
 
     expect(() => formatSessionText([legacyStep])).not.toThrow();
     expect(formatSessionText([legacyStep])).not.toContain("Step 1 — Filler");
+  });
+
+  it("renders the gray-coverage note in the current UI language, ignoring whatever language was baked into the stored note when the entry was saved (regression: a Firestore-loaded step's note is a plain string frozen at save time, not a live i18n getter)", () => {
+    const staleEnglishNoteStep: ColorHistoryStep = {
+      ...colorStep,
+      result: {
+        ...colorStep.result,
+        grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+      },
+    };
+    const originalLanguage = i18n.language;
+    try {
+      i18n.changeLanguage("uk");
+      const text = formatSessionText([staleEnglishNoteStep]);
+      expect(text).toContain("Покриття сивини: нанести модний тон без змішування (0% база / 100% тон)");
+      expect(text).not.toContain("apply the fashion tone as-is");
+    } finally {
+      i18n.changeLanguage(originalLanguage);
+    }
   });
 });
 

@@ -2,6 +2,7 @@ import i18n from "../i18n";
 import type { Level } from "./levels";
 import type { Shade } from "./shades";
 import type { FullFormula, FormulaGrams } from "./formula";
+import { getGrayCoverageNote } from "./formula";
 import type { ApplicationZone } from "./applicationZone";
 import { formatLineLabel } from "./formatLineLabel";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
@@ -111,7 +112,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
       : i18n.t("format.mixFallback", { message: result.liftUnsupportedWarning ?? i18n.t("results.notAchievable") }),
     i18n.t("format.processingTime", { value: processingMinutes }),
     i18n.t("format.grayCoverage", {
-      note: result.grayCoverage.note,
+      note: getGrayCoverageNote(result.grayCoverage),
       natural: Math.round(result.grayCoverage.naturalRatio * 100),
       fashion: Math.round(result.grayCoverage.fashionRatio * 100),
     }),

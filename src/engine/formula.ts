@@ -61,6 +61,22 @@ const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fash
 const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, get note() { return i18n.t("engine.grayCoverage.oneThirdNatural"); } });
 const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5, get note() { return i18n.t("engine.grayCoverage.halfNatural"); } });
 
+// Re-derives the display note from the strategy's (language-independent) ratios rather
+// than trusting `strategy.note` directly. `note` is a getter that resolves via i18n.t at
+// property-access time, which is exactly right for a freshly computed, in-memory
+// strategy -- but a saved history entry has already had that getter resolved to a plain
+// string by sanitizeForFirestore's JSON round-trip (see history/firestore.ts), frozen in
+// whatever language was active at save time. Reading `strategy.note` straight out of a
+// loaded history document would then silently show stale-language text even when the
+// rest of the UI has since switched locale. naturalRatio/fashionRatio are plain numbers,
+// unaffected by that round-trip, so re-deriving the note from them here keeps both the
+// live calculator and History always rendering the note in the current UI language.
+export function getGrayCoverageNote(strategy: Pick<GrayCoverageStrategy, "naturalRatio">): string {
+  if (strategy.naturalRatio === 0) return i18n.t("engine.grayCoverage.fashionOnly");
+  if (strategy.naturalRatio < 0.5) return i18n.t("engine.grayCoverage.oneThirdNatural");
+  return i18n.t("engine.grayCoverage.halfNatural");
+}
+
 export function getGrayCoverageStrategy(grayPercent: number): GrayCoverageStrategy {
   if (grayPercent < GRAY_LIGHT_THRESHOLD) {
     return FASHION_ONLY;

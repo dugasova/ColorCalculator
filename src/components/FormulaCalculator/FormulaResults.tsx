@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { FullFormula } from "../../engine/formula";
+import { getGrayCoverageNote } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
@@ -175,7 +176,7 @@ export function FormulaResults({
       <div className="results__row">
         <span className="results__row-label">{t("results.grayCoverage")}</span>
         <span>{t("results.grayCoverageValue", {
-          note: result.grayCoverage.note,
+          note: getGrayCoverageNote(result.grayCoverage),
           natural: Math.round(result.grayCoverage.naturalRatio * 100),
           fashion: Math.round(result.grayCoverage.fashionRatio * 100),
         })}</span>
