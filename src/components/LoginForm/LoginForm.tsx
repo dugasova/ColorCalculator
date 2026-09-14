@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase";
 import { SALON_INVITE_CODE } from "../../inviteCode";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
+import { PasswordInput } from "../common/PasswordInput";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./LoginForm.css";
 
@@ -18,6 +19,7 @@ export default function LoginForm() {
   const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resetStatus, setResetStatus] = useState<"idle" | "sending" | "sent" | "error" | "missing-email">("idle");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -49,9 +51,24 @@ export default function LoginForm() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (email.trim() === "") {
+      setResetStatus("missing-email");
+      return;
+    }
+    setResetStatus("sending");
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setResetStatus("sent");
+    } catch {
+      setResetStatus("error");
+    }
+  };
+
   const switchMode = (newMode: Mode) => {
     setMode(newMode);
     setError(null);
+    setResetStatus("idle");
   };
 
   return (
@@ -92,16 +109,25 @@ export default function LoginForm() {
         </div>
         <div className="field">
           <label htmlFor="password">{t("login.password")}</label>
-          <input
-            type="password"
+          <PasswordInput
             id="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
+            onChange={setPassword}
             autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
             minLength={mode === "sign-up" ? 6 : undefined}
+            required
           />
         </div>
+        {mode === "sign-in" && (
+          <div className="forgot-row">
+            <button type="button" className="link-button" onClick={handleForgotPassword} disabled={resetStatus === "sending"}>
+              {resetStatus === "sending" ? t("login.forgotPasswordSending") : t("login.forgotPassword")}
+            </button>
+            {resetStatus === "sent" && <p className="notice" role="status">{t("login.forgotPasswordSent")}</p>}
+            {resetStatus === "error" && <p className="warning" role="alert">{t("login.forgotPasswordError")}</p>}
+            {resetStatus === "missing-email" && <p className="warning" role="alert">{t("login.forgotPasswordMissingEmail")}</p>}
+          </div>
+        )}
         {mode === "sign-up" && (
           <div className="field">
             <label htmlFor="inviteCode">{t("login.inviteCode")}</label>

@@ -431,6 +431,36 @@
   text-decoration: underline;
 }
 
+/* Reusable plain-link button -- same treatment as `.processing-time-hint button`
+   above, pulled out as a class so LoginForm's "Forgot password?" and
+   ChangePasswordModal's "Forgot your current password?" (both import this file for
+   `.field`/`.button`/`.warning`/`.notice`) can share it instead of each declaring
+   their own copy. */
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold-ink);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.forgot-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: -4px;
+}
+
 .processing-timer {
   display: flex;
   flex-direction: column;
