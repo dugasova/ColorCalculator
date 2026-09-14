@@ -21,6 +21,11 @@ running on shared Firebase infrastructure, not a multi-tenant SaaS.
 - **Client history** — save applied formulas per client (formula, pricing, patch-test
   record, before/after photos), searchable, with a "repeat formula" shortcut that
   reconstructs the calculator state from a past visit.
+- **Saved client profiles** — a stylist's own client book: phone, persistent allergy
+  notes, and the hair canvas (porosity/thickness/chemical history) recorded on the last
+  visit. Typing a known name in the client-details step autofills the notes/phone (never
+  overwriting anything already typed that visit) and shows the last visit's hair profile
+  as a reference. Private per stylist, same ownership boundary as their client history.
 - **Revisit reminders** — recommends the next visit date per client based on their
   gray-coverage tier and actual visit history.
 - **Salon analytics** — visit counts, client retention, popular shades, average dye
@@ -49,6 +54,8 @@ src/
                     ComplexColoring, ColorCorrection, History, Analytics, PaletteAdmin,
                     Nav, LoginForm, LanguageSwitcher).
   history.ts        Firestore-backed client history (CRUD + legacy-shape migration).
+  clients.ts        Firestore-backed per-stylist client profiles (contacts, persistent
+                     allergy notes, last known hair canvas) used to autofill SessionDetailsPanel.
   palette.ts        Firestore-backed palette data (custom brands, shade overrides) +
                     the React context/hooks that expose the live, merged catalog.
   roles.ts          Admin-role lookup (`users/{uid}.role` in Firestore).
@@ -95,12 +102,13 @@ shared salon data; it's a light deterrent, not real security. Real access contro
 in `firestore.rules` (Firestore documents) and `storage.rules` (before/after formula
 photos).
 
-Deploy the security rules (required — both Firestore and Storage deny everything by
-default until rules are published):
+Deploy the security rules and composite indexes (required — Firestore/Storage deny
+everything by default until rules are published, and the client-history and saved-client
+queries need their composite indexes to exist before they'll run):
 
 ```bash
 npx firebase-tools login
-npx firebase-tools deploy --only firestore:rules,storage
+npx firebase-tools deploy --only firestore:rules,firestore:indexes,storage
 ```
 
 Run it locally:

@@ -48,6 +48,17 @@ service cloud.firestore {
       allow update: if isAdmin() || (isSignedIn() && resource.data.appliedBy == request.auth.token.email);
     }
 
+    // A stylist's saved client profiles (contacts, persistent allergy notes, last known
+    // hair canvas -- src/clients.ts) are private to them, same `appliedBy`-style
+    // ownership boundary as formulaHistory above; an admin sees and manages every
+    // profile. `create`/`update` pin `ownedBy` to the caller's own token email for the
+    // same spoofing reason formulaHistory pins `appliedBy`.
+    match /clients/{clientId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.ownedBy == request.auth.token.email);
+      allow create: if isAdmin() || (isSignedIn() && request.resource.data.ownedBy == request.auth.token.email);
+      allow update: if isAdmin() || (isSignedIn() && resource.data.ownedBy == request.auth.token.email);
+    }
+
     // Palette management (src/palette.ts, src/components/PaletteAdmin): every stylist
     // reads the live catalog, but only an admin may add a dye line, add a shade, or mark
     // one discontinued.

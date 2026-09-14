@@ -64,6 +64,7 @@
 }
 
 .results__client-name,
+.results__client-phone,
 .results__note,
 .results__patch-test,
 .results__allergy-notes,
@@ -631,6 +632,15 @@
 
 .results__client-name {
   margin-top: 0;
+}
+
+.results__last-visit {
+  font-size: 0.85rem;
+  white-space: pre-line;
+}
+
+.results__client-phone {
+  margin-top: 20px;
 }
 
 .results__actions {

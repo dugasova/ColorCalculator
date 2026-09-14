@@ -275,6 +275,8 @@ export function FormulaResults({
         processingMinutes={processingMinutes}
         onSave={handleSave}
         onSaved={onSaved}
+        appliedBy={appliedBy}
+        canvas={{ porosity, thickness, chemicalHistory }}
       />
     </div>
   );

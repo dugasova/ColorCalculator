@@ -4,6 +4,15 @@ import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/re
 import "../../i18n";
 import { SessionDetailsPanel } from "./SessionDetailsPanel";
 
+// Keeps this a pure component-interaction test: no real Firestore/network reachable from
+// jsdom, and no bearing on what's under test here (the save/onSaved timing below).
+vi.mock("../../clients", () => ({
+  fetchClients: vi.fn().mockResolvedValue([]),
+  upsertClient: vi.fn().mockResolvedValue(undefined),
+}));
+
+const APPLIED_BY = "stylist@salon.test";
+
 // See ColorStepCard.interaction.test.tsx for why this project needs an explicit
 // afterEach(cleanup): it doesn't set vitest's `test.globals: true`.
 afterEach(cleanup);
@@ -20,7 +29,13 @@ describe("SessionDetailsPanel onSaved", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const onSaved = vi.fn();
     render(
-      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} onSaved={onSaved} />
+      <SessionDetailsPanel
+        formulaText="Test formula"
+        processingMinutes={30}
+        onSave={onSave}
+        onSaved={onSaved}
+        appliedBy={APPLIED_BY}
+      />
     );
 
     fillRequiredFieldsAndSave();
@@ -35,7 +50,7 @@ describe("SessionDetailsPanel onSaved", () => {
 
   it("never throws when onSaved is omitted -- ColorStepCard has no reason to reset a step this way", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} />);
+    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
 
     fillRequiredFieldsAndSave();
 
@@ -53,7 +68,13 @@ describe("SessionDetailsPanel onSaved", () => {
     const onSaved = vi.fn();
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     const { unmount } = render(
-      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} onSaved={onSaved} />
+      <SessionDetailsPanel
+        formulaText="Test formula"
+        processingMinutes={30}
+        onSave={onSave}
+        onSaved={onSaved}
+        appliedBy={APPLIED_BY}
+      />
     );
 
     fillRequiredFieldsAndSave();

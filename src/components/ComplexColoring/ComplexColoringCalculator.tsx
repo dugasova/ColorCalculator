@@ -79,6 +79,10 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
     : null;
   const servicePrice = manualServicePrice ?? recommendedServicePrice;
   const formulaText = orderedSteps.length > 0 ? formatSessionText(orderedSteps) : "";
+  // Every step describes the same client's hair, so any one step's recorded canvas
+  // (porosity/thickness/chemical history) represents the whole session -- picks the
+  // first one that has it set, same as formatSessionText's per-step canvas is optional.
+  const sessionCanvas = orderedSteps.find(step => step.canvas !== undefined)?.canvas;
 
   const handleSave = async (details: SessionDetails) => {
     await saveFormulaToHistory({
@@ -191,6 +195,8 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
             processingMinutes={totalProcessingMinutes}
             onSave={handleSave}
             onSaved={onSaved}
+            appliedBy={appliedBy}
+            canvas={sessionCanvas}
           />
         </div>
       )}

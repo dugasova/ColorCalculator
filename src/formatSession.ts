@@ -5,7 +5,7 @@ import { formatFillerStepText } from "./engine/formatPrePigmentation";
 import { formatLineLabel } from "./engine/formatLineLabel";
 import type { ColorHistoryStep, HistoryStep } from "./history";
 
-function formatCanvasText(canvas: HistoryStep["canvas"]): string {
+export function formatCanvasText(canvas: HistoryStep["canvas"] | null): string {
   if (!canvas) return "";
   const porosityText = i18n.t(`canvas.porosity.${canvas.porosity}`);
   const thicknessText = i18n.t(`canvas.thickness.${canvas.thickness}`);
