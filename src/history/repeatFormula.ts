@@ -26,7 +26,7 @@ export interface RepeatFormulaRequest {
   pricePerGram: number;
   markupMultiplier: number;
   servicePrice: number | undefined;
-  // Only the boolean choice, not the snapshotted PrePigmentationResult itself -- Repeat
+  // Only the boolean choice, not the snapshotted PrePigmentationResult itself - Repeat
   // recomputes it live from the restored startLevel/targetShadeCode/totalGrams above
   // (see useFormulaCalculatorState), the same way every other field here is a raw input
   // rather than a frozen calculation.
@@ -56,7 +56,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   // the total on top of the primary mix (see `applyAdditionalShade`), so its grams are
   // subtracted back out here first, and re-applied on top from restored state on repeat.
   // The two are mutually exclusive (see ColorHistoryStep), so only one branch applies.
-  // `undefined` (not `null`) from Firestore -- normalize so the `!== null` checks below
+  // `undefined` (not `null`) from Firestore - normalize so the `!== null` checks below
   // don't take the "blend present" branch and crash dereferencing an undefined blend.
   const blend = step.blend ?? null;
   const additionalShadeGrams = step.additionalShadeGrams ?? 0;
@@ -91,7 +91,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     blendShadeBCode: blend?.shadeB.code ?? null,
     blendPrimaryPercent,
     // Old docs saved before this field existed lack the `prePigmentation` key entirely,
-    // reading back as `undefined` (not `null`) -- treat that the same as `null` (off).
+    // reading back as `undefined` (not `null`) - treat that the same as `null` (off).
     prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
     processingMinutes: step.processingMinutes,
     applicationZone: step.applicationZone ?? "full-head",

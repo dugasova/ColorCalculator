@@ -21,10 +21,10 @@ vi.mock("firebase/firestore", () => ({
   serverTimestamp: vi.fn(() => "server-timestamp"),
   updateDoc: (...args: unknown[]) => updateDocMock(...args),
   // schema.ts (imported transitively via firestore.ts) uses `Timestamp` as a
-  // `z.instanceof` check -- any distinct class works here since these tests never
+  // `z.instanceof` check - any distinct class works here since these tests never
   // construct one. Declared inside the factory since `vi.mock` factories are hoisted
   // above top-level module code.
-  Timestamp: class MockTimestamp {},
+  Timestamp: class MockTimestamp { },
 }));
 vi.mock("firebase/storage", () => ({
   getDownloadURL: (...args: unknown[]) => getDownloadURLMock(...args),
@@ -60,7 +60,7 @@ beforeEach(() => {
 describe("saveFormulaToHistory", () => {
   it("resolves even when the photo upload fails, instead of surfacing a false error that would prompt a duplicate-creating retry", async () => {
     uploadBytesMock.mockRejectedValue(new Error("network drop"));
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => { });
 
     await expect(saveFormulaToHistory({
       ...baseParams(),
@@ -69,7 +69,7 @@ describe("saveFormulaToHistory", () => {
     })).resolves.toBeUndefined();
 
     // The history entry itself (client, formula, pricing, patch-test info) was already
-    // durably saved via addDoc before the photo upload ran -- exactly once, no retry loop.
+    // durably saved via addDoc before the photo upload ran - exactly once, no retry loop.
     expect(addDocMock).toHaveBeenCalledTimes(1);
     // The failed attach is still traceable, just not fatal to the overall save.
     expect(consoleError).toHaveBeenCalledTimes(1);

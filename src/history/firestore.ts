@@ -54,8 +54,8 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
   // Photos upload after the doc exists so they can live at a path keyed by its id;
   // attach the resulting URLs with a follow-up update rather than blocking doc creation
   // on the (much slower) file upload. A failure here (flaky salon Wi-Fi on a large phone
-  // photo, a Storage hiccup) must not fail the whole save: the doc above -- client name,
-  // formula, pricing, patch-test info -- is already durably persisted. Letting this
+  // photo, a Storage hiccup) must not fail the whole save: the doc above - client name,
+  // formula, pricing, patch-test info - is already durably persisted. Letting this
   // reject would surface as a generic save error to the stylist even though the entry
   // was in fact saved, and a plausible retry would then create a second, duplicate
   // history entry for the same visit. Logged rather than swallowed silently, so a
@@ -77,7 +77,7 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
 }
 
 // Every stylist may only see the clients they personally entered (identified by the
-// `appliedBy` email captured at save time -- see App.tsx, which always passes the
+// `appliedBy` email captured at save time - see App.tsx, which always passes the
 // signed-in `user.email`, never a free-typed name); an admin sees the whole salon's
 // history. `isAdmin`/`currentUserEmail` come from the caller (HistoryView/AnalyticsView),
 // which already reads them off the authenticated session (useIsAdmin/user.email).
@@ -86,7 +86,7 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
 // convenience: firestore.rules denies a non-admin's read of any document whose
 // `appliedBy` doesn't match their own token email, and Firestore rejects a `list` query
 // outright unless the query itself is constrained to a result set the rule can prove
-// satisfies that condition -- so admin and non-admin genuinely need different queries,
+// satisfies that condition - so admin and non-admin genuinely need different queries,
 // not just different client-side filtering of the same fetch.
 export async function fetchFormulaHistory(scope: { isAdmin: boolean; currentUserEmail: string }): Promise<FormulaHistoryEntry[]> {
   const q = scope.isAdmin
@@ -102,7 +102,7 @@ export async function fetchFormulaHistory(scope: { isAdmin: boolean; currentUser
     }
     // See historyEntryShapeSchema's comment above for why this is shallow (result.data's
     // nested fields are validated as "some object", not deep-checked against FullFormula/
-    // BleachFormula) -- the cast trusts only the fields the schema left unvalidated.
+    // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
     entries.push(normalizeHistoryEntry(result.data as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
   }
   return entries;
