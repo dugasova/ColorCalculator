@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchClients, upsertClient } from "./clients";
+import { createClient, updateClient, fetchClients } from "./clients";
 
-const setDocMock = vi.fn();
+const addDocMock = vi.fn();
+const updateDocMock = vi.fn();
 const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
 const getDocsMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
@@ -9,26 +10,28 @@ const whereMock = vi.fn((...args: unknown[]) => ({ kind: "where", field: args[0]
 const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
 
 vi.mock("firebase/firestore", () => ({
+  addDoc: (...args: unknown[]) => addDocMock(...args),
   collection: vi.fn(() => "collection-ref"),
   doc: (...args: unknown[]) => docMock(...args),
   getDocs: (...args: unknown[]) => getDocsMock(...args),
   orderBy: (...args: unknown[]) => orderByMock(...args),
   query: (...args: unknown[]) => queryMock(...args),
   serverTimestamp: vi.fn(() => "server-timestamp"),
-  setDoc: (...args: unknown[]) => setDocMock(...args),
+  updateDoc: (...args: unknown[]) => updateDocMock(...args),
   where: (...args: unknown[]) => whereMock(...args),
 }));
 vi.mock("./firebase", () => ({ db: {} }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-  setDocMock.mockResolvedValue(undefined);
+  addDocMock.mockResolvedValue({ id: "new-doc-id" });
+  updateDocMock.mockResolvedValue(undefined);
   getDocsMock.mockResolvedValue({ docs: [] });
 });
 
-describe("upsertClient", () => {
-  it("writes a deterministic id keyed by owner + normalized name, so the same client upserts instead of duplicating", async () => {
-    await upsertClient({
+describe("createClient", () => {
+  it("creates a brand-new profile via a real Firestore-assigned id, not a name-derived one", async () => {
+    const id = await createClient({
       ownedBy: "stylist@salon.test",
       name: "  Anna K.  ",
       phone: " +1 555 0100 ",
@@ -36,29 +39,51 @@ describe("upsertClient", () => {
       canvas: { porosity: "high", thickness: "fine", chemicalHistory: ["keratin"] },
     });
 
-    expect(docMock).toHaveBeenCalledWith(
-      {},
-      "clients",
-      `${encodeURIComponent("stylist@salon.test")}::${encodeURIComponent("anna k.")}`
-    );
-    expect(setDocMock).toHaveBeenCalledWith(
-      { kind: "doc", args: [{}, "clients", `${encodeURIComponent("stylist@salon.test")}::${encodeURIComponent("anna k.")}`] },
+    expect(id).toBe("new-doc-id");
+    expect(addDocMock).toHaveBeenCalledWith("collection-ref", {
+      ownedBy: "stylist@salon.test",
+      name: "Anna K.",
+      phone: "+1 555 0100",
+      allergyNotes: "PPD sensitivity",
+      lastCanvas: { porosity: "high", thickness: "fine", chemicalHistory: ["keratin"] },
+      updatedAt: "server-timestamp",
+    });
+  });
+
+  // Two real clients sharing a name must never collide into one profile -- calling
+  // createClient twice for "Anna K." (e.g. two different people, same name) has to
+  // produce two independent ids, since nothing here derives the id from the name.
+  it("creates a distinct id on every call, even for the exact same name", async () => {
+    addDocMock.mockResolvedValueOnce({ id: "anna-1" }).mockResolvedValueOnce({ id: "anna-2" });
+
+    const first = await createClient({ ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", canvas: null });
+    const second = await createClient({ ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", canvas: null });
+
+    expect(first).not.toBe(second);
+    expect(addDocMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("updateClient", () => {
+  it("writes to the given client's own real id", async () => {
+    await updateClient("anna-1", {
+      name: "Anna K.",
+      phone: "+1 555 0100",
+      allergyNotes: "PPD sensitivity",
+      canvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
+    });
+
+    expect(docMock).toHaveBeenCalledWith({}, "clients", "anna-1");
+    expect(updateDocMock).toHaveBeenCalledWith(
+      { kind: "doc", args: [{}, "clients", "anna-1"] },
       {
-        ownedBy: "stylist@salon.test",
         name: "Anna K.",
-        nameKey: "anna k.",
         phone: "+1 555 0100",
         allergyNotes: "PPD sensitivity",
-        lastCanvas: { porosity: "high", thickness: "fine", chemicalHistory: ["keratin"] },
+        lastCanvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
         updatedAt: "server-timestamp",
       }
     );
-  });
-
-  it("is a no-op for a blank name -- there's nothing to key the profile by", async () => {
-    await upsertClient({ ownedBy: "stylist@salon.test", name: "   ", phone: "", allergyNotes: "", canvas: null });
-
-    expect(setDocMock).not.toHaveBeenCalled();
   });
 });
 

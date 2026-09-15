@@ -19,13 +19,20 @@ running on shared Firebase infrastructure, not a multi-tenant SaaS.
 - **Color correction** — neutralize an unwanted tone (via the color-wheel complementary
   relationship) with the right corrector and technique.
 - **Client history** — save applied formulas per client (formula, pricing, patch-test
-  record, before/after photos), searchable, with a "repeat formula" shortcut that
-  reconstructs the calculator state from a past visit.
-- **Saved client profiles** — a stylist's own client book: phone, persistent allergy
+  record, before/after photos), grouped into one collapsible card per client (visit
+  count, last-visit date, saved phone/allergy notes when known) instead of a flat feed,
+  searchable, with a "repeat formula" shortcut that reconstructs the calculator state
+  from a past visit.
+- **Saved client profiles** — a stylist's own client book, each identified by a real id
+  (not just a name — two different clients can share one): phone, persistent allergy
   notes, and the hair canvas (porosity/thickness/chemical history) recorded on the last
-  visit. Typing a known name in the client-details step autofills the notes/phone (never
-  overwriting anything already typed that visit) and shows the last visit's hair profile
-  as a reference. Private per stylist, same ownership boundary as their client history.
+  visit. Typing a name in the client-details step offers every saved match as an explicit
+  pick (so "which Anna K.?" is never a guess) — picking one autofills the notes/phone
+  (never overwriting anything already typed that visit) and shows that client's last
+  visit's hair profile as a reference; typing a name with no match creates a new profile.
+  Every saved formula is linked to that same real client id, so client history, revisit
+  reminders, and repeat-formula all target the right person even when names collide.
+  Private per stylist, same ownership boundary as their client history.
 - **Revisit reminders** — recommends the next visit date per client based on their
   gray-coverage tier and actual visit history.
 - **Salon analytics** — visit counts, client retention, popular shades, average dye
@@ -54,12 +61,12 @@ src/
                     ComplexColoring, ColorCorrection, History, Analytics, PaletteAdmin,
                     Nav, LoginForm, LanguageSwitcher).
   history.ts        Firestore-backed client history (CRUD + legacy-shape migration).
-  clients.ts        Firestore-backed per-stylist client profiles (contacts, persistent
-                     allergy notes, last known hair canvas) used to autofill SessionDetailsPanel.
+  clients.ts        Firestore-backed per-stylist client profiles, identified by a real id
+                     (not name) so two same-named clients never collide — contacts,
+                     persistent allergy notes, last known hair canvas. Used by
+                     SessionDetailsPanel's client picker and linked onto each saved
+                     FormulaHistoryEntry via `clientId`.
   palette.ts        Firestore-backed palette data (custom brands, shade overrides) +
-                    the React context/hooks that expose the live, merged catalog.
-  roles.ts          Admin-role lookup (`users/{uid}.role` in Firestore).
-  locales/          en / uk translation dictionaries.
 scripts/
   migrateBuiltInPalette.ts   One-off migration: copies the hard-coded brand charts into
                              Firestore so they become admin-editable too.

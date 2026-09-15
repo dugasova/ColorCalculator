@@ -36,6 +36,7 @@ vi.mock("../firebase", () => ({ db: {}, storage: {} }));
 function baseParams() {
   return {
     clientName: "Anna",
+    clientId: null,
     note: "",
     appliedBy: "stylist@salon.test",
     steps: [],

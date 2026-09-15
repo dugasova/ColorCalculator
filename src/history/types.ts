@@ -64,6 +64,12 @@ export type HistoryStep = ColorHistoryStep | BleachHistoryStep;
 export interface FormulaHistoryEntry {
   id: string;
   clientName: string;
+  // Links this visit to a specific saved client profile (clients.ts), not just their
+  // name -- two real clients can share a name, so `clientName` alone can't safely
+  // identify who a repeat/next-visit formula belongs to. `null` for entries saved
+  // before this field existed, or when the colorist explicitly typed a name with no
+  // matching/created profile (see normalizeHistoryEntry for the missing-field case).
+  clientId: string | null;
   note: string;
   appliedBy: string;
   appliedAt: Timestamp | null;

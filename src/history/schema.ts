@@ -25,6 +25,12 @@ const historyStepShapeSchema = z.union([
 const formulaHistoryEntryShapeSchema = z.object({
   id: z.string(),
   clientName: z.string(),
+  // Optional/nullable, not just nullable: every `steps`-based document saved before this
+  // field existed (all of them, pre-dating clients.ts's real per-client ids) simply lacks
+  // it at the Firestore level -- normalizeHistoryEntry's early-return branch below
+  // coerces the missing case to `null` so the rest of the app only ever sees the fully
+  // normalized `FormulaHistoryEntry.clientId: string | null`.
+  clientId: z.string().nullable().optional(),
   note: z.string(),
   appliedBy: z.string(),
   appliedAt: z.instanceof(Timestamp).nullable(),
@@ -73,7 +79,14 @@ const legacyFormulaHistoryEntryShapeSchema = z.object({
 export const historyEntryShapeSchema = z.union([formulaHistoryEntryShapeSchema, legacyFormulaHistoryEntryShapeSchema]);
 
 export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHistoryEntry): FormulaHistoryEntry {
-  if ("steps" in raw && raw.steps !== undefined) return raw;
+  // `raw.clientId` reads as `undefined` (not `null`) for any steps-based document saved
+  // before this field existed -- coerce here so every caller downstream can rely on the
+  // type's `string | null` without re-deriving this fallback itself. Returns `raw`
+  // unchanged (not a copy) when it already has the field, same as the plain `return raw`
+  // this replaced for an already-well-formed modern entry.
+  if ("steps" in raw && raw.steps !== undefined) {
+    return raw.clientId !== undefined ? raw : { ...raw, clientId: null };
+  }
 
   const legacy = raw as LegacyFormulaHistoryEntry;
   const colorStep: ColorHistoryStep = {
@@ -100,6 +113,7 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
   return {
     id: legacy.id,
     clientName: legacy.clientName,
+    clientId: null,
     note: legacy.note,
     appliedBy: legacy.appliedBy,
     appliedAt: legacy.appliedAt,

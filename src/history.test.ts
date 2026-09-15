@@ -65,6 +65,7 @@ function makeBleachStep(overrides: Partial<BleachHistoryStep> = {}): BleachHisto
 function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName: string }): FormulaHistoryEntry {
   return {
     id: "id",
+    clientId: null,
     note: "",
     appliedBy: "stylist",
     appliedAt: null,

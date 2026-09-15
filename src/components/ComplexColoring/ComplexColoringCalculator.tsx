@@ -87,6 +87,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
   const handleSave = async (details: SessionDetails) => {
     await saveFormulaToHistory({
       clientName: details.clientName,
+      clientId: details.clientId,
       note: details.note,
       appliedBy,
       steps: orderedSteps,

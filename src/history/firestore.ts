@@ -8,6 +8,7 @@ const HISTORY_COLLECTION = "formulaHistory";
 
 export interface SaveFormulaParams {
   clientName: string;
+  clientId: string | null;
   note: string;
   appliedBy: string;
   steps: HistoryStep[];
@@ -37,6 +38,7 @@ async function uploadFormulaPhoto(historyId: string, slot: "before" | "after", f
 export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<void> {
   const docRef = await addDoc(collection(db, HISTORY_COLLECTION), {
     clientName: params.clientName,
+    clientId: params.clientId,
     note: params.note,
     appliedBy: params.appliedBy,
     steps: sanitizeForFirestore(params.steps),

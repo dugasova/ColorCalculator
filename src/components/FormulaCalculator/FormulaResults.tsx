@@ -109,6 +109,7 @@ export function FormulaResults({
     };
     await saveFormulaToHistory({
       clientName: details.clientName,
+      clientId: details.clientId,
       note: details.note,
       appliedBy,
       steps: [step],

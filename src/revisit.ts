@@ -19,7 +19,7 @@ export function getDefaultRevisitIntervalDays(grayPercent: number): number {
 }
 
 export interface ClientRevisitPlan {
-  clientKey: string;       // normalized (trim + lowercase) grouping key
+  clientKey: string;       // see getClientGroupKey -- real clientId, or a name-based fallback
   clientName: string;      // display name, from the most recent visit
   lastVisitAt: Date;
   intervalDays: number;    // rounded to the nearest whole day
@@ -27,22 +27,32 @@ export interface ClientRevisitPlan {
   recommendedDate: Date;
 }
 
-// Client-identity normalization shared with analytics.ts (computeSalonAnalytics) -- two
-// entries count as "the same client" iff their names match after trimming and
-// lowercasing. Centralized so the two stay in lockstep; whitespace/casing is the only
-// normalization applied deliberately -- a stricter rule (e.g. accent-folding) risks
-// merging genuinely different clients who happen to share a base name.
+// Client-identity normalization shared with analytics.ts (computeSalonAnalytics) and
+// HistoryView -- two entries count as "the same client" iff their names match after
+// trimming and lowercasing. Centralized so the three stay in lockstep; whitespace/casing
+// is the only normalization applied deliberately -- a stricter rule (e.g. accent-folding)
+// risks merging genuinely different clients who happen to share a base name.
 export function normalizeClientKey(clientName: string): string {
   return clientName.trim().toLowerCase();
 }
 
-// Groups by normalized client name, skipping entries with no name (can't attribute) or no
-// `appliedAt` (still pending server timestamp / malformed).
+// The actual grouping key: an entry's real `clientId` (clients.ts) when it has one, since
+// that's the one thing that can't collide between two different real people who happen to
+// share a name -- normalizeClientKey alone would silently merge "their" history/revisit
+// plan/retention count together. Falls back to the normalized name only for entries saved
+// before clientId existed (or an explicitly unlinked "different person, same name" save) --
+// `name:` prefixed so a legacy fallback key can never collide with a real Firestore id.
+export function getClientGroupKey(entry: Pick<FormulaHistoryEntry, "clientId" | "clientName">): string {
+  return entry.clientId ?? `name:${normalizeClientKey(entry.clientName)}`;
+}
+
+// Groups by client identity (see getClientGroupKey), skipping entries with no name (can't
+// attribute) or no `appliedAt` (still pending server timestamp / malformed).
 function groupByClient(entries: FormulaHistoryEntry[]): Map<string, FormulaHistoryEntry[]> {
   const groups = new Map<string, FormulaHistoryEntry[]>();
   for (const entry of entries) {
-    const key = normalizeClientKey(entry.clientName);
-    if (key === "" || entry.appliedAt === null) continue;
+    if (normalizeClientKey(entry.clientName) === "" || entry.appliedAt === null) continue;
+    const key = getClientGroupKey(entry);
     const list = groups.get(key) ?? [];
     list.push(entry);
     groups.set(key, list);
@@ -80,7 +90,7 @@ function planForClient(clientEntries: FormulaHistoryEntry[]): ClientRevisitPlan 
   intervalDays = Math.round(intervalDays);
 
   return {
-    clientKey: normalizeClientKey(last.entry.clientName),
+    clientKey: getClientGroupKey(last.entry),
     clientName: last.entry.clientName,
     lastVisitAt: last.date,
     intervalDays,

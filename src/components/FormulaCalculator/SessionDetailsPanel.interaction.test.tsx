@@ -8,7 +8,8 @@ import { SessionDetailsPanel } from "./SessionDetailsPanel";
 // jsdom, and no bearing on what's under test here (the save/onSaved timing below).
 vi.mock("../../clients", () => ({
   fetchClients: vi.fn().mockResolvedValue([]),
-  upsertClient: vi.fn().mockResolvedValue(undefined),
+  createClient: vi.fn().mockResolvedValue("new-client-id"),
+  updateClient: vi.fn().mockResolvedValue(undefined),
 }));
 
 const APPLIED_BY = "stylist@salon.test";

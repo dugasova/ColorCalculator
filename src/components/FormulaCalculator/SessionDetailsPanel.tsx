@@ -2,13 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProcessingTimer } from "./ProcessingTimer";
 import { Modal } from "../common/Modal";
-import { fetchClients, upsertClient, type ClientProfile } from "../../clients";
-import { normalizeClientKey } from "../../revisit";
+import { createClient, fetchClients, updateClient, type ClientProfile } from "../../clients";
 import { formatCanvasText } from "../../formatSession";
 import type { HairCanvas } from "../../engine/canvas";
 
 export interface SessionDetails {
   clientName: string;
+  // The specific saved client (clients.ts) this visit belongs to, or `null` for a
+  // brand-new profile the caller should create -- see SessionDetailsPanelProps' own
+  // comment on why a name string alone can't safely identify who this is.
+  clientId: string | null;
   note: string;
   phone: string;
   patchTestDate: string;
@@ -29,7 +32,7 @@ export interface SessionDetailsPanelProps {
   // the whole form (this panel's own fields plus the brand/shade/level state above it) so
   // the next client starts from a blank calculator instead of the just-saved one's values.
   onSaved?: () => void;
-  // The signed-in stylist's own email -- scopes the saved-client lookup/upsert (see
+  // The signed-in stylist's own email -- scopes the saved-client lookup/create/update (see
   // clients.ts) to their own book, same ownership boundary as formulaHistory's `appliedBy`.
   appliedBy: string;
   // The session's current hair canvas (porosity/thickness/chemical history), carried
@@ -42,6 +45,7 @@ export interface SessionDetailsPanelProps {
 const COPIED_FEEDBACK_MS = 1500;
 const SAVED_FEEDBACK_MS = 1500;
 const PATCH_TEST_MIN_HOURS = 48;
+const MAX_CLIENT_SUGGESTIONS = 6;
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -59,6 +63,11 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   const [isCopied, setIsCopied] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [clientName, setClientName] = useState("");
+  // The colorist's explicit pick among possibly-several same-named saved clients (see the
+  // suggestion list below) -- `null` means "no specific existing client confirmed yet",
+  // which on save creates a brand-new profile. Two real people can share a name, so this
+  // (not `clientName`) is what actually identifies whose history a save belongs to.
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -101,9 +110,9 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     };
   }, []);
 
-  // Loads once per mount, not gated on the details modal being open -- so the
-  // autocomplete/autofill below is ready the instant the colorist opens it, with no
-  // extra loading flicker. Cheap: one stylist's own client book, not the whole salon's.
+  // Loads once per mount, not gated on the details modal being open -- so the suggestion
+  // list below is ready the instant the colorist opens it, with no extra loading flicker.
+  // Cheap: one stylist's own client book, not the whole salon's.
   useEffect(() => {
     let cancelled = false;
     fetchClients(appliedBy)
@@ -112,34 +121,49 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     return () => { cancelled = true; };
   }, [appliedBy]);
 
-  // An exact (normalized) name match against the stylist's own saved clients -- feeds the
-  // "last visit" hint below.
-  const matchedClient = useMemo(() => {
-    const key = normalizeClientKey(clientName);
-    if (key === "") return null;
-    return savedClients.find(c => normalizeClientKey(c.name) === key) ?? null;
-  }, [clientName, savedClients]);
+  // Candidates for the typed name, offered as explicit picks rather than auto-matched --
+  // two real clients can share a display name, so which one this visit belongs to has to
+  // be a deliberate choice, not a guess from text alone. Hidden once a specific client is
+  // already confirmed (selectedClientId set); reappears the moment the colorist edits the
+  // name again, since that invalidates whatever was previously confirmed.
+  const suggestions = useMemo(() => {
+    if (selectedClientId !== null) return [];
+    const query = clientName.trim().toLowerCase();
+    if (query === "") return [];
+    return savedClients.filter(c => c.name.toLowerCase().includes(query)).slice(0, MAX_CLIENT_SUGGESTIONS);
+  }, [clientName, selectedClientId, savedClients]);
 
-  // Carries a matched client's phone/allergy notes forward so the colorist doesn't retype
-  // them every visit -- only into fields still blank, so it never clobbers something
-  // already typed this visit (e.g. a fresh allergy note for today). Driven directly by the
-  // name field's own change event (fires identically whether typed or picked from the
-  // <datalist>) rather than an effect watching `clientName`/`savedClients`, so it runs
-  // exactly once per actual edit instead of setting state from within an effect.
-  const handleClientNameChange = (value: string) => {
-    setClientName(value);
-    const key = normalizeClientKey(value);
-    if (key === "") return;
-    const match = savedClients.find(c => normalizeClientKey(c.name) === key);
-    if (match === undefined) return;
-    setPhone(prev => (prev === "" ? match.phone : prev));
-    setAllergyNotes(prev => (prev === "" ? match.allergyNotes : prev));
-  };
+  const selectedClient = useMemo(
+    () => (selectedClientId !== null ? savedClients.find(c => c.id === selectedClientId) ?? null : null),
+    [selectedClientId, savedClients]
+  );
 
   // Purely informational -- the canvas fields live at the top of the calculator, entered
   // well before a client is even picked here, so there's no live value to overwrite. This
   // just lets the colorist sanity-check what they set against what was recorded last time.
-  const lastVisitCanvasText = matchedClient?.lastCanvas ? formatCanvasText(matchedClient.lastCanvas) : null;
+  const lastVisitCanvasText = selectedClient?.lastCanvas ? formatCanvasText(selectedClient.lastCanvas) : null;
+
+  const handleClientNameChange = (value: string) => {
+    setClientName(value);
+    // Any manual edit invalidates whatever specific client was previously confirmed --
+    // re-picking (or typing a genuinely new name) is required again.
+    setSelectedClientId(null);
+  };
+
+  // Carries the picked client's phone/allergy notes forward so the colorist doesn't retype
+  // them every visit -- only into fields still blank, so it never clobbers something
+  // already typed this visit (e.g. a fresh allergy note for today).
+  const handleSelectSuggestion = (client: ClientProfile) => {
+    setClientName(client.name);
+    setSelectedClientId(client.id);
+    setPhone(prev => (prev === "" ? client.phone : prev));
+    setAllergyNotes(prev => (prev === "" ? client.allergyNotes : prev));
+  };
+
+  // Escape hatch for the rare exact-name collision the colorist notices only after
+  // picking -- detaches from that profile without having to retype the name, so the next
+  // save creates a fresh one instead of overwriting the wrong person's record.
+  const handleClearSelection = () => setSelectedClientId(null);
 
   const patchTestOk = patchTestOverride || (
     patchTestDate !== "" && nowMs - new Date(patchTestDate).getTime() >= PATCH_TEST_MIN_HOURS * 60 * 60 * 1000
@@ -179,8 +203,36 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   const handleSave = async () => {
     setSaveState("saving");
     try {
+      // Resolves the *real* client id before saving the formula, so the entry can carry
+      // it (FormulaHistoryEntry.clientId) instead of just a name string. Best-effort like
+      // the photo-upload attach below: a hiccup here shouldn't block saving the formula
+      // itself, it just means this one visit won't be linked to a profile yet.
+      let clientId = selectedClientId;
+      try {
+        if (clientId === null) {
+          clientId = await createClient({
+            ownedBy: appliedBy,
+            name: clientName.trim(),
+            phone: phone.trim(),
+            allergyNotes,
+            canvas: canvas ?? null,
+          });
+        } else {
+          await updateClient(clientId, {
+            name: clientName.trim(),
+            phone: phone.trim(),
+            allergyNotes,
+            canvas: canvas ?? null,
+          });
+        }
+      } catch (err) {
+        console.error("Could not save the client profile -- the formula will still be saved, just without a linked client id this time.", err);
+        clientId = selectedClientId;
+      }
+
       await onSave({
         clientName: clientName.trim(),
+        clientId,
         note: note.trim(),
         phone: phone.trim(),
         patchTestDate,
@@ -189,21 +241,6 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         beforePhotoFile,
         afterPhotoFile,
       });
-      try {
-        await upsertClient({
-          ownedBy: appliedBy,
-          name: clientName.trim(),
-          phone: phone.trim(),
-          allergyNotes,
-          canvas: canvas ?? null,
-        });
-      } catch (err) {
-        // The formula itself is already saved above -- losing the client-profile upsert
-        // (phone/allergy-notes/canvas carried forward to the *next* visit) shouldn't
-        // surface as a save failure to the colorist. Same best-effort trade-off as the
-        // photo-upload attach in saveFormulaToHistory; logged so it's traceable.
-        console.error("Saved formula, but updating the client profile failed:", err);
-      }
       setSaveState("saved");
       clearTimeout(saveFeedbackTimeoutRef.current);
       saveFeedbackTimeoutRef.current = setTimeout(() => { setSaveState("idle"); setIsDetailsModalOpen(false); onSaved?.(); }, SAVED_FEEDBACK_MS);
@@ -249,16 +286,40 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
             <label htmlFor="clientName">{t("results.clientNameLabel")}</label>
             <input
               id="clientName"
-              list="savedClientNames"
               value={clientName}
               onChange={e => handleClientNameChange(e.target.value)}
               placeholder={t("results.clientNamePlaceholder")}
               required
+              autoComplete="off"
             />
-            <datalist id="savedClientNames">
-              {savedClients.map(c => <option key={c.id} value={c.name} />)}
-            </datalist>
           </div>
+
+          {selectedClient !== null ? (
+            <p className="results__client-match results__client-match--confirmed">
+              {t("results.clientLinkedTo", { name: selectedClient.name })}
+              {selectedClient.phone !== "" ? ` — ${selectedClient.phone}` : ""}
+              {" "}
+              <button type="button" className="link-button" onClick={handleClearSelection}>
+                {t("results.clientNotThisPerson")}
+              </button>
+            </p>
+          ) : suggestions.length > 0 && (
+            <div className="results__client-suggestions">
+              <p className="results__client-suggestions-heading">{t("results.clientSuggestionsHeading")}</p>
+              <ul className="results__client-suggestions-list">
+                {suggestions.map(candidate => (
+                  <li key={candidate.id}>
+                    <button type="button" className="results__client-suggestion" onClick={() => handleSelectSuggestion(candidate)}>
+                      <span className="results__client-suggestion-name">{candidate.name}</span>
+                      <span className="results__client-suggestion-phone">
+                        {candidate.phone !== "" ? candidate.phone : t("results.clientNoPhoneOnFile")}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {lastVisitCanvasText !== null && (
             <p className="notice results__last-visit" role="status">

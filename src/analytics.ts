@@ -1,5 +1,5 @@
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
-import { normalizeClientKey } from "./revisit";
+import { getClientGroupKey, normalizeClientKey } from "./revisit";
 
 export interface ShadePopularity {
   brandName: string;
@@ -62,13 +62,14 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
     ? productCostValues.reduce((sum, c) => sum + c, 0) / productCostValues.length
     : null;
 
-  // Retention: % of named clients (normalized via normalizeClientKey, same grouping as
-  // revisit.ts) who have 2 or more saved visits. Entries with an empty clientName can't
-  // be attributed to a client and are excluded from both the numerator and denominator.
+  // Retention: % of clients (grouped by real clientId when the entry has one, else a
+  // normalized-name fallback -- see getClientGroupKey) who have 2 or more saved visits.
+  // Entries with an empty clientName can't be attributed to a client and are excluded
+  // from both the numerator and denominator.
   const visitsByClient = new Map<string, number>();
   for (const entry of entries) {
-    const key = normalizeClientKey(entry.clientName);
-    if (key === "") continue;
+    if (normalizeClientKey(entry.clientName) === "") continue;
+    const key = getClientGroupKey(entry);
     visitsByClient.set(key, (visitsByClient.get(key) ?? 0) + 1);
   }
   const uniqueClients = visitsByClient.size;

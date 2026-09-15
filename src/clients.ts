@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "./firebase";
 import type { HairCanvas } from "./engine/canvas";
-import { normalizeClientKey } from "./revisit";
 
 const CLIENTS_COLLECTION = "clients";
 
@@ -33,19 +32,7 @@ export interface ClientProfile {
   lastCanvas: HairCanvas | null;
 }
 
-// Deterministic id (owner + normalized name) so saving the same client again upserts one
-// profile instead of accumulating duplicates -- the same trick palette.ts's
-// disableOverrideId uses for shade-disable overrides. `nameKey` alone isn't unique across
-// stylists (two stylists can each have a client named "Anna"); a client profile is owned
-// by the stylist who saved it, same boundary as formulaHistory's `appliedBy` (see
-// firestore.rules) -- encoding the owner into the id keeps every stylist's book distinct
-// without a query round-trip on every save. `encodeURIComponent` avoids "/", which
-// Firestore document ids can't contain and an email or client name could otherwise carry.
-function clientId(ownedBy: string, nameKey: string): string {
-  return `${encodeURIComponent(ownedBy)}::${encodeURIComponent(nameKey)}`;
-}
-
-export interface UpsertClientParams {
+export interface CreateClientParams {
   ownedBy: string;
   name: string;
   phone: string;
@@ -53,18 +40,39 @@ export interface UpsertClientParams {
   canvas: HairCanvas | null;
 }
 
-// Called after every successful formula save (see SessionDetailsPanel's handleSave) so
-// the *next* visit's client-name autocomplete can carry the phone number, allergy notes,
-// and last known hair canvas forward instead of the colorist re-entering them from
-// scratch. A blank name is a no-op -- SessionDetailsPanel already requires a name before
-// it will save the formula itself, so this only guards a hypothetical direct caller.
-export async function upsertClient(params: UpsertClientParams): Promise<void> {
-  const nameKey = normalizeClientKey(params.name);
-  if (nameKey === "") return;
-  await setDoc(doc(db, CLIENTS_COLLECTION, clientId(params.ownedBy, nameKey)), {
+// A brand-new client profile, identified from here on by its own real Firestore id --
+// never by name. Two real people can share the exact same name (see SessionDetailsPanel's
+// suggestion picker, which exists precisely so a colorist can tell them apart before
+// saving); a name-derived id would silently merge their profiles and history together.
+// Returns the new id so the caller can stamp it onto the formula entry being saved
+// (FormulaHistoryEntry.clientId), which is what actually lets "this client's history"/
+// "repeat formula" target the right person later.
+export async function createClient(params: CreateClientParams): Promise<string> {
+  const docRef = await addDoc(collection(db, CLIENTS_COLLECTION), {
     ownedBy: params.ownedBy,
     name: params.name.trim(),
-    nameKey,
+    phone: params.phone.trim(),
+    allergyNotes: params.allergyNotes,
+    lastCanvas: params.canvas,
+    updatedAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export interface UpdateClientParams {
+  name: string;
+  phone: string;
+  allergyNotes: string;
+  canvas: HairCanvas | null;
+}
+
+// Refreshes an *already-identified* client's profile (the colorist picked a specific
+// suggestion in SessionDetailsPanel, so `id` is that exact person's real id, not a
+// name-based guess) with whatever changed this visit -- phone, allergy notes, and the
+// current hair canvas.
+export async function updateClient(id: string, params: UpdateClientParams): Promise<void> {
+  await updateDoc(doc(db, CLIENTS_COLLECTION, id), {
+    name: params.name.trim(),
     phone: params.phone.trim(),
     allergyNotes: params.allergyNotes,
     lastCanvas: params.canvas,
@@ -74,7 +82,7 @@ export async function upsertClient(params: UpsertClientParams): Promise<void> {
 
 // Every stylist's client book is private to them, mirroring formulaHistory's
 // `appliedBy`-scoped rule in firestore.rules -- feeds SessionDetailsPanel's client-name
-// autocomplete and its phone/allergy-notes/last-canvas autofill.
+// suggestion list and its phone/allergy-notes/last-canvas autofill.
 export async function fetchClients(ownedBy: string): Promise<ClientProfile[]> {
   const snapshot = await getDocs(
     query(collection(db, CLIENTS_COLLECTION), where("ownedBy", "==", ownedBy), orderBy("name"))
