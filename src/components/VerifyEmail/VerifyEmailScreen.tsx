@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { sendEmailVerification, reload, signOut, type User } from "firebase/auth";
+import { sendEmailVerification, reload, getIdToken, signOut, type User } from "firebase/auth";
 import { auth } from "../../firebase";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -39,6 +39,14 @@ export function VerifyEmailScreen({ user, onRefreshed }: VerifyEmailScreenProps)
     setCheckStatus("checking");
     await reload(user);
     if (user.emailVerified) {
+      // `reload` refreshes the live `user.emailVerified` flag (what unblocks this
+      // screen), but Firestore's rules read `email_verified` off the *ID token* the
+      // SDK attaches to each request -- a claim baked in when the token was minted,
+      // not the live profile. That cached token keeps its stale `false` claim until
+      // it naturally expires (up to ~1h) unless forced here, so without this a
+      // freshly verified account passes this screen but still gets permission-denied
+      // on every client/formula save until the token happens to refresh on its own.
+      await getIdToken(user, true);
       onRefreshed();
     } else {
       setCheckStatus("stillUnverified");
