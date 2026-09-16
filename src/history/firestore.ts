@@ -3,6 +3,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 import { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
+import { computeStockConsumption, consumeStock } from "../stock";
 
 const HISTORY_COLLECTION = "formulaHistory";
 
@@ -52,6 +53,15 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
     afterPhotoUrl: null,
     appliedAt: serverTimestamp(),
   });
+
+  // Stock is a convenience ledger, not part of the visit record: a failure here must not
+  // surface as a save error (the stylist would retry and create a duplicate entry), and
+  // an untracked product is simply skipped -- see consumeStock.
+  try {
+    await consumeStock(computeStockConsumption(params.steps));
+  } catch (err) {
+    console.error(`Saved formula history entry "${docRef.id}", but updating dye stock failed:`, err);
+  }
 
   // Photos upload after the doc exists so they can live at a path keyed by its id;
   // attach the resulting URLs with a follow-up update rather than blocking doc creation

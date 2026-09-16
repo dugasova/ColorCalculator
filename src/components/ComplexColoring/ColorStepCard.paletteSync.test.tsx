@@ -28,7 +28,7 @@ function brandsWith(shades: Shade[]): Record<BrandId, Brand> {
 }
 
 function paletteState(shades: Shade[]): PaletteState {
-  return { brands: brandsWith(shades), customBrands: [], overrides: [] };
+  return { brands: brandsWith(shades), customBrands: [], overrides: [], stock: [] };
 }
 
 // The custom Select (see components/common/Select) has no native <select> "change" event

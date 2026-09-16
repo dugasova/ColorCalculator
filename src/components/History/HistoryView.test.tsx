@@ -184,3 +184,43 @@ describe("HistoryView client grouping", () => {
     }
   });
 });
+
+describe("HistoryView revisit reminders", () => {
+  it("opens a WhatsApp link addressed to the client's saved phone, prefilled with their name and recommended date", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+      makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
+    ]);
+    vi.mocked(fetchClients).mockResolvedValue([
+      { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+380 50 123 4567", allergyNotes: "", lastCanvas: null },
+    ]);
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+
+    renderHistoryView();
+
+    const remindButton = await screen.findByRole("button", { name: /Remind via WhatsApp/ });
+    fireEvent.click(remindButton);
+
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    const url = openSpy.mock.calls[0][0] as string;
+    expect(url.startsWith("https://wa.me/380501234567?text=")).toBe(true);
+    const text = decodeURIComponent(url.split("?text=")[1]);
+    expect(text).toContain("Anna K.");
+    openSpy.mockRestore();
+  });
+
+  it("opens a Telegram share link when the Remind via Telegram button is clicked", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K." })]);
+    vi.mocked(fetchClients).mockResolvedValue([]);
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+
+    renderHistoryView();
+
+    const remindButton = await screen.findByRole("button", { name: /Remind via Telegram/ });
+    fireEvent.click(remindButton);
+
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    const url = openSpy.mock.calls[0][0] as string;
+    expect(url.startsWith("https://t.me/share/url?url=")).toBe(true);
+    openSpy.mockRestore();
+  });
+});

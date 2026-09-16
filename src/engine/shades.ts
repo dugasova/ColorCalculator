@@ -56,7 +56,7 @@ const mixingRatioSchema = z.object({
 });
 
 const levelSchema = z.number().int().min(1).max(12) as unknown as z.ZodType<Level>;
-const developerVolumeSchema = z.union([
+export const developerVolumeSchema = z.union([
   z.literal(6), z.literal(10), z.literal(13), z.literal(20), z.literal(30), z.literal(40),
 ]) satisfies z.ZodType<DeveloperVolume>;
 const toneFamilySchema = z.enum([

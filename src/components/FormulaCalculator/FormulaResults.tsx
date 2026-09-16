@@ -3,6 +3,7 @@ import type { FullFormula } from "../../engine/formula";
 import { getGrayCoverageNote } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
+import type { BrandId } from "../../engine/brands";
 import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
@@ -10,11 +11,14 @@ import { formatFillerStepText } from "../../engine/formatPrePigmentation";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
+import { useStock } from "../../palette";
+import { computeStockConsumption, stockById } from "../../stock";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
 import { PrePigmentationStep } from "./PrePigmentationStep";
 import { SessionDetailsPanel, type SessionDetails } from "./SessionDetailsPanel";
 
 export interface FormulaResultsProps {
+  brandId: BrandId;
   brandName: string;
   line: string | null;
   targetShade: Shade;
@@ -56,7 +60,7 @@ export interface FormulaResultsProps {
 const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
-  brandName, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory, applicationZone, result,
+  brandId, brandName, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory, applicationZone, result,
   additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
@@ -86,27 +90,40 @@ export function FormulaResults({
     ? `${fillerStepText}\n\n${t("prePigmentation.finalStepLabel")}\n${targetColorFormulaText}`
     : targetColorFormulaText;
 
+  // Hoisted out of handleSave so the stock-shortage check below (computeStockConsumption)
+  // reads from the exact same step object that gets saved -- one source of truth for
+  // "what this mix consumes", instead of a second literal that could drift from it.
+  const step: ColorHistoryStep = {
+    kind: "color",
+    brandId,
+    brandName,
+    line,
+    targetShade,
+    startLevel,
+    grayPercent,
+    applicationZone,
+    canvas: { porosity, thickness, chemicalHistory },
+    result,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2: additionalShade2 ?? null,
+    additionalShade2Grams: additionalShade2Grams ?? null,
+    blend,
+    prePigmentation: prePigmentationResult,
+    neutralizationApplied,
+    processingMinutes,
+    pricePerGram,
+  };
+
+  const stockMap = stockById(useStock());
+  const shortages = computeStockConsumption([step]).flatMap(consumption => {
+    const record = stockMap.get(consumption.id);
+    return record === undefined || record.remainingGrams >= consumption.grams
+      ? []
+      : [{ consumption, remainingGrams: record.remainingGrams }];
+  });
+
   const handleSave = async (details: SessionDetails) => {
-    const step: ColorHistoryStep = {
-      kind: "color",
-      brandName,
-      line,
-      targetShade,
-      startLevel,
-      grayPercent,
-      applicationZone,
-      canvas: { porosity, thickness, chemicalHistory },
-      result,
-      additionalShade,
-      additionalShadeGrams,
-      additionalShade2: additionalShade2 ?? null,
-      additionalShade2Grams: additionalShade2Grams ?? null,
-      blend,
-      prePigmentation: prePigmentationResult,
-      neutralizationApplied,
-      processingMinutes,
-      pricePerGram,
-    };
     await saveFormulaToHistory({
       clientName: details.clientName,
       clientId: details.clientId,
@@ -168,6 +185,18 @@ export function FormulaResults({
           <span>{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
         </div>
       )}
+
+      {shortages.map(({ consumption, remainingGrams }) => (
+        <p key={consumption.id} className="warning" role="alert">
+          {t("results.stockShortWarning", {
+            code: consumption.kind === "developer"
+              ? t("format.developerVolume", { value: Number(consumption.code) })
+              : consumption.code,
+            remaining: remainingGrams.toFixed(1),
+            needed: consumption.grams.toFixed(1),
+          })}
+        </p>
+      ))}
 
       <div className="results__row">
         <span className="results__row-label">{t("results.applicationZone")}</span>

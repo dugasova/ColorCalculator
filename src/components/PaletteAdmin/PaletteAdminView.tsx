@@ -5,6 +5,7 @@ import { BRANDS } from "../../engine/brands";
 import { getDisabledShadeKeys, getFullBrandShades } from "../../engine/paletteOverrides";
 import { AddBrandForm } from "./AddBrandForm";
 import { BrandShadeList } from "./BrandShadeList";
+import { BrandStockList } from "./BrandStockList";
 import { AddShadeForm } from "./AddShadeForm";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./PaletteAdminView.css";
@@ -31,7 +32,14 @@ export function PaletteAdminView() {
     <div className="calculator calculator--wide">
       <h1 className="calculator__title">{t("palette.titlePrefix")} <span className="calculator__title-accent">{t("palette.titleAccent")}</span></h1>
 
-      <AddBrandForm brands={brands} onBrandAdded={setSelectedBrandId} />
+      <div className="palette-admin__admin-actions">
+        <AddBrandForm brands={brands} onBrandAdded={setSelectedBrandId} />
+        <AddShadeForm
+          brandId={effectiveSelectedBrandId}
+          brandName={brands[effectiveSelectedBrandId]?.name ?? effectiveSelectedBrandId}
+          existingShades={fullShades}
+        />
+      </div>
 
       <BrandShadeList
         brands={brands}
@@ -42,7 +50,7 @@ export function PaletteAdminView() {
         disabledKeys={disabledKeys}
       />
 
-      <AddShadeForm brandId={effectiveSelectedBrandId} existingShades={fullShades} />
+      <BrandStockList brandId={effectiveSelectedBrandId} shades={fullShades} disabledKeys={disabledKeys} />
     </div>
   );
 }

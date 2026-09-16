@@ -6,6 +6,24 @@
   margin-top: 20px;
 }
 
+/* "Add a new dye line" and "Add a shade" are the two data-entry forms an admin reaches
+   for back-to-back (create a line, then immediately populate it) -- stacked directly on
+   top of each other, above the (often long) shade list/stock sections, so reaching
+   "Add a shade" never needs scrolling past those. A side-by-side layout was tried and
+   dropped -- it squeezed each form's fields into half the page width, which made every
+   input/select cramped and hard to use. Both child sections opt out of their own top
+   margin here since the wrapper's own margin already provides it. */
+.palette-admin__admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.palette-admin__admin-actions .palette-admin__section {
+  margin-top: 0;
+}
+
 .palette-admin__status {
   color: var(--brand-primary-ink, #6d28d9);
   font-size: 0.9rem;
@@ -57,4 +75,60 @@
   gap: 6px;
   font-size: 0.85rem;
   white-space: nowrap;
+}
+
+.palette-admin__hint {
+  color: rgba(var(--brand-ink-rgb), 0.65);
+  font-size: 0.9rem;
+  margin: 4px 0 12px;
+}
+
+.palette-admin__stock-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.palette-admin__stock-subheading {
+  margin: 16px 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(var(--brand-ink-rgb), 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.palette-admin__stock-row {
+  display: grid;
+  grid-template-columns: 1fr 6rem auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.palette-admin__stock-restock {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.palette-admin__stock-row--out {
+  opacity: 0.55;
+}
+
+.palette-admin__stock-label {
+  font-weight: 600;
+  min-width: 3.5em;
+}
+
+.palette-admin__stock-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(234, 88, 12, 0.08);
+  color: var(--status-warning-ink);
 }

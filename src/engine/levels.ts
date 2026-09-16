@@ -56,6 +56,10 @@ export function canReachTarget(
   return targetLevel - startLevel <= liftTable(volume);
 }
 
+// Every volume the DeveloperVolume union allows, ascending -- for UI that needs one row
+// per developer a salon can stock (PaletteAdmin's stock list). Deliberately separate from
+// the lift-ladder list above, which encodes cream-color lift capability, not inventory.
+export const ALL_DEVELOPER_VOLUMES: DeveloperVolume[] = [6, 10, 13, 20, 30, 40];
 const ALL_VOLUMES: DeveloperVolume[] = [10, 20, 30, 40];
 
 export function pickDeveloperVolume(

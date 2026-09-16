@@ -10,6 +10,10 @@ import { Select } from "../common/Select";
 export interface AddShadeFormProps {
   // The brand the new shade is added to — see PaletteAdminView's `effectiveSelectedBrandId`.
   brandId: BrandId;
+  // Display name of that same brand -- shown under the heading so it's clear which line
+  // this form targets even though the brand selector itself lives in BrandShadeList,
+  // further down the page (see PaletteAdminView's two-column admin-actions row).
+  brandName: string;
   // That brand's current shades (including discontinued ones), used only to reject a
   // duplicate (line, code) pair before writing — see `shadeKey`.
   existingShades: Shade[];
@@ -19,7 +23,7 @@ const TONE_FAMILIES: ToneFamily[] = ["natural", "ash", "cendré", "matt", "gold"
 
 type SubmitStatus = "idle" | "saving" | "saved" | "error";
 
-export function AddShadeForm({ brandId, existingShades }: AddShadeFormProps) {
+export function AddShadeForm({ brandId, brandName, existingShades }: AddShadeFormProps) {
   const { t } = useTranslation();
 
   const [shadeCode, setShadeCode] = useState("");
@@ -71,6 +75,7 @@ export function AddShadeForm({ brandId, existingShades }: AddShadeFormProps) {
   return (
     <section className="palette-admin__section">
       <h2 className="results__section-heading">{t("palette.addShadeTitle")}</h2>
+      <p className="palette-admin__hint">{t("palette.addShadeForBrand", { brand: brandName })}</p>
       <form className="calculator__form" onSubmit={handleAddShade}>
         <div className="field">
           <label htmlFor="paletteShadeCode">{t("palette.shadeCode")}</label>

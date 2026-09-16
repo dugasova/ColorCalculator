@@ -91,6 +91,7 @@ describe("FormulaResults pre-pigmentation step", () => {
   it("renders the filler step ahead of a \"Step 2\" heading once opted in, with the Generic-line example", () => {
     const html = renderToStaticMarkup(
       <FormulaResults
+        brandId="generic"
         brandName="Generic"
         line={null}
         targetShade={targetShade}
@@ -128,6 +129,7 @@ describe("FormulaResults pre-pigmentation step", () => {
   it("omits the filler step entirely when prePigmentationResult is null", () => {
     const html = renderToStaticMarkup(
       <FormulaResults
+        brandId="generic"
         brandName="Generic"
         line={null}
         targetShade={targetShade}
@@ -181,6 +183,7 @@ describe("FormulaResults additional shade blending", () => {
 
     const html = renderToStaticMarkup(
       <FormulaResults
+        brandId="generic"
         brandName="Generic"
         line={null}
         targetShade={targetShade}
@@ -215,6 +218,7 @@ describe("FormulaResults additional shade blending", () => {
   it("omits the second shade from the mix line when no grams were entered", () => {
     const html = renderToStaticMarkup(
       <FormulaResults
+        brandId="generic"
         brandName="Generic"
         line={null}
         targetShade={targetShade}
@@ -271,6 +275,7 @@ describe("FormulaResults substitute blend", () => {
 
     const html = renderToStaticMarkup(
       <FormulaResults
+        brandId="generic"
         brandName="Generic"
         line={null}
         targetShade={targetShade}

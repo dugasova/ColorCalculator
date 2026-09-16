@@ -181,6 +181,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         <TotalGramsField totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} />
       </div>
       <FormulaResults
+        brandId={brandId}
         brandName={brands[brandId].name}
         line={line}
         targetShade={targetShade}

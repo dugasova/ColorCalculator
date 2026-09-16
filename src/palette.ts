@@ -7,6 +7,7 @@ import {
   type CustomBrandRecord, type MixingRatioConfig, type PaletteOverride, customBrandRecordSchema, paletteOverrideSchema,
 } from "./engine/paletteOverrides";
 import type { Shade } from "./engine/shades";
+import type { StockRecord } from "./stock";
 
 export interface PaletteState {
   // Built-ins merged with every admin-added custom brand/shade, discontinued shades
@@ -16,12 +17,16 @@ export interface PaletteState {
   // discontinued shades too (to let an admin re-enable them) — see `getFullBrandShades`.
   customBrands: CustomBrandRecord[];
   overrides: PaletteOverride[];
+  // Remaining-grams records (src/stock.ts) — surfaced here (not a separate context) since
+  // it's admin-editable palette-adjacent data with the exact same live-subscription shape
+  // as customBrands/overrides above.
+  stock: StockRecord[];
 }
 
 // Lives here (not in PaletteContext.tsx) so that file can export nothing but the
 // `PaletteProvider` component — mixing hook/context exports into a component file breaks
 // React Fast Refresh.
-export const PaletteReactContext = createContext<PaletteState>({ brands: BRANDS, customBrands: [], overrides: [] });
+export const PaletteReactContext = createContext<PaletteState>({ brands: BRANDS, customBrands: [], overrides: [], stock: [] });
 
 // The merged, calculator-facing brand catalog. Live: updates the moment an admin adds a
 // shade, discontinues one, or adds a new dye line, in every open session.
@@ -33,6 +38,12 @@ export function usePalette(): Record<BrandId, Brand> {
 // overrides/custom-brand writes precisely.
 export function usePaletteAdmin(): PaletteState {
   return useContext(PaletteReactContext);
+}
+
+// Live remaining-grams records (src/stock.ts) -- used by FormulaResults (shortage
+// warnings) and PaletteAdmin's stock editor.
+export function useStock(): StockRecord[] {
+  return useContext(PaletteReactContext).stock;
 }
 
 const CUSTOM_BRANDS_COLLECTION = "customBrands";

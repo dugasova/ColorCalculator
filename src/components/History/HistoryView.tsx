@@ -4,6 +4,7 @@ import { buildRepeatFormulaRequest, fetchFormulaHistory, type FormulaHistoryEntr
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { planClientRevisits, getRevisitStatus, getClientGroupKey, normalizeClientKey } from "../../revisit";
 import { fetchClients, type ClientProfile } from "../../clients";
+import { buildRevisitReminderText, buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { usePalette } from "../../palette";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
@@ -37,6 +38,21 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   const [nowMs] = useState(() => Date.now());
   const [savedClients, setSavedClients] = useState<ClientProfile[]>([]);
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
+  // Keyed exactly the way `getClientGroupKey` keys a `ClientRevisitPlan` (a real
+  // `clientId`, or a `name:`-prefixed normalized-name fallback), so `plan.clientKey`
+  // resolves directly without re-deriving the join HistoryView's own `groups` memo
+  // below already does per entry.
+  const profilesByClientKey = useMemo(() => {
+    const map = new Map<string, ClientProfile>();
+    for (const client of savedClients) {
+      map.set(client.id, client);
+      // Mirrors the existing name-based fallback semantics: `savedClients` is
+      // name-ordered, so the first same-named profile wins.
+      const nameKey = `name:${normalizeClientKey(client.name)}`;
+      if (!map.has(nameKey)) map.set(nameKey, client);
+    }
+    return map;
+  }, [savedClients]);
 
   useEffect(() => {
     fetchFormulaHistory({ isAdmin, currentUserEmail })
@@ -87,6 +103,8 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
             {revisitPlans.map(plan => {
               const status = getRevisitStatus(plan.recommendedDate, new Date(nowMs));
               const weeks = Math.round(plan.intervalDays / 7);
+              const phone = profilesByClientKey.get(plan.clientKey)?.phone ?? null;
+              const reminderText = buildRevisitReminderText(plan);
               return (
                 <li key={plan.clientKey} className={`history__reminder history__reminder--${status}`}>
                   <span className="history__reminder-client">{plan.clientName}</span>
@@ -94,6 +112,22 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                     {t("history.reminderDetail", { weeks, date: plan.recommendedDate.toLocaleDateString() })}
                   </span>
                   <span className="history__reminder-status">{t(`history.reminderStatus.${status}`)}</span>
+                  <span className="history__reminder-actions">
+                    <button
+                      type="button"
+                      className="button button--share button--whatsapp history__reminder-remind"
+                      onClick={() => window.open(buildWhatsAppReminderUrl(phone, reminderText), "_blank", "noopener,noreferrer")}
+                    >
+                      {t("history.remindWhatsApp")}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--share button--telegram history__reminder-remind"
+                      onClick={() => window.open(buildTelegramReminderUrl(reminderText), "_blank", "noopener,noreferrer")}
+                    >
+                      {t("history.remindTelegram")}
+                    </button>
+                  </span>
                 </li>
               );
             })}

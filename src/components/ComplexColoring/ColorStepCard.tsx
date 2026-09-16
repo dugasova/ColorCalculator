@@ -76,6 +76,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   useEffect(() => {
     const stepData: ColorHistoryStep = {
       kind: "color",
+      brandId,
       brandName: brands[brandId].name,
       line,
       targetShade,
@@ -97,7 +98,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     onChange(stepData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    applicationZone, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
+    brandId, applicationZone, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
     porosity, thickness, chemicalHistory
   ]);
 

@@ -72,6 +72,17 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Dye/developer stock (src/stock.ts). Registering or clearing a tracked product is an
+    // admin action, like every other palette edit -- but *every* stylist's save
+    // auto-decrements what their formula consumed (see consumeStock), so `update` has to
+    // be open to any signed-in salon account. Same trust level as the shared formula
+    // history all accounts already write.
+    match /dyeStock/{stockId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isSignedIn();
+    }
+
     // Built-in brand shade charts (Wella, L'Oréal, ...), migrated out of the JS bundle so
     // an admin can correct entries without a redeploy. Same read/write split as
     // customBrands/paletteOverrides.

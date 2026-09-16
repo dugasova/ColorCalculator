@@ -6,6 +6,7 @@ import type { BleachFormula } from "../engine/bleach";
 import type { PrePigmentationResult } from "../engine/prePigmentation";
 import type { ApplicationZone } from "../engine/applicationZone";
 import type { HairCanvas } from "../engine/canvas";
+import type { BrandId } from "../engine/brands";
 
 // One dye/tone step within a saved session (single-step for a simple color service,
 // multiple for complex work like balayage: one or more `BleachHistoryStep`s to lift
@@ -13,6 +14,12 @@ import type { HairCanvas } from "../engine/canvas";
 export interface ColorHistoryStep {
   kind: "color";
   brandName: string;
+  // The catalog id (`BrandId`) of `brandName`'s brand, needed to charge this step's
+  // grams against the right stock document (see stock.ts's computeStockConsumption).
+  // Absent on entries saved before stock tracking existed and on legacy-shape entries
+  // upgraded by `normalizeHistoryEntry` -- those steps simply don't move stock. New
+  // saves always set it.
+  brandId?: BrandId;
   line: string | null;
   targetShade: Shade;
   startLevel: Level;
