@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { signOut, type User } from "firebase/auth";
 import { auth } from "./firebase";
 import { usePalette } from "./palette";
@@ -32,11 +33,19 @@ const PaletteAdminView = lazy(() =>
 const ChangePasswordModal = lazy(() =>
   import("./components/Account/ChangePasswordModal").then(m => ({ default: m.ChangePasswordModal }))
 );
+const BrandsIndexPage = lazy(() =>
+  import("./components/BrandNotes/BrandsIndexPage").then(m => ({ default: m.BrandsIndexPage }))
+);
+const BrandCheatSheetPage = lazy(() =>
+  import("./components/BrandNotes/BrandCheatSheetPage").then(m => ({ default: m.BrandCheatSheetPage }))
+);
 
 export function AuthenticatedApp({ user }: { user: User }) {
   const { t } = useTranslation();
   const brands = usePalette();
   const isAdmin = useIsAdmin(user.uid);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [view, setView] = useState<AppView>("calculator");
   const [repeatRequest, setRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
   // Bumped after a formula/session save finishes showing its "Saved!" confirmation --
@@ -46,10 +55,26 @@ export function AuthenticatedApp({ user }: { user: User }) {
   const [formResetKey, setFormResetKey] = useState(0);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
+  // The brand cheat sheets (BrandsIndexPage, BrandCheatSheetPage) are real routes, not
+  // part of the `view` state switch below -- derives Nav's active tab from the URL
+  // instead, so a directly-typed bookmark URL (e.g. /loreal) highlights "Brands" too,
+  // not whatever `view` happened to default to.
+  const activeView: AppView = location.pathname === "/" ? view : "brands";
+
+  const handleViewChange = (next: AppView) => {
+    if (next === "brands") {
+      navigate("/brands");
+      return;
+    }
+    navigate("/");
+    setView(next);
+  };
+
   const handleRepeat = (entry: FormulaHistoryEntry) => {
     const request = buildRepeatFormulaRequest(entry, brands);
     if (request === null) return;
     setRepeatRequest(request);
+    navigate("/");
     setView("calculator");
   };
 
@@ -65,8 +90,8 @@ export function AuthenticatedApp({ user }: { user: User }) {
       <a href="#main-content" className="skip-link">{t("app.skipToContent")}</a>
       <header className="app-header">
         <div className="app-topbar">
-          <button type="button" className="app-brand" onClick={() => setView("calculator")} aria-label={t("nav.calculator")}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t("app.titlePrefix")}<em>{t("app.titleAccent")}</em></button>
-          <Nav view={view} onViewChange={setView} isAdmin={isAdmin} />
+          <button type="button" className="app-brand" onClick={() => { navigate("/"); setView("calculator"); }} aria-label={t("nav.calculator")}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t("app.titlePrefix")}<em>{t("app.titleAccent")}</em></button>
+          <Nav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} />
           <div className="app-topbar__account">
             <ThemeSwitcher />
             <LanguageSwitcher />
@@ -82,22 +107,33 @@ export function AuthenticatedApp({ user }: { user: User }) {
         </Suspense>
       )}
       <main className="app-main" id="main-content" tabIndex={-1}>
-        {view === "calculator" && (
-          <FormulaCalculator
-            key={formResetKey}
-            appliedBy={user.email ?? "unknown"}
-            repeatRequest={repeatRequest}
-            onSaved={handleFormulaSaved}
-          />
-        )}
         <Suspense fallback={null}>
-          {view === "correction" && <ColorCorrectionCalculator />}
-          {view === "bleach" && <BleachCalculator />}
-          {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} onSaved={handleFormulaSaved} />}
-          {view === "prepigment" && <PrePigmentationCalculator />}
-          {view === "history" && <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
-          {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
-          {view === "palette" && isAdmin && <PaletteAdminView />}
+          <Routes>
+            <Route path="/brands" element={<BrandsIndexPage />} />
+            <Route path="/:brandId" element={<BrandCheatSheetPage />} />
+            <Route
+              path="/"
+              element={
+                <>
+                  {view === "calculator" && (
+                    <FormulaCalculator
+                      key={formResetKey}
+                      appliedBy={user.email ?? "unknown"}
+                      repeatRequest={repeatRequest}
+                      onSaved={handleFormulaSaved}
+                    />
+                  )}
+                  {view === "correction" && <ColorCorrectionCalculator />}
+                  {view === "bleach" && <BleachCalculator />}
+                  {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} onSaved={handleFormulaSaved} />}
+                  {view === "prepigment" && <PrePigmentationCalculator />}
+                  {view === "history" && <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
+                  {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
+                  {view === "palette" && isAdmin && <PaletteAdminView />}
+                </>
+              }
+            />
+          </Routes>
         </Suspense>
       </main>
     </div>

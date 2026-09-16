@@ -13,4 +13,9 @@ describe("Nav", () => {
     expect(html).toContain("History");
     expect(html.match(/aria-selected="true"/g)).toHaveLength(1);
   });
+
+  it("renders the Brands tab, visible to every stylist (not admin-gated)", () => {
+    const html = renderToStaticMarkup(<Nav view="correction" onViewChange={() => {}} />);
+    expect(html).toContain("Brands");
+  });
 });

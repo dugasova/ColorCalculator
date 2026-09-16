@@ -24,6 +24,7 @@ export const en = {
     prepigment: "Pre-pigment",
     analytics: "Analytics",
     palette: "Palette",
+    brands: "Brands",
     ariaLabel: "Primary navigation",
   },
   account: {
@@ -446,6 +447,54 @@ export const en = {
       pearl: "Pearl",
       "slate-grey": "Slate grey",
       mahogany: "Mahogany",
+    },
+  },
+  brandNotes: {
+    indexTitlePrefix: "Brand",
+    indexTitleAccent: "Notes",
+    indexHint: "Quick per-brand mixing/processing quirks -- glance at these with gloves on, instead of hunting through the app.",
+    backToApp: "← Back to the app",
+    notFound: "No cheat sheet for \"{{brandId}}\".",
+    notFoundHint: "Available: {{ids}}",
+    loreal: {
+      title: "L'Oréal",
+      points: [
+        "Majirel: fixed 1:1.5 with developer, never level-based. 50 g tubes (not the usual 60 g).",
+        "INOA: fixed 1:1. Standard 60 g tubes.",
+        "Dia Light / Dia Richesse (ammonia-free gloss): 1:1.5, developer choice of 6 or 10 vol. 50 g tubes.",
+        "Majiblond Ultra (high-lift): fixed 50 min, no heat, regardless of gray %.",
+      ],
+    },
+    wella: {
+      title: "Wella",
+      points: [
+        "Koleston Perfect: 1:1, except the \"12\" Special Blonde series (1:2).",
+        "Same depth or darker with little gray: use 4% (13 vol) instead of the usual 3%.",
+        "Special Blonde: fixed 55 min, no heat.",
+        "Color Touch (demi): its own 1.9%/4% developer choice, separate from the rules above.",
+      ],
+    },
+    igora: {
+      title: "Igora",
+      points: [
+        "Igora Royal: 1:1, including the \"10-\" Ultra Blonde series. \"12-\" Special Blonde is 1:2.",
+        "Highlifts 12-series: fixed 45 min, no heat.",
+        "Igora Vibrance (demi toner): always 1:1 with activator, even the level-10 toners.",
+      ],
+    },
+    redken: {
+      title: "Redken",
+      points: [
+        "Shades EQ (demi gloss): always 1:1, never lifts -- no real developer-volume choice.",
+        "Chromatics (permanent): fixed 1:1 with its own Oil-in-Cream Developer -- different chemistry from Shades EQ despite sharing the brand.",
+      ],
+    },
+    generic: {
+      title: "Generic",
+      points: [
+        "Not tied to a real manufacturer -- a reference level.reflect chart; the ratio follows the standard lift-based formula, not a fixed one.",
+        "Used as the default brand and as the pre-pigmentation worked example.",
+      ],
     },
   },
 };
