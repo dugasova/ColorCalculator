@@ -18,7 +18,11 @@ const canvasShapeSchema = z.object({
 });
 
 const historyStepShapeSchema = z.union([
-  z.looseObject({ kind: z.literal("color"), canvas: canvasShapeSchema.optional() }),
+  z.looseObject({
+    kind: z.literal("color"),
+    canvas: canvasShapeSchema.optional(),
+    actualColorGrams: z.number().nonnegative().nullable().optional(),
+  }),
   z.looseObject({ kind: z.literal("bleach"), canvas: canvasShapeSchema.optional() }),
 ]);
 

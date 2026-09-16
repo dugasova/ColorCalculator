@@ -4,6 +4,8 @@ import "../../i18n";
 import { calculateFullFormula, applyAdditionalShade, splitShadeBlend } from "../../engine/formula";
 import { calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { Shade } from "../../engine/shades";
+import { PaletteReactContext } from "../../palette";
+import { BRANDS } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
 import FormulaCalculator from "./FormulaCalculator";
 import { FormulaResults } from "./FormulaResults";
@@ -33,6 +35,7 @@ describe("FormulaCalculator", () => {
 
   it("hides the pre-pigmentation checkbox when the level drop is under 2 (no lift/no drop)", () => {
     const repeatRequest: RepeatFormulaRequest = {
+      clientName: "Anna K.", clientId: "anna-1",
       brandId: "generic", line: null, targetShadeCode: "8.1", startLevel: 8, grayPercent: 0, totalGrams: 60,
       manualDeveloperVolume: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
@@ -46,6 +49,7 @@ describe("FormulaCalculator", () => {
 
   it("shows the pre-pigmentation checkbox, unchecked, when the level drop is 2 or more and the repeated entry never opted in", () => {
     const repeatRequest: RepeatFormulaRequest = {
+      clientName: "Anna K.", clientId: "anna-1",
       brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30,
       manualDeveloperVolume: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
@@ -61,6 +65,7 @@ describe("FormulaCalculator", () => {
 
   it("restores an opted-in filler step when repeating an entry that had it checked", () => {
     const repeatRequest: RepeatFormulaRequest = {
+      clientName: "Anna K.", clientId: "anna-1",
       brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30,
       manualDeveloperVolume: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
@@ -71,6 +76,22 @@ describe("FormulaCalculator", () => {
 
     expect(html).toContain("Step 1");
     expect(html).toContain("Generic 5.4 (Copper)");
+  });
+
+  it("seeds the markup field from the live salon setting, not the hardcoded default", () => {
+    const html = renderToStaticMarkup(
+      <PaletteReactContext.Provider
+        value={{
+          brands: BRANDS, customBrands: [], overrides: [], stock: [],
+          pricingSettings: { markupMultiplier: 2.5 },
+        }}
+      >
+        <FormulaCalculator appliedBy="stylist@example.com" />
+      </PaletteReactContext.Provider>
+    );
+
+    expect(html).toContain("id=\"markupMultiplier\"");
+    expect(html).toContain("value=\"2.5\"");
   });
 });
 

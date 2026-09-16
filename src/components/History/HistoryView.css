@@ -62,6 +62,24 @@
   color: var(--brand-ink);
 }
 
+.history__entry-actual {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+
+.history__entry-actual input {
+  max-width: 7rem;
+}
+
+.history__entry-actual-hint {
+  color: var(--brand-muted);
+  font-size: 0.75rem;
+}
+
 .history__entry-note {
   margin: 8px 0 0;
   padding: 0.5rem 0.75rem;
@@ -116,6 +134,11 @@
 }
 
 .history__client-group-summary {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   padding: 14px 16px;
   display: flex;
@@ -124,7 +147,8 @@
   gap: 4px 12px;
 }
 
-.history__client-group-summary:hover {
+.history__client-group-summary:hover,
+.history__client-group-summary:focus-visible {
   background: var(--brand-surface);
 }
 

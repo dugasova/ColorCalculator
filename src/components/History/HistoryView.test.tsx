@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor, within, fireEvent } from "@testing-library/react";
 import "../../i18n";
 import { HistoryView } from "./HistoryView";
-import { fetchFormulaHistory } from "../../history";
+import { fetchFormulaHistory, setActualColorGrams } from "../../history";
 import { fetchClients } from "../../clients";
 import type { FormulaHistoryEntry, ColorHistoryStep } from "../../history";
 import type { ClientProfile } from "../../clients";
@@ -14,6 +14,7 @@ vi.mock("../../history", async () => {
     ...actual,
     fetchFormulaHistory: vi.fn(),
     buildRepeatFormulaRequest: vi.fn().mockReturnValue(null),
+    setActualColorGrams: vi.fn(),
   };
 });
 vi.mock("../../clients", () => ({
@@ -87,10 +88,10 @@ describe("HistoryView client grouping", () => {
 
     renderHistoryView();
 
-    // One card per distinct client, not per visit -- "Anna K."/"Boris P." also appear
-    // inside each visit's own entry card, so this counts <details role="group"> cards
-    // rather than matching the (ambiguous, repeated) name text directly.
-    await waitFor(() => expect(screen.getAllByRole("group")).toHaveLength(2));
+    // One card per distinct client, not per visit -- each card is a button carrying its
+    // own "Visits: N" text in its accessible name, so this counts those rather than
+    // matching the (ambiguous, repeated) name text directly.
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(2));
     expect(screen.getByText(/^Visits: 2/)).toBeInTheDocument();
     expect(screen.getByText(/^Visits: 1/)).toBeInTheDocument();
   });
@@ -104,7 +105,7 @@ describe("HistoryView client grouping", () => {
 
     renderHistoryView();
 
-    await waitFor(() => expect(screen.getAllByRole("group")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(1));
     expect(screen.getByText(/^Visits: 2/)).toBeInTheDocument();
   });
 
@@ -122,12 +123,13 @@ describe("HistoryView client grouping", () => {
 
     renderHistoryView();
 
-    const card = await screen.findByRole("group");
+    // Contact info sits directly on the collapsed card -- no need to open the modal for it.
+    const card = await screen.findByRole("button", { name: /Visits: \d/ });
     expect(within(card).getByText(/\+1 555 0100/)).toBeInTheDocument();
     expect(within(card).getByText(/PPD sensitivity/)).toBeInTheDocument();
   });
 
-  it("starts every client card collapsed, then auto-expands the one left after search narrows to a single client", async () => {
+  it("keeps every client card collapsed until clicked, opening only that client's visits in a modal", async () => {
     vi.mocked(fetchFormulaHistory).mockResolvedValue([
       makeEntry({ id: "1", clientName: "Anna K." }),
       makeEntry({ id: "2", clientName: "Boris P." }),
@@ -135,15 +137,28 @@ describe("HistoryView client grouping", () => {
     vi.mocked(fetchClients).mockResolvedValue([]);
 
     renderHistoryView();
-    await waitFor(() => expect(screen.getAllByRole("group")).toHaveLength(2));
-    for (const group of screen.getAllByRole("group")) {
-      expect((group as HTMLDetailsElement).open).toBe(false);
-    }
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(2));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Search by client name"), { target: { value: "Anna" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Anna K\./ }));
 
-    await waitFor(() => expect(screen.getAllByRole("group")).toHaveLength(1));
-    expect((screen.getByRole("group") as HTMLDetailsElement).open).toBe(true);
+    // The dialog's accessible name is the modal title, set to the clicked client's own
+    // display name -- confirms it opened the right client's visits, not the other one's.
+    const dialog = await screen.findByRole("dialog", { name: "Anna K." });
+    expect(within(dialog).queryByText("Boris P.")).not.toBeInTheDocument();
+  });
+
+  it("closes the modal on Escape, returning to the collapsed card list", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K." })]);
+    vi.mocked(fetchClients).mockResolvedValue([]);
+
+    renderHistoryView();
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+    await screen.findByRole("dialog");
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
   it("keeps two real clients who happen to share a name in separate cards, each with its own real clientId", async () => {
@@ -157,7 +172,7 @@ describe("HistoryView client grouping", () => {
 
     // Two distinct people with the same display name must never merge into one card --
     // that would silently mix their formula history/visit counts together.
-    await waitFor(() => expect(screen.getAllByRole("group")).toHaveLength(2));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(2));
     const visitCounts = screen.getAllByText(/^Visits: 1/);
     expect(visitCounts).toHaveLength(2);
   });
@@ -174,7 +189,7 @@ describe("HistoryView client grouping", () => {
 
     renderHistoryView();
 
-    const cards = await screen.findAllByRole("group");
+    const cards = await screen.findAllByRole("button", { name: /Visits: \d/ });
     expect(cards).toHaveLength(2);
     const cardPhones = cards.map(card => within(card).getByText(/\+1 555/).textContent);
     expect(cardPhones.sort()).toEqual([expect.stringContaining("+1 555 0100"), expect.stringContaining("+1 555 0200")]);
@@ -222,5 +237,33 @@ describe("HistoryView revisit reminders", () => {
     const url = openSpy.mock.calls[0][0] as string;
     expect(url.startsWith("https://t.me/share/url?url=")).toBe(true);
     openSpy.mockRestore();
+  });
+});
+
+describe("HistoryView actual grams", () => {
+  it("records a typed actual-grams figure on blur and renders the entry's updated product cost", async () => {
+    const entry = makeEntry({ id: "1", clientName: "Anna K." });
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([entry]);
+    vi.mocked(fetchClients).mockResolvedValue([]);
+    vi.mocked(setActualColorGrams).mockResolvedValue({ steps: entry.steps, productCost: 18 });
+
+    renderHistoryView();
+
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+    await screen.findByRole("dialog");
+
+    const input = await screen.findByLabelText("Actually used 7.1, g");
+    fireEvent.change(input, { target: { value: "45" } });
+    fireEvent.blur(input);
+
+    await waitFor(() =>
+      expect(setActualColorGrams).toHaveBeenCalledWith({
+        id: "1",
+        steps: entry.steps,
+        stepIndex: 0,
+        actualColorGrams: 45,
+      })
+    );
+    await waitFor(() => expect(screen.getByText(/Product cost: 18\.00/)).toBeInTheDocument());
   });
 });

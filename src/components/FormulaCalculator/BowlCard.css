@@ -1,0 +1,67 @@
+/* Big-print card meant to be read at arm's length next to the mixing bowl, not squinted
+   at on a phone -- every value here is deliberately oversized compared to the rest of the
+   app's UI (see FormulaCalculator.css's normal 0.85-1rem body text). */
+.bowl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: center;
+}
+
+.bowl-card__client {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.bowl-card__formula {
+  margin: 0;
+  padding: 16px;
+  border-radius: 1rem;
+  background: var(--field-bg);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+.bowl-card__time {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold-ink);
+}
+
+.bowl-card__actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* Standard "print only this element" trick: hide the whole page, then re-reveal just the
+   card -- the modal's own header/backdrop/close button (outside .bowl-card) and the
+   .no-print action button stay hidden, so the physical printout is composition + time +
+   client name and nothing else. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .bowl-card,
+  .bowl-card * {
+    visibility: visible;
+  }
+
+  .bowl-card {
+    position: fixed;
+    inset: 0;
+    padding: 32px;
+  }
+
+  .bowl-card .no-print {
+    display: none;
+  }
+}

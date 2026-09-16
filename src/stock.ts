@@ -7,6 +7,7 @@ import type { BrandId } from "./engine/brands";
 import type { DeveloperVolume } from "./engine/levels";
 import { developerVolumeSchema } from "./engine/shades";
 import type { HistoryStep } from "./history";
+import { actualGramsScale } from "./sessionCost";
 
 const DYE_STOCK_COLLECTION = "dyeStock";
 
@@ -148,8 +149,10 @@ export interface StockConsumption {
 //    charged: neither is tied to a specific product code in the saved data.
 //  - Developer is charged by (brandId, developerVolume) whenever a developer volume was
 //    actually used.
-//  - Grams for the same product across multiple steps (or the primary + additional/blend
 //    split above) are summed into one consumption; non-positive totals are dropped.
+//  - A step with a recorded actualColorGrams (see history/types.ts) charges that figure
+//    instead of the computed colorGrams, scaling developer and every shade share by the
+//    same ratio.
 export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[] {
   const totals = new Map<string, StockConsumption>();
   const add = (id: string, kind: "shade" | "developer", code: string, grams: number) => {
@@ -166,30 +169,37 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
     if (step.kind !== "color" || step.brandId === undefined) continue;
     const grams = step.result.grams;
     if (grams === null) continue;
+    // A recorded actual figure scales this step's whole mix -- primary shade, additional
+    // shades, blend halves and developer alike -- so the split the colorist actually
+    // weighed keeps its proportions. Rounded to 0.1 g only when scaling is in play, so an
+    // unscaled step charges exactly the same grams it always did.
+    const scale = actualGramsScale(step);
+    const addScaled = (id: string, kind: "shade" | "developer", code: string, g: number) =>
+      add(id, kind, code, scale === 1 ? g : Math.round(g * scale * 10) / 10);
     const { brandId, targetShade, blend, additionalShade, additionalShade2, result } = step;
     const additionalShadeGrams = step.additionalShadeGrams ?? 0;
     const additionalShade2Grams = step.additionalShade2Grams ?? 0;
 
     if (blend !== null) {
-      add(shadeStockId(brandId, blend.shadeA.line ?? null, blend.shadeA.code), "shade", blend.shadeA.code, blend.shadeAGrams);
-      add(shadeStockId(brandId, blend.shadeB.line ?? null, blend.shadeB.code), "shade", blend.shadeB.code, blend.shadeBGrams);
+      addScaled(shadeStockId(brandId, blend.shadeA.line ?? null, blend.shadeA.code), "shade", blend.shadeA.code, blend.shadeAGrams);
+      addScaled(shadeStockId(brandId, blend.shadeB.line ?? null, blend.shadeB.code), "shade", blend.shadeB.code, blend.shadeBGrams);
     } else {
       const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
       const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && additionalShade2Grams > 0;
       const primaryGrams = grams.colorGrams
         - (hasAdditional ? additionalShadeGrams : 0)
         - (hasAdditional2 ? additionalShade2Grams : 0);
-      add(shadeStockId(brandId, targetShade.line ?? null, targetShade.code), "shade", targetShade.code, primaryGrams);
+      addScaled(shadeStockId(brandId, targetShade.line ?? null, targetShade.code), "shade", targetShade.code, primaryGrams);
       if (hasAdditional) {
-        add(shadeStockId(brandId, additionalShade.line ?? null, additionalShade.code), "shade", additionalShade.code, additionalShadeGrams);
+        addScaled(shadeStockId(brandId, additionalShade.line ?? null, additionalShade.code), "shade", additionalShade.code, additionalShadeGrams);
       }
       if (hasAdditional2 && additionalShade2 !== null && additionalShade2 !== undefined) {
-        add(shadeStockId(brandId, additionalShade2.line ?? null, additionalShade2.code), "shade", additionalShade2.code, additionalShade2Grams);
+        addScaled(shadeStockId(brandId, additionalShade2.line ?? null, additionalShade2.code), "shade", additionalShade2.code, additionalShade2Grams);
       }
     }
 
     if (result.developerVolume !== null) {
-      add(developerStockId(brandId, result.developerVolume), "developer", String(result.developerVolume), grams.developerGrams);
+      addScaled(developerStockId(brandId, result.developerVolume), "developer", String(result.developerVolume), grams.developerGrams);
     }
   }
 
@@ -214,6 +224,22 @@ async function applyStockDelta(id: string, deltaGrams: number): Promise<void> {
 // Charges every consumption's grams off its tracked document -- see applyStockDelta.
 export async function consumeStock(consumptions: StockConsumption[]): Promise<void> {
   await Promise.all(consumptions.map(consumption => applyStockDelta(consumption.id, -consumption.grams)));
+}
+
+// Re-charges stock after a saved session's grams change -- a stylist recording what was
+// actually weighed out (see setActualColorGrams in history/firestore.ts). Applies only the
+// difference between what the old and new step arrays consume, so editing the same entry
+// repeatedly (or clearing the actual figure again) never double-charges and always lands
+// back on the computed baseline. Signed delta: consuming more means a negative delta on
+// the remaining grams. Untracked products are no-ops, same as consumeStock.
+export async function reconcileStockConsumption(before: HistoryStep[], after: HistoryStep[]): Promise<void> {
+  const beforeGrams = new Map(computeStockConsumption(before).map(c => [c.id, c.grams]));
+  const afterGrams = new Map(computeStockConsumption(after).map(c => [c.id, c.grams]));
+  const ids = new Set([...beforeGrams.keys(), ...afterGrams.keys()]);
+  await Promise.all(Array.from(ids, id => {
+    const delta = (beforeGrams.get(id) ?? 0) - (afterGrams.get(id) ?? 0);
+    return delta === 0 ? Promise.resolve() : applyStockDelta(id, delta);
+  }));
 }
 
 // An admin's quick "+1 tube" action (BrandStockList) -- restocks an already-tracked

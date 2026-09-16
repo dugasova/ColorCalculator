@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProcessingTimer } from "./ProcessingTimer";
+import { BowlCard } from "./BowlCard";
 import { Modal } from "../common/Modal";
 import { createClient, fetchClients, updateClient, type ClientProfile } from "../../clients";
+import type { RepeatFormulaRequest } from "../../history";
 import { formatCanvasText } from "../../formatSession";
 import type { HairCanvas } from "../../engine/canvas";
 
@@ -40,6 +42,14 @@ export interface SessionDetailsPanelProps {
   // editable here -- it's entered at the top of the calculator, well before this panel's
   // client-name field exists to match against.
   canvas?: HairCanvas;
+  // Pre-fills and re-links the client name to the same profile when replaying a "Repeat
+  // formula" request from History (see FormulaCalculator's repeatRequest and
+  // buildRepeatFormulaRequest) -- without this, a repeated visit for a returning client
+  // silently created a second, duplicate client profile unless the colorist happened to
+  // re-pick the exact suggestion by hand, which double-counted that person in every
+  // "unique clients" figure (History's grouping, AnalyticsView's retention). Omitted (not
+  // just `null`) for a caller with no repeat concept at all, e.g. ComplexColoringCalculator.
+  repeatRequest?: RepeatFormulaRequest | null;
 }
 
 const COPIED_FEEDBACK_MS = 1500;
@@ -58,10 +68,16 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 // rather than inline in the results panel -- they're a distinct, only-needed-once-per-save
 // task, and previously took up permanent scroll space (plus two photo pickers) even before
 // a colorist was ready to save.
-export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, saveDisabled, onSaved, appliedBy, canvas }: SessionDetailsPanelProps) {
+export function SessionDetailsPanel({
+  formulaText, processingMinutes, onSave, saveDisabled, onSaved, appliedBy, canvas, repeatRequest,
+}: SessionDetailsPanelProps) {
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  // The large print/at-a-glance card (composition + processing time + client name) for
+  // reading next to the mixing bowl -- opened from a tap on the confirmed client name
+  // below, so a colorist never has to re-open the whole Client details modal for it.
+  const [isBowlCardOpen, setIsBowlCardOpen] = useState(false);
   const [clientName, setClientName] = useState("");
   // The colorist's explicit pick among possibly-several same-named saved clients (see the
   // suggestion list below) -- `null` means "no specific existing client confirmed yet",
@@ -79,6 +95,16 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
   const [beforePhotoPreviewUrl, setBeforePhotoPreviewUrl] = useState<string | null>(null);
   const [afterPhotoPreviewUrl, setAfterPhotoPreviewUrl] = useState<string | null>(null);
   const [savedClients, setSavedClients] = useState<ClientProfile[]>([]);
+  // The repeatRequest currently applied to clientName/selectedClientId below -- a fresh
+  // object each time History's "Repeat" button is clicked (see buildRepeatFormulaRequest),
+  // so comparing by reference is enough to apply each click exactly once, the same
+  // pattern useFormulaCalculatorState uses for the rest of the repeated formula's fields.
+  const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+  // The clientId whose phone/allergy notes have already been backfilled below -- distinct
+  // from `appliedRepeatRequest` because the matched ClientProfile may resolve out of the
+  // async fetchClients load well after the repeat replay (or an explicit suggestion pick)
+  // sets `selectedClientId`, on a later render.
+  const [contactBackfilledForClientId, setContactBackfilledForClientId] = useState<string | null>(null);
   // Lazy initializer runs once at mount — the one React-sanctioned place to read the
   // (impure) system clock during render. A 48h-threshold check doesn't need finer
   // freshness than "when this form was opened".
@@ -121,6 +147,20 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     return () => { cancelled = true; };
   }, [appliedBy]);
 
+  // Replay a "Repeat formula" request's client link right during render, same pattern
+  // (and same rationale) as useFormulaCalculatorState's own repeatRequest effect: no
+  // extra render tick needed, see https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
+  // Without this, repeating a returning client's past visit left this panel's client
+  // fields blank, so an easy-to-miss unlinked save on top of it created a second,
+  // duplicate client profile for the exact same person -- double-counting them in every
+  // "unique clients" figure (History's grouping, AnalyticsView's retention/uniqueClients).
+  if (repeatRequest && repeatRequest !== appliedRepeatRequest) {
+    setAppliedRepeatRequest(repeatRequest);
+    setClientName(repeatRequest.clientName);
+    setSelectedClientId(repeatRequest.clientId);
+  }
+
+
   // Candidates for the typed name, offered as explicit picks rather than auto-matched --
   // two real clients can share a display name, so which one this visit belongs to has to
   // be a deliberate choice, not a guess from text alone. Hidden once a specific client is
@@ -137,6 +177,20 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
     () => (selectedClientId !== null ? savedClients.find(c => c.id === selectedClientId) ?? null : null),
     [selectedClientId, savedClients]
   );
+
+  // Backfills phone/allergy notes once the repeat-linked profile resolves out of the
+  // async fetchClients load above -- handleSelectSuggestion does this eagerly for an
+  // explicit click, but a repeat-driven selection has no click to hang it off of, and
+  // `savedClients` may still be loading the instant the replay above runs. Right during
+  // render, same "adjust state when a prop/derived value changes" pattern as the
+  // repeatRequest replay above -- only into fields still blank (never overwrites
+  // something already typed this visit), and a no-op once already backfilled for this
+  // clientId (or handleSelectSuggestion already filled them in itself).
+  if (selectedClient !== null && selectedClient.id !== contactBackfilledForClientId) {
+    setContactBackfilledForClientId(selectedClient.id);
+    setPhone(prev => (prev === "" ? selectedClient.phone : prev));
+    setAllergyNotes(prev => (prev === "" ? selectedClient.allergyNotes : prev));
+  }
 
   // Purely informational -- the canvas fields live at the top of the calculator, entered
   // well before a client is even picked here, so there's no live value to overwrite. This
@@ -276,7 +330,16 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
         >
           {t("results.clientDetailsSectionTitle")}
         </button>
-        {clientName.trim() !== "" && <p className="results__client-summary-name">{clientName.trim()}</p>}
+        {clientName.trim() !== "" && (
+          <button
+            type="button"
+            className="results__client-summary-name"
+            onClick={() => setIsBowlCardOpen(true)}
+            aria-label={t("results.bowlCardOpenAria", { name: clientName.trim() })}
+          >
+            {clientName.trim()}
+          </button>
+        )}
         {clientName.trim() !== "" && !patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}
       </div>
 
@@ -404,6 +467,15 @@ export function SessionDetailsPanel({ formulaText, processingMinutes, onSave, sa
           </div>
           {saveState === "error" && <p className="warning" role="alert">{t("results.saveError")}</p>}
         </Modal>
+      )}
+
+      {isBowlCardOpen && (
+        <BowlCard
+          clientName={clientName.trim()}
+          formulaText={formulaText}
+          processingMinutes={processingMinutes}
+          onClose={() => setIsBowlCardOpen(false)}
+        />
       )}
     </>
   );

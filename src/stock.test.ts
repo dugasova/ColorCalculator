@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { computeStockConsumption, consumeStock, developerStockId, shadeStockId, getStockStatus, getShadeTubeSizeGrams, restockOneTube } from "./stock";
+import { computeStockConsumption, consumeStock, reconcileStockConsumption, developerStockId, shadeStockId, getStockStatus, getShadeTubeSizeGrams, restockOneTube } from "./stock";
 import type { ColorHistoryStep, BleachHistoryStep, HistoryStep } from "./history";
 import type { Shade } from "./engine/shades";
 
@@ -127,6 +127,20 @@ describe("computeStockConsumption", () => {
     const shade = consumptions.find(c => c.kind === "shade");
     expect(shade?.grams).toBe(60);
   });
+
+  it("scales shade and developer grams by a recorded actual figure", () => {
+    const consumptions = computeStockConsumption([makeColorStep({ actualColorGrams: 45 })]);
+    const byId = new Map(consumptions.map(c => [c.id, c]));
+    expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/1"))?.grams).toBe(45);
+    expect(byId.get(developerStockId("wella", 20))?.grams).toBe(90);
+  });
+
+  it("charges the unscaled computed grams when no actual figure is recorded", () => {
+    const consumptions = computeStockConsumption([makeColorStep({ actualColorGrams: undefined })]);
+    const byId = new Map(consumptions.map(c => [c.id, c]));
+    expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/1"))?.grams).toBe(30);
+    expect(byId.get(developerStockId("wella", 20))?.grams).toBe(60);
+  });
 });
 
 describe("consumeStock", () => {
@@ -184,5 +198,27 @@ describe("getShadeTubeSizeGrams", () => {
     expect(getShadeTubeSizeGrams("loreal", "inoa")).toBe(60);
     expect(getShadeTubeSizeGrams("wella", "Koleston Perfect")).toBe(60);
     expect(getShadeTubeSizeGrams("generic", null)).toBe(60);
+  });
+});
+
+describe("reconcileStockConsumption", () => {
+  it("charges only the difference when a recorded actual figure changes an already-saved session's grams", async () => {
+    getDocMock.mockResolvedValue({ exists: () => true });
+    const before = [makeColorStep({ actualColorGrams: undefined })];
+    const after = [makeColorStep({ actualColorGrams: 45 })];
+    await reconcileStockConsumption(before, after);
+    expect(incrementMock).toHaveBeenCalledWith(-15);
+    expect(updateDocMock).toHaveBeenCalledWith(
+      expect.anything(),
+      { remainingGrams: { kind: "increment", n: -15 } }
+    );
+  });
+
+  it("issues no update at all when the two step arrays consume the same grams", async () => {
+    getDocMock.mockResolvedValue({ exists: () => true });
+    const before = [makeColorStep()];
+    const after = [makeColorStep()];
+    await reconcileStockConsumption(before, after);
+    expect(updateDocMock).not.toHaveBeenCalled();
   });
 });

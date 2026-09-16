@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
+import { calculateRecommendedServicePrice } from "../../engine/pricing";
 import { saveFormulaToHistory, type HistoryStep } from "../../history";
+import { useSalonMarkupMultiplier } from "../../palette";
+import { calculateSessionProductCost } from "../../sessionCost";
 import { formatSessionText } from "../../formatSession";
 import { SessionDetailsPanel, type SessionDetails } from "../FormulaCalculator/SessionDetailsPanel";
 import { ColorStepCard } from "./ColorStepCard";
@@ -23,13 +25,6 @@ interface StepScaffold {
   kind: HistoryStep["kind"];
 }
 
-function stepTotalGrams(step: HistoryStep): number {
-  if (step.kind === "color") {
-    return step.result.grams !== null ? step.result.grams.colorGrams + step.result.grams.developerGrams : 0;
-  }
-  return step.result.grams !== null ? step.result.grams.powderGrams + step.result.grams.developerGrams : 0;
-}
-
 // A saved multi-step session for complex color work — one or more bleach (lift) steps
 // combined with one or more color/tone steps, e.g. balayage: bleach powder on sections,
 // then a permanent color to tone the rest. Each step is calculated independently by its own
@@ -39,7 +34,9 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
   const { t } = useTranslation();
   const [scaffold, setScaffold] = useState<StepScaffold[]>([]);
   const [computedSteps, setComputedSteps] = useState<Record<string, HistoryStep>>({});
-  const [markupMultiplier, setMarkupMultiplier] = useState(DEFAULT_MARKUP_MULTIPLIER);
+  const salonMarkupMultiplier = useSalonMarkupMultiplier();
+  const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
+  const markupMultiplier = manualMarkupMultiplier ?? salonMarkupMultiplier;
   const [manualServicePrice, setManualServicePrice] = useState<number | undefined>(undefined);
   const nextIdRef = useRef(0);
 
@@ -71,9 +68,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
     .filter((step): step is HistoryStep => step !== undefined);
 
   const totalProcessingMinutes = orderedSteps.reduce((sum, step) => sum + step.processingMinutes, 0);
-  const totalProductCost = orderedSteps.length > 0
-    ? orderedSteps.reduce((sum, step) => sum + calculateProductCost(stepTotalGrams(step), step.pricePerGram), 0)
-    : null;
+  const totalProductCost = calculateSessionProductCost(orderedSteps);
   const recommendedServicePrice = totalProductCost !== null
     ? calculateRecommendedServicePrice(totalProductCost, markupMultiplier)
     : null;
@@ -158,7 +153,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
                 min={1}
                 step={0.1}
                 value={markupMultiplier}
-                onChange={e => setMarkupMultiplier(Number(e.target.value))}
+                onChange={e => setManualMarkupMultiplier(Number(e.target.value))}
               />
             </div>
             <div className="field">

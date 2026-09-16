@@ -120,6 +120,30 @@ describe("computeSalonAnalytics", () => {
     expect(computeSalonAnalytics(entries).averageColorGrams).toBe(10);
   });
 
+  it("computes actualVsComputedRatio and averageActualColorGrams from recorded-vs-computed pairs", () => {
+    const entries = [
+      makeEntry({
+        clientName: "A",
+        steps: [makeColorStep({ actualColorGrams: 45, result: { ...makeColorStep().result, grams: { colorGrams: 30, developerGrams: 30 } } })],
+      }),
+      makeEntry({
+        clientName: "B",
+        steps: [makeColorStep({ actualColorGrams: 15, result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } } })],
+      }),
+    ];
+
+    const stats = computeSalonAnalytics(entries);
+    expect(stats.averageActualColorGrams).toBe(30);
+    expect(stats.actualVsComputedRatio).toBeCloseTo(1.5, 5);
+  });
+
+  it("returns null averageActualColorGrams and actualVsComputedRatio when nothing has been recorded", () => {
+    const entries = [makeEntry({ clientName: "A" })];
+    const stats = computeSalonAnalytics(entries);
+    expect(stats.averageActualColorGrams).toBeNull();
+    expect(stats.actualVsComputedRatio).toBeNull();
+  });
+
   it("averages productCost across entries with a non-null value", () => {
     const entries = [
       makeEntry({ clientName: "A", productCost: 20 }),

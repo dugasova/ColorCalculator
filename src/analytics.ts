@@ -15,6 +15,8 @@ export interface SalonAnalytics {
   retentionRate: number;       // returningClients / uniqueClients; 0 when uniqueClients === 0
   popularShades: ShadePopularity[]; // sorted desc by count, ties broken by shadeCode asc
   averageColorGrams: number | null; // avg colorGrams (dye only, excludes developer) across entries with a computed formula; null if none
+  averageActualColorGrams: number | null; // avg recorded real dye grams; null when nothing has been recorded
+  actualVsComputedRatio: number | null;   // sum(actual) / sum(computed) over steps that have both; 1 means the engine matches reality
   averageProductCost: number | null; // avg stored productCost across entries with a non-null value; null if none
 }
 
@@ -55,6 +57,20 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
     ? colorGramsValues.reduce((sum, g) => sum + g, 0) / colorGramsValues.length
     : null;
 
+  const actualPairs = entries
+    .flatMap(e => e.steps)
+    .filter((step): step is ColorHistoryStep => step.kind === "color")
+    .map(step => ({ actual: step.actualColorGrams, computed: step.result.grams?.colorGrams }))
+    .filter((pair): pair is { actual: number; computed: number } =>
+      typeof pair.actual === "number" && typeof pair.computed === "number");
+  const averageActualColorGrams = actualPairs.length > 0
+    ? actualPairs.reduce((sum, p) => sum + p.actual, 0) / actualPairs.length
+    : null;
+  const computedTotal = actualPairs.reduce((sum, p) => sum + p.computed, 0);
+  const actualVsComputedRatio = computedTotal > 0
+    ? actualPairs.reduce((sum, p) => sum + p.actual, 0) / computedTotal
+    : null;
+
   const productCostValues = entries
     .map(e => e.productCost)
     .filter((c): c is number => typeof c === "number");
@@ -79,5 +95,8 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
   }
   const retentionRate = uniqueClients > 0 ? returningClients / uniqueClients : 0;
 
-  return { totalVisits, uniqueClients, returningClients, retentionRate, popularShades, averageColorGrams, averageProductCost };
+  return {
+    totalVisits, uniqueClients, returningClients, retentionRate, popularShades,
+    averageColorGrams, averageActualColorGrams, actualVsComputedRatio, averageProductCost,
+  };
 }

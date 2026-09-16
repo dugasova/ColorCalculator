@@ -4,6 +4,7 @@ import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import "../../i18n";
 import { ColorStepCard } from "./ColorStepCard";
 import { PaletteReactContext, type PaletteState } from "../../palette";
+import { DEFAULT_PRICING_SETTINGS } from "../../salonSettings";
 import { BRANDS, type Brand, type BrandId } from "../../engine/brands";
 import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
 import { getMixingRatio } from "../../engine/formula";
@@ -28,7 +29,7 @@ function brandsWith(shades: Shade[]): Record<BrandId, Brand> {
 }
 
 function paletteState(shades: Shade[]): PaletteState {
-  return { brands: brandsWith(shades), customBrands: [], overrides: [], stock: [] };
+  return { brands: brandsWith(shades), customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS };
 }
 
 // The custom Select (see components/common/Select) has no native <select> "change" event

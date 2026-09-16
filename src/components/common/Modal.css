@@ -36,6 +36,14 @@
   animation: modal-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Large variant (see BowlCard, the mixing-bowl formula card): a wider ceiling so the huge
+   composition/processing-time text has room, while staying the same near-fullscreen
+   bottom sheet as the default size on a phone (see the @media rule below). */
+.modal--large {
+  max-width: 640px;
+  max-height: min(92vh, 860px);
+}
+
 .modal__header {
   display: flex;
   align-items: center;

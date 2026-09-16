@@ -6,6 +6,12 @@ import { DEFAULT_MARKUP_MULTIPLIER } from "../engine/pricing";
 import type { FormulaHistoryEntry } from "./types";
 
 export interface RepeatFormulaRequest {
+  // Carried forward so Save can re-link this repeat to the same client profile instead
+  // of silently creating a duplicate one -- see SessionDetailsPanel's `repeatRequest`
+  // prop. `clientId` is whatever the original entry had (real id, or null for a legacy
+  // entry saved before clientId existed / an explicitly unlinked save).
+  clientName: string;
+  clientId: string | null;
   brandId: BrandId;
   line: string | null;
   targetShadeCode: string;
@@ -73,6 +79,8 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   const blendPrimaryPercent = blend !== null && blendTotal > 0 ? Math.round(blend.shadeAGrams / blendTotal * 100) : 70;
 
   return {
+    clientName: entry.clientName,
+    clientId: entry.clientId,
     brandId: brand.id,
     line: step.line,
     targetShadeCode: step.targetShade.code,

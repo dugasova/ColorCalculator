@@ -47,6 +47,13 @@ export interface ColorHistoryStep {
   neutralizationApplied: boolean;
   processingMinutes: number;
   pricePerGram: number;
+  // What the colorist actually weighed out of dye for this step, entered in History after
+  // the service (see HistoryView) -- `result.grams.colorGrams` is only the engine's
+  // prediction. Dye only: developer is mixed to the step's ratio, so every derived figure
+  // (stock, cost) scales the whole mix by actual/computed rather than storing a second
+  // number nobody weighs separately. `undefined` on every step saved before this field
+  // existed and `null` once a stylist clears it -- both mean "use the computed grams".
+  actualColorGrams?: number | null;
 }
 
 export interface ColorBlend {

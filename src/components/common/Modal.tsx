@@ -7,6 +7,9 @@ export interface ModalProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  // "large" widens the dialog (see BowlCard, the mixing-bowl formula card) -- everything
+  // else (portal, focus trap, escape/backdrop close) is identical to the default size.
+  size?: "default" | "large";
 }
 
 // A generic accessible dialog, portaled to <body> so it escapes the calculator card's own
@@ -17,7 +20,7 @@ export interface ModalProps {
 // aliases `.calculator` sets in FormulaCalculator.css -- the portal renders as a sibling of
 // `.calculator`, not a descendant, so shared classes like `.field` used inside a modal
 // (see SessionDetailsPanel) would otherwise resolve those custom properties to nothing.
-export function Modal({ title, onClose, children }: ModalProps) {
+export function Modal({ title, onClose, children, size = "default" }: ModalProps) {
   const { t } = useTranslation();
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -67,7 +70,7 @@ export function Modal({ title, onClose, children }: ModalProps) {
     // Select.tsx makes the same tradeoff.
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div className="modal-overlay" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialogRef} tabIndex={-1}>
+      <div className={`modal${size === "large" ? " modal--large" : ""}`} role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialogRef} tabIndex={-1}>
         <div className="modal__header">
           <h2 id={titleId} className="modal__title">{title}</h2>
           <button type="button" className="modal__close" onClick={onClose} aria-label={t("common.close")}>

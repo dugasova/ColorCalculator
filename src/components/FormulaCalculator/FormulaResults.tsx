@@ -10,7 +10,7 @@ import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../engine/formatPrePigmentation";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
-import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
+import { saveFormulaToHistory, type ColorHistoryStep, type RepeatFormulaRequest } from "../../history";
 import { useStock } from "../../palette";
 import { computeStockConsumption, stockById } from "../../stock";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
@@ -55,6 +55,10 @@ export interface FormulaResultsProps {
   // calculator (brand/shade/level, not just this panel's client fields) once the "Saved!"
   // confirmation has finished showing.
   onSaved?: () => void;
+  // Forwarded to SessionDetailsPanel so repeating a past visit re-links the save to the
+  // same client instead of silently creating a duplicate profile -- see
+  // buildRepeatFormulaRequest and SessionDetailsPanel's own `repeatRequest` prop.
+  repeatRequest?: RepeatFormulaRequest | null;
 }
 
 const MAX_PROCESSING_MINUTES = 180;
@@ -64,7 +68,7 @@ export function FormulaResults({
   additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
-  productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved,
+  productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved, repeatRequest,
 }: FormulaResultsProps) {
   const { t } = useTranslation();
   const { inputProps: processingMinutesInputProps } = useClampedNumberText(
@@ -307,6 +311,7 @@ export function FormulaResults({
         onSaved={onSaved}
         appliedBy={appliedBy}
         canvas={{ porosity, thickness, chemicalHistory }}
+        repeatRequest={repeatRequest}
       />
     </div>
   );

@@ -9,5 +9,8 @@ export type {
   ColorHistoryStep, ColorBlend, BleachHistoryStep, HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry,
 } from "./types";
 export { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
-export { sanitizeForFirestore, saveFormulaToHistory, fetchFormulaHistory, type SaveFormulaParams } from "./firestore";
+export {
+  sanitizeForFirestore, saveFormulaToHistory, fetchFormulaHistory, setActualColorGrams,
+  type SaveFormulaParams, type SetActualColorGramsParams, type ActualColorGramsResult,
+} from "./firestore";
 export { buildRepeatFormulaRequest, type RepeatFormulaRequest } from "./repeatFormula";

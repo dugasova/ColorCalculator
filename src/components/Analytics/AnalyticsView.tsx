@@ -63,6 +63,14 @@ export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps)
               <span className="analytics__kpi-value">{stats.averageProductCost !== null ? stats.averageProductCost.toFixed(2) : "—"}</span>
               <span className="analytics__kpi-label">{t("analytics.averageProductCost")}</span>
             </div>
+            <div className="analytics__kpi">
+              <span className="analytics__kpi-value">{stats.averageActualColorGrams !== null ? stats.averageActualColorGrams.toFixed(1) : "—"}</span>
+              <span className="analytics__kpi-label">{t("analytics.averageActualColorGrams")}</span>
+            </div>
+            <div className="analytics__kpi">
+              <span className="analytics__kpi-value">{stats.actualVsComputedRatio !== null ? `${Math.round(stats.actualVsComputedRatio * 100)}%` : "—"}</span>
+              <span className="analytics__kpi-label">{t("analytics.actualVsComputedRatio")}</span>
+            </div>
           </div>
 
           <h2 className="analytics__section-title">{t("analytics.popularShadesTitle")}</h2>

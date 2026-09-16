@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { canBlendShades, suggestBlendComponents } from "../../engine/shades";
 import { splitShadeBlend } from "../../engine/formula";
-import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
+import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
 import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { Brand, BrandId } from "../../engine/brands";
+import { useSalonMarkupMultiplier } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
 import { useShadeFormulaState } from "./useShadeFormulaState";
 
@@ -15,7 +16,9 @@ const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
 // render of already-computed values.
 export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeatRequest?: RepeatFormulaRequest | null) {
   const [manualPricePerGram, setManualPricePerGram] = useState<number | undefined>(undefined);
-  const [markupMultiplier, setMarkupMultiplier] = useState(DEFAULT_MARKUP_MULTIPLIER);
+  const salonMarkupMultiplier = useSalonMarkupMultiplier();
+  const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
+  const markupMultiplier = manualMarkupMultiplier ?? salonMarkupMultiplier;
   const [manualServicePrice, setManualServicePrice] = useState<number | undefined>(undefined);
   const [blendModeEnabled, setBlendModeEnabled] = useState(false);
   const [blendShadeACode, setBlendShadeACode] = useState<string | null>(null);
@@ -66,7 +69,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setManualDeveloperVolume(repeatRequest.manualDeveloperVolume);
     setManualProcessingMinutes(repeatRequest.processingMinutes);
     setManualPricePerGram(repeatRequest.pricePerGram);
-    setMarkupMultiplier(repeatRequest.markupMultiplier);
+    setManualMarkupMultiplier(repeatRequest.markupMultiplier);
     setManualServicePrice(repeatRequest.servicePrice);
     setAdditionalShadeCode(repeatRequest.additionalShadeCode);
     setAdditionalShadeGrams(repeatRequest.additionalShadeGrams);
@@ -185,7 +188,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
     manualPricePerGram, setManualPricePerGram,
-    markupMultiplier, setMarkupMultiplier,
+    markupMultiplier, setMarkupMultiplier: setManualMarkupMultiplier,
     manualServicePrice, setManualServicePrice,
     additionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,

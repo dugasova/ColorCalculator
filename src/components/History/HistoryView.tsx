@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildRepeatFormulaRequest, fetchFormulaHistory, type FormulaHistoryEntry } from "../../history";
+import { buildRepeatFormulaRequest, fetchFormulaHistory, setActualColorGrams, type FormulaHistoryEntry } from "../../history";
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { planClientRevisits, getRevisitStatus, getClientGroupKey, normalizeClientKey } from "../../revisit";
 import { fetchClients, type ClientProfile } from "../../clients";
 import { buildRevisitReminderText, buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { usePalette } from "../../palette";
+import { Modal } from "../common/Modal";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
 
@@ -37,6 +38,15 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   const [search, setSearch] = useState("");
   const [nowMs] = useState(() => Date.now());
   const [savedClients, setSavedClients] = useState<ClientProfile[]>([]);
+  // The one client card currently expanded into a modal -- null means every card is
+  // collapsed. A client's full visit list (formula, pricing, photos, ...) needs real
+  // screen space to stay readable, so it opens in a Modal instead of an inline accordion.
+  const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
+  // Keyed `${entry.id}::${stepIndex}` -- a draft exists only while a row is being edited;
+  // otherwise the input renders the persisted value.
+  const [gramsDrafts, setGramsDrafts] = useState<Record<string, string>>({});
+  const [savingGramsKey, setSavingGramsKey] = useState<string | null>(null);
+  const [gramsError, setGramsError] = useState<string | null>(null);
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
   // Keyed exactly the way `getClientGroupKey` keys a `ClientRevisitPlan` (a real
   // `clientId`, or a `name:`-prefixed normalized-name fallback), so `plan.clientKey`
@@ -91,6 +101,41 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
     }
     return Array.from(map.values());
   }, [filtered, savedClients]);
+
+  const openGroup = groups.find(g => g.key === openGroupKey) ?? null;
+
+  const handleActualGramsBlur = async (entry: FormulaHistoryEntry, stepIndex: number) => {
+    const key = `${entry.id}::${stepIndex}`;
+    const draft = gramsDrafts[key];
+    if (draft === undefined) return;
+    const trimmed = draft.trim();
+    let actualColorGrams: number | null;
+    if (trimmed === "") {
+      actualColorGrams = null;
+    } else {
+      const grams = Number(trimmed);
+      if (!Number.isFinite(grams) || grams < 0) {
+        setGramsError(t("history.actualGramsInvalid"));
+        return;
+      }
+      actualColorGrams = grams;
+    }
+    setGramsError(null);
+    setSavingGramsKey(key);
+    try {
+      const updated = await setActualColorGrams({ id: entry.id, steps: entry.steps, stepIndex, actualColorGrams });
+      setEntries(prev => prev.map(e => (e.id === entry.id ? { ...e, steps: updated.steps, productCost: updated.productCost } : e)));
+      setGramsDrafts(prev => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    } catch {
+      setGramsError(t("history.actualGramsSaveError"));
+    } finally {
+      setSavingGramsKey(null);
+    }
+  };
 
   return (
     <div className="calculator">
@@ -147,6 +192,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
 
       {isLoading && <p className="history__status" aria-live="polite">{t("history.loading")}</p>}
       {error !== null && <p className="warning" role="alert">{error}</p>}
+      {gramsError !== null && <p className="warning" role="alert">{gramsError}</p>}
       {!isLoading && error === null && filtered.length === 0 && (
         <p className="history__status" aria-live="polite">{t("history.empty")}</p>
       )}
@@ -154,8 +200,13 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
       <ul className="history__list">
         {groups.map(group => (
           <li key={group.key}>
-            <details className="history__client-group" open={groups.length === 1}>
-              <summary className="history__client-group-summary">
+            <div className="history__client-group">
+              <button
+                type="button"
+                className="history__client-group-summary"
+                onClick={() => setOpenGroupKey(group.key)}
+                aria-haspopup="dialog"
+              >
                 <span className="history__client-group-name">{group.displayName}</span>
                 <span className="history__client-group-meta">
                   {t("history.visitCount", { count: group.entries.length })}
@@ -168,58 +219,91 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                     {group.profile.allergyNotes !== "" && <span>{t("results.allergyNotesLabel")}: {group.profile.allergyNotes}</span>}
                   </span>
                 )}
-              </summary>
-              <ul className="history__entry-list">
-                {group.entries.map(entry => {
-                  const repeatRequest = buildRepeatFormulaRequest(entry, brands);
-                  return (
-                    <li key={entry.id} className="history__entry">
-                      <div className="history__entry-header">
-                        <strong>{entry.clientName}</strong>
-                        <span className="history__entry-date">
-                          {entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : ""}
-                        </span>
-                      </div>
-                      <p className="history__entry-summary">{formatSessionSummary(entry.steps)}</p>
-                      <pre className="history__entry-text">
-                        {formatSessionText(entry.steps)}
-                      </pre>
-                      {(entry.productCost != null || entry.servicePrice != null) && (
-                        <div className="history__entry-pricing">
-                          {entry.productCost != null && <span>{t("results.productCost")}: {entry.productCost.toFixed(2)}</span>}
-                          {entry.servicePrice != null && <span>{t("results.servicePrice")}: {entry.servicePrice.toFixed(2)}</span>}
-                        </div>
-                      )}
-                      {entry.note && <p className="history__entry-note">{entry.note}</p>}
-                      {(entry.patchTestDate || entry.allergyNotes) && (
-                        <p className="history__entry-patch-test">
-                          {entry.patchTestDate && t("history.patchTestOn", { date: new Date(entry.patchTestDate).toLocaleString() })}
-                          {entry.patchTestDate && entry.allergyNotes && " — "}
-                          {entry.allergyNotes}
-                        </p>
-                      )}
-                      {(entry.beforePhotoUrl || entry.afterPhotoUrl) && (
-                        <div className="history__entry-photos">
-                          {entry.beforePhotoUrl && <img src={entry.beforePhotoUrl} alt={t("results.beforePhotoLabel")} />}
-                          {entry.afterPhotoUrl && <img src={entry.afterPhotoUrl} alt={t("results.afterPhotoLabel")} />}
-                        </div>
-                      )}
-                      <div className="history__entry-footer">
-                        <span>{t("history.appliedBy", { name: entry.appliedBy })}</span>
-                        {repeatRequest !== null && (
-                          <button type="button" className="button button--secondary history__entry-repeat" onClick={() => onRepeat(entry)}>
-                            {t("history.repeat")}
-                          </button>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </details>
+              </button>
+            </div>
           </li>
         ))}
       </ul>
+
+      {openGroup !== null && (
+        <Modal title={openGroup.displayName} onClose={() => setOpenGroupKey(null)} size="large">
+          <ul className="history__entry-list">
+            {openGroup.entries.map(entry => {
+              const repeatRequest = buildRepeatFormulaRequest(entry, brands);
+              return (
+                <li key={entry.id} className="history__entry">
+                  <div className="history__entry-header">
+                    <strong>{entry.clientName}</strong>
+                    <span className="history__entry-date">
+                      {entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : ""}
+                    </span>
+                  </div>
+                  <p className="history__entry-summary">{formatSessionSummary(entry.steps)}</p>
+                  <pre className="history__entry-text">
+                    {formatSessionText(entry.steps)}
+                  </pre>
+                  {entry.steps.map((step, index) => {
+                    if (step.kind !== "color") return null;
+                    const key = `${entry.id}::${index}`;
+                    const computed = step.result.grams?.colorGrams ?? null;
+                    const persisted = typeof step.actualColorGrams === "number" ? String(step.actualColorGrams) : "";
+                    return (
+                      <div className="history__entry-actual" key={key}>
+                        <label htmlFor={`actualGrams-${key}`}>
+                          {t("history.actualColorGrams", { code: step.targetShade.code })}
+                        </label>
+                        <input
+                          id={`actualGrams-${key}`}
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={gramsDrafts[key] ?? persisted}
+                          disabled={savingGramsKey === key}
+                          onChange={e => setGramsDrafts(prev => ({ ...prev, [key]: e.target.value }))}
+                          onBlur={() => { void handleActualGramsBlur(entry, index); }}
+                        />
+                        {computed !== null && (
+                          <span className="history__entry-actual-hint">
+                            {t("history.computedColorGrams", { grams: computed })}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {(entry.productCost != null || entry.servicePrice != null) && (
+                    <div className="history__entry-pricing">
+                      {entry.productCost != null && <span>{t("results.productCost")}: {entry.productCost.toFixed(2)}</span>}
+                      {entry.servicePrice != null && <span>{t("results.servicePrice")}: {entry.servicePrice.toFixed(2)}</span>}
+                    </div>
+                  )}
+                  {entry.note && <p className="history__entry-note">{entry.note}</p>}
+                  {(entry.patchTestDate || entry.allergyNotes) && (
+                    <p className="history__entry-patch-test">
+                      {entry.patchTestDate && t("history.patchTestOn", { date: new Date(entry.patchTestDate).toLocaleString() })}
+                      {entry.patchTestDate && entry.allergyNotes && " — "}
+                      {entry.allergyNotes}
+                    </p>
+                  )}
+                  {(entry.beforePhotoUrl || entry.afterPhotoUrl) && (
+                    <div className="history__entry-photos">
+                      {entry.beforePhotoUrl && <img src={entry.beforePhotoUrl} alt={t("results.beforePhotoLabel")} />}
+                      {entry.afterPhotoUrl && <img src={entry.afterPhotoUrl} alt={t("results.afterPhotoLabel")} />}
+                    </div>
+                  )}
+                  <div className="history__entry-footer">
+                    <span>{t("history.appliedBy", { name: entry.appliedBy })}</span>
+                    {repeatRequest !== null && (
+                      <button type="button" className="button button--secondary history__entry-repeat" onClick={() => onRepeat(entry)}>
+                        {t("history.repeat")}
+                      </button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { addDoc, collection, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 import { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
-import { computeStockConsumption, consumeStock } from "../stock";
+import { computeStockConsumption, consumeStock, reconcileStockConsumption } from "../stock";
+import { calculateSessionProductCost } from "../sessionCost";
 
 const HISTORY_COLLECTION = "formulaHistory";
 
@@ -86,6 +87,52 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
   } catch (err) {
     console.error(`Saved formula history entry "${docRef.id}", but attaching its photo(s) failed:`, err);
   }
+}
+
+export interface SetActualColorGramsParams {
+  id: string;
+  // The entry's steps exactly as currently held by the caller (HistoryView's fetched
+  // state) -- both the base for the patched array and the "before" side of the stock
+  // reconciliation, so repeated edits of the same entry stay correct.
+  steps: HistoryStep[];
+  stepIndex: number;
+  // null clears the recorded figure and returns every derived number to the engine's
+  // computed grams.
+  actualColorGrams: number | null;
+}
+
+// The fields the caller must merge into its local copy of the entry.
+export interface ActualColorGramsResult {
+  steps: HistoryStep[];
+  productCost: number | null;
+}
+
+// History is otherwise append-only; this is the one post-save amendment: what was actually
+// weighed out is knowable only after the service. Patches the step, recomputes the stored
+// productCost from the actual grams (servicePrice is deliberately left alone -- it may be
+// a price the stylist manually agreed with the client, not a derived number), then
+// reconciles dye stock by the difference. The stock write is best-effort for the same
+// reason saveFormulaToHistory's consumeStock is: a stock failure must not make the stylist
+// retype a fact that is already recorded.
+export async function setActualColorGrams(params: SetActualColorGramsParams): Promise<ActualColorGramsResult> {
+  const target = params.steps[params.stepIndex];
+  if (target === undefined || target.kind !== "color") {
+    throw new Error(`Cannot record actual grams for step ${params.stepIndex} of history entry ${params.id}: not a color step`);
+  }
+  const steps = params.steps.map((step, index) =>
+    index === params.stepIndex ? { ...step, actualColorGrams: params.actualColorGrams } : step
+  );
+  const productCost = calculateSessionProductCost(steps);
+  await updateDoc(doc(db, HISTORY_COLLECTION, params.id), {
+    steps: sanitizeForFirestore(steps),
+    productCost,
+  });
+  try {
+    await reconcileStockConsumption(params.steps, steps);
+  } catch (err) {
+    console.error(`Recorded actual grams on history entry "${params.id}", but adjusting dye stock failed:`, err);
+  }
+  return { steps, productCost };
 }
 
 // Every stylist may only see the clients they personally entered (identified by the

@@ -212,6 +212,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         servicePrice={servicePrice}
         onServicePriceChange={setManualServicePrice}
         onSaved={onSaved}
+        repeatRequest={repeatRequest}
       />
     </div>
   );

@@ -734,9 +734,22 @@
 }
 
 .results__client-summary-name {
+  display: block;
   margin: 8px 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
   font-size: 0.85rem;
   color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.results__client-summary-name:hover,
+.results__client-summary-name:focus-visible {
+  color: var(--gold-ink);
 }
 
 .results__share {

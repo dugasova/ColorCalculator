@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculateBleachFormula, type BleachFormula } from "../../engine/bleach";
-import { calculateProductCost, calculateRecommendedServicePrice, DEFAULT_MARKUP_MULTIPLIER } from "../../engine/pricing";
+import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
 import { Select } from "../common/Select";
+import { useSalonMarkupMultiplier } from "../../palette";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./BleachCalculator.css";
 
@@ -121,7 +122,9 @@ export function BleachCalculator() {
   const [targetLevel, setTargetLevel] = useState<Level>(8);
   const [totalGrams, setTotalGrams] = useState(60);
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_BLEACH_PRICE_PER_GRAM);
-  const [markupMultiplier, setMarkupMultiplier] = useState(DEFAULT_MARKUP_MULTIPLIER);
+  const salonMarkupMultiplier = useSalonMarkupMultiplier();
+  const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
+  const markupMultiplier = manualMarkupMultiplier ?? salonMarkupMultiplier;
 
   const result = calculateBleachFormula(currentLevel, targetLevel, totalGrams);
   const totalProductGrams = result.grams !== null ? result.grams.powderGrams + result.grams.developerGrams : null;
@@ -171,7 +174,7 @@ export function BleachCalculator() {
         pricePerGram={pricePerGram}
         onPricePerGramChange={setPricePerGram}
         markupMultiplier={markupMultiplier}
-        onMarkupMultiplierChange={setMarkupMultiplier}
+        onMarkupMultiplierChange={setManualMarkupMultiplier}
         productCost={productCost}
         recommendedServicePrice={recommendedServicePrice}
       />

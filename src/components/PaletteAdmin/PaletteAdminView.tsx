@@ -7,6 +7,7 @@ import { AddBrandForm } from "./AddBrandForm";
 import { BrandShadeList } from "./BrandShadeList";
 import { BrandStockList } from "./BrandStockList";
 import { AddShadeForm } from "./AddShadeForm";
+import { PricingSettingsForm } from "./PricingSettingsForm";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./PaletteAdminView.css";
 
@@ -39,6 +40,7 @@ export function PaletteAdminView() {
           brandName={brands[effectiveSelectedBrandId]?.name ?? effectiveSelectedBrandId}
           existingShades={fullShades}
         />
+        <PricingSettingsForm />
       </div>
 
       <BrandShadeList

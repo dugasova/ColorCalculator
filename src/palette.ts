@@ -8,6 +8,7 @@ import {
 } from "./engine/paletteOverrides";
 import type { Shade } from "./engine/shades";
 import type { StockRecord } from "./stock";
+import { DEFAULT_PRICING_SETTINGS, type PricingSettings } from "./salonSettings";
 
 export interface PaletteState {
   // Built-ins merged with every admin-added custom brand/shade, discontinued shades
@@ -21,12 +22,17 @@ export interface PaletteState {
   // it's admin-editable palette-adjacent data with the exact same live-subscription shape
   // as customBrands/overrides above.
   stock: StockRecord[];
+  // Live salon-wide pricing default (src/salonSettings.ts) -- rides this context for the
+  // same live-admin-data reason `stock` does.
+  pricingSettings: PricingSettings;
 }
 
 // Lives here (not in PaletteContext.tsx) so that file can export nothing but the
 // `PaletteProvider` component — mixing hook/context exports into a component file breaks
 // React Fast Refresh.
-export const PaletteReactContext = createContext<PaletteState>({ brands: BRANDS, customBrands: [], overrides: [], stock: [] });
+export const PaletteReactContext = createContext<PaletteState>({
+  brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS,
+});
 
 // The merged, calculator-facing brand catalog. Live: updates the moment an admin adds a
 // shade, discontinues one, or adds a new dye line, in every open session.
@@ -44,6 +50,12 @@ export function usePaletteAdmin(): PaletteState {
 // warnings) and PaletteAdmin's stock editor.
 export function useStock(): StockRecord[] {
   return useContext(PaletteReactContext).stock;
+}
+
+// Live salon-wide markup default (src/salonSettings.ts) -- every calculator's starting
+// markup, still overridable per session in the results panel.
+export function useSalonMarkupMultiplier(): number {
+  return useContext(PaletteReactContext).pricingSettings.markupMultiplier;
 }
 
 const CUSTOM_BRANDS_COLLECTION = "customBrands";
