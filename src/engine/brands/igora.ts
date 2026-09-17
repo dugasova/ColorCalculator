@@ -1,4 +1,4 @@
-import type { Shade } from "../shades";
+import { highLiftOverride, type Shade } from "../shades";
 import type { LiftTable } from "../levels";
 
 const igoraHighlifts12LiftTable: LiftTable = (volume) => {
@@ -145,13 +145,11 @@ export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({
   // 9 individual shade literals above, where a future addition could silently miss one
   // (see igoraHighlifts12LiftTable/HIGHLIFTS_12_PROCESSING_MINUTES above).
   ...(shade.level === 12
-    ? {
+    ? highLiftOverride({
       developerLiftTable: igoraHighlifts12LiftTable,
       minStartLevel: 6,
       fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES,
-      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
-      acceptsPartialLift: true,
-    }
+    })
     : {}),
 }));
 

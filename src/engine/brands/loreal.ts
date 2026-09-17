@@ -1,4 +1,4 @@
-import type { Shade } from "../shades";
+import { highLiftOverride, type Shade } from "../shades";
 import type { LiftTable } from "../levels";
 
 // Majirel High Lift / Majiblond Ultra - Majirel's own maximum-lift sub-range, sold as a
@@ -151,13 +151,11 @@ export const LOREAL_MAJIREL_CHART: Shade[] = majirelShades.map(shade => ({
   // allows rather than to guarantee its own nominal level, so it alone gets
   // acceptsPartialLift (see Shade.acceptsPartialLift, ../shades.ts) instead.
   ...(shade.level === 12
-    ? {
+    ? highLiftOverride({
       developerLiftTable: majiblondUltraLiftTable,
-      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
       minStartLevel: 5,
       fixedProcessingMinutes: MAJIBLOND_ULTRA_PROCESSING_MINUTES,
-      acceptsPartialLift: true,
-    }
+    })
     : { fixedMixingRatio: { colorParts: 1, developerParts: 1.5 } }),
 }));
 

@@ -1,4 +1,4 @@
-import type { Shade } from "../shades";
+import { highLiftOverride, type Shade } from "../shades";
 
 // Coded from the official Koleston Perfect chart. The primary reflect digit (first
 // digit after the slash) maps to `tone`; a second digit, if present, maps to
@@ -192,13 +192,11 @@ export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({
   // fixed target tone, so it alone gets acceptsPartialLift (see Shade.acceptsPartialLift,
   // ../shades.ts) instead.
   ...(shade.level === 12
-    ? {
+    ? highLiftOverride({
       developerLiftTable: specialBlondeLiftTable,
-      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
       minStartLevel: 6,
       fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES,
-      acceptsPartialLift: true,
-    }
+    })
     : { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME }),
 }));
 

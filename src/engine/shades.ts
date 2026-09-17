@@ -125,6 +125,30 @@ export function canBlendShades(a: Shade, b: Shade): boolean {
     && JSON.stringify(a.developerVolumeChoices ?? null) === JSON.stringify(b.developerVolumeChoices ?? null);
 }
 
+// Shared shape for a brand chart's level-12 "maximum lift" sub-range override — Majirel
+// High Lift/Majiblond Ultra (brands/loreal.ts), Koleston Perfect Special Blonde
+// (brands/wella.ts), and Igora Royal Highlifts (brands/igora.ts) each independently mix
+// 1:2 with developer (double their line's usual ratio), replace the level-diff developer
+// ladder with their own fixed lift table, run a fixed processing time instead of the
+// gray-percentage-driven default, and are routinely chosen purely to lift as far as a
+// single process safely allows rather than to guarantee their own nominal level - so they
+// alone get `acceptsPartialLift` (see above) instead of a fixed-target-tone guarantee.
+// Centralizing the shape here means a brand chart can't add or edit this sub-range and
+// silently drop one of the five fields, the way three separate hand-written copies could.
+export function highLiftOverride(params: {
+  developerLiftTable: LiftTable;
+  minStartLevel: Level;
+  fixedProcessingMinutes: number;
+}): Pick<Shade, "developerLiftTable" | "fixedMixingRatio" | "minStartLevel" | "fixedProcessingMinutes" | "acceptsPartialLift"> {
+  return {
+    developerLiftTable: params.developerLiftTable,
+    fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+    minStartLevel: params.minStartLevel,
+    fixedProcessingMinutes: params.fixedProcessingMinutes,
+    acceptsPartialLift: true,
+  };
+}
+
 // Raw brand charts (see engine/brands/*) are transcribed grouped by tone family
 // (natural, ash, gold, ...), which is the order a printed swatch book uses but reads as
 // chaotic in a <select> - e.g. Wella's chart lists 8/38 then 8/96, 8/97 before 8/34,
