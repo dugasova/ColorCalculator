@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildRepeatFormulaRequest, fetchFormulaHistory, type FormulaHistoryEntry } from "../../history";
+import { buildRepeatFormulaRequest, type FormulaHistoryEntry } from "../../history";
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
-import { planClientRevisits, getRevisitStatus, getClientGroupKey, normalizeClientKey } from "../../revisit";
-import { fetchClients, type ClientProfile } from "../../clients";
+import { planClientRevisits, getRevisitStatus } from "../../revisit";
 import { buildRevisitReminderText, buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { usePalette } from "../../palette";
 import { useActualGramsEditor } from "./useActualGramsEditor";
+import { useHistoryData } from "./useHistoryData";
 import { Modal } from "../common/Modal";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
@@ -15,19 +15,6 @@ export interface HistoryViewProps {
   onRepeat: (entry: FormulaHistoryEntry) => void;
   isAdmin: boolean;
   currentUserEmail: string;
-}
-
-// One client's full visit timeline, grouped from the flat (already date-sorted-desc)
-// `entries` fetch -- lets the list read as "N visits for Anna K." instead of Anna's
-// visits interleaved with everyone else's. `profile` is the saved-client record (see
-// clients.ts) for the signed-in stylist's own book -- an admin browsing another
-// stylist's clients simply won't have a match (that profile is private to its owner,
-// same boundary firestore.rules enforces), so `profile` stays null there.
-interface ClientHistoryGroup {
-  key: string;
-  displayName: string;
-  entries: FormulaHistoryEntry[];
-  profile: ClientProfile | null;
 }
 
 function FormattedSessionText({ text }: { text: string }) {
@@ -50,72 +37,17 @@ function FormattedSessionText({ text }: { text: string }) {
 export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryViewProps) {
   const { t } = useTranslation();
   const brands = usePalette();
-  const [entries, setEntries] = useState<FormulaHistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [nowMs] = useState(() => Date.now());
-  const [savedClients, setSavedClients] = useState<ClientProfile[]>([]);
   // The one client card currently expanded into a modal -- null means every card is
   // collapsed. A client's full visit list (formula, pricing, photos, ...) needs real
   // screen space to stay readable, so it opens in a Modal instead of an inline accordion.
   const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
+  const { entries, setEntries, isLoading, error, filtered, groups, profilesByClientKey } =
+    useHistoryData({ isAdmin, currentUserEmail, search });
   const { gramsDrafts, savingGramsKey, gramsError, handleActualGramsChange, handleActualGramsBlur } =
     useActualGramsEditor(setEntries);
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
-  // Keyed exactly the way `getClientGroupKey` keys a `ClientRevisitPlan` (a real
-  // `clientId`, or a `name:`-prefixed normalized-name fallback), so `plan.clientKey`
-  // resolves directly without re-deriving the join HistoryView's own `groups` memo
-  // below already does per entry.
-  const profilesByClientKey = useMemo(() => {
-    const map = new Map<string, ClientProfile>();
-    for (const client of savedClients) {
-      map.set(client.id, client);
-      // Mirrors the existing name-based fallback semantics: `savedClients` is
-      // name-ordered, so the first same-named profile wins.
-      const nameKey = `name:${normalizeClientKey(client.name)}`;
-      if (!map.has(nameKey)) map.set(nameKey, client);
-    }
-    return map;
-  }, [savedClients]);
-
-  useEffect(() => {
-    fetchFormulaHistory({ isAdmin, currentUserEmail })
-      .then(setEntries)
-      .catch(() => setError(t("history.loadError")))
-      .finally(() => setIsLoading(false));
-  }, [t, isAdmin, currentUserEmail]);
-
-  useEffect(() => {
-    fetchClients(currentUserEmail)
-      .then(setSavedClients)
-      .catch(err => console.error("Failed to load saved clients:", err));
-  }, [currentUserEmail]);
-
-  const filtered = entries.filter(entry =>
-    entry.clientName.toLowerCase().includes(search.trim().toLowerCase())
-  );
-
-  const groups = useMemo<ClientHistoryGroup[]>(() => {
-    const map = new Map<string, ClientHistoryGroup>();
-    for (const entry of filtered) {
-      const key = getClientGroupKey(entry);
-      const existing = map.get(key);
-      if (existing !== undefined) {
-        existing.entries.push(entry);
-        continue;
-      }
-      // Prefer matching the saved-client profile by the entry's own real clientId --
-      // falls back to a normalized-name match only for entries saved before clientId
-      // existed, which carries the same "could be the wrong same-named person" risk the
-      // rest of this feature exists to avoid, but there's no better signal to use for them.
-      const profile = entry.clientId !== null
-        ? savedClients.find(c => c.id === entry.clientId) ?? null
-        : savedClients.find(c => normalizeClientKey(c.name) === normalizeClientKey(entry.clientName)) ?? null;
-      map.set(key, { key, displayName: entry.clientName, entries: [entry], profile });
-    }
-    return Array.from(map.values());
-  }, [filtered, savedClients]);
 
   const openGroup = groups.find(g => g.key === openGroupKey) ?? null;
 
