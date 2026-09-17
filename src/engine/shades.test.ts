@@ -32,6 +32,28 @@ describe("canBlendShades", () => {
     const b: Shade = { code: "6/1", level: 6, tone: "ash" };
     expect(canBlendShades(a, b)).toBe(false);
   });
+
+  it("accepts a component one level above or below when a tolerance is given", () => {
+    const target: Shade = { code: "8/1", level: 8, tone: "ash" };
+    const below: Shade = { code: "7/1", level: 7, tone: "ash" };
+    const above: Shade = { code: "9/1", level: 9, tone: "ash" };
+    expect(canBlendShades(target, below, 1)).toBe(true);
+    expect(canBlendShades(target, above, 1)).toBe(true);
+  });
+
+  it("still rejects a component two levels away even with a tolerance of 1", () => {
+    const target: Shade = { code: "8/1", level: 8, tone: "ash" };
+    const tooFar: Shade = { code: "6/1", level: 6, tone: "ash" };
+    expect(canBlendShades(target, tooFar, 1)).toBe(false);
+  });
+
+  it("still enforces line/mixing-chemistry agreement within the tolerance", () => {
+    const target: Shade = { code: "8/1", level: 8, tone: "ash", line: "koleston-perfect" };
+    const wrongLine: Shade = { code: "9/1", level: 9, tone: "ash", line: "color-touch" };
+    const wrongMix: Shade = { code: "9/1", level: 9, tone: "ash", line: "koleston-perfect", fixedMixingRatio: { colorParts: 1, developerParts: 2 } };
+    expect(canBlendShades(target, wrongLine, 1)).toBe(false);
+    expect(canBlendShades(target, wrongMix, 1)).toBe(false);
+  });
 });
 
 describe("suggestBlendComponents", () => {

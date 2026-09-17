@@ -14,7 +14,8 @@ export interface BlendComponentFieldProps {
 // One half of a substitute blend (see BlendModeField/BlendRatioField): picks one real
 // shade to stand in as either component. Used twice -- once per component -- with
 // `candidates` pre-filtered by the caller to shades `canBlendShades` accepts against the
-// target (same level/line/mixing chemistry), so any pairing here is physically valid.
+// target (within one level, same line/mixing chemistry -- see BLEND_LEVEL_TOLERANCE in
+// useFormulaCalculatorState), so any pairing here is physically valid.
 export function BlendComponentField({ label, placeholder, candidates, shadeCode, onShadeCodeChange, id }: BlendComponentFieldProps) {
   const shade = candidates.find(s => s.code === shadeCode) ?? null;
 

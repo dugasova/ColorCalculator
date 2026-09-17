@@ -114,12 +114,20 @@ export function shadeLabel(shade: Shade): string {
 }
 
 // Two shades can stand in for each other in a blend (see `splitShadeBlend` in formula.ts)
-// only if they share the level and mixing chemistry a formula was calculated for -
-// otherwise the developer ratio/volume computed for one wouldn't hold for the blended
-// total. Same level alone isn't enough: a handful of shades override their line's usual
-// mixing ratio or developer choices for just that one shade (e.g. Wella's Special Blonde).
-export function canBlendShades(a: Shade, b: Shade): boolean {
-  return a.level === b.level
+// only if they share the mixing chemistry a formula was calculated for -- otherwise the
+// developer ratio/volume computed for the target wouldn't hold for the blended total.
+// Same line isn't enough: a handful of shades override their line's usual mixing ratio
+// or developer choices for just that one shade (e.g. Wella's Special Blonde).
+//
+// `levelTolerance` (default 0, exact match) widens how far a stand-in's own level may
+// sit from `a`'s: colorists routinely blend one level above and below a missing shade
+// to approximate it (e.g. no 8/13 on hand -> blend a 7- and a 9-level component), since
+// `splitShadeBlend` only ever splits the color total already computed for the target's
+// own level/developer -- a component's own level never feeds into that math, so widening
+// this is purely which physical tubes are offered, not a change to the developer/lift
+// calculation itself.
+export function canBlendShades(a: Shade, b: Shade, levelTolerance = 0): boolean {
+  return Math.abs(a.level - b.level) <= levelTolerance
     && (a.line ?? null) === (b.line ?? null)
     && JSON.stringify(a.fixedMixingRatio ?? null) === JSON.stringify(b.fixedMixingRatio ?? null)
     && JSON.stringify(a.developerVolumeChoices ?? null) === JSON.stringify(b.developerVolumeChoices ?? null);

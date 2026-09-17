@@ -9,6 +9,10 @@ import type { RepeatFormulaRequest } from "../../history";
 import { useShadeFormulaState } from "./useShadeFormulaState";
 
 const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
+// How far a blend component's own level may sit from the target's for it to be offered
+// as a stand-in (see canBlendShades) -- colorists routinely blend one level above and
+// below a missing shade to approximate it, not just same-level reflects.
+const BLEND_LEVEL_TOLERANCE = 1;
 
 // Layers FormulaCalculator's own state -- repeat-request replay, substitute-blend mode,
 // cross-brand match, markup/service price -- on top of the brand/line/shade/formula state
@@ -137,10 +141,15 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
 
   // Two dedicated fields for the substitute-blend components (see BlendComponentField),
   // fully independent of targetShade/additionalShade above -- targetShade stays the
-  // visual goal (may not itself be a physical product to weigh), and each blend
-  // component defaults to the closest real single-reflect shade the moment blend mode is
-  // turned on (e.g. target 7/17 suggests 7/1 + 7/7), overridable via the two selects.
-  const blendCandidates = lineShades.filter(s => s.code !== targetShade.code && canBlendShades(targetShade, s));
+  // visual goal, never itself a candidate: blend mode exists precisely because the
+  // target is the one shade NOT on hand (see the "Shade out of stock" toggle label), so
+  // offering it back as a stand-in for itself would be offering the missing product.
+  // Each blend component defaults to the closest real single-reflect shade the moment
+  // blend mode is turned on (e.g. target 7/17 suggests 7/1 + 7/7), overridable via the
+  // two selects. Candidates span target.level +/- BLEND_LEVEL_TOLERANCE (see
+  // canBlendShades) -- colorists routinely blend one level above/below a missing shade
+  // to approximate it, not just other reflects at the exact same level.
+  const blendCandidates = lineShades.filter(s => s.code !== targetShade.code && canBlendShades(targetShade, s, BLEND_LEVEL_TOLERANCE));
   const blendSuggestion = suggestBlendComponents(targetShade, lineShades);
   const blendShadeACodeEffective = blendShadeACode ?? blendSuggestion.primary?.code ?? null;
   const blendShadeBCodeEffective = blendShadeBCode ?? blendSuggestion.secondary?.code ?? null;
