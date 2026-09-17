@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildRepeatFormulaRequest, type FormulaHistoryEntry } from "../../history";
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
-import { planClientRevisits, getRevisitStatus } from "../../revisit";
-import { buildRevisitReminderText, buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
+import { planClientRevisits } from "../../revisit";
 import { usePalette } from "../../palette";
 import { useActualGramsEditor } from "./useActualGramsEditor";
 import { useHistoryData } from "./useHistoryData";
+import { RevisitReminders } from "./RevisitReminders";
 import { Modal } from "../common/Modal";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
@@ -55,43 +55,8 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
     <div className="calculator">
       <h1 className="calculator__title">{t("history.titlePrefix")} <span className="calculator__title-accent">{t("history.titleAccent")}</span></h1>
 
-      {!isLoading && error === null && revisitPlans.length > 0 && (
-        <section className="history__reminders">
-          <h2 className="history__reminders-title">{t("history.remindersTitle")}</h2>
-          <ul className="history__reminders-list">
-            {revisitPlans.map(plan => {
-              const status = getRevisitStatus(plan.recommendedDate, new Date(nowMs));
-              const weeks = Math.round(plan.intervalDays / 7);
-              const phone = profilesByClientKey.get(plan.clientKey)?.phone ?? null;
-              const reminderText = buildRevisitReminderText(plan);
-              return (
-                <li key={plan.clientKey} className={`history__reminder history__reminder--${status}`}>
-                  <span className="history__reminder-client">{plan.clientName}</span>
-                  <span className="history__reminder-detail">
-                    {t("history.reminderDetail", { weeks, date: plan.recommendedDate.toLocaleDateString() })}
-                  </span>
-                  <span className="history__reminder-status">{t(`history.reminderStatus.${status}`)}</span>
-                  <span className="history__reminder-actions">
-                    <button
-                      type="button"
-                      className="button button--share button--whatsapp history__reminder-remind"
-                      onClick={() => window.open(buildWhatsAppReminderUrl(phone, reminderText), "_blank", "noopener,noreferrer")}
-                    >
-                      {t("history.remindWhatsApp")}
-                    </button>
-                    <button
-                      type="button"
-                      className="button button--share button--telegram history__reminder-remind"
-                      onClick={() => window.open(buildTelegramReminderUrl(reminderText), "_blank", "noopener,noreferrer")}
-                    >
-                      {t("history.remindTelegram")}
-                    </button>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+      {!isLoading && error === null && (
+        <RevisitReminders revisitPlans={revisitPlans} profilesByClientKey={profilesByClientKey} nowMs={nowMs} />
       )}
 
       <div className="field">
