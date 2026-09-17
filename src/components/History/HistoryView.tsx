@@ -29,6 +29,23 @@ interface ClientHistoryGroup {
   profile: ClientProfile | null;
 }
 
+function FormattedSessionText({ text }: { text: string }) {
+  const lines = text.split("\n");
+  return (
+    <pre className="history__entry-text">
+      {lines.map((line, i) => {
+        const isMix = /^(Mix|Суміш|Микс)/.test(line) || /^\d+(\.\d+)?\s*(g|г)\s+(bleach|освітлювального|обесцвечивающего)/.test(line);
+        return (
+          <span key={i}>
+            {isMix ? <strong className="history__entry-mix">{line}</strong> : line}
+            {i < lines.length - 1 && "\n"}
+          </span>
+        );
+      })}
+    </pre>
+  );
+}
+
 export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryViewProps) {
   const { t } = useTranslation();
   const brands = usePalette();
@@ -239,9 +256,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                     </span>
                   </div>
                   <p className="history__entry-summary">{formatSessionSummary(entry.steps)}</p>
-                  <pre className="history__entry-text">
-                    {formatSessionText(entry.steps)}
-                  </pre>
+                  <FormattedSessionText text={formatSessionText(entry.steps)} />
                   {entry.steps.map((step, index) => {
                     if (step.kind !== "color") return null;
                     const key = `${entry.id}::${index}`;

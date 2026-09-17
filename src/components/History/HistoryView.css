@@ -52,6 +52,15 @@
   font-size: 0.85rem;
   line-height: 1.5;
 }
+.history__entry-mix {
+  font-weight: 600;
+  color: var(--brand-primary-ink);
+  background: var(--brand-gradient-soft);
+  padding: 0.125rem 0.35rem;
+  margin: 0 -0.1rem;
+  border-radius: 4px;
+}
+
 
 .history__entry-pricing {
   display: flex;
