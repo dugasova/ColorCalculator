@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildRepeatFormulaRequest, fetchFormulaHistory, setActualColorGrams, type FormulaHistoryEntry } from "../../history";
+import { buildRepeatFormulaRequest, fetchFormulaHistory, type FormulaHistoryEntry } from "../../history";
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { planClientRevisits, getRevisitStatus, getClientGroupKey, normalizeClientKey } from "../../revisit";
 import { fetchClients, type ClientProfile } from "../../clients";
 import { buildRevisitReminderText, buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { usePalette } from "../../palette";
+import { useActualGramsEditor } from "./useActualGramsEditor";
 import { Modal } from "../common/Modal";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
@@ -59,11 +60,8 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   // collapsed. A client's full visit list (formula, pricing, photos, ...) needs real
   // screen space to stay readable, so it opens in a Modal instead of an inline accordion.
   const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
-  // Keyed `${entry.id}::${stepIndex}` -- a draft exists only while a row is being edited;
-  // otherwise the input renders the persisted value.
-  const [gramsDrafts, setGramsDrafts] = useState<Record<string, string>>({});
-  const [savingGramsKey, setSavingGramsKey] = useState<string | null>(null);
-  const [gramsError, setGramsError] = useState<string | null>(null);
+  const { gramsDrafts, savingGramsKey, gramsError, handleActualGramsChange, handleActualGramsBlur } =
+    useActualGramsEditor(setEntries);
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
   // Keyed exactly the way `getClientGroupKey` keys a `ClientRevisitPlan` (a real
   // `clientId`, or a `name:`-prefixed normalized-name fallback), so `plan.clientKey`
@@ -120,39 +118,6 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   }, [filtered, savedClients]);
 
   const openGroup = groups.find(g => g.key === openGroupKey) ?? null;
-
-  const handleActualGramsBlur = async (entry: FormulaHistoryEntry, stepIndex: number) => {
-    const key = `${entry.id}::${stepIndex}`;
-    const draft = gramsDrafts[key];
-    if (draft === undefined) return;
-    const trimmed = draft.trim();
-    let actualColorGrams: number | null;
-    if (trimmed === "") {
-      actualColorGrams = null;
-    } else {
-      const grams = Number(trimmed);
-      if (!Number.isFinite(grams) || grams < 0) {
-        setGramsError(t("history.actualGramsInvalid"));
-        return;
-      }
-      actualColorGrams = grams;
-    }
-    setGramsError(null);
-    setSavingGramsKey(key);
-    try {
-      const updated = await setActualColorGrams({ id: entry.id, steps: entry.steps, stepIndex, actualColorGrams });
-      setEntries(prev => prev.map(e => (e.id === entry.id ? { ...e, steps: updated.steps, productCost: updated.productCost } : e)));
-      setGramsDrafts(prev => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      });
-    } catch {
-      setGramsError(t("history.actualGramsSaveError"));
-    } finally {
-      setSavingGramsKey(null);
-    }
-  };
 
   return (
     <div className="calculator">
@@ -274,7 +239,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                           step={1}
                           value={gramsDrafts[key] ?? persisted}
                           disabled={savingGramsKey === key}
-                          onChange={e => setGramsDrafts(prev => ({ ...prev, [key]: e.target.value }))}
+                          onChange={e => handleActualGramsChange(key, e.target.value)}
                           onBlur={() => { void handleActualGramsBlur(entry, index); }}
                         />
                         {computed !== null && (

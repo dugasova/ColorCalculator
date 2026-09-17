@@ -7,6 +7,7 @@ import { createClient, fetchClients, updateClient, type ClientProfile } from "..
 import type { RepeatFormulaRequest } from "../../history";
 import { formatCanvasText } from "../../formatSession";
 import type { HairCanvas } from "../../engine/canvas";
+import { usePhotoUpload } from "./usePhotoUpload";
 
 export interface SessionDetails {
   clientName: string;
@@ -90,10 +91,8 @@ export function SessionDetailsPanel({
   const [patchTestDate, setPatchTestDate] = useState("");
   const [allergyNotes, setAllergyNotes] = useState("");
   const [patchTestOverride, setPatchTestOverride] = useState(false);
-  const [beforePhotoFile, setBeforePhotoFile] = useState<File | null>(null);
-  const [afterPhotoFile, setAfterPhotoFile] = useState<File | null>(null);
-  const [beforePhotoPreviewUrl, setBeforePhotoPreviewUrl] = useState<string | null>(null);
-  const [afterPhotoPreviewUrl, setAfterPhotoPreviewUrl] = useState<string | null>(null);
+  const beforePhoto = usePhotoUpload();
+  const afterPhoto = usePhotoUpload();
   const [savedClients, setSavedClients] = useState<ClientProfile[]>([]);
   // The repeatRequest currently applied to clientName/selectedClientId below -- a fresh
   // object each time History's "Repeat" button is clicked (see buildRepeatFormulaRequest),
@@ -115,15 +114,6 @@ export function SessionDetailsPanel({
   // the same concern the photo-preview-URL cleanup handles for its own resource.
   const copyFeedbackTimeoutRef = useRef<number | undefined>(undefined);
   const saveFeedbackTimeoutRef = useRef<number | undefined>(undefined);
-
-  // Release the blob: preview URLs when the component unmounts (per-selection swaps are
-  // already revoked synchronously in the change handlers below).
-  useEffect(() => {
-    return () => {
-      if (beforePhotoPreviewUrl) URL.revokeObjectURL(beforePhotoPreviewUrl);
-      if (afterPhotoPreviewUrl) URL.revokeObjectURL(afterPhotoPreviewUrl);
-    };
-  }, [beforePhotoPreviewUrl, afterPhotoPreviewUrl]);
 
   // Cancels a still-pending copy/save feedback timer on unmount -- e.g. the colorist
   // switches away from this view (or the parent remounts the whole calculator) before the
@@ -242,18 +232,6 @@ export function SessionDetailsPanel({
     window.open(`https://t.me/share/url?url=${encodeURIComponent(formulaText)}`, "_blank", "noopener,noreferrer");
   };
 
-  const handleBeforePhotoChange = (file: File | null) => {
-    if (beforePhotoPreviewUrl) URL.revokeObjectURL(beforePhotoPreviewUrl);
-    setBeforePhotoFile(file);
-    setBeforePhotoPreviewUrl(file ? URL.createObjectURL(file) : null);
-  };
-
-  const handleAfterPhotoChange = (file: File | null) => {
-    if (afterPhotoPreviewUrl) URL.revokeObjectURL(afterPhotoPreviewUrl);
-    setAfterPhotoFile(file);
-    setAfterPhotoPreviewUrl(file ? URL.createObjectURL(file) : null);
-  };
-
   const handleSave = async () => {
     setSaveState("saving");
     try {
@@ -292,8 +270,8 @@ export function SessionDetailsPanel({
         patchTestDate,
         allergyNotes,
         patchTestOverride,
-        beforePhotoFile,
-        afterPhotoFile,
+        beforePhotoFile: beforePhoto.file,
+        afterPhotoFile: afterPhoto.file,
       });
       setSaveState("saved");
       clearTimeout(saveFeedbackTimeoutRef.current);
@@ -445,13 +423,13 @@ export function SessionDetailsPanel({
           <div className="results__photos">
             <div className="field results__photo">
               <label htmlFor="beforePhoto">{t("results.beforePhotoLabel")}</label>
-              <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => handleBeforePhotoChange(e.target.files?.[0] ?? null)} />
-              {beforePhotoPreviewUrl && <img className="results__photo-preview" src={beforePhotoPreviewUrl} alt="" />}
+              <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => beforePhoto.handleChange(e.target.files?.[0] ?? null)} />
+              {beforePhoto.previewUrl && <img className="results__photo-preview" src={beforePhoto.previewUrl} alt="" />}
             </div>
             <div className="field results__photo">
               <label htmlFor="afterPhoto">{t("results.afterPhotoLabel")}</label>
-              <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => handleAfterPhotoChange(e.target.files?.[0] ?? null)} />
-              {afterPhotoPreviewUrl && <img className="results__photo-preview" src={afterPhotoPreviewUrl} alt="" />}
+              <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => afterPhoto.handleChange(e.target.files?.[0] ?? null)} />
+              {afterPhoto.previewUrl && <img className="results__photo-preview" src={afterPhoto.previewUrl} alt="" />}
             </div>
           </div>
 
