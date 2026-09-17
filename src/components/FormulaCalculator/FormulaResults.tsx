@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import type { FullFormula } from "../../engine/formula";
 import { getGrayCoverageNote } from "../../engine/formula";
+import type { FullFormula } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
@@ -10,12 +10,11 @@ import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../engine/formatPrePigmentation";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
-import { saveFormulaToHistory, type ColorHistoryStep, type RepeatFormulaRequest } from "../../history";
-import { useStock } from "../../palette";
-import { computeStockConsumption, stockById } from "../../stock";
+import type { RepeatFormulaRequest } from "../../history";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
 import { PrePigmentationStep } from "./PrePigmentationStep";
-import { SessionDetailsPanel, type SessionDetails } from "./SessionDetailsPanel";
+import { SessionDetailsPanel } from "./SessionDetailsPanel";
+import { useFormulaSave } from "./useFormulaSave";
 
 export interface FormulaResultsProps {
   brandId: BrandId;
@@ -94,56 +93,12 @@ export function FormulaResults({
     ? `${fillerStepText}\n\n${t("prePigmentation.finalStepLabel")}\n${targetColorFormulaText}`
     : targetColorFormulaText;
 
-  // Hoisted out of handleSave so the stock-shortage check below (computeStockConsumption)
-  // reads from the exact same step object that gets saved -- one source of truth for
-  // "what this mix consumes", instead of a second literal that could drift from it.
-  const step: ColorHistoryStep = {
-    kind: "color",
-    brandId,
-    brandName,
-    line,
-    targetShade,
-    startLevel,
-    grayPercent,
-    applicationZone,
-    canvas: { porosity, thickness, chemicalHistory },
-    result,
-    additionalShade,
-    additionalShadeGrams,
-    additionalShade2: additionalShade2 ?? null,
-    additionalShade2Grams: additionalShade2Grams ?? null,
-    blend,
-    prePigmentation: prePigmentationResult,
-    neutralizationApplied,
-    processingMinutes,
-    pricePerGram,
-  };
-
-  const stockMap = stockById(useStock());
-  const shortages = computeStockConsumption([step]).flatMap(consumption => {
-    const record = stockMap.get(consumption.id);
-    return record === undefined || record.remainingGrams >= consumption.grams
-      ? []
-      : [{ consumption, remainingGrams: record.remainingGrams }];
+  const { shortages, handleSave } = useFormulaSave({
+    brandId, brandName, line, targetShade, startLevel, grayPercent, applicationZone,
+    porosity, thickness, chemicalHistory, result, additionalShade, additionalShadeGrams,
+    additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied,
+    appliedBy, processingMinutes, pricePerGram, markupMultiplier, productCost, servicePrice,
   });
-
-  const handleSave = async (details: SessionDetails) => {
-    await saveFormulaToHistory({
-      clientName: details.clientName,
-      clientId: details.clientId,
-      note: details.note,
-      appliedBy,
-      steps: [step],
-      markupMultiplier,
-      productCost,
-      servicePrice,
-      patchTestDate: details.patchTestDate,
-      allergyNotes: details.allergyNotes,
-      patchTestOverride: details.patchTestOverride,
-      beforePhotoFile: details.beforePhotoFile,
-      afterPhotoFile: details.afterPhotoFile,
-    });
-  };
 
   return (
     <div className="results">
