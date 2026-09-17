@@ -244,7 +244,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                         />
                         {computed !== null && (
                           <span className="history__entry-actual-hint">
-                            {t("history.computedColorGrams", { grams: computed })}
+                            {t("history.computedColorGrams", { grams: computed.toFixed(1) })}
                           </span>
                         )}
                       </div>
