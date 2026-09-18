@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchFormulaHistory, type FormulaHistoryEntry } from "../../history";
+import { fetchFormulaHistory, deleteHistoryEntry, type FormulaHistoryEntry } from "../../history";
 import { getClientGroupKey, normalizeClientKey } from "../../revisit";
-import { fetchClients, type ClientProfile } from "../../clients";
+import { fetchClients, deleteClient, type ClientProfile } from "../../clients";
 
 // One client's full visit timeline, grouped from the flat (already date-sorted-desc)
 // `entries` fetch -- lets the list read as "N visits for Anna K." instead of Anna's
@@ -30,6 +30,15 @@ export interface HistoryData {
   // `clientKey` resolves directly without re-deriving the join `groups` above already
   // does per entry.
   profilesByClientKey: Map<string, ClientProfile>;
+  // Permanently deletes a client's saved profile and every visit in `group.entries` --
+  // see HistoryView's admin-only "Delete client" confirm flow. Resolves `true` on
+  // success (local `entries`/`savedClients` already updated to match) or `false` once
+  // `deleteError` is set, so the caller can decide whether to close its confirm dialog.
+  deleteClientGroup: (group: ClientHistoryGroup) => Promise<boolean>;
+  // The group currently being deleted (for a per-button pending/disabled state), or
+  // null once the delete settles either way.
+  deletingClientKey: string | null;
+  deleteError: string | null;
 }
 
 // Loads a stylist's (or, for an admin, everyone's) saved formula history plus their own
@@ -48,6 +57,8 @@ export function useHistoryData({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedClients, setSavedClients] = useState<ClientProfile[]>([]);
+  const [deletingClientKey, setDeletingClientKey] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFormulaHistory({ isAdmin, currentUserEmail })
@@ -99,5 +110,39 @@ export function useHistoryData({
     return Array.from(map.values());
   }, [filtered, savedClients]);
 
-  return { entries, setEntries, isLoading, error, savedClients, filtered, groups, profilesByClientKey };
+  // Cascades: every visit in the group first (photos + doc, see deleteHistoryEntry),
+  // then the saved profile itself (if the group has a real one -- a legacy name-only
+  // group with no matching `clients` document simply has nothing further to delete).
+  // Order matters for the same reason saveFormulaToHistory writes parent-before-child:
+  // here it's the reverse, child-before-parent, so a crash partway through never leaves
+  // a `clients` doc pointing at visits that no longer exist -- worst case on failure is
+  // extra orphaned visits still findable/re-deletable, never a dangling client reference.
+  async function deleteClientGroup(group: ClientHistoryGroup): Promise<boolean> {
+    setDeletingClientKey(group.key);
+    setDeleteError(null);
+    try {
+      await Promise.all(group.entries.map(entry => deleteHistoryEntry(entry)));
+      if (group.profile !== null) {
+        await deleteClient(group.profile.id);
+      }
+      const deletedIds = new Set(group.entries.map(entry => entry.id));
+      setEntries(prev => prev.filter(entry => !deletedIds.has(entry.id)));
+      if (group.profile !== null) {
+        const deletedProfileId = group.profile.id;
+        setSavedClients(prev => prev.filter(client => client.id !== deletedProfileId));
+      }
+      return true;
+    } catch (err) {
+      console.error(`Failed to delete client "${group.displayName}":`, err);
+      setDeleteError(t("history.deleteClientError"));
+      return false;
+    } finally {
+      setDeletingClientKey(null);
+    }
+  }
+
+  return {
+    entries, setEntries, isLoading, error, savedClients, filtered, groups, profilesByClientKey,
+    deleteClientGroup, deletingClientKey, deleteError,
+  };
 }

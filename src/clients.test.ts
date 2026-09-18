@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createClient, updateClient, fetchClients } from "./clients";
+import { createClient, updateClient, fetchClients, deleteClient } from "./clients";
 
 const addDocMock = vi.fn();
 const updateDocMock = vi.fn();
+const deleteDocMock = vi.fn();
 const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
 const getDocsMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
@@ -12,6 +13,7 @@ const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
 vi.mock("firebase/firestore", () => ({
   addDoc: (...args: unknown[]) => addDocMock(...args),
   collection: vi.fn(() => "collection-ref"),
+  deleteDoc: (...args: unknown[]) => deleteDocMock(...args),
   doc: (...args: unknown[]) => docMock(...args),
   getDocs: (...args: unknown[]) => getDocsMock(...args),
   orderBy: (...args: unknown[]) => orderByMock(...args),
@@ -26,6 +28,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   addDocMock.mockResolvedValue({ id: "new-doc-id" });
   updateDocMock.mockResolvedValue(undefined);
+  deleteDocMock.mockResolvedValue(undefined);
   getDocsMock.mockResolvedValue({ docs: [] });
 });
 
@@ -114,5 +117,14 @@ describe("fetchClients", () => {
     expect(result).toEqual([{ id: "good", ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null }]);
     expect(consoleError).toHaveBeenCalledTimes(1);
     consoleError.mockRestore();
+  });
+});
+
+describe("deleteClient", () => {
+  it("deletes the given client's own real id", async () => {
+    await deleteClient("anna-1");
+
+    expect(docMock).toHaveBeenCalledWith({}, "clients", "anna-1");
+    expect(deleteDocMock).toHaveBeenCalledWith({ kind: "doc", args: [{}, "clients", "anna-1"] });
   });
 });

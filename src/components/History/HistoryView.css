@@ -190,6 +190,19 @@
   gap: 12px;
 }
 
+.history__client-group-actions {
+  padding: 0 16px 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.history__delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
 /* `.history__entry` normally sits directly on the page and uses --brand-field for
    contrast; nested inside `.history__client-group` (which already uses --brand-field
    as its own card background) it needs the lighter --brand-surface instead, or the two

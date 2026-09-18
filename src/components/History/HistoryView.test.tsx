@@ -3,8 +3,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor, within, fireEvent } from "@testing-library/react";
 import "../../i18n";
 import { HistoryView } from "./HistoryView";
-import { fetchFormulaHistory, setActualColorGrams } from "../../history";
-import { fetchClients } from "../../clients";
+import { fetchFormulaHistory, setActualColorGrams, deleteHistoryEntry } from "../../history";
+import { fetchClients, deleteClient } from "../../clients";
 import type { FormulaHistoryEntry, ColorHistoryStep } from "../../history";
 import type { ClientProfile } from "../../clients";
 
@@ -15,13 +15,18 @@ vi.mock("../../history", async () => {
     fetchFormulaHistory: vi.fn(),
     buildRepeatFormulaRequest: vi.fn().mockReturnValue(null),
     setActualColorGrams: vi.fn(),
+    deleteHistoryEntry: vi.fn(),
   };
 });
 vi.mock("../../clients", () => ({
   fetchClients: vi.fn(),
+  deleteClient: vi.fn(),
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 const colorStep: ColorHistoryStep = {
   kind: "color",
@@ -73,8 +78,8 @@ function makeEntry(overrides: Partial<FormulaHistoryEntry> & { id: string; clien
   };
 }
 
-function renderHistoryView() {
-  return render(<HistoryView onRepeat={vi.fn()} isAdmin={false} currentUserEmail="stylist@salon.test" />);
+function renderHistoryView(overrides: Partial<{ isAdmin: boolean }> = {}) {
+  return render(<HistoryView onRepeat={vi.fn()} isAdmin={overrides.isAdmin ?? false} currentUserEmail="stylist@salon.test" />);
 }
 
 describe("HistoryView client grouping", () => {
@@ -265,5 +270,90 @@ describe("HistoryView actual grams", () => {
       })
     );
     await waitFor(() => expect(screen.getByText(/Product cost: 18\.00/)).toBeInTheDocument());
+  });
+});
+
+describe("HistoryView delete client", () => {
+  it("hides the delete-client action for a non-admin stylist", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
+    vi.mocked(fetchClients).mockResolvedValue([]);
+
+    renderHistoryView({ isAdmin: false });
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+    await screen.findByRole("dialog");
+
+    expect(screen.queryByRole("button", { name: "Delete client" })).not.toBeInTheDocument();
+  });
+
+  it("asks for confirmation before deleting, and does nothing on Cancel", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
+    vi.mocked(fetchClients).mockResolvedValue([]);
+
+    renderHistoryView({ isAdmin: true });
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+    await screen.findByRole("dialog", { name: "Anna K." });
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete client" }));
+    const confirmDialog = await screen.findByRole("dialog", { name: /Delete Anna K\.\?/ });
+    expect(within(confirmDialog).getByText(/1 saved visit/)).toBeInTheDocument();
+
+    fireEvent.click(within(confirmDialog).getByRole("button", { name: "Cancel" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: /Delete Anna K\.\?/ })).not.toBeInTheDocument());
+    expect(deleteHistoryEntry).not.toHaveBeenCalled();
+    expect(deleteClient).not.toHaveBeenCalled();
+    // The client card behind the (now-dismissed) confirm dialog is untouched.
+    expect(screen.getByRole("dialog", { name: "Anna K." })).toBeInTheDocument();
+  });
+
+  it("deletes every visit and the saved profile on confirm, then removes the client from the list", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+      makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
+      makeEntry({ id: "2", clientName: "Anna K.", clientId: "anna-1" }),
+      makeEntry({ id: "3", clientName: "Boris P." }),
+    ]);
+    vi.mocked(fetchClients).mockResolvedValue([
+      { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", lastCanvas: null },
+    ]);
+    vi.mocked(deleteHistoryEntry).mockResolvedValue(undefined);
+    vi.mocked(deleteClient).mockResolvedValue(undefined);
+
+    renderHistoryView({ isAdmin: true });
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(2));
+    fireEvent.click(screen.getByRole("button", { name: /^Anna K\./ }));
+    await screen.findByRole("dialog", { name: "Anna K." });
+
+    fireEvent.click(screen.getByRole("button", { name: "Delete client" }));
+    const confirmDialog = await screen.findByRole("dialog", { name: /Delete Anna K\.\?/ });
+    fireEvent.click(within(confirmDialog).getByRole("button", { name: "Delete permanently" }));
+
+    await waitFor(() => expect(deleteClient).toHaveBeenCalledWith("anna-1"));
+    expect(deleteHistoryEntry).toHaveBeenCalledTimes(2);
+
+    // Both dialogs close and Anna's card is gone -- Boris's is untouched.
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(1));
+    expect(screen.getByRole("button", { name: /^Boris P\./ })).toBeInTheDocument();
+  });
+
+  it("shows an error and keeps the client listed when the delete fails", async () => {
+    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
+    vi.mocked(fetchClients).mockResolvedValue([]);
+    vi.mocked(deleteHistoryEntry).mockRejectedValue(new Error("offline"));
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    renderHistoryView({ isAdmin: true });
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+    await screen.findByRole("dialog", { name: "Anna K." });
+    fireEvent.click(screen.getByRole("button", { name: "Delete client" }));
+    const confirmDialog = await screen.findByRole("dialog", { name: /Delete Anna K\.\?/ });
+    fireEvent.click(within(confirmDialog).getByRole("button", { name: "Delete permanently" }));
+
+    await waitFor(() => expect(screen.getByText(/Could not delete this client/)).toBeInTheDocument());
+    // The confirm dialog stays open and the client is still listed -- nothing was lost.
+    expect(screen.getByRole("dialog", { name: /Delete Anna K\.\?/ })).toBeInTheDocument();
+    expect(deleteClient).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
   });
 });

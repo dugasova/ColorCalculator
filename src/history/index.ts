@@ -10,7 +10,7 @@ export type {
 } from "./types";
 export { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
 export {
-  sanitizeForFirestore, saveFormulaToHistory, fetchFormulaHistory, setActualColorGrams,
+  sanitizeForFirestore, saveFormulaToHistory, fetchFormulaHistory, setActualColorGrams, deleteHistoryEntry,
   type SaveFormulaParams, type SetActualColorGramsParams, type ActualColorGramsResult,
 } from "./firestore";
 export { buildRepeatFormulaRequest, type RepeatFormulaRequest } from "./repeatFormula";

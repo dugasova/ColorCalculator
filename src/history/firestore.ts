@@ -1,5 +1,5 @@
-import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 import { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
@@ -165,4 +165,32 @@ export async function fetchFormulaHistory(scope: { isAdmin: boolean; currentUser
     entries.push(normalizeHistoryEntry(result.data as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
   }
   return entries;
+}
+
+// Best-effort delete of one uploaded photo slot -- mirrors uploadFormulaPhoto's own
+// deterministic path (formulaHistory/{historyId}/{slot}), so no stored URL needs
+// parsing. "storage/object-not-found" is swallowed (the slot was simply never
+// uploaded); any other failure is logged, not thrown, so a Storage hiccup can never
+// block deleting the Firestore record itself -- see deleteHistoryEntry below.
+async function deleteFormulaPhoto(historyId: string, slot: "before" | "after"): Promise<void> {
+  try {
+    await deleteObject(ref(storage, `formulaHistory/${historyId}/${slot}`));
+  } catch (err) {
+    const isObjectNotFound = typeof err === "object" && err !== null && "code" in err && err.code === "storage/object-not-found";
+    if (!isObjectNotFound) {
+      console.error(`Failed to delete "${slot}" photo for history entry "${historyId}":`, err);
+    }
+  }
+}
+
+// Permanently erases one saved visit -- admin-only (see firestore.rules), used by
+// HistoryView's "Delete client" flow to wipe every visit belonging to a client being
+// deleted. Deletes both photo slots before the document itself so a partial failure
+// never leaves an orphaned Storage object with no Firestore record pointing back to it.
+export async function deleteHistoryEntry(entry: Pick<FormulaHistoryEntry, "id" | "beforePhotoUrl" | "afterPhotoUrl">): Promise<void> {
+  await Promise.all([
+    entry.beforePhotoUrl !== null ? deleteFormulaPhoto(entry.id, "before") : Promise.resolve(),
+    entry.afterPhotoUrl !== null ? deleteFormulaPhoto(entry.id, "after") : Promise.resolve(),
+  ]);
+  await deleteDoc(doc(db, HISTORY_COLLECTION, entry.id));
 }

@@ -1,6 +1,7 @@
 export const en = {
   common: {
     close: "Close",
+    cancel: "Cancel",
   },
   app: {
     titlePrefix: "Formu",
@@ -221,6 +222,12 @@ export const en = {
     computedColorGrams: "calculated: {{grams}} g",
     actualGramsInvalid: "Enter grams as a number of 0 or more",
     actualGramsSaveError: "Could not save the actual grams — check your connection and try again",
+    deleteClient: "Delete client",
+    deleteClientConfirmTitle: "Delete {{name}}?",
+    deleteClientConfirmBody: "This permanently deletes {{name}}'s profile and all {{count}} saved visit(s), including any photos. This cannot be undone.",
+    deleteClientConfirmButton: "Delete permanently",
+    deletingClient: "Deleting…",
+    deleteClientError: "Could not delete this client — check your connection and try again",
   },
   analytics: {
     titlePrefix: "Salon",

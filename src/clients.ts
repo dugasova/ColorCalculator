@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "./firebase";
 import type { HairCanvas } from "./engine/canvas";
 
@@ -97,4 +97,12 @@ export async function fetchClients(ownedBy: string): Promise<ClientProfile[]> {
     clients.push(result.data);
   }
   return clients;
+}
+
+// Permanently erases a client's saved profile -- admin-only (see firestore.rules), called
+// alongside history/firestore.ts's deleteHistoryEntry when an admin wipes a client's
+// entire record (see HistoryView's "Delete client" confirm flow). Irreversible: no
+// soft-delete flag, nothing left behind in `clients` once this resolves.
+export async function deleteClient(id: string): Promise<void> {
+  await deleteDoc(doc(db, CLIENTS_COLLECTION, id));
 }

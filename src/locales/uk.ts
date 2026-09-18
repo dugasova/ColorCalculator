@@ -3,6 +3,7 @@ import type { en } from "./en";
 export const uk: typeof en = {
   common: {
     close: "Закрити",
+    cancel: "Скасувати",
   },
   app: {
     titlePrefix: "Formu",
@@ -223,6 +224,12 @@ export const uk: typeof en = {
     computedColorGrams: "розраховано: {{grams}} г",
     actualGramsInvalid: "Введіть грами числом від 0",
     actualGramsSaveError: "Не вдалося зберегти фактичну витрату - перевірте з'єднання та спробуйте ще раз",
+    deleteClient: "Видалити клієнта",
+    deleteClientConfirmTitle: "Видалити {{name}}?",
+    deleteClientConfirmBody: "Це остаточно видалить профіль {{name}} та всі {{count}} збережених візитів, включно з фото. Цю дію неможливо скасувати.",
+    deleteClientConfirmButton: "Видалити назавжди",
+    deletingClient: "Видалення…",
+    deleteClientError: "Не вдалося видалити клієнта - перевірте з'єднання та спробуйте ще раз",
   },
   analytics: {
     titlePrefix: "Аналітика",

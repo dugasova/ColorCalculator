@@ -43,13 +43,29 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   // collapsed. A client's full visit list (formula, pricing, photos, ...) needs real
   // screen space to stay readable, so it opens in a Modal instead of an inline accordion.
   const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
-  const { entries, setEntries, isLoading, error, filtered, groups, profilesByClientKey } =
-    useHistoryData({ isAdmin, currentUserEmail, search });
+  // Set only while the admin-only confirm dialog is open, to the key of the group it's
+  // asking about -- separate from `openGroupKey` so the confirm dialog can stack on top
+  // of (and, on cancel, fall back to) the still-open client visit-list modal beneath it.
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
+  const {
+    entries, setEntries, isLoading, error, filtered, groups, profilesByClientKey,
+    deleteClientGroup, deletingClientKey, deleteError,
+  } = useHistoryData({ isAdmin, currentUserEmail, search });
   const { gramsDrafts, savingGramsKey, gramsError, handleActualGramsChange, handleActualGramsBlur } =
     useActualGramsEditor(setEntries);
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
 
   const openGroup = groups.find(g => g.key === openGroupKey) ?? null;
+  const confirmDeleteGroup = groups.find(g => g.key === confirmDeleteKey) ?? null;
+
+  const handleConfirmDelete = async () => {
+    if (confirmDeleteGroup === null) return;
+    const deleted = await deleteClientGroup(confirmDeleteGroup);
+    if (deleted) {
+      setConfirmDeleteKey(null);
+      setOpenGroupKey(null);
+    }
+  };
 
   return (
     <div className="calculator">
@@ -72,6 +88,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
       {isLoading && <p className="history__status" aria-live="polite">{t("history.loading")}</p>}
       {error !== null && <p className="warning" role="alert">{error}</p>}
       {gramsError !== null && <p className="warning" role="alert">{gramsError}</p>}
+      {deleteError !== null && <p className="warning" role="alert">{deleteError}</p>}
       {!isLoading && error === null && filtered.length === 0 && (
         <p className="history__status" aria-live="polite">{t("history.empty")}</p>
       )}
@@ -106,6 +123,17 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
 
       {openGroup !== null && (
         <Modal title={openGroup.displayName} onClose={() => setOpenGroupKey(null)} size="large">
+          {isAdmin && (
+            <div className="history__client-group-actions">
+              <button
+                type="button"
+                className="button button--danger"
+                onClick={() => setConfirmDeleteKey(openGroup.key)}
+              >
+                {t("history.deleteClient")}
+              </button>
+            </div>
+          )}
           <ul className="history__entry-list">
             {openGroup.entries.map(entry => {
               const repeatRequest = buildRepeatFormulaRequest(entry, brands);
@@ -179,6 +207,33 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
               );
             })}
           </ul>
+        </Modal>
+      )}
+
+      {confirmDeleteGroup !== null && (
+        <Modal
+          title={t("history.deleteClientConfirmTitle", { name: confirmDeleteGroup.displayName })}
+          onClose={() => setConfirmDeleteKey(null)}
+        >
+          <p>{t("history.deleteClientConfirmBody", { name: confirmDeleteGroup.displayName, count: confirmDeleteGroup.entries.length })}</p>
+          <div className="history__delete-confirm-actions">
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={() => setConfirmDeleteKey(null)}
+              disabled={deletingClientKey === confirmDeleteGroup.key}
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="button"
+              className="button button--danger"
+              onClick={() => { void handleConfirmDelete(); }}
+              disabled={deletingClientKey === confirmDeleteGroup.key}
+            >
+              {deletingClientKey === confirmDeleteGroup.key ? t("history.deletingClient") : t("history.deleteClientConfirmButton")}
+            </button>
+          </div>
         </Modal>
       )}
     </div>

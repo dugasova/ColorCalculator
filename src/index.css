@@ -36,6 +36,8 @@
      WhatsApp/Telegram darkening note in FormulaCalculator.css); parametrized so the dark
      theme below can lighten them to keep clearing AA once the surface underneath flips. */
   --status-warning-ink: #9a3412;
+  --brand-danger: #dc2626;
+  --brand-danger-dark: #b91c1c;
   --quality-excellent-ink: #137a45;
   --quality-good-ink: #2e6bab;
   --quality-fair-ink: #8f6118;
@@ -68,6 +70,8 @@
   --brand-primary-ink: #c9b6ff;
   --brand-header-bg: rgba(21, 18, 30, 0.78);
   --status-warning-ink: #ffb37a;
+  --brand-danger: #ef4444;
+  --brand-danger-dark: #dc2626;
   --quality-excellent-ink: #4ade80;
   --quality-good-ink: #7fb8f5;
   --quality-fair-ink: #e0b055;
@@ -145,6 +149,21 @@ body {
   color: #fff;
   border-color: transparent;
   box-shadow: var(--brand-shadow-sm);
+}
+
+/* Destructive admin actions (see HistoryView's "Delete client" flow) -- filled solid
+   red instead of the brand gradient, so it reads unmistakably as irreversible next to
+   every other (brand-colored) button on the same screen. */
+.button--danger {
+  background: var(--brand-danger);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.25);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: var(--brand-danger-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -8px rgba(220, 38, 38, 0.45);
 }
 
 input[type="checkbox"] {
