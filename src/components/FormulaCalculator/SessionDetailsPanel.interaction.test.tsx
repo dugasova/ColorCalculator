@@ -7,7 +7,7 @@ import { SessionDetailsPanel } from "./SessionDetailsPanel";
 // Keeps this a pure component-interaction test: no real Firestore/network reachable from
 // jsdom, and no bearing on what's under test here (the save/onSaved timing below).
 vi.mock("../../clients", () => ({
-  fetchClients: vi.fn().mockResolvedValue([]),
+  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => { onChange([]); return () => {}; }),
   createClient: vi.fn().mockResolvedValue("new-client-id"),
   updateClient: vi.fn().mockResolvedValue(undefined),
 }));

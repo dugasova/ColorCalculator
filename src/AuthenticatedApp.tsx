@@ -10,6 +10,7 @@ import { Nav, type AppView } from "./components/Nav/Nav";
 import { buildRepeatFormulaRequest, type FormulaHistoryEntry, type RepeatFormulaRequest } from "./history";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
+import { useNativeBackButton } from "./nativeBackButton";
 
 const HistoryView = lazy(() =>
   import("./components/History/HistoryView").then(m => ({ default: m.HistoryView }))
@@ -60,6 +61,21 @@ export function AuthenticatedApp({ user }: { user: User }) {
   // instead, so a directly-typed bookmark URL (e.g. /loreal) highlights "Brands" too,
   // not whatever `view` happened to default to.
   const activeView: AppView = location.pathname === "/" ? view : "brands";
+
+  // One step of Android back-button/swipe navigation: leave a brand cheat-sheet route,
+  // else return from a non-calculator tab to the calculator, else (already home) hand
+  // back `false` so useNativeBackButton lets the app actually exit. See nativeBackButton.ts.
+  useNativeBackButton(() => {
+    if (location.pathname !== "/") {
+      navigate("/");
+      return true;
+    }
+    if (view !== "calculator") {
+      setView("calculator");
+      return true;
+    }
+    return false;
+  });
 
   const handleViewChange = (next: AppView) => {
     if (next === "brands") {

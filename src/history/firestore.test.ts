@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchFormulaHistory, saveFormulaToHistory, deleteHistoryEntry } from "./firestore";
+import { subscribeToFormulaHistory, saveFormulaToHistory, deleteHistoryEntry } from "./firestore";
 
 const addDocMock = vi.fn();
 const updateDocMock = vi.fn();
@@ -9,7 +9,7 @@ const uploadBytesMock = vi.fn();
 const getDownloadURLMock = vi.fn();
 const deleteObjectMock = vi.fn();
 
-const getDocsMock = vi.fn();
+const onSnapshotMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
 const whereMock = vi.fn((...args: unknown[]) => ({ kind: "where", field: args[0], op: args[1], value: args[2] }));
 const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
@@ -19,7 +19,7 @@ vi.mock("firebase/firestore", () => ({
   collection: vi.fn(() => "collection-ref"),
   deleteDoc: (...args: unknown[]) => deleteDocMock(...args),
   doc: (...args: unknown[]) => docMock(...args),
-  getDocs: (...args: unknown[]) => getDocsMock(...args),
+  onSnapshot: (...args: unknown[]) => onSnapshotMock(...args),
   orderBy: (...args: unknown[]) => orderByMock(...args),
   query: (...args: unknown[]) => queryMock(...args),
   where: (...args: unknown[]) => whereMock(...args),
@@ -62,7 +62,7 @@ beforeEach(() => {
   deleteDocMock.mockResolvedValue(undefined);
   uploadBytesMock.mockResolvedValue(undefined);
   getDownloadURLMock.mockResolvedValue("https://example.test/photo.jpg");
-  getDocsMock.mockResolvedValue({ docs: [] });
+  onSnapshotMock.mockImplementation(() => () => {});
   deleteObjectMock.mockResolvedValue(undefined);
 });
 
@@ -103,17 +103,19 @@ describe("saveFormulaToHistory", () => {
   });
 });
 
-describe("fetchFormulaHistory", () => {
-  it("queries every entry, unfiltered by owner, for an admin", async () => {
-    await fetchFormulaHistory({ isAdmin: true, currentUserEmail: "admin@salon.test" });
+describe("subscribeToFormulaHistory", () => {
+  it("queries every entry, unfiltered by owner, for an admin", () => {
+    onSnapshotMock.mockImplementation(() => () => {});
+    subscribeToFormulaHistory({ isAdmin: true, currentUserEmail: "admin@salon.test" }, () => {}, () => {});
 
     expect(whereMock).not.toHaveBeenCalled();
     expect(orderByMock).toHaveBeenCalledWith("appliedAt", "desc");
     expect(queryMock).toHaveBeenCalledWith("collection-ref", { kind: "orderBy", field: "appliedAt" });
   });
 
-  it("scopes the query to the signed-in stylist's own entries for a non-admin (Firestore rules reject an unscoped list request for them)", async () => {
-    await fetchFormulaHistory({ isAdmin: false, currentUserEmail: "stylist@salon.test" });
+  it("scopes the query to the signed-in stylist's own entries for a non-admin (Firestore rules reject an unscoped list request for them)", () => {
+    onSnapshotMock.mockImplementation(() => () => {});
+    subscribeToFormulaHistory({ isAdmin: false, currentUserEmail: "stylist@salon.test" }, () => {}, () => {});
 
     expect(whereMock).toHaveBeenCalledWith("appliedBy", "==", "stylist@salon.test");
     expect(queryMock).toHaveBeenCalledWith(
@@ -121,6 +123,35 @@ describe("fetchFormulaHistory", () => {
       { kind: "where", field: "appliedBy", op: "==", value: "stylist@salon.test" },
       { kind: "orderBy", field: "appliedAt" }
     );
+  });
+
+  it("skips a malformed document instead of throwing or poisoning the rest of the list", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    onSnapshotMock.mockImplementation((_q, next) => {
+      next({
+        docs: [
+          {
+            id: "good",
+            data: () => ({
+              clientName: "Anna", clientId: null, note: "", appliedBy: "s@t", steps: [], markupMultiplier: 1,
+              productCost: null, servicePrice: null, patchTestDate: "", allergyNotes: "", patchTestOverride: false,
+              beforePhotoUrl: null, afterPhotoUrl: null, appliedAt: null,
+            }),
+          },
+          { id: "bad", data: () => ({ appliedBy: "s@t" }) }, // missing required fields
+        ],
+      });
+      return () => {};
+    });
+
+    const onChange = vi.fn();
+    subscribeToFormulaHistory({ isAdmin: true, currentUserEmail: "s@t" }, onChange, () => {});
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0]).toHaveLength(1);
+    expect(onChange.mock.calls[0][0][0].id).toBe("good");
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    consoleError.mockRestore();
   });
 });
 

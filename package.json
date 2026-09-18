@@ -15,9 +15,15 @@
     "migrate:repair-igora-highlifts": "tsx --env-file=.env scripts/repairIgoraHighlifts12Palette.ts",
     "migrate:repair-wella-special-blonde": "tsx --env-file=.env scripts/repairWellaSpecialBlondePalette.ts",
     "verify-email:force": "tsx --env-file=.env scripts/forceVerifyEmail.ts",
-    "pwa:icons": "tsx scripts/generatePwaIcons.ts"
+    "pwa:icons": "tsx scripts/generatePwaIcons.ts",
+    "cap:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:apk": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.5.2",
     "clsx": "^2.1.1",
     "firebase": "^12.18.0",
     "i18next": "^26.4.0",
@@ -28,6 +34,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@eslint/js": "^9.39.5",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.1",

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { registerOpenModal } from "../../nativeBackButton";
 import "./Modal.css";
 
 export interface ModalProps {
@@ -36,6 +37,11 @@ export function Modal({ title, onClose, children, size = "default" }: ModalProps
       (triggerRef.current as HTMLElement | null)?.focus?.();
     };
   }, []);
+
+  // Lets Android's hardware back button / edge-swipe gesture close this dialog instead
+  // of exiting the app or falling through to whatever's behind it -- see
+  // nativeBackButton.ts for why a listener has to be registered at all.
+  useEffect(() => registerOpenModal(onClose), [onClose]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

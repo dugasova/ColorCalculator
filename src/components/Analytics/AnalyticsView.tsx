@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchFormulaHistory, type FormulaHistoryEntry } from "../../history";
+import { subscribeToFormulaHistory, type FormulaHistoryEntry } from "../../history";
 import { computeSalonAnalytics } from "../../analytics";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -20,10 +20,14 @@ export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps)
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFormulaHistory({ isAdmin, currentUserEmail })
-      .then(setEntries)
-      .catch(() => setError(t("analytics.loadError")))
-      .finally(() => setIsLoading(false));
+    return subscribeToFormulaHistory({ isAdmin, currentUserEmail }, entries => {
+      setEntries(entries);
+      setError(null);
+      setIsLoading(false);
+    }, () => {
+      setError(t("analytics.loadError"));
+      setIsLoading(false);
+    });
   }, [t, isAdmin, currentUserEmail]);
 
   const stats = computeSalonAnalytics(entries);

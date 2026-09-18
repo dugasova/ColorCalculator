@@ -3,8 +3,8 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor, within, fireEvent } from "@testing-library/react";
 import "../../i18n";
 import { HistoryView } from "./HistoryView";
-import { fetchFormulaHistory, setActualColorGrams, deleteHistoryEntry } from "../../history";
-import { fetchClients, deleteClient } from "../../clients";
+import { subscribeToFormulaHistory, setActualColorGrams, deleteHistoryEntry } from "../../history";
+import { subscribeToClients, deleteClient } from "../../clients";
 import type { FormulaHistoryEntry, ColorHistoryStep } from "../../history";
 import type { ClientProfile } from "../../clients";
 
@@ -12,14 +12,14 @@ vi.mock("../../history", async () => {
   const actual = await vi.importActual<typeof import("../../history")>("../../history");
   return {
     ...actual,
-    fetchFormulaHistory: vi.fn(),
+    subscribeToFormulaHistory: vi.fn(),
     buildRepeatFormulaRequest: vi.fn().mockReturnValue(null),
     setActualColorGrams: vi.fn(),
     deleteHistoryEntry: vi.fn(),
   };
 });
 vi.mock("../../clients", () => ({
-  fetchClients: vi.fn(),
+  subscribeToClients: vi.fn(),
   deleteClient: vi.fn(),
 }));
 
@@ -82,14 +82,28 @@ function renderHistoryView(overrides: Partial<{ isAdmin: boolean }> = {}) {
   return render(<HistoryView onRepeat={vi.fn()} isAdmin={overrides.isAdmin ?? false} currentUserEmail="stylist@salon.test" />);
 }
 
+function mockHistory(entries: FormulaHistoryEntry[]) {
+  vi.mocked(subscribeToFormulaHistory).mockImplementation((_scope, onChange) => {
+    onChange(entries);
+    return () => {};
+  });
+}
+
+function mockClients(clients: ClientProfile[]) {
+  vi.mocked(subscribeToClients).mockImplementation((_ownedBy, onChange) => {
+    onChange(clients);
+    return () => {};
+  });
+}
+
 describe("HistoryView client grouping", () => {
   it("groups every visit under one card per client, with an accurate visit count", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "Anna K." }),
       makeEntry({ id: "2", clientName: "Anna K." }),
       makeEntry({ id: "3", clientName: "Boris P." }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockClients([]);
 
     renderHistoryView();
 
@@ -102,11 +116,11 @@ describe("HistoryView client grouping", () => {
   });
 
   it("treats names differing only by case/whitespace as the same client", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "anna k." }),
       makeEntry({ id: "2", clientName: "  Anna K.  " }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockClients([]);
 
     renderHistoryView();
 
@@ -115,7 +129,7 @@ describe("HistoryView client grouping", () => {
   });
 
   it("shows the stylist's own saved phone/allergy notes for a matched client", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K." })]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K." })]);
     const profile: ClientProfile = {
       id: "c1",
       ownedBy: "stylist@salon.test",
@@ -124,7 +138,7 @@ describe("HistoryView client grouping", () => {
       allergyNotes: "PPD sensitivity",
       lastCanvas: null,
     };
-    vi.mocked(fetchClients).mockResolvedValue([profile]);
+    mockClients([profile]);
 
     renderHistoryView();
 
@@ -135,11 +149,11 @@ describe("HistoryView client grouping", () => {
   });
 
   it("keeps every client card collapsed until clicked, opening only that client's visits in a modal", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "Anna K." }),
       makeEntry({ id: "2", clientName: "Boris P." }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockClients([]);
 
     renderHistoryView();
     await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(2));
@@ -154,8 +168,8 @@ describe("HistoryView client grouping", () => {
   });
 
   it("closes the modal on Escape, returning to the collapsed card list", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K." })]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K." })]);
+    mockClients([]);
 
     renderHistoryView();
     fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
@@ -167,11 +181,11 @@ describe("HistoryView client grouping", () => {
   });
 
   it("keeps two real clients who happen to share a name in separate cards, each with its own real clientId", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
       makeEntry({ id: "2", clientName: "Anna K.", clientId: "anna-2" }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockClients([]);
 
     renderHistoryView();
 
@@ -183,11 +197,11 @@ describe("HistoryView client grouping", () => {
   });
 
   it("matches each card's saved-client profile by its own clientId, not by the shared name", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
       makeEntry({ id: "2", clientName: "Anna K.", clientId: "anna-2" }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([
+    mockClients([
       { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+1 555 0100", allergyNotes: "", lastCanvas: null },
       { id: "anna-2", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+1 555 0200", allergyNotes: "", lastCanvas: null },
     ]);
@@ -207,10 +221,10 @@ describe("HistoryView client grouping", () => {
 
 describe("HistoryView revisit reminders", () => {
   it("opens a WhatsApp link addressed to the client's saved phone, prefilled with their name and recommended date", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([
+    mockClients([
       { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+380 50 123 4567", allergyNotes: "", lastCanvas: null },
     ]);
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
@@ -229,8 +243,8 @@ describe("HistoryView revisit reminders", () => {
   });
 
   it("opens a Telegram share link when the Remind via Telegram button is clicked", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K." })]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K." })]);
+    mockClients([]);
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
 
     renderHistoryView();
@@ -248,8 +262,8 @@ describe("HistoryView revisit reminders", () => {
 describe("HistoryView actual grams", () => {
   it("records a typed actual-grams figure on blur and renders the entry's updated product cost", async () => {
     const entry = makeEntry({ id: "1", clientName: "Anna K." });
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([entry]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockHistory([entry]);
+    mockClients([]);
     vi.mocked(setActualColorGrams).mockResolvedValue({ steps: entry.steps, productCost: 18 });
 
     renderHistoryView();
@@ -275,8 +289,8 @@ describe("HistoryView actual grams", () => {
 
 describe("HistoryView delete client", () => {
   it("hides the delete-client action for a non-admin stylist", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
+    mockClients([]);
 
     renderHistoryView({ isAdmin: false });
     fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
@@ -286,8 +300,8 @@ describe("HistoryView delete client", () => {
   });
 
   it("asks for confirmation before deleting, and does nothing on Cancel", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
+    mockClients([]);
 
     renderHistoryView({ isAdmin: true });
     fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
@@ -307,12 +321,12 @@ describe("HistoryView delete client", () => {
   });
 
   it("deletes every visit and the saved profile on confirm, then removes the client from the list", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([
+    mockHistory([
       makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
       makeEntry({ id: "2", clientName: "Anna K.", clientId: "anna-1" }),
       makeEntry({ id: "3", clientName: "Boris P." }),
     ]);
-    vi.mocked(fetchClients).mockResolvedValue([
+    mockClients([
       { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", lastCanvas: null },
     ]);
     vi.mocked(deleteHistoryEntry).mockResolvedValue(undefined);
@@ -337,8 +351,8 @@ describe("HistoryView delete client", () => {
   });
 
   it("shows an error and keeps the client listed when the delete fails", async () => {
-    vi.mocked(fetchFormulaHistory).mockResolvedValue([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
+    mockClients([]);
     vi.mocked(deleteHistoryEntry).mockRejectedValue(new Error("offline"));
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 

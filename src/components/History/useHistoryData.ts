@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchFormulaHistory, deleteHistoryEntry, type FormulaHistoryEntry } from "../../history";
+import { subscribeToFormulaHistory, deleteHistoryEntry, type FormulaHistoryEntry } from "../../history";
 import { getClientGroupKey, normalizeClientKey } from "../../revisit";
-import { fetchClients, deleteClient, type ClientProfile } from "../../clients";
+import { subscribeToClients, deleteClient, type ClientProfile } from "../../clients";
 
 // One client's full visit timeline, grouped from the flat (already date-sorted-desc)
 // `entries` fetch -- lets the list read as "N visits for Anna K." instead of Anna's
@@ -61,16 +61,19 @@ export function useHistoryData({
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFormulaHistory({ isAdmin, currentUserEmail })
-      .then(setEntries)
-      .catch(() => setError(t("history.loadError")))
-      .finally(() => setIsLoading(false));
+    return subscribeToFormulaHistory({ isAdmin, currentUserEmail }, entries => {
+      setEntries(entries);
+      setError(null);
+      setIsLoading(false);
+    }, err => {
+      console.error("Formula history subscription failed:", err);
+      setError(t("history.loadError"));
+      setIsLoading(false);
+    });
   }, [t, isAdmin, currentUserEmail]);
 
   useEffect(() => {
-    fetchClients(currentUserEmail)
-      .then(setSavedClients)
-      .catch(err => console.error("Failed to load saved clients:", err));
+    return subscribeToClients(currentUserEmail, setSavedClients, err => console.error("Saved clients subscription failed:", err));
   }, [currentUserEmail]);
 
   const profilesByClientKey = useMemo(() => {

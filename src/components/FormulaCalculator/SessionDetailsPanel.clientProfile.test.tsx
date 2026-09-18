@@ -3,10 +3,10 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import "../../i18n";
 import { SessionDetailsPanel } from "./SessionDetailsPanel";
-import { fetchClients, createClient, updateClient } from "../../clients";
+import { subscribeToClients, createClient, updateClient, type ClientProfile } from "../../clients";
 
 vi.mock("../../clients", () => ({
-  fetchClients: vi.fn(),
+  subscribeToClients: vi.fn(),
   createClient: vi.fn(),
   updateClient: vi.fn(),
 }));
@@ -32,6 +32,13 @@ const ANNA_2 = {
 afterEach(cleanup);
 beforeEach(() => vi.clearAllMocks());
 
+function mockClients(clients: ClientProfile[]) {
+  vi.mocked(subscribeToClients).mockImplementation((_ownedBy, onChange) => {
+    onChange(clients);
+    return () => {};
+  });
+}
+
 function openModal() {
   fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
 }
@@ -42,7 +49,7 @@ async function waitForClientListLoaded(count: number) {
 
 describe("SessionDetailsPanel client disambiguation", () => {
   it("offers both namesakes as separate picks and links to only the one actually clicked", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1, ANNA_2]);
+    mockClients([ANNA_1, ANNA_2]);
     vi.mocked(updateClient).mockResolvedValue(undefined);
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
@@ -69,7 +76,7 @@ describe("SessionDetailsPanel client disambiguation", () => {
   });
 
   it("re-shows the suggestion list (and drops the previous link) once the name is edited again", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1, ANNA_2]);
+    mockClients([ANNA_1, ANNA_2]);
     render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
     openModal();
 
@@ -84,7 +91,7 @@ describe("SessionDetailsPanel client disambiguation", () => {
   });
 
   it("lets the colorist explicitly detach from a wrongly picked namesake via \"not this person\"", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1]);
+    mockClients([ANNA_1]);
     render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
     openModal();
 
@@ -101,7 +108,7 @@ describe("SessionDetailsPanel client disambiguation", () => {
   });
 
   it("creates a brand-new profile (not an update) for a name with no matching suggestion, and links the entry to the new id", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockClients([]);
     vi.mocked(createClient).mockResolvedValue("brand-new-id");
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
@@ -118,7 +125,7 @@ describe("SessionDetailsPanel client disambiguation", () => {
   });
 
   it("shows the picked client's last visit hint only once a specific match is confirmed", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1, ANNA_2]);
+    mockClients([ANNA_1, ANNA_2]);
     render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
     openModal();
 

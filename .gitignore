@@ -24,6 +24,12 @@ secrets/
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# OS junk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 *.suo
 *.ntvs*
 *.njsproj

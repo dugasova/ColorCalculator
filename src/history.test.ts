@@ -279,7 +279,7 @@ describe("buildRepeatFormulaRequest", () => {
   });
 });
 
-// Firestore documents are untrusted input -- see fetchFormulaHistory, which safeParses
+// Firestore documents are untrusted input -- see subscribeToFormulaHistory, which safeParses
 // against this before calling normalizeHistoryEntry, and skips (logging) any document
 // that fails.
 describe("historyEntryShapeSchema", () => {

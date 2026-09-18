@@ -1,4 +1,5 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
@@ -147,24 +148,34 @@ export async function setActualColorGrams(params: SetActualColorGramsParams): Pr
 // outright unless the query itself is constrained to a result set the rule can prove
 // satisfies that condition - so admin and non-admin genuinely need different queries,
 // not just different client-side filtering of the same fetch.
-export async function fetchFormulaHistory(scope: { isAdmin: boolean; currentUserEmail: string }): Promise<FormulaHistoryEntry[]> {
+// Live query instead of a one-shot read so an entry saved on another device (the salon's
+// web browser, another stylist's phone) shows up in an already-open History/Analytics
+// screen without a reload -- same pattern as stock.ts's subscribeToStock. Scope rules
+// are identical to the previous one-shot read: a non-admin's query MUST stay constrained
+// to their own `appliedBy`, or firestore.rules rejects the whole listen.
+export function subscribeToFormulaHistory(
+  scope: { isAdmin: boolean; currentUserEmail: string },
+  onChange: (entries: FormulaHistoryEntry[]) => void,
+  onError: (error: FirestoreError) => void,
+): Unsubscribe {
   const q = scope.isAdmin
     ? query(collection(db, HISTORY_COLLECTION), orderBy("appliedAt", "desc"))
     : query(collection(db, HISTORY_COLLECTION), where("appliedBy", "==", scope.currentUserEmail), orderBy("appliedAt", "desc"));
-  const snapshot = await getDocs(q);
-  const entries: FormulaHistoryEntry[] = [];
-  for (const doc of snapshot.docs) {
-    const result = historyEntryShapeSchema.safeParse({ id: doc.id, ...doc.data() });
-    if (!result.success) {
-      console.error(`Skipping malformed history document "${doc.id}":`, result.error.issues);
-      continue;
+  return onSnapshot(q, snapshot => {
+    const entries: FormulaHistoryEntry[] = [];
+    for (const d of snapshot.docs) {
+      const result = historyEntryShapeSchema.safeParse({ id: d.id, ...d.data() });
+      if (!result.success) {
+        console.error(`Skipping malformed history document "${d.id}":`, result.error.issues);
+        continue;
+      }
+      // See historyEntryShapeSchema's comment above for why this is shallow (result.data's
+      // nested fields are validated as "some object", not deep-checked against FullFormula/
+      // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
+      entries.push(normalizeHistoryEntry(result.data as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
     }
-    // See historyEntryShapeSchema's comment above for why this is shallow (result.data's
-    // nested fields are validated as "some object", not deep-checked against FullFormula/
-    // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
-    entries.push(normalizeHistoryEntry(result.data as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
-  }
-  return entries;
+    onChange(entries);
+  }, onError);
 }
 
 // Best-effort delete of one uploaded photo slot -- mirrors uploadFormulaPhoto's own

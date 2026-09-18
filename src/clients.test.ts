@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createClient, updateClient, fetchClients, deleteClient } from "./clients";
+import { createClient, updateClient, subscribeToClients, deleteClient } from "./clients";
 
 const addDocMock = vi.fn();
 const updateDocMock = vi.fn();
 const deleteDocMock = vi.fn();
 const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
-const getDocsMock = vi.fn();
+const onSnapshotMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
 const whereMock = vi.fn((...args: unknown[]) => ({ kind: "where", field: args[0], op: args[1], value: args[2] }));
 const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
@@ -15,7 +15,7 @@ vi.mock("firebase/firestore", () => ({
   collection: vi.fn(() => "collection-ref"),
   deleteDoc: (...args: unknown[]) => deleteDocMock(...args),
   doc: (...args: unknown[]) => docMock(...args),
-  getDocs: (...args: unknown[]) => getDocsMock(...args),
+  onSnapshot: (...args: unknown[]) => onSnapshotMock(...args),
   orderBy: (...args: unknown[]) => orderByMock(...args),
   query: (...args: unknown[]) => queryMock(...args),
   serverTimestamp: vi.fn(() => "server-timestamp"),
@@ -29,7 +29,7 @@ beforeEach(() => {
   addDocMock.mockResolvedValue({ id: "new-doc-id" });
   updateDocMock.mockResolvedValue(undefined);
   deleteDocMock.mockResolvedValue(undefined);
-  getDocsMock.mockResolvedValue({ docs: [] });
+  onSnapshotMock.mockImplementation(() => () => {});
 });
 
 describe("createClient", () => {
@@ -90,9 +90,9 @@ describe("updateClient", () => {
   });
 });
 
-describe("fetchClients", () => {
-  it("scopes the query to the given owner and orders by name", async () => {
-    await fetchClients("stylist@salon.test");
+describe("subscribeToClients", () => {
+  it("scopes the query to the given owner and orders by name", () => {
+    subscribeToClients("stylist@salon.test", () => {}, () => {});
 
     expect(whereMock).toHaveBeenCalledWith("ownedBy", "==", "stylist@salon.test");
     expect(orderByMock).toHaveBeenCalledWith("name");
@@ -103,18 +103,23 @@ describe("fetchClients", () => {
     );
   });
 
-  it("skips a malformed document instead of throwing or poisoning the rest of the list", async () => {
+  it("skips a malformed document instead of throwing or poisoning the rest of the list", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-    getDocsMock.mockResolvedValue({
-      docs: [
-        { id: "good", data: () => ({ ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null }) },
-        { id: "bad", data: () => ({ ownedBy: "s@t" }) }, // missing required fields
-      ],
+    onSnapshotMock.mockImplementation((_q, next) => {
+      next({
+        docs: [
+          { id: "good", data: () => ({ ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null }) },
+          { id: "bad", data: () => ({ ownedBy: "s@t" }) }, // missing required fields
+        ],
+      });
+      return () => {};
     });
 
-    const result = await fetchClients("s@t");
+    const onChange = vi.fn();
+    subscribeToClients("s@t", onChange, () => {});
 
-    expect(result).toEqual([{ id: "good", ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null }]);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0]).toEqual([{ id: "good", ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null }]);
     expect(consoleError).toHaveBeenCalledTimes(1);
     consoleError.mockRestore();
   });

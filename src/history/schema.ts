@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Timestamp } from "firebase/firestore";
 import type { ColorHistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 
-// Validates a formulaHistory Firestore document's top-level shape (see fetchFormulaHistory
+// Validates a formulaHistory Firestore document's top-level shape (see subscribeToFormulaHistory
 // in ./firestore). Deliberately shallow: `result`/`targetShade`/`additionalShade`/`blend` are the
 // nested, purely-computed/display output of the formula engine (FullFormula, BleachFormula
 // -- engine/formula.ts, engine/bleach.ts), not something a corrupt value could feed back

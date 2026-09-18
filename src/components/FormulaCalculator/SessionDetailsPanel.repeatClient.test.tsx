@@ -3,11 +3,11 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import "../../i18n";
 import { SessionDetailsPanel } from "./SessionDetailsPanel";
-import { fetchClients, createClient, updateClient } from "../../clients";
+import { subscribeToClients, createClient, updateClient, type ClientProfile } from "../../clients";
 import type { RepeatFormulaRequest } from "../../history";
 
 vi.mock("../../clients", () => ({
-  fetchClients: vi.fn(),
+  subscribeToClients: vi.fn(),
   createClient: vi.fn(),
   updateClient: vi.fn(),
 }));
@@ -47,6 +47,13 @@ function makeRepeatRequest(overrides: Partial<Pick<RepeatFormulaRequest, "client
 afterEach(cleanup);
 beforeEach(() => vi.clearAllMocks());
 
+function mockClients(clients: ClientProfile[]) {
+  vi.mocked(subscribeToClients).mockImplementation((_ownedBy, onChange) => {
+    onChange(clients);
+    return () => {};
+  });
+}
+
 function openModal() {
   fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
 }
@@ -57,7 +64,7 @@ function openModal() {
 // both History's grouping and AnalyticsView's retention figures.
 describe("SessionDetailsPanel repeatRequest client link", () => {
   it("pre-fills the client name and re-links to the matched saved profile, without any suggestion click", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1]);
+    mockClients([ANNA_1]);
     render(
       <SessionDetailsPanel
         formulaText="Test formula"
@@ -74,7 +81,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
   });
 
   it("re-links Save to the same client profile via updateClient, never creating a duplicate", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1]);
+    mockClients([ANNA_1]);
     vi.mocked(updateClient).mockResolvedValue(undefined);
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(
@@ -98,7 +105,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
   });
 
   it("backfills phone/allergy notes from the matched saved profile once it loads", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([ANNA_1]);
+    mockClients([ANNA_1]);
     render(
       <SessionDetailsPanel
         formulaText="Test formula"
@@ -115,7 +122,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
   });
 
   it("does not create a duplicate profile for a legacy entry with no clientId, matching pre-fix behavior", async () => {
-    vi.mocked(fetchClients).mockResolvedValue([]);
+    mockClients([]);
     vi.mocked(createClient).mockResolvedValue("new-id");
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(

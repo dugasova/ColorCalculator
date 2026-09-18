@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchClients, type ClientProfile } from "../../clients";
+import { subscribeToClients, type ClientProfile } from "../../clients";
 import type { RepeatFormulaRequest } from "../../history";
 import { formatCanvasText } from "../../formatSession";
 
@@ -56,7 +56,7 @@ export function useClientLink(appliedBy: string, repeatRequest?: RepeatFormulaRe
   const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
   // The clientId whose phone/allergy notes have already been backfilled below -- distinct
   // from `appliedRepeatRequest` because the matched ClientProfile may resolve out of the
-  // async fetchClients load well after the repeat replay (or an explicit suggestion pick)
+  // subscribeToClients subscription well after the repeat replay (or an explicit suggestion pick)
   // sets `selectedClientId`, on a later render.
   const [contactBackfilledForClientId, setContactBackfilledForClientId] = useState<string | null>(null);
 
@@ -64,11 +64,7 @@ export function useClientLink(appliedBy: string, repeatRequest?: RepeatFormulaRe
   // below is ready the instant the colorist needs it, with no extra loading flicker.
   // Cheap: one stylist's own client book, not the whole salon's.
   useEffect(() => {
-    let cancelled = false;
-    fetchClients(appliedBy)
-      .then(list => { if (!cancelled) setSavedClients(list); })
-      .catch(err => console.error("Failed to load saved clients:", err));
-    return () => { cancelled = true; };
+    return subscribeToClients(appliedBy, setSavedClients, err => console.error("Failed to load saved clients:", err));
   }, [appliedBy]);
 
   // Replay a "Repeat formula" request's client link right during render, same pattern
@@ -97,7 +93,7 @@ export function useClientLink(appliedBy: string, repeatRequest?: RepeatFormulaRe
   );
 
   // Backfills phone/allergy notes once the repeat-linked profile resolves out of the
-  // async fetchClients load above -- handleSelectSuggestion does this eagerly for an
+  // subscribeToClients subscription above -- handleSelectSuggestion does this eagerly for an
   // explicit click, but a repeat-driven selection has no click to hang it off of, and
   // `savedClients` may still be loading the instant the replay above runs. Right during
   // render, same "adjust state when a prop/derived value changes" pattern as the

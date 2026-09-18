@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { db } from "./firebase";
 import type { HairCanvas } from "./engine/canvas";
 
@@ -83,20 +84,27 @@ export async function updateClient(id: string, params: UpdateClientParams): Prom
 // Every stylist's client book is private to them, mirroring formulaHistory's
 // `appliedBy`-scoped rule in firestore.rules -- feeds SessionDetailsPanel's client-name
 // suggestion list and its phone/allergy-notes/last-canvas autofill.
-export async function fetchClients(ownedBy: string): Promise<ClientProfile[]> {
-  const snapshot = await getDocs(
-    query(collection(db, CLIENTS_COLLECTION), where("ownedBy", "==", ownedBy), orderBy("name"))
-  );
-  const clients: ClientProfile[] = [];
-  for (const doc of snapshot.docs) {
-    const result = clientProfileShapeSchema.safeParse({ id: doc.id, ...doc.data() });
-    if (!result.success) {
-      console.error(`Skipping malformed client document "${doc.id}":`, result.error.issues);
-      continue;
+// Live query for the same reason subscribeToFormulaHistory is live: a profile created or
+// renamed on another device must show up in an open client picker/History list without a
+// reload. Malformed documents are skipped and logged, exactly as the one-shot read did.
+export function subscribeToClients(
+  ownedBy: string,
+  onChange: (clients: ClientProfile[]) => void,
+  onError: (error: FirestoreError) => void,
+): Unsubscribe {
+  const q = query(collection(db, CLIENTS_COLLECTION), where("ownedBy", "==", ownedBy), orderBy("name"));
+  return onSnapshot(q, snapshot => {
+    const clients: ClientProfile[] = [];
+    for (const d of snapshot.docs) {
+      const result = clientProfileShapeSchema.safeParse({ id: d.id, ...d.data() });
+      if (!result.success) {
+        console.error(`Skipping malformed client document "${d.id}":`, result.error.issues);
+        continue;
+      }
+      clients.push(result.data);
     }
-    clients.push(result.data);
-  }
-  return clients;
+    onChange(clients);
+  }, onError);
 }
 
 // Permanently erases a client's saved profile -- admin-only (see firestore.rules), called
