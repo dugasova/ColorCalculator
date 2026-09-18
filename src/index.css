@@ -356,14 +356,6 @@ input[type="checkbox"]:disabled {
   .app-brand {
     display: none;
   }
-
-  /* The signed-in email is purely informational (not an accessible name/label for
-     anything) and its length is unbounded -- on a narrow phone it was by far the widest,
-     least predictable item in .app-topbar__account, forcing the whole topbar row (and
-     with it the page) into horizontal scroll instead of wrapping onto a second line. */
-  .app-topbar__account > span {
-    display: none;
-  }
 }
 
 @media (min-width: 1024px) {

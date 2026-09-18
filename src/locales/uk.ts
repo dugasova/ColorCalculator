@@ -31,6 +31,7 @@ export const uk: typeof en = {
     ariaLabel: "Основна навігація",
   },
   account: {
+    menuLabel: "Меню акаунту",
     signOut: "Вийти",
     changePassword: "Змінити пароль",
     currentPassword: "Поточний пароль",

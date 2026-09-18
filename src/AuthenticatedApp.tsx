@@ -10,6 +10,7 @@ import { Nav, type AppView } from "./components/Nav/Nav";
 import { buildRepeatFormulaRequest, type FormulaHistoryEntry, type RepeatFormulaRequest } from "./history";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
+import { AccountMenu } from "./components/AccountMenu/AccountMenu";
 import { useNativeBackButton } from "./nativeBackButton";
 
 const HistoryView = lazy(() =>
@@ -111,9 +112,11 @@ export function AuthenticatedApp({ user }: { user: User }) {
           <div className="app-topbar__account">
             <ThemeSwitcher />
             <LanguageSwitcher />
-            <span>{user.email}</span>
-            <button className="button button--secondary" onClick={() => setIsChangePasswordOpen(true)}>{t("account.changePassword")}</button>
-            <button className="button button--secondary" onClick={() => signOut(auth)}>{t("account.signOut")}</button>
+            <AccountMenu
+              email={user.email}
+              onChangePassword={() => setIsChangePasswordOpen(true)}
+              onSignOut={() => signOut(auth)}
+            />
           </div>
         </div>
       </header>

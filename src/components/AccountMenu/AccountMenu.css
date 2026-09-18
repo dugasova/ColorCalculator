@@ -1,0 +1,56 @@
+.account-menu {
+  position: relative;
+}
+
+.account-menu__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.account-menu__icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Right-aligned, not left like Select.tsx's popup: the trigger sits at the far right
+   edge of .app-topbar, so a left-anchored popup would run off the viewport on narrow
+   screens. */
+.account-menu__popup {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 12px;
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: 0.85rem;
+  box-shadow: var(--brand-shadow-md);
+  animation: account-menu-popup-enter 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.account-menu__popup .button {
+  width: 100%;
+}
+
+.account-menu__email {
+  margin: 0 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--brand-border);
+  color: var(--brand-muted);
+  font-size: 0.8rem;
+  word-break: break-word;
+}
+
+@keyframes account-menu-popup-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}

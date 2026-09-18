@@ -29,6 +29,7 @@ export const en = {
     ariaLabel: "Primary navigation",
   },
   account: {
+    menuLabel: "Account menu",
     signOut: "Sign out",
     changePassword: "Change password",
     currentPassword: "Current password",
