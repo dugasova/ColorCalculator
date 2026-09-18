@@ -31,7 +31,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
   const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(false);
 
-  const base = useShadeFormulaState({ brands, suppressAdditionalShade: blendModeEnabled });
+  const base = useShadeFormulaState({ brands });
   const {
     startLevel, setStartLevel, grayPercent, setGrayPercent,
     porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory,

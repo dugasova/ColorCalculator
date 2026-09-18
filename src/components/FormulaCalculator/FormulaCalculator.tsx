@@ -117,29 +117,23 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
           onSelectMatch={handleCrossBrandMatchSelect}
         />
         <BlendModeField substituteBlend={blendModeEnabled} onSubstituteBlendChange={handleBlendModeChange} />
-        {!blendModeEnabled && (
-          <>
-            <AdditionalShadeField
-              lineShades={lineShades}
-              additionalShadeCode={additionalShadeCode}
-              onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
-              additionalShadeGrams={additionalShadeGrams}
-              onAdditionalShadeGramsChange={setAdditionalShadeGrams}
-            />
-            {additionalShadeCode !== null && (
-              <>
-                <AdditionalShadeField
-                  lineShades={lineShades}
-                  additionalShadeCode={additionalShade2Code}
-                  onAdditionalShadeCodeChange={setAdditionalShade2Code}
-                  additionalShadeGrams={additionalShade2Grams}
-                  onAdditionalShadeGramsChange={setAdditionalShade2Grams}
-                  idSuffix="_2"
-                  label={t("fields.additionalShade2")}
-                />
-              </>
-            )}
-          </>
+        <AdditionalShadeField
+          lineShades={lineShades}
+          additionalShadeCode={additionalShadeCode}
+          onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
+          additionalShadeGrams={additionalShadeGrams}
+          onAdditionalShadeGramsChange={setAdditionalShadeGrams}
+        />
+        {additionalShadeCode !== null && (
+          <AdditionalShadeField
+            lineShades={lineShades}
+            additionalShadeCode={additionalShade2Code}
+            onAdditionalShadeCodeChange={setAdditionalShade2Code}
+            additionalShadeGrams={additionalShade2Grams}
+            onAdditionalShadeGramsChange={setAdditionalShade2Grams}
+            idSuffix="_2"
+            label={t("fields.additionalShade2")}
+          />
         )}
         {blendModeEnabled && (
           <div className="blend-group">

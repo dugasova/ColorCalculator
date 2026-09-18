@@ -139,9 +139,9 @@ export function FormulaResults({
         <p className="warning" role="alert">{t("results.porousWarning")}</p>
       )}
       {result.grams !== null && (
-        <div className="results__row">
+        <div className="results__row results__row--mix">
           <span className="results__row-label">{t("results.mix")}</span>
-          <span>{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
+          <span className="results__mix-value">{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
         </div>
       )}
 

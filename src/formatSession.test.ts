@@ -52,7 +52,7 @@ describe("formatSessionText", () => {
     const text = formatSessionText([colorStep]);
     expect(text).not.toContain("Step 1");
     expect(text).toContain("Generic — 9.1 (ash)");
-    expect(text).toContain("Mix: 9.1-20.0 g developer 40.0 g");
+    expect(text).toContain("Mix: 9.1- 20.0 g developer 40.0 g");
   });
 
   it("numbers each step and appends the combined total processing time for a multi-step session", () => {
@@ -78,7 +78,7 @@ describe("formatSessionText", () => {
     delete (legacyStep as Partial<ColorHistoryStep>).blend;
 
     expect(() => formatSessionText([legacyStep])).not.toThrow();
-    expect(formatSessionText([legacyStep])).toContain("Mix: 9.1-20.0 g developer 40.0 g");
+    expect(formatSessionText([legacyStep])).toContain("Mix: 9.1- 20.0 g developer 40.0 g");
   });
 
   it("prepends the recorded filler step ahead of the target-color block when prePigmentation is set", () => {

@@ -28,7 +28,7 @@ describe("formatFormulaText", () => {
       "Application: Full head\n" +
       "Developer: 10 vol\n" +
       "Ratio: 1:1\n" +
-      "Mix: 8.1-30.0 g developer 30.0 g\n" +
+      "Mix: 8.1- 30.0 g developer 30.0 g\n" +
       "Processing time: 30 min\n" +
       "Gray coverage: apply the fashion tone as-is (0% base / 100% tone)\n" +
       "Recommended corrective tone: none"
@@ -202,7 +202,7 @@ describe("formatFormulaText", () => {
 
     // Primary shade keeps its original 30g share; the additional 5g is broken out
     // separately; developer grows from 30g to 35g to match the new 35g color total.
-    expect(text).toContain("Mix: 8.1-30.0 g 8.3-5.0 g developer 35.0 g");
+    expect(text).toContain("Mix: 8.1- 30.0 g 8.3- 5.0 g developer 35.0 g");
   });
 
   it("omits the second shade from the Mix line when no grams were entered for it", () => {
@@ -223,7 +223,7 @@ describe("formatFormulaText", () => {
       neutralizationApplied: false,
     });
 
-    expect(text).toContain("Mix: 8.1-30.0 g developer 30.0 g");
+    expect(text).toContain("Mix: 8.1- 30.0 g developer 30.0 g");
     expect(text).not.toContain("8.3");
   });
 

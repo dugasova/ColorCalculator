@@ -19,9 +19,10 @@ export interface FormatFormulaParams {
   additionalShadeGrams: number;
   additionalShade2?: Shade | null;
   additionalShade2Grams?: number;
-  // A substitute blend for a shade that's out of stock (see BlendSummary) -- mutually
-  // exclusive with additionalShade/additionalShadeGrams above, which is instead a
-  // discretionary corrective addition on top of the primary mix.
+  // A substitute blend for a shade that's out of stock (see BlendSummary). Independent
+  // of additionalShade/additionalShadeGrams below -- a colorist may both substitute a
+  // blend for the missing target shade AND still add a discretionary corrective shade
+  // on top of that blend.
   blend: BlendSummary | null;
   neutralizationApplied: boolean;
 }
@@ -35,16 +36,34 @@ export interface BlendSummary {
 
 // Mix breakdown for a substitute blend approximating a shade that's out of stock: the
 // target shade (the visual goal named in the title above) never appears here, since it
-// isn't a real product to weigh -- only the two components standing in for it.
-export function buildBlendMixSummary(blend: BlendSummary, developerGrams: number): string {
-  return [
+// isn't a real product to weigh -- only the two components standing in for it, plus any
+// discretionary additional shade(s) blended on top (see buildMixSummary's own additional-
+// shade handling -- `developerGrams` here already reflects their weight, same as there).
+export function buildBlendMixSummary(
+  blend: BlendSummary,
+  developerGrams: number,
+  additionalShade?: Shade | null,
+  additionalShadeGrams?: number,
+  additionalShade2?: Shade | null,
+  additionalShade2Grams?: number,
+): string {
+  const hasAdditional = additionalShade != null && (additionalShadeGrams ?? 0) > 0;
+  const hasAdditional2 = additionalShade2 != null && (additionalShade2Grams ?? 0) > 0;
+  const parts = [
     i18n.t("format.mixShade", { code: blend.shadeA.code, grams: blend.shadeAGrams.toFixed(1) }),
     i18n.t("format.mixShade", { code: blend.shadeB.code, grams: blend.shadeBGrams.toFixed(1) }),
-    i18n.t("format.mixDeveloper", { grams: developerGrams.toFixed(1) }),
-  ].join(" ");
+  ];
+  if (hasAdditional) {
+    parts.push(i18n.t("format.mixShade", { code: additionalShade.code, grams: (additionalShadeGrams ?? 0).toFixed(1) }));
+  }
+  if (hasAdditional2) {
+    parts.push(i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }));
+  }
+  parts.push(i18n.t("format.mixDeveloper", { grams: developerGrams.toFixed(1) }));
+  return parts.join(" ");
 }
 
-// Renders the mix as a per-shade breakdown (e.g. "7/71-30.0 g 7/17-15.0 g developer 45.0 g")
+// Renders the mix as a per-shade breakdown (e.g. "7/71- 30.0 g 7/17- 15.0 g developer 45.0 g")
 // rather than a generic "color vs developer" split, so the colorist can read exactly how
 // much of each shade — including any additional shade blended in at their discretion — to
 // weigh out. `grams.colorGrams` already includes the additional shade's grams (see
@@ -106,7 +125,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     result.grams !== null
       ? i18n.t("format.mixValue", {
         value: blend !== null
-          ? buildBlendMixSummary(blend, result.grams.developerGrams)
+          ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)
           : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams),
       })
       : i18n.t("format.mixFallback", { message: result.liftUnsupportedWarning ?? i18n.t("results.notAchievable") }),

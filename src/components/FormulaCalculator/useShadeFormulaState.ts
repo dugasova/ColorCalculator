@@ -25,7 +25,6 @@ function useComputedFullFormula(
   totalGrams: number,
   mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio,
   manualDeveloperVolume: DeveloperVolume | undefined,
-  suppressAdditionalShade: boolean,
   totalExtra: number,
 ) {
   const result = useMemo(
@@ -33,10 +32,10 @@ function useComputedFullFormula(
     [startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume]
   );
   const grams = useMemo(
-    () => (!suppressAdditionalShade && result.grams !== null && totalExtra > 0
+    () => (result.grams !== null && totalExtra > 0
       ? applyAdditionalShade(result.grams, result.mixingRatio, totalExtra)
       : result.grams),
-    [suppressAdditionalShade, result, totalExtra]
+    [result, totalExtra]
   );
   const effectiveResult = useMemo(
     () => (grams !== result.grams ? { ...result, grams } : result),
@@ -47,11 +46,6 @@ function useComputedFullFormula(
 
 export interface UseShadeFormulaStateOptions {
   brands: Record<BrandId, Brand>;
-  // FormulaCalculator's substitute-blend mode replaces the additional-shade calculation
-  // entirely (see BlendComponentField/BlendRatioField) -- when it's on, this suppresses
-  // applyAdditionalShade here so the two calculations never both try to adjust `grams`.
-  // ColorStepCard has no blend mode, so it never needs this.
-  suppressAdditionalShade?: boolean;
 }
 
 // The brand/line/shade selection, developer/application/gram overrides, additional-shade
@@ -60,8 +54,12 @@ export interface UseShadeFormulaStateOptions {
 // its own extra state on top (FormulaCalculator: repeat-request replay, substitute-blend
 // mode, cross-brand match, markup/service price; ColorStepCard: a flat price-per-gram
 // field) -- see resetShadePoolOverrides for the shade-pool-changed reset point a caller
-// with its own overrides plugs into.
-export function useShadeFormulaState({ brands, suppressAdditionalShade = false }: UseShadeFormulaStateOptions) {
+// with its own overrides plugs into. The additional shade may be combined with
+// FormulaCalculator's substitute blend (blendModeEnabled) -- both add real weight to the
+// same `grams` total, so this hook applies the additional-shade grams unconditionally;
+// the blend split itself works off the pre-additional `result.grams.colorGrams` (see
+// useFormulaCalculatorState's `blend`), so the two calculations never collide.
+export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
   const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState();
   const [startLevel, setStartLevel] = useState<Level>(10);
   const [grayPercent, setGrayPercent] = useState(0);
@@ -165,7 +163,7 @@ export function useShadeFormulaState({ brands, suppressAdditionalShade = false }
   const totalExtra = (hasShade1 ? additionalShadeGrams : 0) + (hasShade2 ? additionalShade2Grams : 0);
   const { result, grams, effectiveResult } = useComputedFullFormula(
     startLevel, targetShade, grayPercent, totalGrams, brands[brandId].mixingRatio, effectiveManualDeveloperVolume,
-    suppressAdditionalShade, totalExtra
+    totalExtra
   );
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 

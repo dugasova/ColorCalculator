@@ -23,7 +23,7 @@ describe("FormulaCalculator substitute-blend candidates", () => {
     openCombobox("Shade");
     fireEvent.click(screen.getByRole("option", { name: "8.1 ash" }));
 
-    fireEvent.click(screen.getByLabelText("Shade out of stock — blend instead of adding on top"));
+    fireEvent.click(screen.getByLabelText("Shade out of stock — blend two shades to approximate it"));
   }
 
   it("offers components one level above and below the target, not just the same level", () => {
@@ -48,5 +48,11 @@ describe("FormulaCalculator substitute-blend candidates", () => {
       .map(option => option.getAttribute("data-value"));
 
     expect(codes).not.toContain("8.1");
+  });
+
+  it("keeps the additional-shade selector visible after enabling substitute blend -- the two aren't mutually exclusive", () => {
+    selectTargetAndEnableBlend();
+
+    expect(document.getElementById("additionalShadeCode")).not.toBeNull();
   });
 });

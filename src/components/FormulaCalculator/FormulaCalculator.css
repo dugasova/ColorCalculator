@@ -346,6 +346,39 @@
   font-weight: 600;
 }
 
+/* The Mix row -- the actual gram-by-gram formula a colorist weighs out -- is the single
+   most operationally critical line in the results panel, buried among plain label/value
+   rows (achieved level, application zone, gray coverage, etc.) that all look the same.
+   Pulled out of the shared .results__row list styling (no bottom border, stacked instead
+   of side-by-side) and given its own tinted card so it reads as the answer, not a detail. */
+.results__row--mix {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-field);
+  border-bottom: 1px solid var(--border-field);
+  border-radius: 0.85rem;
+  background: var(--brand-gradient-soft);
+}
+
+.results__row--mix:hover {
+  padding-left: 16px;
+}
+
+.results__row--mix .results__row-label {
+  color: var(--gold-ink);
+}
+
+.results__mix-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink);
+  word-break: break-word;
+}
+
 .warning {
   margin: 12px 0 0;
   padding: 0.5rem 0.75rem;
