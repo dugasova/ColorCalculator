@@ -161,4 +161,44 @@ describe("formatSessionSummary", () => {
     // bleachStep starts at 6; colorStep (the final toning step) targets Generic 9.1.
     expect(summary).toBe("Starting level: 6 → Target: Generic — 9.1");
   });
+
+  it("shows a start-level range instead of a false single pair when a multi-zone session's steps start at different levels", () => {
+    // Regression: root 6 / mid-lengths 8 / ends 10 previously collapsed to
+    // "Starting level: 6 -> Target: <ends' shade>", implying the whole head started at
+    // 6 and reached the ends' target directly -- neither zone the session actually did.
+    const roots = { ...colorStep, startLevel: 6 as const, targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const } };
+    const midLengths = { ...colorStep, startLevel: 8 as const, targetShade: { code: "8.12", level: 8 as const, tone: "ash" as const, secondaryTone: "matt" as const } };
+    const ends = { ...colorStep, startLevel: 10 as const, targetShade: { code: "10.13", level: 10 as const, tone: "ash" as const, secondaryTone: "gold" as const } };
+
+    const summary = formatSessionSummary([roots, midLengths, ends]);
+
+    expect(summary).toBe("Starting level: 6–10 → Target: Generic — 10.13");
+  });
+
+  it("keeps the single-value format when every step happens to share the same start level", () => {
+    const summary = formatSessionSummary([colorStep, { ...colorStep, targetShade: { code: "6.1", level: 6 as const, tone: "ash" as const } }]);
+
+    expect(summary).toBe("Starting level: 6 → Target: Generic — 6.1");
+  });
+});
+
+describe("formatSessionText: zone and starting-base recap", () => {
+  it("prepends the zone label and starting-base line ahead of the rest of a step's text when set", () => {
+    const text = formatSessionText([{ ...colorStep, strandZone: "mid-lengths", startingBase: { kind: "colored", tone: "gold" } }]);
+
+    expect(text).toContain("Zone: Mid-lengths");
+    expect(text).toContain("Starting base: Colored (Gold)");
+    expect(text.indexOf("Zone: Mid-lengths")).toBeLessThan(text.indexOf("Generic — 9.1"));
+  });
+
+  it("shows the natural-base label with no tone when startingBase is natural", () => {
+    const text = formatSessionText([{ ...colorStep, startingBase: { kind: "natural" } }]);
+    expect(text).toContain("Starting base: Natural (virgin)");
+  });
+
+  it("omits the zone/starting-base lines entirely for a step that never set them (plain single-shade save)", () => {
+    const text = formatSessionText([colorStep]);
+    expect(text).not.toContain("Zone:");
+    expect(text).not.toContain("Starting base:");
+  });
 });

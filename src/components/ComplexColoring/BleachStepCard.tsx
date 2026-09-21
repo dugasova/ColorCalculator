@@ -4,6 +4,10 @@ import { ALL_LEVELS, type Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
 import { Select } from "../common/Select";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
+import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
+import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
+import type { StrandZone } from "../../engine/strandZone";
+import type { StartingBase } from "../../engine/startingBase";
 import type { BleachHistoryStep } from "../../history";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
@@ -28,6 +32,8 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
   const [totalGrams, setTotalGrams] = useState(60);
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_BLEACH_PRICE_PER_GRAM);
+  const [strandZone, setStrandZone] = useState<StrandZone>("full-head");
+  const [startingBase, setStartingBase] = useState<StartingBase>({ kind: "natural" });
 
   const result = calculateBleachFormula(startLevel, targetLevel, totalGrams);
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
@@ -40,12 +46,14 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
     processingMinutes,
     pricePerGram,
     canvas: { porosity, thickness, chemicalHistory },
+    strandZone,
+    startingBase,
   };
 
   useEffect(() => {
     onChange(step);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startLevel, targetLevel, totalGrams, manualProcessingMinutes, pricePerGram, porosity, thickness, chemicalHistory]);
+  }, [startLevel, targetLevel, totalGrams, manualProcessingMinutes, pricePerGram, porosity, thickness, chemicalHistory, strandZone, startingBase]);
 
   return (
     <div className="step-card">
@@ -66,6 +74,9 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
             options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
           />
         </div>
+
+        <StrandZoneField strandZone={strandZone} onStrandZoneChange={setStrandZone} idSuffix={idSuffix} />
+        <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
 
         <CanvasFields
           porosity={porosity} onPorosityChange={setPorosity}

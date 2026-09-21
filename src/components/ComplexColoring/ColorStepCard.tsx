@@ -13,6 +13,10 @@ import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolum
 import { MixingRatioField } from "../FormulaCalculator/fields/MixingRatioField";
 import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
 import { ApplicationZoneField } from "../FormulaCalculator/fields/ApplicationZoneField";
+import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
+import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
+import type { StrandZone } from "../../engine/strandZone";
+import type { StartingBase } from "../../engine/startingBase";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../engine/formatFormula";
 import type { ColorHistoryStep } from "../../history";
@@ -35,6 +39,8 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   const idSuffix = `-${stepId}`;
 
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_PRICE_PER_GRAM);
+  const [strandZone, setStrandZone] = useState<StrandZone>("full-head");
+  const [startingBase, setStartingBase] = useState<StartingBase>({ kind: "natural" });
 
   const {
     startLevel, setStartLevel,
@@ -86,6 +92,8 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
       grayPercent,
       canvas: { porosity, thickness, chemicalHistory },
       applicationZone,
+      strandZone,
+      startingBase,
       result: effectiveResult,
       additionalShade,
       additionalShadeGrams: additionalShade !== null ? additionalShadeGrams : null,
@@ -100,7 +108,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     onChange(stepData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    brandId, applicationZone, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
+    brandId, applicationZone, strandZone, startingBase, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
     porosity, thickness, chemicalHistory
   ]);
 
@@ -117,6 +125,8 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
         <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} idSuffix={idSuffix} />
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} idSuffix={idSuffix} />
         <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} idSuffix={idSuffix} />
+        <StrandZoneField strandZone={strandZone} onStrandZoneChange={setStrandZone} idSuffix={idSuffix} />
+        <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
         <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} idSuffix={idSuffix} />
         <CanvasFields
           porosity={porosity} onPorosityChange={setPorosity}

@@ -5,6 +5,8 @@ import type { FullFormula } from "../engine/formula";
 import type { BleachFormula } from "../engine/bleach";
 import type { PrePigmentationResult } from "../engine/prePigmentation";
 import type { ApplicationZone } from "../engine/applicationZone";
+import type { StrandZone } from "../engine/strandZone";
+import type { StartingBase } from "../engine/startingBase";
 import type { HairCanvas } from "../engine/canvas";
 import type { BrandId } from "../engine/brands";
 
@@ -25,6 +27,14 @@ export interface ColorHistoryStep {
   startLevel: Level;
   grayPercent: number;
   applicationZone: ApplicationZone;
+  // Which part of the strand this step targets (root/mid-lengths/ends/whole head) and
+  // what that zone's hair looked like before this step -- both purely descriptive (see
+  // engine/strandZone.ts, engine/startingBase.ts), absent on every step saved before
+  // these fields existed. Lets a multi-zone session (e.g. balayage: a different
+  // starting level and target per zone) record and later display *which* zone each
+  // step's `startLevel`/`targetShade` belongs to, instead of only a bare per-step level.
+  strandZone?: StrandZone;
+  startingBase?: StartingBase;
   canvas?: HairCanvas;
   result: FullFormula;
   additionalShade: Shade | null;
@@ -71,6 +81,11 @@ export interface BleachHistoryStep {
   result: BleachFormula;
   processingMinutes: number;
   pricePerGram: number;
+  // See ColorHistoryStep's own strandZone/startingBase for what these describe -- a
+  // bleach step in a multi-zone session (e.g. lifting only the mid-lengths/ends before
+  // toning) benefits from the same per-zone labeling.
+  strandZone?: StrandZone;
+  startingBase?: StartingBase;
 }
 
 export type HistoryStep = ColorHistoryStep | BleachHistoryStep;

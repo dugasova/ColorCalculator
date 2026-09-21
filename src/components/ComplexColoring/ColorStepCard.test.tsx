@@ -9,6 +9,8 @@ describe("ColorStepCard", () => {
 
     expect(html).toContain("id=\"brandId-1\"");
     expect(html).toContain("id=\"startLevel-1\"");
+    expect(html).toContain("id=\"strandZone-1\"");
+    expect(html).toContain("id=\"startingBaseKind-1\"");
     expect(html).toContain("id=\"grayPercent-1\"");
     expect(html).toContain("id=\"targetShadeCode-1\"");
     expect(html).toContain("id=\"additionalShadeCode-1\"");
@@ -27,6 +29,9 @@ describe("ColorStepCard", () => {
     expect(html).not.toContain("id=\"manualDeveloperVolume-1\"");
     // No additional shade chosen yet -- its grams input has nothing to control.
     expect(html).not.toContain("id=\"additionalShadeGrams-1\"");
+    // Starting base defaults to "natural" -- the tone sub-picker only appears once
+    // "Previously colored" is picked (see StartingBaseField).
+    expect(html).not.toContain("id=\"startingBaseTone-1\"");
   });
 
   it("defaults the price-per-gram field to 0.18, independent of any brand default", () => {

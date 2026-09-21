@@ -69,9 +69,13 @@ const levelSchema = z.number().int().min(1).max(12) as unknown as z.ZodType<Leve
 export const developerVolumeSchema = z.union([
   z.literal(6), z.literal(10), z.literal(13), z.literal(20), z.literal(30), z.literal(40),
 ]) satisfies z.ZodType<DeveloperVolume>;
-const toneFamilySchema = z.enum([
+// Every ToneFamily value, in a stable display order -- reused by the zod schema below
+// (single source of truth, was duplicated inline before) and by StartingBaseField's tone
+// picker (see engine/startingBase.ts).
+export const TONE_FAMILIES: ToneFamily[] = [
   "natural", "ash", "cendré", "matt", "gold", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany", "beige",
-]) satisfies z.ZodType<ToneFamily>;
+];
+const toneFamilySchema = z.enum(TONE_FAMILIES) satisfies z.ZodType<ToneFamily>;
 
 // Validates a Shade document read from Firestore (admin-added via PaletteAdminView - see
 // palette.ts's subscribeToPaletteOverrides). Deliberately excludes `developerLiftTable`: it's
