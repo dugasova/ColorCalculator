@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { subscribeToFormulaHistory, saveFormulaToHistory, deleteHistoryEntry } from "./firestore";
+import { subscribeToFormulaHistory, saveFormulaToHistory, deleteHistoryEntry, updateHistoryEntryDetails } from "./firestore";
 
 const addDocMock = vi.fn();
 const updateDocMock = vi.fn();
@@ -202,5 +202,87 @@ describe("deleteHistoryEntry", () => {
 
     expect(deleteObjectMock).not.toHaveBeenCalled();
     expect(deleteDocMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("updateHistoryEntryDetails", () => {
+  function editParams(overrides: Partial<Parameters<typeof updateHistoryEntryDetails>[0]> = {}) {
+    return {
+      entry: { id: "entry-1", beforePhotoUrl: null, afterPhotoUrl: null },
+      note: "edited note",
+      patchTestDate: "2024-02-27T10:00",
+      allergyNotes: "none",
+      patchTestOverride: false,
+      beforePhoto: { kind: "keep" as const },
+      afterPhoto: { kind: "keep" as const },
+      ...overrides,
+    };
+  }
+
+  it("writes the text fields and returns them for the caller to merge, leaving the formula and pricing out of the update", async () => {
+    const result = await updateHistoryEntryDetails(editParams());
+
+    expect(updateDocMock).toHaveBeenCalledTimes(1);
+    expect(updateDocMock).toHaveBeenCalledWith(
+      { kind: "doc", args: [{}, "formulaHistory", "entry-1"] },
+      { note: "edited note", patchTestDate: "2024-02-27T10:00", allergyNotes: "none", patchTestOverride: false, beforePhotoUrl: null, afterPhotoUrl: null },
+    );
+    expect(result.note).toBe("edited note");
+    expect(uploadBytesMock).not.toHaveBeenCalled();
+    expect(deleteObjectMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps an existing photo URL untouched on a 'keep' edit", async () => {
+    const result = await updateHistoryEntryDetails(editParams({
+      entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null },
+    }));
+
+    expect(result.beforePhotoUrl).toBe("https://x/before.jpg");
+    expect(uploadBytesMock).not.toHaveBeenCalled();
+  });
+
+  it("uploads a forgotten photo to its deterministic slot path and stores the resulting URL in the same write", async () => {
+    const file = new File(["x"], "after.jpg", { type: "image/jpeg" });
+
+    const result = await updateHistoryEntryDetails(editParams({ afterPhoto: { kind: "replace", file } }));
+
+    expect(uploadBytesMock).toHaveBeenCalledWith({ kind: "ref", args: [{}, "formulaHistory/entry-1/after"] }, file);
+    expect(result.afterPhotoUrl).toBe("https://example.test/photo.jpg");
+    expect(updateDocMock).toHaveBeenCalledTimes(1);
+    expect(updateDocMock.mock.calls[0][1]).toMatchObject({ afterPhotoUrl: "https://example.test/photo.jpg" });
+  });
+
+  it("rejects and leaves the document untouched when a photo upload fails, so the colorist sees the failure and can retry", async () => {
+    uploadBytesMock.mockRejectedValue(new Error("network drop"));
+
+    await expect(updateHistoryEntryDetails(editParams({
+      beforePhoto: { kind: "replace", file: new File(["x"], "before.jpg") },
+    }))).rejects.toThrow("network drop");
+
+    expect(updateDocMock).not.toHaveBeenCalled();
+  });
+
+  it("clears the URL, then deletes the stored file, when a photo is removed", async () => {
+    const result = await updateHistoryEntryDetails(editParams({
+      entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: "https://x/after.jpg" },
+      beforePhoto: { kind: "remove" },
+    }));
+
+    expect(result.beforePhotoUrl).toBeNull();
+    expect(result.afterPhotoUrl).toBe("https://x/after.jpg");
+    expect(deleteObjectMock).toHaveBeenCalledTimes(1);
+    expect(deleteObjectMock).toHaveBeenCalledWith({ kind: "ref", args: [{}, "formulaHistory/entry-1/before"] });
+    expect(updateDocMock.mock.invocationCallOrder[0]).toBeLessThan(deleteObjectMock.mock.invocationCallOrder[0]);
+  });
+
+  it("does not delete any file, and does not touch Storage, when the document update fails", async () => {
+    updateDocMock.mockRejectedValue(new Error("permission-denied"));
+
+    await expect(updateHistoryEntryDetails(editParams({
+      entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null },
+      beforePhoto: { kind: "remove" },
+    }))).rejects.toThrow("permission-denied");
+
+    expect(deleteObjectMock).not.toHaveBeenCalled();
   });
 });

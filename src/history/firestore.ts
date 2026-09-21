@@ -136,6 +136,76 @@ export async function setActualColorGrams(params: SetActualColorGramsParams): Pr
   return { steps, productCost };
 }
 
+// What to do with one photo slot when amending a saved visit.
+export type PhotoEdit =
+  | { kind: "keep" }
+  | { kind: "replace"; file: File }
+  | { kind: "remove" };
+
+export interface UpdateHistoryEntryDetailsParams {
+  // The entry as currently held by the caller -- only its id and current photo URLs are
+  // read, the latter to know what a "keep" leaves in place and which slot a "remove"
+  // has something to delete from.
+  entry: Pick<FormulaHistoryEntry, "id" | "beforePhotoUrl" | "afterPhotoUrl">;
+  note: string;
+  patchTestDate: string;
+  allergyNotes: string;
+  patchTestOverride: boolean;
+  beforePhoto: PhotoEdit;
+  afterPhoto: PhotoEdit;
+}
+
+// The fields the caller must merge into its local copy of the entry.
+export type HistoryEntryDetailsResult = Pick<
+  FormulaHistoryEntry,
+  "note" | "patchTestDate" | "allergyNotes" | "patchTestOverride" | "beforePhotoUrl" | "afterPhotoUrl"
+>;
+
+async function resolvePhotoUrl(
+  historyId: string, slot: "before" | "after", edit: PhotoEdit, currentUrl: string | null,
+): Promise<string | null> {
+  switch (edit.kind) {
+    case "keep": return currentUrl;
+    case "remove": return null;
+    case "replace": return uploadFormulaPhoto(historyId, slot, edit.file);
+  }
+}
+
+// The second post-save amendment (after setActualColorGrams): fixing a typo in the note /
+// patch-test / allergy fields, or attaching a before/after photo the colorist forgot.
+// Deliberately excludes the formula (`steps`) and pricing -- changing those would mean
+// re-deriving cost and reconciling dye stock; a different formula is a new visit ("Repeat
+// formula"). Also excludes clientName/clientId, which drive grouping and profile linking.
+//
+// Unlike saveFormulaToHistory, a photo failure here MUST reject: the colorist is
+// explicitly asking for that photo, there is no "saved anyway" record to protect from a
+// duplicate-creating retry, and retrying an edit is idempotent. Ordering keeps a failure
+// at any point recoverable: uploads first (a reject leaves the document untouched), then
+// a single updateDoc carrying text fields and photo URLs together, and only then the
+// best-effort Storage delete for removed photos -- so a crash never leaves a document
+// pointing at an already-deleted file.
+export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetailsParams): Promise<HistoryEntryDetailsResult> {
+  const { entry } = params;
+  const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
+    resolvePhotoUrl(entry.id, "before", params.beforePhoto, entry.beforePhotoUrl),
+    resolvePhotoUrl(entry.id, "after", params.afterPhoto, entry.afterPhotoUrl),
+  ]);
+  const result: HistoryEntryDetailsResult = {
+    note: params.note,
+    patchTestDate: params.patchTestDate,
+    allergyNotes: params.allergyNotes,
+    patchTestOverride: params.patchTestOverride,
+    beforePhotoUrl,
+    afterPhotoUrl,
+  };
+  await updateDoc(doc(db, HISTORY_COLLECTION, entry.id), result);
+  await Promise.all([
+    params.beforePhoto.kind === "remove" && entry.beforePhotoUrl !== null ? deleteFormulaPhoto(entry.id, "before") : Promise.resolve(),
+    params.afterPhoto.kind === "remove" && entry.afterPhotoUrl !== null ? deleteFormulaPhoto(entry.id, "after") : Promise.resolve(),
+  ]);
+  return result;
+}
+
 // Every stylist may only see the clients they personally entered (identified by the
 // `appliedBy` email captured at save time - see App.tsx, which always passes the
 // signed-in `user.email`, never a free-typed name); an admin sees the whole salon's

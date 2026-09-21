@@ -7,6 +7,7 @@ import { usePalette } from "../../palette";
 import { useActualGramsEditor } from "./useActualGramsEditor";
 import { useHistoryData } from "./useHistoryData";
 import { RevisitReminders } from "./RevisitReminders";
+import { EditEntryModal } from "./EditEntryModal";
 import { Modal } from "../common/Modal";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
@@ -47,6 +48,9 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   // asking about -- separate from `openGroupKey` so the confirm dialog can stack on top
   // of (and, on cancel, fall back to) the still-open client visit-list modal beneath it.
   const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
+  // The one visit whose details are being amended in the edit dialog -- stacks on top of
+  // the client's visit-list modal the same way the delete confirm above does.
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const {
     entries, setEntries, isLoading, error, filtered, groups, profilesByClientKey,
     deleteClientGroup, deletingClientKey, deleteError,
@@ -57,6 +61,9 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
 
   const openGroup = groups.find(g => g.key === openGroupKey) ?? null;
   const confirmDeleteGroup = groups.find(g => g.key === confirmDeleteKey) ?? null;
+  // Looked up from the live `entries` (not `filtered`/`groups`) so the edit dialog survives
+  // the search box changing underneath it.
+  const editingEntry = entries.find(e => e.id === editingEntryId) ?? null;
 
   const handleConfirmDelete = async () => {
     if (confirmDeleteGroup === null) return;
@@ -197,17 +204,36 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                   )}
                   <div className="history__entry-footer">
                     <span>{t("history.appliedBy", { name: entry.appliedBy })}</span>
-                    {repeatRequest !== null && (
-                      <button type="button" className="button button--secondary history__entry-repeat" onClick={() => onRepeat(entry)}>
-                        {t("history.repeat")}
+                    <div className="history__entry-footer-actions">
+                      <button
+                        type="button"
+                        className="button button--secondary history__entry-repeat"
+                        onClick={() => setEditingEntryId(entry.id)}
+                        aria-label={t("history.editEntryAria", { date: entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : "" })}
+                      >
+                        {t("history.editEntry")}
                       </button>
-                    )}
+                      {repeatRequest !== null && (
+                        <button type="button" className="button button--secondary history__entry-repeat" onClick={() => onRepeat(entry)}>
+                          {t("history.repeat")}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </li>
               );
             })}
           </ul>
         </Modal>
+      )}
+
+      {editingEntry !== null && (
+        <EditEntryModal
+          entry={editingEntry}
+          onClose={() => setEditingEntryId(null)}
+          onSaved={(entryId, updated) =>
+            setEntries(prev => prev.map(e => (e.id === entryId ? { ...e, ...updated } : e)))}
+        />
       )}
 
       {confirmDeleteGroup !== null && (

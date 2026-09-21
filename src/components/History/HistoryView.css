@@ -306,3 +306,22 @@
   background: rgba(var(--brand-ink-rgb), 0.06);
   color: var(--brand-muted);
 }
+
+.history__entry-footer-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.history__edit-photo-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+}
+
+.history__edit-photo-removed {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--brand-muted);
+  font-style: italic;
+}

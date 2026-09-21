@@ -11,6 +11,8 @@ export type {
 export { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
 export {
   sanitizeForFirestore, saveFormulaToHistory, subscribeToFormulaHistory, setActualColorGrams, deleteHistoryEntry,
+  updateHistoryEntryDetails,
   type SaveFormulaParams, type SetActualColorGramsParams, type ActualColorGramsResult,
+  type PhotoEdit, type UpdateHistoryEntryDetailsParams, type HistoryEntryDetailsResult,
 } from "./firestore";
 export { buildRepeatFormulaRequest, type RepeatFormulaRequest } from "./repeatFormula";

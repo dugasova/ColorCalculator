@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ProcessingTimer } from "./ProcessingTimer";
 import { BowlCard } from "./BowlCard";
 import { createClient, updateClient } from "../../clients";
+import { isPatchTestSufficient } from "../../patchTest";
 import type { RepeatFormulaRequest } from "../../history";
 import type { HairCanvas } from "../../engine/canvas";
 import { usePhotoUpload } from "./usePhotoUpload";
@@ -55,7 +56,6 @@ export interface SessionDetailsPanelProps {
 
 const COPIED_FEEDBACK_MS = 1500;
 const SAVED_FEEDBACK_MS = 1500;
-const PATCH_TEST_MIN_HOURS = 48;
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -108,9 +108,7 @@ export function SessionDetailsPanel({
     };
   }, []);
 
-  const patchTestOk = patchTestOverride || (
-    patchTestDate !== "" && nowMs - new Date(patchTestDate).getTime() >= PATCH_TEST_MIN_HOURS * 60 * 60 * 1000
-  );
+  const patchTestOk = isPatchTestSufficient(patchTestDate, patchTestOverride, nowMs);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(formulaText);
