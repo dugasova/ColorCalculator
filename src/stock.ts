@@ -3,6 +3,7 @@ import {
 } from "firebase/firestore";
 import { z } from "zod";
 import { db } from "./firebase";
+import { parseSnapshotDocs } from "./firestoreSubscribe";
 import type { BrandId } from "./engine/brands";
 import type { DeveloperVolume } from "./engine/levels";
 import { developerVolumeSchema } from "./engine/shades";
@@ -84,20 +85,11 @@ export function stockById(records: StockRecord[]): Map<string, StockRecord> {
   return new Map(records.map(record => [record.id, record]));
 }
 
-// Malformed documents are skipped and logged rather than propagated, same defensive
-// pattern as palette.ts's subscribeToCustomBrands/subscribeToPaletteOverrides.
+// Malformed documents are skipped and logged rather than propagated -- see
+// firestoreSubscribe.ts's parseSnapshotDocs, shared by every `subscribeToX` live query.
 export function subscribeToStock(onChange: (records: StockRecord[]) => void): Unsubscribe {
   return onSnapshot(collection(db, DYE_STOCK_COLLECTION), snapshot => {
-    const records: StockRecord[] = [];
-    for (const d of snapshot.docs) {
-      const result = stockRecordSchema.safeParse(d.data());
-      if (!result.success) {
-        console.error(`Skipping malformed dye stock document "${d.id}":`, result.error.issues);
-        continue;
-      }
-      records.push({ id: d.id, ...result.data } as StockRecord);
-    }
-    onChange(records);
+    onChange(parseSnapshotDocs(snapshot, stockRecordSchema, "dye stock"));
   });
 }
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { db } from "./firebase";
+import { parseSnapshotDocs } from "./firestoreSubscribe";
 import type { HairCanvas } from "./engine/canvas";
 
 const CLIENTS_COLLECTION = "clients";
@@ -94,16 +95,7 @@ export function subscribeToClients(
 ): Unsubscribe {
   const q = query(collection(db, CLIENTS_COLLECTION), where("ownedBy", "==", ownedBy), orderBy("name"));
   return onSnapshot(q, snapshot => {
-    const clients: ClientProfile[] = [];
-    for (const d of snapshot.docs) {
-      const result = clientProfileShapeSchema.safeParse({ id: d.id, ...d.data() });
-      if (!result.success) {
-        console.error(`Skipping malformed client document "${d.id}":`, result.error.issues);
-        continue;
-      }
-      clients.push(result.data);
-    }
-    onChange(clients);
+    onChange(parseSnapshotDocs(snapshot, clientProfileShapeSchema, "client", true));
   }, onError);
 }
 

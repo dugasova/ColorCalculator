@@ -2,6 +2,7 @@ import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverT
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
+import { parseSnapshotDocs } from "../firestoreSubscribe";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 import { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
 import { computeStockConsumption, consumeStock, reconcileStockConsumption } from "../stock";
@@ -232,18 +233,11 @@ export function subscribeToFormulaHistory(
     ? query(collection(db, HISTORY_COLLECTION), orderBy("appliedAt", "desc"))
     : query(collection(db, HISTORY_COLLECTION), where("appliedBy", "==", scope.currentUserEmail), orderBy("appliedAt", "desc"));
   return onSnapshot(q, snapshot => {
-    const entries: FormulaHistoryEntry[] = [];
-    for (const d of snapshot.docs) {
-      const result = historyEntryShapeSchema.safeParse({ id: d.id, ...d.data() });
-      if (!result.success) {
-        console.error(`Skipping malformed history document "${d.id}":`, result.error.issues);
-        continue;
-      }
-      // See historyEntryShapeSchema's comment above for why this is shallow (result.data's
-      // nested fields are validated as "some object", not deep-checked against FullFormula/
-      // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
-      entries.push(normalizeHistoryEntry(result.data as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
-    }
+    // See historyEntryShapeSchema's comment above for why this is shallow (its output's
+    // nested fields are validated as "some object", not deep-checked against FullFormula/
+    // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
+    const entries = parseSnapshotDocs(snapshot, historyEntryShapeSchema, "history", true)
+      .map(entry => normalizeHistoryEntry(entry as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
     onChange(entries);
   }, onError);
 }
