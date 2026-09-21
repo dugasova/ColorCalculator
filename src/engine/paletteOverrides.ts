@@ -95,11 +95,24 @@ export function getDisabledShadeKeys(overrides: PaletteOverride[], brandId: Bran
 // running it while a few of those shades were already added by hand, never produces a
 // duplicate row. Keying by (line, code) instead of bare code matters here: two different
 // lines legitimately share the same numeric code, and must not shadow each other.
+//
+// The one exception to "the override wins outright": a migrated copy that predates
+// `mixingRatioChoices` (a code-defined field PaletteAdminView can't edit) inherits it from
+// the built-in shade it replaces. Without this, every salon that ran the migration would
+// keep the stale copy shadowing the built-in and never see a newly added ratio picker,
+// short of an admin-run repair script deleting those Firestore documents.
 export function getFullBrandShades(baseBrands: Record<BrandId, Brand>, customBrands: CustomBrandRecord[], overrides: PaletteOverride[], brandId: BrandId): Shade[] {
   void customBrands; // custom brands never ship their own shades; they only gain them through `add` overrides.
-  const added = addedShadesFor(overrides, brandId);
+  const baseShades = baseBrands[brandId]?.shades ?? [];
+  const baseByKey = new Map(baseShades.map(s => [shadeKey(s), s]));
+  const added = addedShadesFor(overrides, brandId).map(shade => {
+    const builtInChoices = baseByKey.get(shadeKey(shade))?.mixingRatioChoices;
+    return shade.mixingRatioChoices === undefined && builtInChoices !== undefined
+      ? { ...shade, mixingRatioChoices: builtInChoices }
+      : shade;
+  });
   const addedKeys = new Set(added.map(shadeKey));
-  const base = (baseBrands[brandId]?.shades ?? []).filter(s => !addedKeys.has(shadeKey(s)));
+  const base = baseShades.filter(s => !addedKeys.has(shadeKey(s)));
   return [...base, ...added];
 }
 

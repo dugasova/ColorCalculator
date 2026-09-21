@@ -90,6 +90,44 @@ describe("getFullBrandShades / getDisabledShadeKeys", () => {
     expect(shades.map(s => s.code)).toEqual(["7.1", "7.3"]);
   });
 
+  it("lets a migrated copy that predates mixingRatioChoices inherit them from the built-in shade it replaces", () => {
+    const choices = [{ colorParts: 1, developerParts: 2 }, { colorParts: 1, developerParts: 1.5 }];
+    const brands: Record<string, Brand> = {
+      wella: {
+        id: "wella", name: "Wella", mixingRatio: getMixingRatio, pricePerGram: 0.18,
+        shades: [{ code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: choices }],
+      },
+    };
+    const staleCopy: Shade = { code: "8/73", level: 8, tone: "chocolate", line: "color-touch" };
+    const overrides: PaletteOverride[] = [{ id: "o1", kind: "add", brandId: "wella", shade: staleCopy }];
+
+    const shades = getFullBrandShades(brands, [], overrides, "wella");
+
+    expect(shades).toHaveLength(1);
+    expect(shades[0].mixingRatioChoices).toEqual(choices);
+  });
+
+  it("keeps a migrated copy's own mixingRatioChoices instead of overwriting them with the built-in's", () => {
+    const own = [{ colorParts: 1, developerParts: 1 }, { colorParts: 1, developerParts: 3 }];
+    const brands: Record<string, Brand> = {
+      wella: {
+        id: "wella", name: "Wella", mixingRatio: getMixingRatio, pricePerGram: 0.18,
+        shades: [{ code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }] }],
+      },
+    };
+    const overrides: PaletteOverride[] = [
+      { id: "o1", kind: "add", brandId: "wella", shade: { code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: own } },
+    ];
+
+    expect(getFullBrandShades(brands, [], overrides, "wella")[0].mixingRatioChoices).toEqual(own);
+  });
+
+  it("does not invent mixingRatioChoices for an admin-added shade with no built-in counterpart", () => {
+    const overrides: PaletteOverride[] = [{ id: "o1", kind: "add", brandId: "generic", shade: { code: "9.9", level: 9, tone: "ash" } }];
+
+    expect(getFullBrandShades(baseBrands, [], overrides, "generic").find(s => s.code === "9.9")?.mixingRatioChoices).toBeUndefined();
+  });
+
   it("never collapses same-coded shades that belong to different lines", () => {
     // Regression: Wella and L'Oréal both reuse numeric codes across lines (e.g. Majirel
     // and Inoa each have their own '7.1'). Migrating one line's shade must not shadow
