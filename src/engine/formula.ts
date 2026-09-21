@@ -159,7 +159,10 @@ export function splitShadeBlend(colorGrams: number, primaryPercent: number): Sha
 
 // Step 1 of calculateFullFormula: the developer volume before any partial-lift fallback.
 // A shade with its own developerVolumeChoices (demi-permanent lines) always defers to
-// the colorist's manual pick instead of the auto-picked ladder. Otherwise picks via the
+// the colorist's manual pick instead of the auto-picked ladder -- including when the
+// target is lighter than the start level (see liftUnsupportedWarning in
+// calculateFullFormula): such a line can't lift, but a colorist may go ahead anyway, and
+// the developer they chose is what must be mixed and recorded. Otherwise picks via the
 // level-diff lift ladder, then applies two floors: gray coverage forces at least
 // GRAY_COVERAGE_MIN_DEVELOPER_VOLUME (Wella/Welloxon's own resistant-gray guidance, see
 // the const above), and a same-depth-or-darker shade with its own noLiftDeveloperVolume
@@ -169,10 +172,8 @@ function resolveDeveloperVolume(
   targetShade: Shade,
   grayPercent: number,
   isLifting: boolean,
-  liftUnsupportedWarning: string | null,
   manualDeveloperVolume: DeveloperVolume | undefined,
 ): DeveloperVolume | null {
-  if (liftUnsupportedWarning !== null) return null;
   if (targetShade.developerVolumeChoices !== undefined) return manualDeveloperVolume ?? null;
 
   const autoPicked = pickDeveloperVolume(startLevel, targetShade.level, targetShade.developerLiftTable);
@@ -251,8 +252,11 @@ export function calculateFullFormula(
     ? i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel })
     : null;
 
-  const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, liftUnsupportedWarning, manualDeveloperVolume);
-  const { developerVolume, achievedLevel } = resolvePartialLiftFallback(startLevel, targetShade, isLifting, pickedVolume);
+  const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, manualDeveloperVolume);
+  const { developerVolume, achievedLevel: reachableLevel } = resolvePartialLiftFallback(startLevel, targetShade, isLifting, pickedVolume);
+  // A line that can't lift, mixed anyway with the developer the colorist picked, only
+  // deposits: the hair stays at its starting level rather than reaching the shade's own.
+  const achievedLevel = liftUnsupportedWarning !== null && developerVolume !== null ? startLevel : reachableLevel;
 
   // No pigment is actually revealed if the line can't lift in the first place, or lifts
   // to nowhere (achievedLevel null alongside developerVolume null).

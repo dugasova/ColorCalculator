@@ -103,7 +103,7 @@ describe("formatFormulaText", () => {
     expect(text.split("\n")[0]).toBe("Wella Color Touch — 8/73 (chocolate/gold)");
   });
 
-  it("replaces the Mix line with liftUnsupportedWarning when lift is impossible for a manual-choice shade", () => {
+  it("keeps the developer, the mix and the can't-lift warning when a manual-choice shade is mixed anyway", () => {
     const targetShade: Shade = {
       code: "8/73",
       level: 8,
@@ -111,7 +111,37 @@ describe("formatFormulaText", () => {
       secondaryTone: "gold",
       developerVolumeChoices: [6, 13],
     };
-    const result = calculateFullFormula(6, targetShade, 0, 60, undefined, 6);
+    const result = calculateFullFormula(6, targetShade, 0, 60, undefined, 13);
+
+    const text = formatFormulaText({
+      brandName: "Wella",
+      line: "color-touch",
+      targetShade,
+      startLevel: 6,
+      result,
+      processingMinutes: result.recommendedProcessingMinutes,
+      applicationZone: "full-head",
+      additionalShade: null,
+      additionalShadeGrams: 0,
+      blend: null,
+      neutralizationApplied: false,
+    });
+
+    expect(text).toContain("Developer: 13 vol");
+    expect(text).toMatch(/Mix: 8\/73.*24\.0 g.*developer 36\.0 g/);
+    expect(text).not.toContain("Mix: '8/73' can't lift level");
+    expect(text).toContain("Warning: '8/73' can't lift level");
+  });
+
+  it("replaces the Mix line with liftUnsupportedWarning when the lift is impossible and no developer was picked", () => {
+    const targetShade: Shade = {
+      code: "8/73",
+      level: 8,
+      tone: "chocolate",
+      secondaryTone: "gold",
+      developerVolumeChoices: [6, 13],
+    };
+    const result = calculateFullFormula(6, targetShade, 0, 60);
 
     const text = formatFormulaText({
       brandName: "Wella",

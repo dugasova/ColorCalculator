@@ -138,6 +138,11 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     correctiveToneLine,
   ];
 
+  // With no mix to hold it (grams null) the warning already replaces the Mix line above;
+  // when the colorist mixes anyway, it stays on record next to the formula instead.
+  if (result.liftUnsupportedWarning !== null && result.grams !== null) {
+    lines.push(i18n.t("format.warning", { message: result.liftUnsupportedWarning }));
+  }
   if (result.toneWarning !== null && !applyNeutralization) {
     lines.push(i18n.t("format.warning", { message: result.toneWarning }));
   }

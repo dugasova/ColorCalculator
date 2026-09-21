@@ -160,17 +160,32 @@ describe("calculateFullFormula", () => {
     expect(result.developerVolume).toBeNull();
   });
 
-  it("sets liftUnsupportedWarning and nulls out developerVolume/grams when a manual-choice shade would need to lift", () => {
+  it("warns that a manual-choice shade can't lift, yet still mixes with the developer the colorist picked", () => {
     // colorTouchShade is level 8, only deposits (developerVolumeChoices set) -- start 6 would need +2 levels
     const result = calculateFullFormula(6, colorTouchShade, 0, 60, undefined, 6);
 
     expect(result.liftUnsupportedWarning).toContain("8/73");
-    expect(result.developerVolume).toBeNull();
-    expect(result.grams).toBeNull();
-    // no pigment is actually revealed since the line can't lift in the first place
+    expect(result.developerVolume).toBe(6);
+    expect(result.grams).not.toBeNull();
+    // it can't lift, so the hair stays at the starting level instead of reaching 8
+    expect(result.achievedLevel).toBe(6);
+    // and no pigment is actually revealed, since nothing was lifted
     expect(result.underlyingPigment).toBeNull();
     expect(result.recommendedCorrectiveTone).toBeNull();
     expect(result.toneWarning).toBeNull();
+  });
+
+  it("records whichever developer the colorist picked for a lift the line can't do", () => {
+    expect(calculateFullFormula(6, colorTouchShade, 0, 60, undefined, 13).developerVolume).toBe(13);
+  });
+
+  it("still has no developer or grams for a lift the line can't do when no developer was picked", () => {
+    const result = calculateFullFormula(6, colorTouchShade, 0, 60);
+
+    expect(result.liftUnsupportedWarning).not.toBeNull();
+    expect(result.developerVolume).toBeNull();
+    expect(result.grams).toBeNull();
+    expect(result.achievedLevel).toBeNull();
   });
 
   it("leaves liftUnsupportedWarning null and computes normally when a manual-choice shade only deposits (no lift needed)", () => {
