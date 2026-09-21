@@ -30,6 +30,7 @@ const colorTouchShade: Shade = {
   tone: "chocolate",
   secondaryTone: "gold",
   fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+  mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }, { colorParts: 1, developerParts: 1.5 }],
   developerVolumeChoices: [6, 13],
 };
 
@@ -194,6 +195,43 @@ describe("calculateFullFormula", () => {
     expect(result.liftUnsupportedWarning).toBeNull();
     expect(result.developerVolume).toBe(13);
     expect(result.grams).toEqual({ colorGrams: 20, developerGrams: 40 });
+  });
+
+  describe("manual mixing ratio for a demi-permanent shade", () => {
+    it("keeps the shade's standard 1:2 when the colorist picks nothing", () => {
+      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6);
+
+      expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 2 });
+      expect(result.grams).toEqual({ colorGrams: 20, developerGrams: 40 });
+    });
+
+    it("mixes 1:1.5 and recalculates the developer amount when the colorist picks it", () => {
+      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6, { colorParts: 1, developerParts: 1.5 });
+
+      expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1.5 });
+      expect(result.grams?.colorGrams).toBeCloseTo(24);
+      expect(result.grams?.developerGrams).toBeCloseTo(36);
+    });
+
+    it("also applies to a can't-lift formula the colorist mixes anyway", () => {
+      const result = calculateFullFormula(6, colorTouchShade, 0, 60, undefined, 6, { colorParts: 1, developerParts: 1.5 });
+
+      expect(result.liftUnsupportedWarning).not.toBeNull();
+      expect(result.grams?.developerGrams).toBeCloseTo(36);
+    });
+
+    it("ignores a ratio the shade doesn't offer, so an unlisted value can never slip into a formula", () => {
+      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6, { colorParts: 1, developerParts: 3 });
+
+      expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 2 });
+    });
+
+    it("ignores a manual ratio for a shade with no ratio choices at all", () => {
+      const targetShade: Shade = { code: "7.1", level: 7, tone: "ash" };
+      const result = calculateFullFormula(7, targetShade, 0, 60, undefined, undefined, { colorParts: 1, developerParts: 1.5 });
+
+      expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
+    });
   });
 
   it("leaves liftUnsupportedWarning null for shades without developerVolumeChoices even when lifting", () => {

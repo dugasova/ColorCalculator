@@ -10,6 +10,7 @@ import { GrayPercentField } from "../FormulaCalculator/fields/GrayPercentField";
 import { ShadeField } from "../FormulaCalculator/fields/ShadeField";
 import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShadeField";
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
+import { MixingRatioField } from "../FormulaCalculator/fields/MixingRatioField";
 import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
 import { ApplicationZoneField } from "../FormulaCalculator/fields/ApplicationZoneField";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
@@ -47,6 +48,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
+    manualMixingRatio, setManualMixingRatio,
     setManualProcessingMinutes,
     additionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,
@@ -154,6 +156,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
           targetShade={targetShade}
           manualDeveloperVolume={manualDeveloperVolume}
           onManualDeveloperVolumeChange={setManualDeveloperVolume}
+          idSuffix={idSuffix}
+        />
+        <MixingRatioField
+          targetShade={targetShade}
+          manualMixingRatio={manualMixingRatio}
+          onManualMixingRatioChange={setManualMixingRatio}
           idSuffix={idSuffix}
         />
         <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} idSuffix={idSuffix} />

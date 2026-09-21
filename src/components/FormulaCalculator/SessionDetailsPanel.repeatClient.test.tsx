@@ -28,7 +28,7 @@ function makeRepeatRequest(overrides: Partial<Pick<RepeatFormulaRequest, "client
     startLevel: 7,
     grayPercent: 0,
     totalGrams: 60,
-    manualDeveloperVolume: undefined,
+    manualDeveloperVolume: undefined, manualMixingRatio: undefined,
     additionalShadeCode: null,
     additionalShadeGrams: 0,
     blendShadeACode: null,

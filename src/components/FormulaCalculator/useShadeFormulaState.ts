@@ -25,11 +25,12 @@ function useComputedFullFormula(
   totalGrams: number,
   mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio,
   manualDeveloperVolume: DeveloperVolume | undefined,
+  manualMixingRatio: MixingRatio | undefined,
   totalExtra: number,
 ) {
   const result = useMemo(
-    () => calculateFullFormula(startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume),
-    [startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume]
+    () => calculateFullFormula(startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume, manualMixingRatio),
+    [startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume, manualMixingRatio]
   );
   const grams = useMemo(
     () => (result.grams !== null && totalExtra > 0
@@ -69,6 +70,7 @@ export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
   const [brandId, setBrandId] = useState<BrandId>("generic");
   const [line, setLine] = useState<string | null>(null);
   const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(undefined);
+  const [manualMixingRatio, setManualMixingRatio] = useState<MixingRatio | undefined>(undefined);
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
   const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(null);
   const [additionalShadeGrams, setAdditionalShadeGrams] = useState(0);
@@ -85,6 +87,7 @@ export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
   // don't necessarily carry over to a different shade.
   function resetShadeDependentOverrides() {
     setManualDeveloperVolume(undefined);
+    setManualMixingRatio(undefined);
     setManualProcessingMinutes(undefined);
     setNeutralizationApplied(false);
   }
@@ -156,6 +159,9 @@ export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
   const effectiveManualDeveloperVolume = targetShade.developerVolumeChoices
     ? (manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])
     : undefined;
+  const effectiveManualMixingRatio = targetShade.mixingRatioChoices
+    ? (manualMixingRatio ?? targetShade.mixingRatioChoices[0])
+    : undefined;
   const additionalShade = additionalShadeCode !== null ? lineShades.find(s => s.code === additionalShadeCode) ?? null : null;
   const additionalShade2 = additionalShade2Code !== null ? lineShades.find(s => s.code === additionalShade2Code) ?? null : null;
   const hasShade1 = additionalShade !== null && additionalShadeGrams > 0;
@@ -163,7 +169,7 @@ export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
   const totalExtra = (hasShade1 ? additionalShadeGrams : 0) + (hasShade2 ? additionalShade2Grams : 0);
   const { result, grams, effectiveResult } = useComputedFullFormula(
     startLevel, targetShade, grayPercent, totalGrams, brands[brandId].mixingRatio, effectiveManualDeveloperVolume,
-    totalExtra
+    effectiveManualMixingRatio, totalExtra
   );
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
@@ -179,6 +185,7 @@ export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
     brandId, setBrandId,
     line, setLine,
     manualDeveloperVolume, setManualDeveloperVolume,
+    manualMixingRatio, setManualMixingRatio,
     manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode,
     additionalShadeGrams, setAdditionalShadeGrams,

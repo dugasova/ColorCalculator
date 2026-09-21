@@ -189,6 +189,32 @@ describe("buildRepeatFormulaRequest", () => {
     expect(request!.additionalShadeCode).toBeNull();
   });
 
+  it("restores the 1:1.5 ratio a colorist chose for a demi-permanent shade, so a repeat mixes the same amount of developer", () => {
+    const colorTouch = BRANDS.wella.shades.find(s => s.line === "color-touch")!;
+    const step = makeColorStep({
+      brandName: "Wella",
+      brandId: "wella",
+      line: "color-touch",
+      targetShade: colorTouch,
+      result: {
+        ...colorFullFormula,
+        developerVolume: 6,
+        mixingRatio: { colorParts: 1, developerParts: 1.5 },
+        grams: { colorGrams: 24, developerGrams: 36 },
+      },
+    });
+    const request = buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [step] }), BRANDS);
+
+    expect(request!.manualMixingRatio).toEqual({ colorParts: 1, developerParts: 1.5 });
+    expect(request!.totalGrams).toBe(60);
+  });
+
+  it("leaves the ratio unset for a shade that offers no ratio choice", () => {
+    const request = buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [makeColorStep()] }), BRANDS);
+
+    expect(request!.manualMixingRatio).toBeUndefined();
+  });
+
   it("backs the additional shade grams out of totalGrams so a repeat doesn't double-blend it", () => {
     // Blended mix already includes +10g of the additional shade: 40g color : 40g developer.
     const step = makeColorStep({

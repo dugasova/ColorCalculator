@@ -2,7 +2,7 @@ import i18n from "../i18n";
 import { getUnderlyingPigment, pickDeveloperVolume, pickMaxLiftVolume, type DeveloperVolume, type Level, type UnderlyingPigment } from "./levels";
 import { suggestNeutralizingTone } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
-import type { MixingRatio, Shade, ToneFamily } from "./shades";
+import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
 
 export interface GrayCoverageStrategy {
   naturalRatio: number;
@@ -236,16 +236,31 @@ function deriveCorrectiveGuidance(
   return { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning };
 }
 
+// A manual ratio only counts when the shade actually offers it (Shade.mixingRatioChoices);
+// otherwise the shade's own fixed ratio, or the brand's level-diff strategy, decides.
+function resolveMixingRatio(
+  startLevel: Level,
+  targetShade: Shade,
+  mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio,
+  manualMixingRatio: MixingRatio | undefined,
+): MixingRatio {
+  if (manualMixingRatio !== undefined && targetShade.mixingRatioChoices?.some(choice => sameMixingRatio(choice, manualMixingRatio))) {
+    return manualMixingRatio;
+  }
+  return targetShade.fixedMixingRatio ?? mixingRatioStrategy(startLevel, targetShade.level);
+}
+
 export function calculateFullFormula(
   startLevel: Level,
   targetShade: Shade,
   grayPercent: number,
   totalGrams: number,
   mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio = getMixingRatio,
-  manualDeveloperVolume?: DeveloperVolume
+  manualDeveloperVolume?: DeveloperVolume,
+  manualMixingRatio?: MixingRatio,
 ): FullFormula {
   const isLifting = targetShade.level > startLevel;
-  const mixingRatio = targetShade.fixedMixingRatio ?? mixingRatioStrategy(startLevel, targetShade.level);
+  const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
   const liftUnsupportedWarning = targetShade.developerVolumeChoices !== undefined && isLifting

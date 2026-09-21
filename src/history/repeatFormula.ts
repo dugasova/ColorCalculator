@@ -2,6 +2,7 @@ import type { Brand, BrandId } from "../engine/brands";
 import type { DeveloperVolume, Level } from "../engine/levels";
 import type { ApplicationZone } from "../engine/applicationZone";
 import type { HairCanvas } from "../engine/canvas";
+import { sameMixingRatio, type MixingRatio } from "../engine/shades";
 import { DEFAULT_MARKUP_MULTIPLIER } from "../engine/pricing";
 import type { FormulaHistoryEntry } from "./types";
 
@@ -19,6 +20,7 @@ export interface RepeatFormulaRequest {
   grayPercent: number;
   totalGrams: number;
   manualDeveloperVolume: DeveloperVolume | undefined;
+  manualMixingRatio: MixingRatio | undefined;
   additionalShadeCode: string | null;
   additionalShadeGrams: number;
   additionalShade2Code?: string | null;
@@ -90,6 +92,9 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     canvas: step.canvas ?? { porosity: "normal", thickness: "medium", chemicalHistory: [] },
     manualDeveloperVolume: step.targetShade.developerVolumeChoices !== undefined
       ? (step.result.developerVolume ?? undefined)
+      : undefined,
+    manualMixingRatio: step.targetShade.mixingRatioChoices !== undefined
+      ? (step.targetShade.mixingRatioChoices.find(choice => sameMixingRatio(choice, step.result.mixingRatio)))
       : undefined,
     additionalShadeCode: blend === null ? (step.additionalShade?.code ?? null) : null,
     additionalShadeGrams: blend === null ? additionalShadeGrams : 0,

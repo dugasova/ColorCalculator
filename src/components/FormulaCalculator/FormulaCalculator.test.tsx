@@ -33,11 +33,42 @@ describe("FormulaCalculator", () => {
     expect(html).not.toContain("cross-brand-match-empty");
   });
 
+  describe("mixing ratio choice", () => {
+    function repeatFor(brandId: RepeatFormulaRequest["brandId"], line: string | null, targetShadeCode: string): RepeatFormulaRequest {
+      return {
+        clientName: "Anna K.", clientId: "anna-1",
+        brandId, line, targetShadeCode, startLevel: 8, grayPercent: 0, totalGrams: 60,
+        manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
+        blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
+        processingMinutes: 20, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
+        servicePrice: undefined, prePigmentationEnabled: false,
+      };
+    }
+
+    it("offers the ratio picker for a Wella Color Touch shade, defaulting to 1 : 2", () => {
+      const html = renderToStaticMarkup(
+        <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatFor("wella", "color-touch", "8/73")} />
+      );
+
+      expect(html).toContain("id=\"manualDeveloperVolume\"");
+      expect(html).toContain("id=\"manualMixingRatio\"");
+      expect(html).toContain("1 : 2");
+    });
+
+    it("hides the ratio picker for a shade with a single fixed ratio", () => {
+      const html = renderToStaticMarkup(
+        <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatFor("igora", "vibrance", "8-0")} />
+      );
+
+      expect(html).not.toContain("id=\"manualMixingRatio\"");
+    });
+  });
+
   it("hides the pre-pigmentation checkbox when the level drop is under 2 (no lift/no drop)", () => {
     const repeatRequest: RepeatFormulaRequest = {
       clientName: "Anna K.", clientId: "anna-1",
       brandId: "generic", line: null, targetShadeCode: "8.1", startLevel: 8, grayPercent: 0, totalGrams: 60,
-      manualDeveloperVolume: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
+      manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
       processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
       servicePrice: undefined, prePigmentationEnabled: false,
@@ -51,7 +82,7 @@ describe("FormulaCalculator", () => {
     const repeatRequest: RepeatFormulaRequest = {
       clientName: "Anna K.", clientId: "anna-1",
       brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30,
-      manualDeveloperVolume: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
+      manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
       processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
       servicePrice: undefined, prePigmentationEnabled: false,
@@ -67,7 +98,7 @@ describe("FormulaCalculator", () => {
     const repeatRequest: RepeatFormulaRequest = {
       clientName: "Anna K.", clientId: "anna-1",
       brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30,
-      manualDeveloperVolume: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
+      manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
       processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
       servicePrice: undefined, prePigmentationEnabled: true,

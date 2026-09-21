@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { calculateFullFormula } from "./formula";
 import { IGORA_VIBRANCE_CHART, IGORA_ROYAL_CHART } from "./brands/igora";
-import { WELLA_SHADE_CHART } from "./brands/wella";
+import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
 import { LOREAL_MAJIREL_CHART } from "./brands/loreal";
 
 describe("IGORA_VIBRANCE_CHART", () => {
@@ -152,5 +152,20 @@ describe("LOREAL_MAJIREL_CHART High Lift / Majiblond Ultra overrides", () => {
     expect(result.developerVolume).toBe(40);
     expect(result.achievedLevel).toBe(11); // 6 + 5 levels of lift
     expect(result.grams).not.toBeNull();
+  });
+});
+
+describe("Wella Color Touch mixing ratio choices", () => {
+  it("offers the standard 1:2 first (the default) and 1:1.5 on every Color Touch shade", () => {
+    const colorTouchShades = WELLA_COLOR_TOUCH_CHART;
+
+    expect(colorTouchShades.length).toBeGreaterThan(0);
+    for (const shade of colorTouchShades) {
+      expect(shade.mixingRatioChoices).toEqual([
+        { colorParts: 1, developerParts: 2 },
+        { colorParts: 1, developerParts: 1.5 },
+      ]);
+      expect(shade.mixingRatioChoices![0]).toEqual(shade.fixedMixingRatio);
+    }
   });
 });

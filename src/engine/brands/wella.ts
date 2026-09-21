@@ -326,6 +326,7 @@ export const WELLA_COLOR_TOUCH_CHART: Shade[] = colorTouchBaseShades.map(shade =
   ...shade,
   line: "color-touch",
   fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+  mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }, { colorParts: 1, developerParts: 1.5 }],
   developerVolumeChoices: [6, 13],
 }));
 

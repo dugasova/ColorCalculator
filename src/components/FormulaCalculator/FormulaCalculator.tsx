@@ -15,6 +15,7 @@ import { BlendModeField } from "./fields/BlendModeField";
 import { BlendComponentField } from "./fields/BlendComponentField";
 import { BlendRatioField } from "./fields/BlendRatioField";
 import { DeveloperVolumeField } from "./fields/DeveloperVolumeField";
+import { MixingRatioField } from "./fields/MixingRatioField";
 import { ApplicationZoneField } from "./fields/ApplicationZoneField";
 import { TotalGramsField } from "./fields/TotalGramsField";
 import { CrossBrandMatchField } from "./fields/CrossBrandMatchField";
@@ -43,6 +44,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
+    manualMixingRatio, setManualMixingRatio,
     setManualPricePerGram,
     markupMultiplier, setMarkupMultiplier,
     setManualServicePrice,
@@ -170,6 +172,11 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
           targetShade={targetShade}
           manualDeveloperVolume={manualDeveloperVolume}
           onManualDeveloperVolumeChange={setManualDeveloperVolume}
+        />
+        <MixingRatioField
+          targetShade={targetShade}
+          manualMixingRatio={manualMixingRatio}
+          onManualMixingRatioChange={setManualMixingRatio}
         />
         <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} />
         <TotalGramsField totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} />

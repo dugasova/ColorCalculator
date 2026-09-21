@@ -8,6 +8,10 @@ export interface MixingRatio {
   developerParts: number;
 }
 
+export function sameMixingRatio(a: MixingRatio, b: MixingRatio): boolean {
+  return a.colorParts === b.colorParts && a.developerParts === b.developerParts;
+}
+
 export interface Shade {
   code: string;
   level: Level;
@@ -21,6 +25,12 @@ export interface Shade {
   // to shades by name as much as by code (see brands/redken.ts).
   name?: string;
   fixedMixingRatio?: MixingRatio
+  // The ratios a colorist may choose between for this shade, first entry being the
+  // default -- for lines whose manufacturer allows more than one dilution, e.g. Wella
+  // Color Touch's standard 1:2 or a richer 1:1.5. Only ever narrows a choice the shade
+  // already makes: calculateFullFormula ignores a manual ratio not listed here, and the
+  // default entry should match `fixedMixingRatio`.
+  mixingRatioChoices?: MixingRatio[]
   minStartLevel?: Level
   developerLiftTable?: LiftTable
   developerVolumeChoices?: DeveloperVolume[]
@@ -76,6 +86,7 @@ export const shadeSchema: z.ZodType<Shade> = z.object({
   secondaryTone: toneFamilySchema.optional(),
   name: z.string().optional(),
   fixedMixingRatio: mixingRatioSchema.optional(),
+  mixingRatioChoices: z.array(mixingRatioSchema).optional(),
   minStartLevel: levelSchema.optional(),
   developerVolumeChoices: z.array(developerVolumeSchema).optional(),
   noLiftDeveloperVolume: developerVolumeSchema.optional(),
@@ -130,6 +141,7 @@ export function canBlendShades(a: Shade, b: Shade, levelTolerance = 0): boolean 
   return Math.abs(a.level - b.level) <= levelTolerance
     && (a.line ?? null) === (b.line ?? null)
     && JSON.stringify(a.fixedMixingRatio ?? null) === JSON.stringify(b.fixedMixingRatio ?? null)
+    && JSON.stringify(a.mixingRatioChoices ?? null) === JSON.stringify(b.mixingRatioChoices ?? null)
     && JSON.stringify(a.developerVolumeChoices ?? null) === JSON.stringify(b.developerVolumeChoices ?? null);
 }
 

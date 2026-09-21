@@ -37,7 +37,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory,
     targetShadeCode, setTargetShadeCode,
     applicationZone, setApplicationZone, totalGrams, setTotalGrams, brandId, setBrandId, line, setLine,
-    manualDeveloperVolume, setManualDeveloperVolume, manualProcessingMinutes, setManualProcessingMinutes,
+    manualDeveloperVolume, setManualDeveloperVolume, manualMixingRatio, setManualMixingRatio,
+    manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
     additionalShade2Code, setAdditionalShade2Code, additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
@@ -71,6 +72,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setApplicationZone(repeatRequest.applicationZone);
     setTotalGrams(repeatRequest.totalGrams);
     setManualDeveloperVolume(repeatRequest.manualDeveloperVolume);
+    setManualMixingRatio(repeatRequest.manualMixingRatio);
     setManualProcessingMinutes(repeatRequest.processingMinutes);
     setManualPricePerGram(repeatRequest.pricePerGram);
     setManualMarkupMultiplier(repeatRequest.markupMultiplier);
@@ -196,6 +198,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
+    manualMixingRatio, setManualMixingRatio,
     manualPricePerGram, setManualPricePerGram,
     markupMultiplier, setMarkupMultiplier: setManualMarkupMultiplier,
     manualServicePrice, setManualServicePrice,
