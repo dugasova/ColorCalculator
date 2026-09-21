@@ -72,6 +72,8 @@ scripts/
                              Firestore so they become admin-editable too.
   repairMajirelPalette.ts    One-off repair: clears stale migrated Majirel overrides
                              after a built-in chart correction so it takes effect.
+  repairDiaPalette.ts        One-off repair: clears stale migrated Dia Light/Richesse
+                             overrides after adding the 1:2 mixing ratio option.
 ```
 
 The shade/brand catalog is a merge of two sources: the built-in charts hard-coded in

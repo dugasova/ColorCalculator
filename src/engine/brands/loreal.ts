@@ -284,7 +284,9 @@ export const LOREAL_INOA_CHART: Shade[] = inoaShades.map(shade => ({
 
 // Dia Light — ammonia-free demi-permanent gloss, deposit-only (tone-on-tone,
 // at most very slight lift/grey blending), so it skips the darkest levels.
-// Mixes 1:1.5 with a choice of 6 vol (standard tone-on-tone gloss) or 10 vol
+// Mixes 1:1.5 by default, with a manual option for 1:2 (both real Dia Light
+// dilutions, colorist's choice for a thinner/more fluid mix), and independently
+// a developer choice of 6 vol (standard tone-on-tone gloss) or 10 vol
 // (grey-blending option) — mirrors Color Touch's [6, 13] choice in wella.ts.
 const diaLightShades: Shade[] = [
   // Level 4
@@ -365,12 +367,13 @@ export const LOREAL_DIA_LIGHT_CHART: Shade[] = diaLightShades.map(shade => ({
   ...shade,
   line: "dia-light",
   fixedMixingRatio: { colorParts: 1, developerParts: 1.5 },
+  mixingRatioChoices: [{ colorParts: 1, developerParts: 1.5 }, { colorParts: 1, developerParts: 2 }],
   developerVolumeChoices: [6, 10],
 }));
 
 // Dia Richesse — Dia Light's richer, more opaque sibling gloss line, skewed
 // toward deep/warm/red reflects (acajou/cuivré/rouge). Same mixing mechanics
-// as Dia Light: 1:1.5 with a 6/10 vol choice.
+// as Dia Light: 1:1.5 default with a 1:2 option, plus a 6/10 vol developer choice.
 const diaRichesseShades: Shade[] = [
   // Level 1
   { code: "1", level: 1, tone: "natural" },
@@ -460,5 +463,6 @@ export const LOREAL_DIA_RICHESSE_CHART: Shade[] = diaRichesseShades.map(shade =>
   ...shade,
   line: "dia-richesse",
   fixedMixingRatio: { colorParts: 1, developerParts: 1.5 },
+  mixingRatioChoices: [{ colorParts: 1, developerParts: 1.5 }, { colorParts: 1, developerParts: 2 }],
   developerVolumeChoices: [6, 10],
 }));
