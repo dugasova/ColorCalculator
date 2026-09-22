@@ -4,11 +4,12 @@ import { BRAND_CHEAT_SHEET_IDS, hasBrandCheatSheet } from "../../brandCheatSheet
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./BrandNotes.css";
 
-// One brand's short mixing/processing cheat sheet -- reached either via the "Brands" nav
-// tab (see BrandsIndexPage) or by typing its own bookmarkable URL (e.g. /loreal) directly,
-// so a colorist can glance at it mid-service without touch-fumbling through app tabs with
-// gloved, dye-stained hands. Content lives in the `brandNotes.<id>.*` locale keys
-// (src/locales/en.ts / uk.ts), not here -- this component only resolves and renders it.
+// One brand's short mixing/processing cheat sheet -- reached either via the "Reference"
+// nav tab (see ReferenceIndexPage) or by typing its own bookmarkable URL (e.g. /loreal)
+// directly, so a colorist can glance at it mid-service without touch-fumbling through
+// app tabs with gloved, dye-stained hands. Content lives in the `brandNotes.<id>.*`
+// locale keys (src/locales/en.ts / uk.ts), not here -- this component only resolves and
+// renders it.
 export function BrandCheatSheetPage() {
   const { t } = useTranslation();
   const { brandId } = useParams<{ brandId: string }>();

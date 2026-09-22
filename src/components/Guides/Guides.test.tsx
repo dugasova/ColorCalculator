@@ -3,7 +3,6 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "../../i18n";
-import { GuidesIndexPage } from "./GuidesIndexPage";
 import { GuideCheatSheetPage } from "./GuideCheatSheetPage";
 import { TECHNIQUE_GUIDE_IDS, hasTechniqueGuide } from "../../techniqueGuides";
 
@@ -25,21 +24,6 @@ describe("hasTechniqueGuide", () => {
       expect(hasTechniqueGuide(id)).toBe(true);
     }
     expect(hasTechniqueGuide("not-a-real-guide")).toBe(false);
-  });
-});
-
-describe("GuidesIndexPage", () => {
-  it("links to every known guide's own cheat sheet URL", () => {
-    render(
-      <MemoryRouter>
-        <GuidesIndexPage />
-      </MemoryRouter>
-    );
-
-    for (const id of TECHNIQUE_GUIDE_IDS) {
-      const link = screen.getByRole("link", { name: /Resistant . vitreous gray/i });
-      expect(link).toHaveAttribute("href", `/guides/${id}`);
-    }
   });
 });
 

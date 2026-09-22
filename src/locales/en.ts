@@ -25,8 +25,7 @@ export const en = {
     prepigment: "Pre-pigment",
     analytics: "Analytics",
     palette: "Palette",
-    brands: "Brands",
-    guides: "Guides",
+    reference: "Reference",
     ariaLabel: "Primary navigation",
   },
   account: {
@@ -494,9 +493,6 @@ export const en = {
     },
   },
   brandNotes: {
-    indexTitlePrefix: "Brand",
-    indexTitleAccent: "Notes",
-    indexHint: "Quick per-brand mixing/processing quirks -- glance at these with gloves on, instead of hunting through the app.",
     backToApp: "← Back to the app",
     notFound: "No cheat sheet for \"{{brandId}}\".",
     notFoundHint: "Available: {{ids}}",
@@ -542,9 +538,6 @@ export const en = {
     },
   },
   techniqueGuides: {
-    indexTitlePrefix: "Technique",
-    indexTitleAccent: "guides",
-    indexHint: "Short, practical reference notes for a technique -- glance at these with gloves on, instead of hunting through the app.",
     backToApp: "← Back to the app",
     notFound: "No guide for \"{{guideId}}\".",
     notFoundHint: "Available: {{ids}}",
@@ -564,5 +557,12 @@ export const en = {
         "Expect a shorter revisit interval on heavily resistant zones -- regrowth against stubborn white shows sooner than against normal pigmented hair (see this app's own revisit-planning gray-% tiers).",
       ],
     },
+  },
+  reference: {
+    indexTitlePrefix: "Quick",
+    indexTitleAccent: "reference",
+    indexHint: "Brand mixing/processing quirks and technique cheat sheets -- glance at these with gloves on, instead of hunting through the app.",
+    brandsSectionTitle: "Brands",
+    guidesSectionTitle: "Techniques",
   },
 };

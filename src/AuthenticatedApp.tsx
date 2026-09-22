@@ -35,14 +35,11 @@ const PaletteAdminView = lazy(() =>
 const ChangePasswordModal = lazy(() =>
   import("./components/Account/ChangePasswordModal").then(m => ({ default: m.ChangePasswordModal }))
 );
-const BrandsIndexPage = lazy(() =>
-  import("./components/BrandNotes/BrandsIndexPage").then(m => ({ default: m.BrandsIndexPage }))
+const ReferenceIndexPage = lazy(() =>
+  import("./components/Reference/ReferenceIndexPage").then(m => ({ default: m.ReferenceIndexPage }))
 );
 const BrandCheatSheetPage = lazy(() =>
   import("./components/BrandNotes/BrandCheatSheetPage").then(m => ({ default: m.BrandCheatSheetPage }))
-);
-const GuidesIndexPage = lazy(() =>
-  import("./components/Guides/GuidesIndexPage").then(m => ({ default: m.GuidesIndexPage }))
 );
 const GuideCheatSheetPage = lazy(() =>
   import("./components/Guides/GuideCheatSheetPage").then(m => ({ default: m.GuideCheatSheetPage }))
@@ -63,14 +60,14 @@ export function AuthenticatedApp({ user }: { user: User }) {
   const [formResetKey, setFormResetKey] = useState(0);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
-  // The brand cheat sheets and technique guides (BrandsIndexPage/BrandCheatSheetPage,
-  // GuidesIndexPage/GuideCheatSheetPage) are real routes, not part of the `view` state
-  // switch below -- derives Nav's active tab from the URL instead, so a directly-typed
-  // bookmark URL (e.g. /loreal or /guides/resistant-gray) highlights the right tab too,
-  // not whatever `view` happened to default to.
-  const activeView: AppView = location.pathname === "/"
-    ? view
-    : location.pathname.startsWith("/guides") ? "guides" : "brands";
+  // The brand cheat sheets and technique guides (ReferenceIndexPage, BrandCheatSheetPage,
+  // GuideCheatSheetPage) are real routes, not part of the `view` state switch below --
+  // derives Nav's active tab from the URL instead, so a directly-typed bookmark URL
+  // (e.g. /loreal or /guides/resistant-gray) highlights the "Reference" tab too, not
+  // whatever `view` happened to default to. Every non-"/" pathname belongs to this one
+  // combined reference tab -- there's no other route-backed (as opposed to `view`-state)
+  // screen in the app.
+  const activeView: AppView = location.pathname === "/" ? view : "reference";
 
   // One step of Android back-button/swipe navigation: leave a brand cheat-sheet route,
   // else return from a non-calculator tab to the calculator, else (already home) hand
@@ -88,12 +85,8 @@ export function AuthenticatedApp({ user }: { user: User }) {
   });
 
   const handleViewChange = (next: AppView) => {
-    if (next === "brands") {
-      navigate("/brands");
-      return;
-    }
-    if (next === "guides") {
-      navigate("/guides");
+    if (next === "reference") {
+      navigate("/reference");
       return;
     }
     navigate("/");
@@ -141,8 +134,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
       <main className="app-main" id="main-content" tabIndex={-1}>
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/brands" element={<BrandsIndexPage />} />
-            <Route path="/guides" element={<GuidesIndexPage />} />
+            <Route path="/reference" element={<ReferenceIndexPage />} />
             <Route path="/guides/:guideId" element={<GuideCheatSheetPage />} />
             <Route path="/:brandId" element={<BrandCheatSheetPage />} />
             <Route

@@ -27,8 +27,7 @@ export const uk: typeof en = {
     prepigment: "Передпігментація",
     analytics: "Аналітика",
     palette: "Палітра",
-    brands: "Бренди",
-    guides: "Гайди",
+    reference: "Довідка",
     ariaLabel: "Основна навігація",
   },
   account: {
@@ -496,9 +495,6 @@ export const uk: typeof en = {
     },
   },
   brandNotes: {
-    indexTitlePrefix: "Нотатки",
-    indexTitleAccent: "по брендах",
-    indexHint: "Короткі нюанси змішування й витримки по кожному бренду — гляньте в рукавичках, замість того щоб гортати застосунок.",
     backToApp: "← Назад у застосунок",
     notFound: "Немає шпаргалки для \"{{brandId}}\".",
     notFoundHint: "Доступні: {{ids}}",
@@ -544,9 +540,6 @@ export const uk: typeof en = {
     },
   },
   techniqueGuides: {
-    indexTitlePrefix: "Гайди",
-    indexTitleAccent: "по техніках",
-    indexHint: "Короткі практичні нотатки по техніці — гляньте в рукавичках, замість того щоб гортати застосунок.",
     backToApp: "← Назад у застосунок",
     notFound: "Немає гайду для \"{{guideId}}\".",
     notFoundHint: "Доступні: {{ids}}",
@@ -566,5 +559,12 @@ export const uk: typeof en = {
         "Очікуйте коротший інтервал повторного візиту на сильно резистентних ділянках - відростання проти впертої білої сивини видно раніше, ніж проти звичайного пігментованого волосся (див. власні рівні сивини для планування повторних візитів у цьому застосунку).",
       ],
     },
+  },
+  reference: {
+    indexTitlePrefix: "Швидка",
+    indexTitleAccent: "довідка",
+    indexHint: "Нюанси змішування по брендах і шпаргалки по техніках — гляньте в рукавичках, замість того щоб гортати застосунок.",
+    brandsSectionTitle: "Бренди",
+    guidesSectionTitle: "Техніки",
   },
 };

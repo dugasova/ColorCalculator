@@ -3,7 +3,6 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "../../i18n";
-import { BrandsIndexPage } from "./BrandsIndexPage";
 import { BrandCheatSheetPage } from "./BrandCheatSheetPage";
 import { BRAND_CHEAT_SHEET_IDS, hasBrandCheatSheet } from "../../brandCheatSheets";
 
@@ -25,21 +24,6 @@ describe("hasBrandCheatSheet", () => {
       expect(hasBrandCheatSheet(id)).toBe(true);
     }
     expect(hasBrandCheatSheet("not-a-real-brand")).toBe(false);
-  });
-});
-
-describe("BrandsIndexPage", () => {
-  it("links to every known brand's own cheat sheet URL", () => {
-    render(
-      <MemoryRouter>
-        <BrandsIndexPage />
-      </MemoryRouter>
-    );
-
-    for (const id of BRAND_CHEAT_SHEET_IDS) {
-      const link = screen.getByRole("link", { name: new RegExp(id === "loreal" ? "L.Oréal" : id, "i") });
-      expect(link).toHaveAttribute("href", `/${id}`);
-    }
   });
 });
 

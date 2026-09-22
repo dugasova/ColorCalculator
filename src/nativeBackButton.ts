@@ -4,13 +4,14 @@ import { App } from "@capacitor/app";
 
 // This SPA drives screen switches (calculator/history/analytics/...) with plain React
 // state (see AuthenticatedApp's `view`), not a pushed browser-history entry per screen --
-// only the brand cheat-sheet pages (/loreal etc.) are real routes. So the WebView's own
-// history stack is almost always empty, and Capacitor's *default* Android back-button/
-// edge-swipe behavior ("go back in WebView history, else exit") exits the app on the
-// very first back gesture from anywhere. Registering our own `backButton` listener (see
-// useNativeBackButton below) replaces that default entirely -- Capacitor requires this
-// once you listen, per its own docs -- with: close the topmost open Modal, else hand off
-// to the caller's in-app "go home" navigation, else actually exit.
+// only the "Reference" tab's pages (/loreal, /guides/resistant-gray, ...) are real
+// routes. So the WebView's own history stack is almost always empty, and Capacitor's
+// *default* Android back-button/edge-swipe behavior ("go back in WebView history, else
+// exit") exits the app on the very first back gesture from anywhere. Registering our own
+// `backButton` listener (see useNativeBackButton below) replaces that default entirely --
+// Capacitor requires this once you listen, per its own docs -- with: close the topmost
+// open Modal, else hand off to the caller's in-app "go home" navigation, else actually
+// exit.
 
 // Modal.tsx (shared by every dialog in the app: ClientDetailsModal, BowlCard,
 // ChangePasswordModal, HistoryView's client/confirm-delete modals, ...) pushes/pops

@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import "./Nav.css";
 
-export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "palette" | "brands" | "guides";
+export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "palette" | "reference";
 
 const ICON_PATHS: Record<AppView, ReactNode> = {
   calculator: (
@@ -65,17 +65,10 @@ const ICON_PATHS: Record<AppView, ReactNode> = {
       <circle cx="10.5" cy="16.5" r="1.15" fill="currentColor" stroke="none" />
     </>
   ),
-  brands: (
+  reference: (
     <>
       <path d="M4 4.5c2-1 5-1 8 0v15c-3-1-6-1-8 0V4.5z" />
       <path d="M20 4.5c-2-1-5-1-8 0v15c3-1 6-1 8 0V4.5z" />
-    </>
-  ),
-  guides: (
-    <>
-      <path d="M5 4h11a2.5 2.5 0 0 1 2.5 2.5v13A1.5 1.5 0 0 0 17 18H5a1.5 1.5 0 0 1-1.5-1.5v-11A1.5 1.5 0 0 1 5 4z" />
-      <line x1="8" y1="8" x2="15" y2="8" />
-      <line x1="8" y1="11.5" x2="15" y2="11.5" />
     </>
   ),
 };
@@ -88,7 +81,7 @@ export interface NavProps {
 
 export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const items: AppView[] = ["calculator", "complex", "correction", "bleach", "prepigment", "history", "analytics", "brands", "guides"];
+  const items: AppView[] = ["calculator", "complex", "correction", "bleach", "prepigment", "history", "analytics", "reference"];
   if (isAdmin) {
     items.push("palette");
   }

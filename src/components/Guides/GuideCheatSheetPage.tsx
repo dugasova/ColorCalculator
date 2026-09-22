@@ -4,12 +4,12 @@ import { TECHNIQUE_GUIDE_IDS, hasTechniqueGuide } from "../../techniqueGuides";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "../BrandNotes/BrandNotes.css";
 
-// One technique's short reference cheat sheet -- reached via the "Guides" nav tab (see
-// GuidesIndexPage) or by typing its own bookmarkable URL (e.g. /guides/resistant-gray)
-// directly, so a colorist can glance at it mid-service without touch-fumbling through
-// app tabs with gloved, dye-stained hands. Mirrors BrandCheatSheetPage exactly -- content
-// lives in the `techniqueGuides.<id>.*` locale keys (src/locales/en.ts / uk.ts), not
-// here; this component only resolves and renders it.
+// One technique's short reference cheat sheet -- reached via the "Reference" nav tab
+// (see ReferenceIndexPage) or by typing its own bookmarkable URL (e.g.
+// /guides/resistant-gray) directly, so a colorist can glance at it mid-service without
+// touch-fumbling through app tabs with gloved, dye-stained hands. Mirrors
+// BrandCheatSheetPage exactly -- content lives in the `techniqueGuides.<id>.*` locale
+// keys (src/locales/en.ts / uk.ts), not here; this component only resolves and renders it.
 export function GuideCheatSheetPage() {
   const { t } = useTranslation();
   const { guideId } = useParams<{ guideId: string }>();

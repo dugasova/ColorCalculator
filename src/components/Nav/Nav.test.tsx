@@ -14,8 +14,8 @@ describe("Nav", () => {
     expect(html.match(/aria-selected="true"/g)).toHaveLength(1);
   });
 
-  it("renders the Brands tab, visible to every stylist (not admin-gated)", () => {
+  it("renders the Reference tab (brand notes + technique guides), visible to every stylist (not admin-gated)", () => {
     const html = renderToStaticMarkup(<Nav view="correction" onViewChange={() => {}} />);
-    expect(html).toContain("Brands");
+    expect(html).toContain("Reference");
   });
 });
