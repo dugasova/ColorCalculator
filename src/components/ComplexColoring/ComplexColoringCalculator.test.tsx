@@ -38,4 +38,22 @@ describe("ComplexColoringCalculator", () => {
 
     expect(screen.getAllByRole("button", { name: "Remove step" })).toHaveLength(2);
   });
+
+  // Regression: calculatePrePigmentation built a fresh object literal every render, fed
+  // straight into ColorStepCard's own "report the computed step up" effect deps
+  // unmemoized -- same "Maximum update depth exceeded" failure mode as the
+  // effectiveResult regression above, triggered specifically by opting into the
+  // pre-pigmentation checkbox (calculatePrePigmentation only runs once enabled).
+  it("toggles pre-pigmentation on a color step without looping into 'Maximum update depth exceeded'", () => {
+    render(<ComplexColoringCalculator appliedBy="Test Stylist" />);
+    fireEvent.click(screen.getByRole("button", { name: "+ Add color step" }));
+
+    // Default startLevel (10) -> default target shade (Generic 1.0, level 1) already
+    // warrants pre-pigmentation (see ColorStepCard.test.tsx), so the checkbox is present.
+    expect(() => {
+      fireEvent.click(screen.getByLabelText("Add pre-pigmentation step"));
+    }).not.toThrow();
+
+    expect((screen.getByLabelText("Add pre-pigmentation step") as HTMLInputElement).checked).toBe(true);
+  });
 });

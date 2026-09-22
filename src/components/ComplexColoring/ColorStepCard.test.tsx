@@ -67,4 +67,13 @@ describe("ColorStepCard", () => {
     expect(html).toContain("results__row-label");
     expect(html).not.toContain("results__neutralization-toggle");
   });
+
+  it("prompts for pre-pigmentation (unchecked) when the default level drop warrants it, and omits the filler step from results until opted in", () => {
+    const html = renderToStaticMarkup(<ColorStepCard stepId="1" onChange={() => {}} onRemove={() => {}} />);
+    // Default startLevel (10) -> default target shade (Generic 1.0, level 1) is a
+    // 9-level drop -- getPrePigmentationNeed's "required-multi-visit" tier.
+    expect(html).toContain("id=\"prePigmentationEnabled-1\"");
+    expect(html).not.toContain("checked=\"\" id=\"prePigmentationEnabled-1\"");
+    expect(html).not.toContain("prepigment__disclaimer");
+  });
 });

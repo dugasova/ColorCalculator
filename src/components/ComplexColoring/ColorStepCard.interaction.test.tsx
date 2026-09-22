@@ -92,4 +92,20 @@ describe("ColorStepCard interaction", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove step" }));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
+
+  it("adds the filler step to the reported payload once pre-pigmentation is opted in, and drops it when unchecked again", () => {
+    const { onChange } = renderStep();
+    // Default startLevel (10) -> default target shade (Generic 1.0, level 1) already
+    // warrants pre-pigmentation (see ColorStepCard.test.tsx), so the checkbox is present
+    // unchecked from mount.
+    expect(lastStep(onChange).prePigmentation).toBeNull();
+
+    fireEvent.click(screen.getByLabelText("Add pre-pigmentation step"));
+    const enabledStep = lastStep(onChange);
+    expect(enabledStep.prePigmentation).not.toBeNull();
+    expect(enabledStep.prePigmentation?.fillerTone).toBe("red");
+
+    fireEvent.click(screen.getByLabelText("Add pre-pigmentation step"));
+    expect(lastStep(onChange).prePigmentation).toBeNull();
+  });
 });

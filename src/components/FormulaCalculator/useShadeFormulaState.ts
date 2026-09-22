@@ -79,7 +79,16 @@ export function useShadeFormulaState({ brands }: UseShadeFormulaStateOptions) {
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
 
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
-  const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line).sort(compareShadesForDisplay);
+  // Memoized: `brands[brandId].shades` is a stable array reference from context (only a
+  // real palette change gives it a new one), so this only recomputes when the brand/line
+  // selection or the palette itself actually changes -- an unmemoized `.filter().sort()`
+  // would return a brand-new array every render, which is exactly the kind of unstable
+  // identity a caller's own memoized derivation (e.g. ColorStepCard's prePigmentationResult,
+  // via useComputedFullFormula's own identical concern above) can't safely depend on.
+  const lineShades = useMemo(
+    () => brands[brandId].shades.filter(s => (s.line ?? null) === line).sort(compareShadesForDisplay),
+    [brands, brandId, line]
+  );
 
   // Shared by every handler that changes which target shade is in play (see
   // resetShadePoolOverrides for the additional resets when the whole shade POOL changes,

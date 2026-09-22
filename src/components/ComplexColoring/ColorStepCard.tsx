@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePalette } from "../../palette";
 const DEFAULT_PRICE_PER_GRAM = 0.18;
@@ -9,6 +9,7 @@ import { StartLevelField } from "../FormulaCalculator/fields/StartLevelField";
 import { GrayPercentField } from "../FormulaCalculator/fields/GrayPercentField";
 import { ShadeField } from "../FormulaCalculator/fields/ShadeField";
 import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShadeField";
+import { PrePigmentationField } from "../FormulaCalculator/fields/PrePigmentationField";
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
 import { MixingRatioField } from "../FormulaCalculator/fields/MixingRatioField";
 import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
@@ -18,6 +19,8 @@ import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../engine/formatFormula";
+import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
+import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
 import type { ColorHistoryStep } from "../../history";
 
 export interface ColorStepCardProps {
@@ -40,6 +43,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_PRICE_PER_GRAM);
   const [strandZone, setStrandZone] = useState<StrandZone>("full-head");
   const [startingBase, setStartingBase] = useState<StartingBase>({ kind: "natural" });
+  const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(false);
 
   const {
     startLevel, setStartLevel,
@@ -77,6 +81,26 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     handleAdditionalShadeCodeChange,
   } = useShadeFormulaState({ brands });
 
+  // Reevaluated from startLevel/targetShade every render, matched against this step's
+  // own selected line (lineShades) -- same derivation as FormulaCalculator's
+  // useFormulaCalculatorState, just inlined here since ColorStepCard doesn't otherwise
+  // use that hook. Gated on prePigmentationEnabled so toggling the checkbox off drops
+  // the filler step from both this card and the combined session text/save payload.
+  // Memoized (unlike useFormulaCalculatorState's own unmemoized version, which has no
+  // reporting effect depending on it): calculatePrePigmentation builds a fresh object
+  // literal every call, and this result sits in the "report computed step up" effect's
+  // dependency array below (see useComputedFullFormula's own identical comment) -- an
+  // unmemoized new object every render would fire that effect every render, which calls
+  // the parent's setState, which re-renders this card, which produces yet another new
+  // object: infinite "Maximum update depth exceeded" the moment prePigmentation turns on.
+  const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
+  const prePigmentationResult = useMemo(
+    () => (prePigmentationEnabled && prePigmentationNeed !== "none"
+      ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams, lineShades)
+      : null),
+    [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, totalGrams, lineShades]
+  );
+
   // Report the computed step up on every change — the parent aggregates all steps'
   // totals (time, cost) and builds the combined recipe text/save payload from them.
   useEffect(() => {
@@ -98,7 +122,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
       additionalShade2,
       additionalShade2Grams: additionalShade2 !== null ? additionalShade2Grams : null,
       blend: null,
-      prePigmentation: null,
+      prePigmentation: prePigmentationResult,
       neutralizationApplied,
       processingMinutes,
       pricePerGram,
@@ -107,7 +131,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     brandId, applicationZone, strandZone, startingBase, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
-    porosity, thickness, chemicalHistory
+    porosity, thickness, chemicalHistory, prePigmentationResult
   ]);
 
   return (
@@ -137,6 +161,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}
           onTargetShadeCodeChange={handleTargetShadeCodeChange}
+          idSuffix={idSuffix}
+        />
+        <PrePigmentationField
+          need={prePigmentationNeed}
+          enabled={prePigmentationEnabled}
+          onEnabledChange={setPrePigmentationEnabled}
           idSuffix={idSuffix}
         />
         <AdditionalShadeField
@@ -196,6 +226,12 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
         </div>
       </div>
 
+      {prePigmentationResult !== null && (
+        <>
+          <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} brandName={brands[brandId].name} />
+          <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
+        </>
+      )}
       {result.liftUnsupportedWarning !== null && <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
         <p className="warning" role="alert">{t("results.notAchievable")}</p>
