@@ -41,6 +41,12 @@ const BrandsIndexPage = lazy(() =>
 const BrandCheatSheetPage = lazy(() =>
   import("./components/BrandNotes/BrandCheatSheetPage").then(m => ({ default: m.BrandCheatSheetPage }))
 );
+const GuidesIndexPage = lazy(() =>
+  import("./components/Guides/GuidesIndexPage").then(m => ({ default: m.GuidesIndexPage }))
+);
+const GuideCheatSheetPage = lazy(() =>
+  import("./components/Guides/GuideCheatSheetPage").then(m => ({ default: m.GuideCheatSheetPage }))
+);
 
 export function AuthenticatedApp({ user }: { user: User }) {
   const { t } = useTranslation();
@@ -57,11 +63,14 @@ export function AuthenticatedApp({ user }: { user: User }) {
   const [formResetKey, setFormResetKey] = useState(0);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
-  // The brand cheat sheets (BrandsIndexPage, BrandCheatSheetPage) are real routes, not
-  // part of the `view` state switch below -- derives Nav's active tab from the URL
-  // instead, so a directly-typed bookmark URL (e.g. /loreal) highlights "Brands" too,
+  // The brand cheat sheets and technique guides (BrandsIndexPage/BrandCheatSheetPage,
+  // GuidesIndexPage/GuideCheatSheetPage) are real routes, not part of the `view` state
+  // switch below -- derives Nav's active tab from the URL instead, so a directly-typed
+  // bookmark URL (e.g. /loreal or /guides/resistant-gray) highlights the right tab too,
   // not whatever `view` happened to default to.
-  const activeView: AppView = location.pathname === "/" ? view : "brands";
+  const activeView: AppView = location.pathname === "/"
+    ? view
+    : location.pathname.startsWith("/guides") ? "guides" : "brands";
 
   // One step of Android back-button/swipe navigation: leave a brand cheat-sheet route,
   // else return from a non-calculator tab to the calculator, else (already home) hand
@@ -81,6 +90,10 @@ export function AuthenticatedApp({ user }: { user: User }) {
   const handleViewChange = (next: AppView) => {
     if (next === "brands") {
       navigate("/brands");
+      return;
+    }
+    if (next === "guides") {
+      navigate("/guides");
       return;
     }
     navigate("/");
@@ -129,6 +142,8 @@ export function AuthenticatedApp({ user }: { user: User }) {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/brands" element={<BrandsIndexPage />} />
+            <Route path="/guides" element={<GuidesIndexPage />} />
+            <Route path="/guides/:guideId" element={<GuideCheatSheetPage />} />
             <Route path="/:brandId" element={<BrandCheatSheetPage />} />
             <Route
               path="/"

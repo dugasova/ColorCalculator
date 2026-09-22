@@ -26,6 +26,7 @@ export const en = {
     analytics: "Analytics",
     palette: "Palette",
     brands: "Brands",
+    guides: "Guides",
     ariaLabel: "Primary navigation",
   },
   account: {
@@ -537,6 +538,30 @@ export const en = {
       points: [
         "Not tied to a real manufacturer -- a reference level.reflect chart; the ratio follows the standard lift-based formula, not a fixed one.",
         "Used as the default brand and as the pre-pigmentation worked example.",
+      ],
+    },
+  },
+  techniqueGuides: {
+    indexTitlePrefix: "Technique",
+    indexTitleAccent: "guides",
+    indexHint: "Short, practical reference notes for a technique -- glance at these with gloves on, instead of hunting through the app.",
+    backToApp: "← Back to the app",
+    notFound: "No guide for \"{{guideId}}\".",
+    notFoundHint: "Available: {{ids}}",
+    "resistant-gray": {
+      title: "Resistant / vitreous gray",
+      points: [
+        "Diagnose first: vitreous (\"glassy\") gray has a hard, tightly compacted cuticle -- feels stiff/wiry and looks shiny/translucent rather than dull. It resists oxidative color even when the rest of the head takes normally.",
+        "Never skip the natural-base blend on these zones, even at high gray % -- this app's own gray-coverage strategy already doses it (1/3 natural at 30-50% gray, 1/2 at 50%+, see the calculator's gray-percentage field); don't formulate resistant patches fashion-only to \"save time\".",
+        "Developer floor: never drop below 20 vol on a resistant zone, even same-depth-or-darker where the level-diff math alone would pick a gentler volume -- 20 vol is the minimum that reliably swells this tougher cuticle enough to deposit oxidative pigment.",
+        "Pre-soften stubborn patches (temples, hairline, nape) before the main application: apply the developer alone (no color) to just those sections for 5-10 minutes, blot, then apply the full formula as normal over the now-softer cuticle.",
+        "Alternative/traditional pre-treatment (\"mordanting\"): straight 3% (10 vol) developer on the resistant strands only, left 10 minutes, rinsed, hair dried, then color applied -- functionally the same goal as pre-softening, different order.",
+        "Application order: saturate the resistant sections FIRST, the rest of the head after -- resistant hair needs the longest contact time, so give it a head start rather than an equal share.",
+        "Processing time: use the maximum recommended time for the formula, not the average -- resistant gray is exactly the case that needs the full window, never a shortened one.",
+        "Don't go colder/ashier than the target calls for -- resistant gray tends to grab cool/ash tones unevenly and can read dull or greenish; a touch of warmth in the formula reads truer on it.",
+        "If a client reports color \"looked right for a few days, then faded fast\" on the same zones every time, that's the signature of vitreous gray paired with too weak a developer/too short a time -- fix the process, not just the formula.",
+        "Mechanical work helps: comb or massage the color through tightly packed resistant strands (brush-and-bowl application, not just the applicator bottle) so product actually reaches every strand instead of sitting on top.",
+        "Expect a shorter revisit interval on heavily resistant zones -- regrowth against stubborn white shows sooner than against normal pigmented hair (see this app's own revisit-planning gray-% tiers).",
       ],
     },
   },
