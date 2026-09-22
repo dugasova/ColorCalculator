@@ -57,7 +57,12 @@ function formatStepText(step: HistoryStep): string {
     startLevel: step.startLevel,
     result: step.result,
     processingMinutes: step.processingMinutes,
-    applicationZone: step.applicationZone,
+    // A ComplexColoring step always carries strandZone (see ColorStepCard) -- its
+    // formula text shows the zone recap line (formatZoneAndBaseText) instead, so
+    // "Application: Full head" (frozen, no longer colorist-editable there) would just be
+    // meaningless noise. A plain FormulaCalculator save has no strandZone at all, so it
+    // keeps showing its own real applicationZone choice.
+    applicationZone: step.strandZone !== undefined ? null : step.applicationZone,
     additionalShade: step.additionalShade,
     additionalShadeGrams: step.additionalShadeGrams ?? 0,
     blend: step.blend ?? null,

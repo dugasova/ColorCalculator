@@ -191,6 +191,20 @@ describe("formatSessionText: zone and starting-base recap", () => {
     expect(text.indexOf("Zone: Mid-lengths")).toBeLessThan(text.indexOf("Generic — 9.1"));
   });
 
+  it("omits the redundant 'Application: Full head' line for a ComplexColoring step (it carries strandZone instead)", () => {
+    // Regression: ColorStepCard no longer offers ApplicationZoneField, but
+    // applicationZone stays frozen at "full-head" on the saved step -- the formula text
+    // must not keep showing it as if it were still a real, colorist-made choice.
+    const text = formatSessionText([{ ...colorStep, strandZone: "roots", applicationZone: "full-head" }]);
+    expect(text).not.toContain("Application:");
+  });
+
+  it("keeps showing 'Application: ...' for a plain FormulaCalculator save (no strandZone at all)", () => {
+    const text = formatSessionText([colorStep]);
+    expect(text).toContain("Application: Full head");
+  });
+
+
   it("shows the natural-base label with no tone when startingBase is natural", () => {
     const text = formatSessionText([{ ...colorStep, startingBase: { kind: "natural" } }]);
     expect(text).toContain("Starting base: Natural (virgin)");

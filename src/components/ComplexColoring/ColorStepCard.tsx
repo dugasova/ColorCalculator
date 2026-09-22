@@ -12,7 +12,6 @@ import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShad
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
 import { MixingRatioField } from "../FormulaCalculator/fields/MixingRatioField";
 import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
-import { ApplicationZoneField } from "../FormulaCalculator/fields/ApplicationZoneField";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
@@ -75,7 +74,6 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     handleBrandIdChange,
     handleLineChange,
     handleTargetShadeCodeChange,
-    handleApplicationZoneChange,
     handleAdditionalShadeCodeChange,
   } = useShadeFormulaState({ brands });
 
@@ -174,7 +172,6 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
           onManualMixingRatioChange={setManualMixingRatio}
           idSuffix={idSuffix}
         />
-        <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} idSuffix={idSuffix} />
         <TotalGramsField totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} idSuffix={idSuffix} />
         <div className="field">
           <label htmlFor={`stepProcessingMinutes${idSuffix}`}>{t("results.processingTime")}</label>

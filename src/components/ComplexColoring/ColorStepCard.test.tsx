@@ -14,7 +14,6 @@ describe("ColorStepCard", () => {
     expect(html).toContain("id=\"grayPercent-1\"");
     expect(html).toContain("id=\"targetShadeCode-1\"");
     expect(html).toContain("id=\"additionalShadeCode-1\"");
-    expect(html).toContain("id=\"applicationZone-1\"");
     expect(html).toContain("id=\"totalGrams-1\"");
     expect(html).toContain("id=\"stepProcessingMinutes-1\"");
     expect(html).toContain("id=\"stepPricePerGram-1\"");
@@ -32,6 +31,10 @@ describe("ColorStepCard", () => {
     // Starting base defaults to "natural" -- the tone sub-picker only appears once
     // "Previously colored" is picked (see StartingBaseField).
     expect(html).not.toContain("id=\"startingBaseTone-1\"");
+    // ApplicationZoneField (full-head vs root-touch-up) is redundant here now that
+    // StrandZoneField describes the step's position -- never rendered in a
+    // ComplexColoring step, unlike the plain single-shot FormulaCalculator.
+    expect(html).not.toContain("id=\"applicationZone-1\"");
   });
 
   it("defaults the price-per-gram field to 0.18, independent of any brand default", () => {

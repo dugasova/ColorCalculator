@@ -14,7 +14,12 @@ export interface FormatFormulaParams {
   startLevel: Level;
   result: FullFormula;
   processingMinutes: number;
-  applicationZone: ApplicationZone;
+  // `null` omits the "Application: ..." line entirely -- used for ComplexColoring steps
+  // (see formatSession.ts), where StrandZoneField already describes the step's position
+  // and ApplicationZoneField isn't offered at all; showing a frozen "Application: Full
+  // head" default there would be meaningless, unlike the plain single-shot
+  // FormulaCalculator where this genuinely reflects the colorist's own choice.
+  applicationZone: ApplicationZone | null;
   additionalShade: Shade | null;
   additionalShadeGrams: number;
   additionalShade2?: Shade | null;
@@ -117,9 +122,11 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     ...(result.achievedLevel !== null && result.achievedLevel !== targetShade.level
       ? [i18n.t("format.achievedLevel", { level: result.achievedLevel, target: targetShade.level })]
       : []),
-    i18n.t("format.applicationZone", {
-      value: applicationZone === "full-head" ? i18n.t("fields.applicationZoneFullHead") : i18n.t("fields.applicationZoneRootTouchUp"),
-    }),
+    ...(applicationZone !== null
+      ? [i18n.t("format.applicationZone", {
+        value: applicationZone === "full-head" ? i18n.t("fields.applicationZoneFullHead") : i18n.t("fields.applicationZoneRootTouchUp"),
+      })]
+      : []),
     i18n.t("format.developer", { value: developer }),
     i18n.t("format.ratio", { color: result.mixingRatio.colorParts, developer: result.mixingRatio.developerParts }),
     result.grams !== null
