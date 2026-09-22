@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { TONE_FAMILIES, type ToneFamily } from "../../../engine/shades";
-import type { StartingBase } from "../../../engine/startingBase";
+import { STARTING_BASE_TONES, type StartingBase, type StartingBaseTone } from "../../../engine/startingBase";
 import { Select } from "../../common/Select";
 
 export interface StartingBaseFieldProps {
@@ -39,8 +38,8 @@ export function StartingBaseField({ startingBase, onStartingBaseChange, idSuffix
           <Select
             id={`startingBaseTone${idSuffix}`}
             value={startingBase.tone}
-            onChange={value => onStartingBaseChange({ kind: "colored", tone: value as ToneFamily })}
-            options={TONE_FAMILIES.map(tone => ({ value: tone, label: t(`palette.toneFamily.${tone}`) }))}
+            onChange={value => onStartingBaseChange({ kind: "colored", tone: value as StartingBaseTone })}
+            options={STARTING_BASE_TONES.map(tone => ({ value: tone, label: t(`palette.toneFamily.${tone}`) }))}
           />
         </div>
       )}

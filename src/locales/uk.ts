@@ -487,6 +487,11 @@ export const uk: typeof en = {
       "slate-grey": "Сірий графітовий",
       mahogany: "Червоне дерево",
       beige: "Бежевий",
+      "copper-gold": "Мідно-золотистий",
+      "gold-copper": "Золотисто-мідний",
+      "light-gold": "Світло-золотистий",
+      "light-copper": "Світло-мідний",
+      "red-copper": "Мідно-червоний",
     },
   },
   brandNotes: {

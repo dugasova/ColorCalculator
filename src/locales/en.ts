@@ -485,6 +485,11 @@ export const en = {
       "slate-grey": "Slate grey",
       mahogany: "Mahogany",
       beige: "Beige",
+      "copper-gold": "Copper-gold",
+      "gold-copper": "Gold-copper",
+      "light-gold": "Light gold",
+      "light-copper": "Light copper",
+      "red-copper": "Red-copper",
     },
   },
   brandNotes: {
