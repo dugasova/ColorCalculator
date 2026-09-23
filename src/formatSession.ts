@@ -37,8 +37,34 @@ function formatZoneAndBaseText(step: HistoryStep): string {
   return lines.join("\n");
 }
 
-function formatStepText(step: HistoryStep): string {
-  const prefixText = [formatZoneAndBaseText(step), formatCanvasText(step.canvas)].filter(text => text !== "").join("\n");
+// True when `curr` describes the exact same physical section of hair, in the exact same
+// state, as the immediately preceding step -- e.g. a bleach step on "Roots" followed by
+// a color step also on "Roots", with the same starting base/porosity/thickness/chemical
+// history (nothing changed between the two passes). `prev` is `undefined` for a
+// session's first step, which always shows its own recap. Follows the same
+// `JSON.stringify(x ?? null)` structural-equality pattern already used for shade
+// equality (see canBlendShades, engine/shades.ts) -- startingBase/canvas are plain
+// data objects built the same way every time, never containing anything that wouldn't
+// round-trip through JSON.
+function sameZoneAndCanvasState(prev: HistoryStep | undefined, curr: HistoryStep): boolean {
+  if (prev === undefined) return false;
+  return prev.strandZone === curr.strandZone
+    && JSON.stringify(prev.startingBase ?? null) === JSON.stringify(curr.startingBase ?? null)
+    && JSON.stringify(prev.canvas ?? null) === JSON.stringify(curr.canvas ?? null);
+}
+
+// `previousStep` is the immediately preceding step in the session (`undefined` for the
+// first one) -- once a step describes the exact same zone in the exact same state as the
+// one right before it (see sameZoneAndCanvasState), the zone/starting-base/canvas recap
+// is already on screen one block up and skipped here, instead of literally repeating
+// "Zone: Roots / Starting base: Natural (virgin) / Porosity: Normal / Hair Thickness:
+// Medium" twice in a row for what a colorist reads as one continuous description of the
+// same hair. A genuinely new zone, or the same zone in a state that actually changed
+// (e.g. porosity rising after a bleach step), still gets its own full recap.
+function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined): string {
+  const prefixText = sameZoneAndCanvasState(previousStep, step)
+    ? ""
+    : [formatZoneAndBaseText(step), formatCanvasText(step.canvas)].filter(text => text !== "").join("\n");
 
   if (step.kind === "bleach") {
     const bleachText = formatBleachText({
@@ -88,8 +114,8 @@ function formatStepText(step: HistoryStep): string {
 export function formatSessionText(steps: HistoryStep[]): string {
   const blocks = steps.map((step, index) =>
     steps.length > 1
-      ? `${i18n.t("history.stepLabel", { number: index + 1 })}\n${formatStepText(step)}`
-      : formatStepText(step)
+      ? `${i18n.t("history.stepLabel", { number: index + 1 })}\n${formatStepText(step, steps[index - 1])}`
+      : formatStepText(step, undefined)
   );
 
   if (steps.length > 1) {
