@@ -221,6 +221,7 @@ export const en = {
     patchTestOn: "Patch test: {{date}}",
     repeat: "Repeat formula",
     stepLabel: "Step {{number}}",
+    stepLabelWithZone: "Step {{number}} — {{zone}}",
     visitCount: "Visits: {{count}}",
     lastVisit: "Last visit: {{date}}",
     remindersTitle: "Upcoming revisits",

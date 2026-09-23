@@ -8,13 +8,20 @@ import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
-import type { BleachHistoryStep } from "../../history";
+import type { BleachHistoryStep, HistoryStep } from "../../history";
+import { getInheritedZoneState } from "./stepInheritance";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
 
 export interface BleachStepCardProps {
   stepId: string;
+  // Every already-computed step earlier in this session, in order -- lets this card
+  // default its own hair-state fields (starting base, canvas) from an earlier step that
+  // targeted the same strandZone (see stepInheritance.ts, and ColorStepCard's identical
+  // wiring). Optional/defaults to empty so a lone BleachStepCard works unchanged with no
+  // inheritance.
+  previousSteps?: HistoryStep[];
   onChange: (step: BleachHistoryStep) => void;
   onRemove: () => void;
 }
@@ -22,7 +29,7 @@ export interface BleachStepCardProps {
 // One bleach (lightening powder) step within a complex-coloring session — e.g. lifting a
 // section before toning. Mirrors BleachCalculator's fields and calculation, minus the
 // per-session bits (overall markup/service price) that live in ComplexColoringCalculator.
-export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardProps) {
+export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove }: BleachStepCardProps) {
   const { t } = useTranslation();
   const idSuffix = `-${stepId}`;
 
@@ -34,6 +41,30 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_BLEACH_PRICE_PER_GRAM);
   const [strandZone, setStrandZone] = useState<StrandZone>("full-head");
   const [startingBase, setStartingBase] = useState<StartingBase>({ kind: "natural" });
+
+  // One-time on mount + on every explicit zone pick -- see ColorStepCard's identical
+  // (and more heavily commented) wiring for why this is imperative, not a continuously
+  // rerunning effect keyed on strandZone/previousSteps.
+  useEffect(() => {
+    const inherited = getInheritedZoneState(previousSteps, strandZone);
+    if (inherited !== null) {
+      setStartingBase(inherited.startingBase);
+      setPorosity(inherited.canvas.porosity);
+      setThickness(inherited.canvas.thickness);
+      setChemicalHistory(inherited.canvas.chemicalHistory);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const handleStrandZoneChange = (zone: StrandZone) => {
+    setStrandZone(zone);
+    const inherited = getInheritedZoneState(previousSteps, zone);
+    if (inherited !== null) {
+      setStartingBase(inherited.startingBase);
+      setPorosity(inherited.canvas.porosity);
+      setThickness(inherited.canvas.thickness);
+      setChemicalHistory(inherited.canvas.chemicalHistory);
+    }
+  };
 
   const result = calculateBleachFormula(startLevel, targetLevel, totalGrams);
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
@@ -75,7 +106,7 @@ export function BleachStepCard({ stepId, onChange, onRemove }: BleachStepCardPro
           />
         </div>
 
-        <StrandZoneField strandZone={strandZone} onStrandZoneChange={setStrandZone} idSuffix={idSuffix} />
+        <StrandZoneField strandZone={strandZone} onStrandZoneChange={handleStrandZoneChange} idSuffix={idSuffix} />
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
 
         <CanvasFields

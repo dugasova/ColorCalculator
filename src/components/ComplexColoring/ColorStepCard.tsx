@@ -21,10 +21,17 @@ import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../engine/formatFormula";
 import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
-import type { ColorHistoryStep } from "../../history";
+import type { ColorHistoryStep, HistoryStep } from "../../history";
+import { getInheritedZoneState } from "./stepInheritance";
 
 export interface ColorStepCardProps {
   stepId: string;
+  // Every already-computed step earlier in this session, in order -- lets this card
+  // default its own hair-state fields (starting base, canvas) from an earlier step that
+  // targeted the same strandZone (see stepInheritance.ts). Optional/defaults to empty so
+  // a lone ColorStepCard (e.g. in tests, or a future standalone use) works unchanged
+  // with no inheritance.
+  previousSteps?: HistoryStep[];
   onChange: (step: ColorHistoryStep) => void;
   onRemove: () => void;
 }
@@ -35,7 +42,7 @@ export interface ColorStepCardProps {
 // cross-brand match, overall markup/service price) — those live at the session level in
 // ComplexColoringCalculator, aggregated across every step. `pricePerGram` here is a plain
 // flat field, unlike FormulaCalculator's manual-override-over-a-brand-default pattern.
-export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps) {
+export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }: ColorStepCardProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const idSuffix = `-${stepId}`;
@@ -80,6 +87,37 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
     handleTargetShadeCodeChange,
     handleAdditionalShadeCodeChange,
   } = useShadeFormulaState({ brands });
+
+  // One-time on mount: if this card's default zone ("full-head") already matches an
+  // earlier step's zone, seed starting base/canvas from it. Empty deps -- runs once,
+  // never fights a colorist's own later edit to these fields the way a continuously-
+  // rerunning effect keyed on strandZone/previousSteps would (previousSteps is a fresh
+  // array from the parent on every render, so it can't safely sit in a dependency array
+  // here without refiring constantly and stomping on manual overrides).
+  useEffect(() => {
+    const inherited = getInheritedZoneState(previousSteps, strandZone);
+    if (inherited !== null) {
+      setStartingBase(inherited.startingBase);
+      setPorosity(inherited.canvas.porosity);
+      setThickness(inherited.canvas.thickness);
+      setChemicalHistory(inherited.canvas.chemicalHistory);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
+  // -- an imperative one-shot default, not an ongoing sync, so it never overwrites values
+  // the colorist edits afterward (see mount effect above for the same reasoning).
+  const handleStrandZoneChange = (zone: StrandZone) => {
+    setStrandZone(zone);
+    const inherited = getInheritedZoneState(previousSteps, zone);
+    if (inherited !== null) {
+      setStartingBase(inherited.startingBase);
+      setPorosity(inherited.canvas.porosity);
+      setThickness(inherited.canvas.thickness);
+      setChemicalHistory(inherited.canvas.chemicalHistory);
+    }
+  };
 
   // Reevaluated from startLevel/targetShade every render, matched against this step's
   // own selected line (lineShades) -- same derivation as FormulaCalculator's
@@ -147,7 +185,7 @@ export function ColorStepCard({ stepId, onChange, onRemove }: ColorStepCardProps
         <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} idSuffix={idSuffix} />
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} idSuffix={idSuffix} />
         <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} idSuffix={idSuffix} />
-        <StrandZoneField strandZone={strandZone} onStrandZoneChange={setStrandZone} idSuffix={idSuffix} />
+        <StrandZoneField strandZone={strandZone} onStrandZoneChange={handleStrandZoneChange} idSuffix={idSuffix} />
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
         <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} idSuffix={idSuffix} />
         <CanvasFields

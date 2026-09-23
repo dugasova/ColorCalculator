@@ -109,21 +109,33 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
       )}
 
       <div className="complex-coloring__steps">
-        {scaffold.map(s => s.kind === "color" ? (
-          <ColorStepCard
-            key={s.id}
-            stepId={s.id}
-            onChange={step => handleStepChange(s.id, step)}
-            onRemove={() => handleRemoveStep(s.id)}
-          />
-        ) : (
-          <BleachStepCard
-            key={s.id}
-            stepId={s.id}
-            onChange={step => handleStepChange(s.id, step)}
-            onRemove={() => handleRemoveStep(s.id)}
-          />
-        ))}
+        {scaffold.map((s, index) => {
+          // Every already-computed step before this one in the session, in order --
+          // lets each card default its own hair-state fields (starting base, canvas)
+          // from an earlier step that targeted the same strandZone (see
+          // stepInheritance.ts), without waiting for this card's own onChange effect
+          // (which only fires after mount).
+          const previousSteps = scaffold.slice(0, index)
+            .map(prev => computedSteps[prev.id])
+            .filter((step): step is HistoryStep => step !== undefined);
+          return s.kind === "color" ? (
+            <ColorStepCard
+              key={s.id}
+              stepId={s.id}
+              previousSteps={previousSteps}
+              onChange={step => handleStepChange(s.id, step)}
+              onRemove={() => handleRemoveStep(s.id)}
+            />
+          ) : (
+            <BleachStepCard
+              key={s.id}
+              stepId={s.id}
+              previousSteps={previousSteps}
+              onChange={step => handleStepChange(s.id, step)}
+              onRemove={() => handleRemoveStep(s.id)}
+            />
+          );
+        })}
       </div>
 
       <div className="complex-coloring__add-actions">

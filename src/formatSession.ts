@@ -19,22 +19,27 @@ export function formatCanvasText(canvas: HistoryStep["canvas"] | null): string {
   return text;
 }
 
-// Zone/starting-base recap line, prepended ahead of the rest of a step's text -- both
-// fields are optional (absent on every step saved before they existed, and on a plain
-// single-step FormulaCalculator save, which has no multi-zone concept at all), so this
-// renders nothing unless a colorist actually set one.
-function formatZoneAndBaseText(step: HistoryStep): string {
-  const lines: string[] = [];
-  if (step.strandZone !== undefined) {
-    lines.push(i18n.t("format.strandZone", { value: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) }));
-  }
-  if (step.startingBase !== undefined) {
-    const value = step.startingBase.kind === "natural"
-      ? i18n.t("fields.startingBase.natural")
-      : i18n.t("format.startingBaseColored", { tone: i18n.t(`palette.toneFamily.${step.startingBase.tone}`) });
-    lines.push(i18n.t("format.startingBase", { value }));
-  }
-  return lines.join("\n");
+// Zone recap line, only used in the step body when there's no numbered step header to
+// carry it instead (see formatStepHeader/formatStepText's `includeZoneLine`) -- a
+// single-step session never gets a "Step 1" header at all (formatSessionText renders it
+// exactly like a plain single-formula save), so that's the one case the zone still needs
+// to surface here.
+function formatZoneLine(step: HistoryStep): string {
+  return step.strandZone !== undefined
+    ? i18n.t("format.strandZone", { value: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) })
+    : "";
+}
+
+// Starting-base recap line, prepended ahead of the rest of a step's text -- optional
+// (absent on every step saved before it existed, and on a plain single-step
+// FormulaCalculator save, which has no multi-zone concept at all), so this renders
+// nothing unless a colorist actually set it.
+function formatStartingBaseText(step: HistoryStep): string {
+  if (step.startingBase === undefined) return "";
+  const value = step.startingBase.kind === "natural"
+    ? i18n.t("fields.startingBase.natural")
+    : i18n.t("format.startingBaseColored", { tone: i18n.t(`palette.toneFamily.${step.startingBase.tone}`) });
+  return i18n.t("format.startingBase", { value });
 }
 
 // True when `curr` describes the exact same physical section of hair, in the exact same
@@ -55,16 +60,26 @@ function sameZoneAndCanvasState(prev: HistoryStep | undefined, curr: HistoryStep
 
 // `previousStep` is the immediately preceding step in the session (`undefined` for the
 // first one) -- once a step describes the exact same zone in the exact same state as the
-// one right before it (see sameZoneAndCanvasState), the zone/starting-base/canvas recap
-// is already on screen one block up and skipped here, instead of literally repeating
-// "Zone: Roots / Starting base: Natural (virgin) / Porosity: Normal / Hair Thickness:
-// Medium" twice in a row for what a colorist reads as one continuous description of the
-// same hair. A genuinely new zone, or the same zone in a state that actually changed
-// (e.g. porosity rising after a bleach step), still gets its own full recap.
-function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined): string {
-  const prefixText = sameZoneAndCanvasState(previousStep, step)
-    ? ""
-    : [formatZoneAndBaseText(step), formatCanvasText(step.canvas)].filter(text => text !== "").join("\n");
+// one right before it (see sameZoneAndCanvasState), the starting-base/canvas recap is
+// already on screen one block up and skipped here, instead of literally repeating
+// "Starting base: Natural (virgin) / Porosity: Normal / Hair Thickness: Medium" twice in
+// a row for what a colorist reads as one continuous description of the same hair. A
+// genuinely new zone, or the same zone in a state that actually changed (e.g. porosity
+// rising after a bleach step), still gets its own full recap regardless.
+//
+// `includeZoneLine`: true only for a single-step session's lone step, which never gets a
+// numbered "Step N — Zone" header (see formatSessionText) -- the zone has nowhere else to
+// show, so it's included in the body here instead. A multi-step session's steps pass
+// false: their zone already shows once in the header (formatStepHeader), so repeating it
+// in every step's body too would be exactly the redundancy this whole recap-dedup exists
+// to avoid.
+function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined, includeZoneLine: boolean): string {
+  const stateLines = sameZoneAndCanvasState(previousStep, step)
+    ? []
+    : [formatStartingBaseText(step), formatCanvasText(step.canvas)].filter(text => text !== "");
+  const prefixText = (includeZoneLine ? [formatZoneLine(step), ...stateLines] : stateLines)
+    .filter(text => text !== "")
+    .join("\n");
 
   if (step.kind === "bleach") {
     const bleachText = formatBleachText({
@@ -83,8 +98,9 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
     startLevel: step.startLevel,
     result: step.result,
     processingMinutes: step.processingMinutes,
-    // A ComplexColoring step always carries strandZone (see ColorStepCard) -- its
-    // formula text shows the zone recap line (formatZoneAndBaseText) instead, so
+    // A ComplexColoring step always carries strandZone (see ColorStepCard) -- its own
+    // zone shows via the zone recap (either the header, or this step's own body for a
+    // single-step session -- see formatStepText's includeZoneLine) instead, so
     // "Application: Full head" (frozen, no longer colorist-editable there) would just be
     // meaningless noise. A plain FormulaCalculator save has no strandZone at all, so it
     // keeps showing its own real applicationZone choice.
@@ -106,16 +122,30 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
   return prefixText ? `${prefixText}\n\n${combinedText}` : combinedText;
 }
 
+// The numbered header for one step of a multi-step session ("Step 1", "Step 2", ...) --
+// includes the step's own zone inline ("Step 1 — Roots") whenever it has one, so a
+// colorist scanning the list always knows which section a step targets at a glance,
+// without reading into the body (where the rest of the zone/state recap may be
+// suppressed -- see sameZoneAndCanvasState -- once a step continues the same zone
+// unchanged). A step with no strandZone (plain FormulaCalculator save merged into a
+// session, or a step saved before strandZone existed) falls back to the bare "Step N".
+function formatStepHeader(step: HistoryStep, number: number): string {
+  return step.strandZone !== undefined
+    ? i18n.t("history.stepLabelWithZone", { number, zone: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) })
+    : i18n.t("history.stepLabel", { number });
+}
+
 // Renders every step of a saved (or in-progress) session as its own block. A simple
-// single-step visit reads exactly like the plain single-formula text it always has; a
-// complex session (e.g. bleach lift + toner) numbers each step and appends the combined
-// processing time across all of them, since that's what the colorist actually needs to plan
-// for a multi-hour appointment.
+// single-step visit reads exactly like the plain single-formula text it always has (its
+// zone, if any, folded into the body -- see formatStepText's includeZoneLine); a complex
+// session (e.g. bleach lift + toner) numbers each step with its own zone in the header
+// and appends the combined processing time across all of them, since that's what the
+// colorist actually needs to plan for a multi-hour appointment.
 export function formatSessionText(steps: HistoryStep[]): string {
   const blocks = steps.map((step, index) =>
     steps.length > 1
-      ? `${i18n.t("history.stepLabel", { number: index + 1 })}\n${formatStepText(step, steps[index - 1])}`
-      : formatStepText(step, undefined)
+      ? `${formatStepHeader(step, index + 1)}\n${formatStepText(step, steps[index - 1], false)}`
+      : formatStepText(step, undefined, true)
   );
 
   if (steps.length > 1) {

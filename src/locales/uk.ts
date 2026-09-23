@@ -223,6 +223,7 @@ export const uk: typeof en = {
     patchTestOn: "Алергопроба: {{date}}",
     repeat: "Повторити формулу",
     stepLabel: "Крок {{number}}",
+    stepLabelWithZone: "Крок {{number}} — {{zone}}",
     visitCount: "Візитів: {{count}}",
     lastVisit: "Останній візит: {{date}}",
     remindersTitle: "Найближчі повторні візити",

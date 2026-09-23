@@ -225,22 +225,24 @@ describe("formatSessionText: zone and starting-base recap", () => {
     expect(text).not.toContain("Starting base:");
   });
 
-  it("suppresses the repeated zone/state recap for a step that continues the exact same zone in the exact same state as the step right before it", () => {
+  it("always shows the step's zone in its header, even once its state recap is suppressed as a same-zone continuation", () => {
     // Real scenario: a bleach step on "Roots" followed by a color step also on "Roots",
-    // same starting base/porosity/thickness -- the colorist already read that recap one
-    // block up; repeating it verbatim under "Step 2" is just noise.
+    // same starting base/porosity/thickness -- the colorist already read that state one
+    // block up (suppressed here, see below), but must still see "which zone is this
+    // step?" without scrolling back to Step 1.
     const canvas = { porosity: "normal" as const, thickness: "medium" as const, chemicalHistory: [] };
     const rootsBleach = { ...bleachStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const }, canvas };
     const rootsColor = { ...colorStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const }, canvas };
 
     const text = formatSessionText([rootsBleach, rootsColor]);
 
-    expect((text.match(/Zone: Roots/g) ?? []).length).toBe(1);
+    expect(text).toContain("Step 1 — Roots");
+    expect(text).toContain("Step 2 — Roots");
     expect((text.match(/Starting base: Natural/g) ?? []).length).toBe(1);
     expect((text.match(/Porosity: Normal/g) ?? []).length).toBe(1);
   });
 
-  it("still shows its own recap when the same zone's state actually changed between steps (e.g. porosity after bleaching)", () => {
+  it("still shows its own state recap when the same zone's state actually changed between steps (e.g. porosity after bleaching)", () => {
     const rootsBleach = {
       ...bleachStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const },
       canvas: { porosity: "normal" as const, thickness: "medium" as const, chemicalHistory: [] },
@@ -252,19 +254,20 @@ describe("formatSessionText: zone and starting-base recap", () => {
 
     const text = formatSessionText([rootsBleach, rootsColor]);
 
-    expect((text.match(/Zone: Roots/g) ?? []).length).toBe(2);
+    expect(text).toContain("Step 1 — Roots");
+    expect(text).toContain("Step 2 — Roots");
     expect(text).toContain("Porosity: Normal");
     expect(text).toContain("Porosity: High");
   });
 
-  it("still shows its own recap for a genuinely different zone, even one that coincidentally shares the same state", () => {
+  it("gives a genuinely different zone its own header, even one that coincidentally shares the same state", () => {
     const canvas = { porosity: "normal" as const, thickness: "medium" as const, chemicalHistory: [] };
     const roots = { ...colorStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const }, canvas };
     const midLengths = { ...colorStep, strandZone: "mid-lengths" as const, startingBase: { kind: "natural" as const }, canvas };
 
     const text = formatSessionText([roots, midLengths]);
 
-    expect(text).toContain("Zone: Roots");
-    expect(text).toContain("Zone: Mid-lengths");
+    expect(text).toContain("Step 1 — Roots");
+    expect(text).toContain("Step 2 — Mid-lengths");
   });
 });

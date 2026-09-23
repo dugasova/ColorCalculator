@@ -3,7 +3,8 @@ import { describe, it, expect, vi, afterEach, type Mock } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import "../../i18n";
 import { ColorStepCard } from "./ColorStepCard";
-import type { ColorHistoryStep } from "../../history";
+import { calculateBleachFormula } from "../../engine/bleach";
+import type { ColorHistoryStep, BleachHistoryStep } from "../../history";
 
 // This project doesn't set vitest's `test.globals: true` (every test file imports
 // describe/it/expect explicitly), so @testing-library/react's automatic afterEach
@@ -107,5 +108,61 @@ describe("ColorStepCard interaction", () => {
 
     fireEvent.click(screen.getByLabelText("Add pre-pigmentation step"));
     expect(lastStep(onChange).prePigmentation).toBeNull();
+  });
+
+  it("inherits starting base/canvas from an earlier same-zone step once that zone is picked, and doesn't clobber a subsequent manual edit", () => {
+    const priorBleachStep: BleachHistoryStep = {
+      kind: "bleach",
+      startLevel: 6,
+      targetLevel: 9,
+      result: calculateBleachFormula(6, 9, 60),
+      processingMinutes: 30,
+      pricePerGram: 0.10,
+      strandZone: "roots",
+      startingBase: { kind: "colored", tone: "gold" },
+      canvas: { porosity: "high", thickness: "coarse", chemicalHistory: ["perm"] },
+    };
+    const onChange: StepChangeMock = vi.fn();
+    render(<ColorStepCard stepId="1" previousSteps={[priorBleachStep]} onChange={onChange} onRemove={() => {}} />);
+
+    // Default zone ("full-head") has no match -- fields stay at their own defaults.
+    expect(lastStep(onChange).startingBase).toEqual({ kind: "natural" });
+    expect(lastStep(onChange).canvas).toEqual({ porosity: "normal", thickness: "medium", chemicalHistory: [] });
+
+    chooseOption("Zone", "roots");
+    // Inherits the bleach step's hair-state fields now that the zones match.
+    const inheritedStep = lastStep(onChange);
+    expect(inheritedStep.startingBase).toEqual({ kind: "colored", tone: "gold" });
+    expect(inheritedStep.canvas).toEqual({ porosity: "high", thickness: "coarse", chemicalHistory: ["perm"] });
+
+    chooseOption("Porosity", "low");
+    expect(lastStep(onChange).canvas).toEqual({ porosity: "low", thickness: "coarse", chemicalHistory: ["perm"] });
+
+    // Re-picking the same zone again (a colorist toggling back and forth) re-applies the
+    // inherited default -- a one-shot-per-pick default, not a permanently locked field.
+    chooseOption("Zone", "full-head");
+    chooseOption("Zone", "roots");
+    expect(lastStep(onChange).canvas).toEqual({ porosity: "high", thickness: "coarse", chemicalHistory: ["perm"] });
+  });
+
+  it("never inherits startLevel by zone -- level legitimately changes step to step even within one zone", () => {
+    const priorBleachStep: BleachHistoryStep = {
+      kind: "bleach",
+      startLevel: 6,
+      targetLevel: 9,
+      result: calculateBleachFormula(6, 9, 60),
+      processingMinutes: 30,
+      pricePerGram: 0.10,
+      strandZone: "roots",
+      startingBase: { kind: "natural" },
+      canvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
+    };
+    const onChange: StepChangeMock = vi.fn();
+    render(<ColorStepCard stepId="1" previousSteps={[priorBleachStep]} onChange={onChange} onRemove={() => {}} />);
+
+    chooseOption("Zone", "roots");
+    // startLevel stays at ColorStepCard's own default (10, see useShadeFormulaState) --
+    // not the bleach step's targetLevel (9).
+    expect(lastStep(onChange).startLevel).toBe(10);
   });
 });
