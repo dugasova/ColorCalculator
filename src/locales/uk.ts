@@ -310,6 +310,11 @@ export const uk: typeof en = {
     neutralizationApplied: "Нейтралізація: {{grams}} г коректора {{tone}}",
     warning: "Попередження: {{message}}",
   },
+  zonePreview: {
+    title: "Прогноз результату",
+    startTitle: "Початковий рівень: {{level}}",
+    bleachTitle: "Освітлено до рівня {{level}}",
+  },
   correction: {
     titlePrefix: "Корекція",
     titleAccent: "кольору",

@@ -308,6 +308,11 @@ export const en = {
     neutralizationApplied: "Neutralization: {{grams}} g {{tone}} corrector",
     warning: "Warning: {{message}}",
   },
+  zonePreview: {
+    title: "Result preview",
+    startTitle: "Starting level: {{level}}",
+    bleachTitle: "Bleached to level {{level}}",
+  },
   correction: {
     titlePrefix: "Color",
     titleAccent: "Correction",

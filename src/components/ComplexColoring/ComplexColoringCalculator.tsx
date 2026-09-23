@@ -8,6 +8,7 @@ import { formatSessionText } from "../../formatSession";
 import { SessionDetailsPanel, type SessionDetails } from "../FormulaCalculator/SessionDetailsPanel";
 import { ColorStepCard } from "./ColorStepCard";
 import { BleachStepCard } from "./BleachStepCard";
+import { ZoneProgressPreview } from "../common/ZoneProgressPreview";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "../Bleach/BleachCalculator.css";
 import "./ComplexColoringCalculator.css";
@@ -154,6 +155,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
             <span>{totalProcessingMinutes}</span>
           </div>
 
+          <ZoneProgressPreview steps={orderedSteps} />
           <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>
 
           <div className="results__control-grid">

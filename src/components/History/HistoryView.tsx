@@ -9,6 +9,7 @@ import { useHistoryData } from "./useHistoryData";
 import { RevisitReminders } from "./RevisitReminders";
 import { EditEntryModal } from "./EditEntryModal";
 import { Modal } from "../common/Modal";
+import { ZoneProgressPreview } from "../common/ZoneProgressPreview";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
 
@@ -153,6 +154,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                     </span>
                   </div>
                   <p className="history__entry-summary">{formatSessionSummary(entry.steps)}</p>
+                  <ZoneProgressPreview steps={entry.steps} />
                   <FormattedSessionText text={formatSessionText(entry.steps)} />
                   {entry.steps.map((step, index) => {
                     if (step.kind !== "color") return null;
