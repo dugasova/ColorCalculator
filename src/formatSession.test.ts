@@ -162,17 +162,26 @@ describe("formatSessionSummary", () => {
     expect(summary).toBe("Starting level: 6 → Target: Generic — 9.1");
   });
 
-  it("shows a start-level range instead of a false single pair when a multi-zone session's steps start at different levels", () => {
-    // Regression: root 6 / mid-lengths 8 / ends 10 previously collapsed to
-    // "Starting level: 6 -> Target: <ends' shade>", implying the whole head started at
-    // 6 and reached the ends' target directly -- neither zone the session actually did.
-    const roots = { ...colorStep, startLevel: 6 as const, targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const } };
-    const midLengths = { ...colorStep, startLevel: 8 as const, targetShade: { code: "8.12", level: 8 as const, tone: "ash" as const, secondaryTone: "matt" as const } };
-    const ends = { ...colorStep, startLevel: 10 as const, targetShade: { code: "10.13", level: 10 as const, tone: "ash" as const, secondaryTone: "gold" as const } };
+  it("lists each zone's own final shade instead of a false single target when a multi-zone session's zones reach different results", () => {
+    // Regression: root 6/6.0, mid-lengths 8/8.12, ends 10/10.13 previously collapsed to
+    // "Starting level: 6-10 -> Target: Generic - 10.13", implying every zone reached the
+    // ends' shade -- neither the roots nor the mid-lengths zone actually did.
+    const roots = { ...colorStep, startLevel: 6 as const, strandZone: "roots" as const, targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const } };
+    const midLengths = { ...colorStep, startLevel: 8 as const, strandZone: "mid-lengths" as const, targetShade: { code: "8.12", level: 8 as const, tone: "ash" as const, secondaryTone: "matt" as const } };
+    const ends = { ...colorStep, startLevel: 10 as const, strandZone: "ends" as const, targetShade: { code: "10.13", level: 10 as const, tone: "ash" as const, secondaryTone: "gold" as const } };
 
     const summary = formatSessionSummary([roots, midLengths, ends]);
 
-    expect(summary).toBe("Starting level: 6–10 → Target: Generic — 10.13");
+    expect(summary).toBe("Starting level: 6–10 → Target: Roots 6.0, Mid-lengths 8.12, Ends 10.13");
+  });
+
+  it("still favors the LAST color step's shade when steps share one zone -- sequential passes on the same hair, not parallel zones", () => {
+    const roots = { ...colorStep, startLevel: 6 as const, strandZone: "roots" as const, targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const } };
+    const rootsCorrected = { ...colorStep, startLevel: 6 as const, strandZone: "roots" as const, targetShade: { code: "6.1", level: 6 as const, tone: "ash" as const } };
+
+    const summary = formatSessionSummary([roots, rootsCorrected]);
+
+    expect(summary).toBe("Starting level: 6 → Target: Generic — 6.1");
   });
 
   it("keeps the single-value format when every step happens to share the same start level", () => {

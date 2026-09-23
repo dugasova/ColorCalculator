@@ -115,15 +115,45 @@ export function formatSessionText(steps: HistoryStep[]): string {
 // never actually existed. When start levels differ, show the honest min–max range
 // instead of picking one arbitrarily; the full per-step detail (with each step's own
 // zone label) is right below in formatSessionText regardless.
+//
+// The same honesty problem applies to `target` itself once color steps span more than
+// one distinct strandZone (e.g. a root/mid-lengths/ends color melt, each zone landing on
+// its own final shade) -- "last color step wins" would claim the roots ended up the same
+// shade as the ends, which never happened. Only picks a single last-color-step target
+// when every color step shares one zone (including the common case where strandZone is
+// unset entirely, e.g. a plain FormulaCalculator save or a same-zone corrective-then-
+// final pass -- there, "last wins" IS the honest answer, since the steps are sequential
+// passes over the same hair, not parallel zones). Once zones genuinely differ, lists
+// each zone's own last color step instead, in the order each zone first appears.
 export function formatSessionSummary(steps: HistoryStep[]): string {
   const startLevels = steps.map(step => step.startLevel);
   const minStart = Math.min(...startLevels);
   const maxStart = Math.max(...startLevels);
-  const lastColorStep = [...steps].reverse().find((step): step is ColorHistoryStep => step.kind === "color");
-  const lastStep = steps[steps.length - 1];
-  const target = lastColorStep !== undefined
-    ? `${lastColorStep.brandName}${lastColorStep.line ? " " + formatLineLabel(lastColorStep.line) : ""} — ${lastColorStep.targetShade.code}`
-    : String(lastStep.kind === "bleach" ? lastStep.targetLevel : lastStep.targetShade.level);
+
+  const colorSteps = steps.filter((step): step is ColorHistoryStep => step.kind === "color");
+  const distinctZones = new Set(colorSteps.map(step => step.strandZone));
+
+  let target: string;
+  if (colorSteps.length === 0) {
+    const lastStep = steps[steps.length - 1];
+    target = String(lastStep.kind === "bleach" ? lastStep.targetLevel : lastStep.targetShade.level);
+  } else if (distinctZones.size <= 1) {
+    const lastColorStep = colorSteps[colorSteps.length - 1];
+    target = `${lastColorStep.brandName}${lastColorStep.line ? " " + formatLineLabel(lastColorStep.line) : ""} — ${lastColorStep.targetShade.code}`;
+  } else {
+    // Map.set on an already-present key updates its value without moving its position in
+    // iteration order, so this ends up with each zone's LAST color step (its real final
+    // result), ordered by each zone's first appearance in the session.
+    const lastStepByZone = new Map<ColorHistoryStep["strandZone"], ColorHistoryStep>();
+    for (const step of colorSteps) lastStepByZone.set(step.strandZone, step);
+    target = [...lastStepByZone.values()]
+      .map(step => {
+        const zoneLabel = step.strandZone !== undefined ? `${i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`)} ` : "";
+        return `${zoneLabel}${step.targetShade.code}`;
+      })
+      .join(", ");
+  }
+
   return minStart === maxStart
     ? i18n.t("format.startingLevel", { start: minStart, target })
     : i18n.t("format.startingLevelRange", { start: minStart, end: maxStart, target });
