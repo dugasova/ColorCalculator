@@ -1,5 +1,17 @@
 apply plugin: 'com.android.application'
 
+// Release signing: reads android/key.properties (gitignored -- see android/.gitignore's
+// key.properties/*.jks entries) for the keystore path/passwords, generated once via
+// `keytool -genkeypair` and never committed. Guarded on the properties file existing so
+// a fresh clone without it still builds (assembleRelease then falls back to an unsigned
+// APK instead of failing outright) -- only the machine holding the real release keystore
+// can produce an installable, upgrade-compatible signed release build.
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.formulist.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,10 +28,23 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            release {
+                storeFile file("$projectDir/${keystoreProperties['storeFile']}")
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
