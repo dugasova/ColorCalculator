@@ -8,13 +8,14 @@ import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSum
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../engine/formatPrePigmentation";
-import { formatLineLabel } from "../../engine/formatLineLabel";
+import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import type { RepeatFormulaRequest } from "../../history";
 import { useClampedNumberText } from "./fields/useClampedNumberText";
 import { PrePigmentationStep } from "./PrePigmentationStep";
 import { SessionDetailsPanel } from "./SessionDetailsPanel";
 import { useFormulaSave } from "./useFormulaSave";
+import { StockShortageWarnings } from "../common/StockShortageWarnings";
 
 export interface FormulaResultsProps {
   brandId: BrandId;
@@ -80,8 +81,7 @@ export function FormulaResults({
   });
   // Same brand+line display convention as the target-color title above (formatFormulaText),
   // reused for the filler worked example so both steps of a two-part formula name the
-  // same product line consistently.
-  const fullBrandLabel = `${brandName}${line ? " " + formatLineLabel(line) : ""}`;
+  const fullBrandLabel = formatBrandLineLabel(brandName, line);
   // Prepend the filler ("Step 1") text ahead of the target-color formula ("Step 2") once
   // the colorist has opted into the pre-pigmentation step -- see PrePigmentationField.
   // fillerStepText is null whenever prePigmentationResult is null (checkbox off, or the
@@ -145,17 +145,7 @@ export function FormulaResults({
         </div>
       )}
 
-      {shortages.map(({ consumption, remainingGrams }) => (
-        <p key={consumption.id} className="warning" role="alert">
-          {t("results.stockShortWarning", {
-            code: consumption.kind === "developer"
-              ? t("format.developerVolume", { value: Number(consumption.code) })
-              : consumption.code,
-            remaining: remainingGrams.toFixed(1),
-            needed: consumption.grams.toFixed(1),
-          })}
-        </p>
-      ))}
+      <StockShortageWarnings shortages={shortages} />
 
       <div className="results__row">
         <span className="results__row-label">{t("results.applicationZone")}</span>

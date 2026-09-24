@@ -1,75 +1,33 @@
 import { describe, it, expect } from "vitest";
 import { Timestamp } from "firebase/firestore";
-import { getDefaultRevisitIntervalDays, planClientRevisits, getRevisitStatus } from "./revisit";
+import { getRegrowthIntervalDays, planClientRevisits, getRevisitStatus } from "./revisit";
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
+import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep, makeEntry as makeSharedEntry } from "./testFixtures";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
-  return {
-    kind: "color",
+  return makeSharedColorStep({
     brandName: "Wella",
-    line: null,
-    targetShade: { code: "7.1", level: 7, tone: "ash" },
-    startLevel: 7,
-    grayPercent: 0,
-    canvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
-    applicationZone: "full-head",
-    result: {
-      developerVolume: 20,
-      mixingRatio: { colorParts: 1, developerParts: 1 },
-      grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "" },
-      achievedLevel: 7,
-      underlyingPigment: null,
-      recommendedCorrectiveTone: null,
-      correctorGrams: null,
-      recommendedProcessingMinutes: 30,
-      toneWarning: null,
-      eligibilityWarning: null,
-      liftUnsupportedWarning: null,
-      grams: null,
-    },
-    additionalShade: null,
-    additionalShadeGrams: null,
-    blend: null,
-    prePigmentation: null,
-    neutralizationApplied: false,
-    processingMinutes: 30,
-    pricePerGram: 0.18,
+    result: { ...COLOR_FULL_FORMULA, grams: null },
     ...overrides,
-  };
+  });
 }
 
 function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName: string }): FormulaHistoryEntry {
-  return {
-    id: "id",
-    clientId: null,
-    note: "",
-    appliedBy: "stylist",
-    appliedAt: null,
-    steps: [makeColorStep()],
-    markupMultiplier: 4,
-    productCost: null,
-    servicePrice: null,
-    patchTestDate: "",
-    allergyNotes: "",
-    patchTestOverride: true,
-    beforePhotoUrl: null,
-    afterPhotoUrl: null,
-    ...overrides,
-  };
+  return makeSharedEntry({ steps: [makeColorStep()], ...overrides });
 }
 
-describe("getDefaultRevisitIntervalDays", () => {
+describe("getRegrowthIntervalDays", () => {
   it("maps gray-percent tiers to shortening intervals", () => {
-    expect(getDefaultRevisitIntervalDays(0)).toBe(42);
-    expect(getDefaultRevisitIntervalDays(29)).toBe(42);
-    expect(getDefaultRevisitIntervalDays(30)).toBe(35);
-    expect(getDefaultRevisitIntervalDays(49)).toBe(35);
-    expect(getDefaultRevisitIntervalDays(50)).toBe(28);
-    expect(getDefaultRevisitIntervalDays(79)).toBe(28);
-    expect(getDefaultRevisitIntervalDays(80)).toBe(21);
-    expect(getDefaultRevisitIntervalDays(100)).toBe(21);
+    expect(getRegrowthIntervalDays(0)).toBe(42);
+    expect(getRegrowthIntervalDays(29)).toBe(42);
+    expect(getRegrowthIntervalDays(30)).toBe(35);
+    expect(getRegrowthIntervalDays(49)).toBe(35);
+    expect(getRegrowthIntervalDays(50)).toBe(28);
+    expect(getRegrowthIntervalDays(79)).toBe(28);
+    expect(getRegrowthIntervalDays(80)).toBe(21);
+    expect(getRegrowthIntervalDays(100)).toBe(21);
   });
 });
 
@@ -87,14 +45,14 @@ describe("planClientRevisits", () => {
     expect(plan.intervalDays).toBe(21);
   });
 
-  it("falls back to the default interval for a first-time client", () => {
+  it("falls back to the service interval for a first-time client", () => {
     const entries = [
       makeEntry({ clientName: "New Client", steps: [makeColorStep({ grayPercent: 85 })], appliedAt: Timestamp.fromDate(new Date()) }),
     ];
 
     const [plan] = planClientRevisits(entries);
-    expect(plan.intervalBasis).toBe("default");
-    expect(plan.intervalDays).toBe(getDefaultRevisitIntervalDays(85));
+    expect(plan.intervalBasis).toBe("service");
+    expect(plan.intervalDays).toBe(getRegrowthIntervalDays(85));
   });
 
   it("falls back to the lightest tier for a first-time bleach-only session (no color step)", () => {
@@ -113,8 +71,8 @@ describe("planClientRevisits", () => {
     ];
 
     const [plan] = planClientRevisits(entries);
-    expect(plan.intervalBasis).toBe("default");
-    expect(plan.intervalDays).toBe(getDefaultRevisitIntervalDays(0));
+    expect(plan.intervalBasis).toBe("service");
+    expect(plan.intervalDays).toBe(getRegrowthIntervalDays(0));
   });
 
   it("excludes entries with no client name or no appliedAt", () => {
@@ -147,6 +105,126 @@ describe("planClientRevisits", () => {
 
     const plans = planClientRevisits(entries);
     expect(plans.map(p => p.clientName)).toEqual(["Sooner Client", "Later Client"]);
+  });
+
+  it("schedules a lengths-only balayage session later than a full-head visit", () => {
+    const entries = [
+      makeEntry({
+        clientName: "Balayage Client",
+        steps: [
+          {
+            kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
+              startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
+            }, processingMinutes: 35, pricePerGram: 0.1,
+          },
+          makeColorStep({ strandZone: "ends", grayPercent: 0 }),
+        ],
+        appliedAt: Timestamp.fromDate(new Date()),
+      }),
+    ];
+
+    const [plan] = planClientRevisits(entries);
+    expect(plan.intervalBasis).toBe("service");
+    expect(plan.intervalDays).toBe(56);
+    expect(plan.driver).toBe("toner-refresh");
+    expect(plan.drivers.map(d => d.kind)).toEqual(["toner-refresh", "partial-lightening"]);
+    expect(plan.intervalDays).toBeGreaterThan(getRegrowthIntervalDays(0));
+  });
+
+  it("keeps root regrowth as the driver in a mixed roots+ends session", () => {
+    const entries = [
+      makeEntry({
+        clientName: "Mixed Client",
+        steps: [
+          makeColorStep({ strandZone: "roots", grayPercent: 60 }),
+          makeColorStep({ strandZone: "ends", grayPercent: 60 }),
+        ],
+        appliedAt: Timestamp.fromDate(new Date()),
+      }),
+    ];
+
+    const [plan] = planClientRevisits(entries);
+    expect(plan.intervalDays).toBe(getRegrowthIntervalDays(60));
+    expect(plan.driver).toBe("regrowth");
+  });
+
+  it("recalls a pre-pigmented single-tone session sooner than gray alone implies", () => {
+    const entries = [
+      makeEntry({
+        clientName: "Filled Client",
+        steps: [
+          makeColorStep({
+            grayPercent: 0,
+            prePigmentation: {
+              need: "required-same-session", underlyingPigment: "orange", fillerTone: "copper",
+              exampleFillerShade: null, mixingRatio: { fillerParts: 1, diluentParts: 1 },
+              grams: { fillerGrams: 40, diluentGrams: 40 }, fillerProcessingMinutes: 20,
+              multiVisitGapDays: null, finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
+              finalStepDeveloperVolume: 10,
+            },
+          }),
+        ],
+        appliedAt: Timestamp.fromDate(new Date()),
+      }),
+    ];
+
+    const [plan] = planClientRevisits(entries);
+    expect(plan.intervalDays).toBe(28);
+    expect(plan.driver).toBe("pigment-fade");
+  });
+
+  it("overrides the learned rhythm with the multi-visit filler window", () => {
+    const base = new Date("2026-01-01T00:00:00Z");
+    const entries = [
+      makeEntry({ clientName: "Filler Client", appliedAt: Timestamp.fromDate(base) }),
+      makeEntry({ clientName: "Filler Client", appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)) }),
+      makeEntry({
+        clientName: "Filler Client",
+        steps: [makeColorStep({
+          prePigmentation: {
+            need: "required-multi-visit", underlyingPigment: "orange", fillerTone: "copper",
+            exampleFillerShade: null, mixingRatio: { fillerParts: 1, diluentParts: 1 },
+            grams: { fillerGrams: 40, diluentGrams: 40 }, fillerProcessingMinutes: 20,
+            multiVisitGapDays: { min: 7, max: 14 }, finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
+            finalStepDeveloperVolume: 10,
+          },
+        })],
+        appliedAt: Timestamp.fromDate(new Date(base.getTime() + 28 * MS_PER_DAY)),
+      }),
+    ];
+
+    const [plan] = planClientRevisits(entries);
+    expect(plan.intervalBasis).toBe("service");
+    expect(plan.intervalDays).toBe(14);
+    expect(plan.driver).toBe("multi-visit-filler");
+  });
+
+  it("ignores gaps ending in a different service when averaging", () => {
+    const base = new Date("2026-01-01T00:00:00Z");
+    const entries = [
+      makeEntry({ clientName: "Switching Client", appliedAt: Timestamp.fromDate(base) }),
+      makeEntry({ clientName: "Switching Client", appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)) }),
+      makeEntry({
+        clientName: "Switching Client",
+        steps: [
+          {
+            kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
+              startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
+            }, processingMinutes: 35, pricePerGram: 0.1,
+          },
+          makeColorStep({ strandZone: "ends", grayPercent: 0 }),
+        ],
+        appliedAt: Timestamp.fromDate(new Date(base.getTime() + 28 * MS_PER_DAY)),
+      }),
+    ];
+
+    const [plan] = planClientRevisits(entries);
+    expect(plan.intervalBasis).toBe("service");
+    expect(plan.intervalDays).toBe(56);
   });
 });
 

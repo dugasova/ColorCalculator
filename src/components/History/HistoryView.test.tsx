@@ -5,8 +5,9 @@ import "../../i18n";
 import { HistoryView } from "./HistoryView";
 import { subscribeToFormulaHistory, setActualColorGrams, deleteHistoryEntry, updateHistoryEntryDetails } from "../../history";
 import { subscribeToClients, deleteClient } from "../../clients";
-import type { FormulaHistoryEntry, ColorHistoryStep } from "../../history";
+import type { FormulaHistoryEntry } from "../../history";
 import type { ClientProfile } from "../../clients";
+import { COLOR_FULL_FORMULA, makeColorStep } from "../../testFixtures";
 
 vi.mock("../../history", async () => {
   const actual = await vi.importActual<typeof import("../../history")>("../../history");
@@ -29,36 +30,17 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const colorStep: ColorHistoryStep = {
-  kind: "color",
+const colorStep = makeColorStep({
   brandName: "Generic",
-  line: null,
-  targetShade: { code: "7.1", level: 7, tone: "ash" },
   startLevel: 6,
-  grayPercent: 0,
-  applicationZone: "full-head",
   result: {
-    developerVolume: 20,
-    mixingRatio: { colorParts: 1, developerParts: 1 },
+    ...COLOR_FULL_FORMULA,
     grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
-    achievedLevel: 7,
     underlyingPigment: "pale-yellow",
-    recommendedCorrectiveTone: null,
     correctorGrams: 0,
-    recommendedProcessingMinutes: 30,
-    toneWarning: null,
-    eligibilityWarning: null,
-    liftUnsupportedWarning: null,
-    grams: { colorGrams: 30, developerGrams: 30 },
   },
-  additionalShade: null,
-  additionalShadeGrams: null,
-  blend: null,
-  prePigmentation: null,
-  neutralizationApplied: false,
-  processingMinutes: 30,
   pricePerGram: 0.2,
-};
+});
 
 function makeEntry(overrides: Partial<FormulaHistoryEntry> & { id: string; clientName: string }): FormulaHistoryEntry {
   return {
@@ -257,6 +239,31 @@ describe("HistoryView revisit reminders", () => {
     const url = openSpy.mock.calls[0][0] as string;
     expect(url.startsWith("https://t.me/share/url?url=")).toBe(true);
     openSpy.mockRestore();
+  });
+
+  it("shows the toner-refresh reason (and the later partial-lightening service) for a lengths-only balayage visit", async () => {
+    mockHistory([
+      makeEntry({
+        id: "1",
+        clientName: "Anna K.",
+        steps: [
+          {
+            kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
+              startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
+            }, processingMinutes: 35, pricePerGram: 0.1,
+          },
+          { ...colorStep, strandZone: "ends" },
+        ],
+      }),
+    ]);
+    mockClients([]);
+
+    renderHistoryView();
+
+    const reason = await screen.findByText(/Toner refresh on the lengths/);
+    expect(reason.textContent).toContain("Balayage/highlights grow out softly");
   });
 });
 

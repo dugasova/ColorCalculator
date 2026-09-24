@@ -2,13 +2,15 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { calculateRecommendedServicePrice } from "../../engine/pricing";
 import { saveFormulaToHistory, type HistoryStep } from "../../history";
-import { useSalonMarkupMultiplier } from "../../palette";
+import { useSalonMarkupMultiplier, useStock } from "../../palette";
 import { calculateSessionProductCost } from "../../sessionCost";
 import { formatSessionText } from "../../formatSession";
 import { SessionDetailsPanel, type SessionDetails } from "../FormulaCalculator/SessionDetailsPanel";
 import { ColorStepCard } from "./ColorStepCard";
 import { BleachStepCard } from "./BleachStepCard";
 import { ZoneProgressPreview } from "../common/ZoneProgressPreview";
+import { StockShortageWarnings } from "../common/StockShortageWarnings";
+import { findStockShortages } from "../../stock";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "../Bleach/BleachCalculator.css";
 import "./ComplexColoringCalculator.css";
@@ -79,6 +81,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
   // (porosity/thickness/chemical history) represents the whole session -- picks the
   // first one that has it set, same as formatSessionText's per-step canvas is optional.
   const sessionCanvas = orderedSteps.find(step => step.canvas !== undefined)?.canvas;
+  const shortages = findStockShortages(orderedSteps, useStock());
 
   const handleSave = async (details: SessionDetails) => {
     await saveFormulaToHistory({
@@ -154,6 +157,8 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
             <span className="results__row-label">{t("complexColoring.totalProcessingTime")}</span>
             <span>{totalProcessingMinutes}</span>
           </div>
+
+          <StockShortageWarnings shortages={shortages} />
 
           <ZoneProgressPreview steps={orderedSteps} />
           <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>

@@ -8,7 +8,7 @@ import type { ApplicationZone } from "../../engine/applicationZone";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
 import { useStock } from "../../palette";
-import { computeStockConsumption, stockById, type StockConsumption } from "../../stock";
+import { findStockShortages, type StockShortage } from "../../stock";
 import type { SessionDetails } from "./SessionDetailsPanel";
 
 export interface FormulaSaveParams {
@@ -36,14 +36,6 @@ export interface FormulaSaveParams {
   markupMultiplier: number;
   productCost: number | null;
   servicePrice: number | null;
-}
-
-// A dye/developer this mix would need more of than the salon currently has on hand --
-// surfaced as an inline warning (see FormulaResults) rather than blocking the save, since
-// the stylist may already know to substitute or restock before actually mixing.
-export interface StockShortage {
-  consumption: StockConsumption;
-  remainingGrams: number;
 }
 
 export interface FormulaSave {
@@ -89,13 +81,7 @@ export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
     pricePerGram,
   };
 
-  const stockMap = stockById(useStock());
-  const shortages: StockShortage[] = computeStockConsumption([step]).flatMap(consumption => {
-    const record = stockMap.get(consumption.id);
-    return record === undefined || record.remainingGrams >= consumption.grams
-      ? []
-      : [{ consumption, remainingGrams: record.remainingGrams }];
-  });
+  const shortages: StockShortage[] = findStockShortages([step], useStock());
 
   const handleSave = async (details: SessionDetails) => {
     await saveFormulaToHistory({

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { ALL_LEVELS, type Level } from "../../../engine/levels";
-import { Select } from "../../common/Select";
+import type { Level } from "../../../engine/levels";
+import { LevelField } from "../../common/LevelField";
 
 export interface StartLevelFieldProps {
   startLevel: Level;
@@ -11,14 +11,6 @@ export interface StartLevelFieldProps {
 export function StartLevelField({ startLevel, onStartLevelChange, idSuffix = "" }: StartLevelFieldProps) {
   const { t } = useTranslation();
   return (
-    <div className="field">
-      <label htmlFor={`startLevel${idSuffix}`}>{t("fields.startLevel")}</label>
-      <Select
-        id={`startLevel${idSuffix}`}
-        value={String(startLevel)}
-        onChange={value => onStartLevelChange(Number(value) as Level)}
-        options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-      />
-    </div>
+    <LevelField id={`startLevel${idSuffix}`} label={t("fields.startLevel")} value={startLevel} onChange={onStartLevelChange} />
   );
 }

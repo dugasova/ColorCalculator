@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import { addShadeToBrand } from "../../palette";
 import type { BrandId } from "../../engine/brands";
 import { shadeKey } from "../../engine/paletteOverrides";
-import { ALL_LEVELS, type Level } from "../../engine/levels";
+import type { Level } from "../../engine/levels";
 import type { Shade, ToneFamily } from "../../engine/shades";
 import { Select } from "../common/Select";
+import { LevelField } from "../common/LevelField";
 
 export interface AddShadeFormProps {
   // The brand the new shade is added to — see PaletteAdminView's `effectiveSelectedBrandId`.
@@ -82,15 +83,7 @@ export function AddShadeForm({ brandId, brandName, existingShades }: AddShadeFor
           <input id="paletteShadeCode" type="text" value={shadeCode} onChange={e => setShadeCode(e.target.value)} required />
           <small>{t("palette.shadeCodeHint")}</small>
         </div>
-        <div className="field">
-          <label htmlFor="paletteShadeLevel">{t("palette.level")}</label>
-          <Select
-            id="paletteShadeLevel"
-            value={String(shadeLevel)}
-            onChange={value => setShadeLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
+        <LevelField id="paletteShadeLevel" label={t("palette.level")} value={shadeLevel} onChange={setShadeLevel} />
         <div className="field">
           <label htmlFor="paletteShadeTone">{t("palette.tone")}</label>
           <Select

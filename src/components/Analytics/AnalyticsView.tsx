@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { subscribeToFormulaHistory, type FormulaHistoryEntry } from "../../history";
 import { computeSalonAnalytics } from "../../analytics";
-import { formatLineLabel } from "../../engine/formatLineLabel";
+import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./AnalyticsView.css";
 
@@ -85,7 +85,7 @@ export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps)
               {topShades.map(shade => (
                 <li key={`${shade.brandName}|${shade.line ?? ""}|${shade.shadeCode}`} className="analytics__shade-row">
                   <span className="analytics__shade-name">
-                    {shade.brandName}{shade.line ? " " + formatLineLabel(shade.line) : ""} — {shade.shadeCode}
+                    {formatBrandLineLabel(shade.brandName, shade.line ?? null)} — {shade.shadeCode}
                   </span>
                   <span className="analytics__shade-count">{t("analytics.shadeUsedCount", { count: shade.count })}</span>
                 </li>

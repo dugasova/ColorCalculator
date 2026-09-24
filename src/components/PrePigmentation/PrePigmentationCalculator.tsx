@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ALL_LEVELS, type Level } from "../../engine/levels";
+import type { Level } from "../../engine/levels";
 import { calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { BrandId } from "../../engine/brands";
 import { usePalette } from "../../palette";
-import { formatLineLabel } from "../../engine/formatLineLabel";
-import { Select } from "../common/Select";
+import { formatBrandLineLabel } from "../../engine/formatLineLabel";
+import { LevelField } from "../common/LevelField";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -24,7 +24,7 @@ export function PrePigmentationCalculator() {
   // surfaces resolve "the current line's shades" identically.
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
   const lineShades = brands[brandId].shades.filter(s => (s.line ?? null) === line);
-  const brandLabel = `${brands[brandId].name}${line ? " " + formatLineLabel(line) : ""}`;
+  const brandLabel = formatBrandLineLabel(brands[brandId].name, line);
 
   const handleBrandIdChange = (newBrandId: BrandId) => {
     setBrandId(newBrandId);
@@ -48,25 +48,8 @@ export function PrePigmentationCalculator() {
       <div className="calculator__form">
         <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} idSuffix="Prepigment" />
         <LineField availableLines={availableLines} line={line} onLineChange={setLine} idSuffix="Prepigment" />
-        <div className="field">
-          <label htmlFor="prepigmentStartLevel">{t("prePigmentation.currentLevel")}</label>
-          <Select
-            id="prepigmentStartLevel"
-            value={String(startLevel)}
-            onChange={value => setStartLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="prepigmentTargetLevel">{t("prePigmentation.targetLevel")}</label>
-          <Select
-            id="prepigmentTargetLevel"
-            value={String(targetLevel)}
-            onChange={value => setTargetLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
+        <LevelField id="prepigmentStartLevel" label={t("prePigmentation.currentLevel")} value={startLevel} onChange={setStartLevel} />
+        <LevelField id="prepigmentTargetLevel" label={t("prePigmentation.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
 
         <div className="field">
           <label htmlFor="prepigmentTotalGrams">{t("prePigmentation.totalGrams")}</label>

@@ -1,4 +1,4 @@
-import type { DeveloperVolume, Level } from "./levels";
+import { pickDeveloperVolume, type DeveloperVolume, type Level, type LiftTable } from "./levels";
 
 export type UnwantedTone = "red" | "orange" | "yellow" | "green" | "blue" | "violet";
 
@@ -27,17 +27,35 @@ export function getComplementaryCorrector(tone: UnwantedTone): Corrector {
 }
 
 const LIFT_MODERATE_MAX_DIFF = 2;
-const LIFT_HIGH_DIFF = 3;
 
 export interface CorrectionDeveloper {
   volume: DeveloperVolume;
   percent: number;
 }
 
-// Mirrors the standard vol-to-percentage peroxide conversion (vol * 0.3).
+// Corrective work sits on hair that has already been processed (that's why it needs
+// correcting), so it runs a deliberately gentler ladder than the from-scratch cream-color
+// table in levels.ts's maxLiftForDeveloper -- 20 vol is trusted with a 2-level lift here
+// where the main formula path would already step up to 30. Kept as a named LiftTable and
+// fed through the same pickDeveloperVolume helper (the same way bleach.ts keeps its own
+// BLEACH_LIFT_TABLE) so the difference reads as a decision, not as drift.
+const CORRECTION_LIFT_TABLE: LiftTable = volume => {
+  switch (volume) {
+    case 6: return 0;
+    case 10: return 0;
+    case 13: return 0;
+    case 20: return 2;
+    case 30: return 3;
+    case 40: return 4;
+  }
+};
+
+// Mirrors the standard vol-to-percentage peroxide conversion (vol * 0.3). Beyond a
+// 4-level lift no single developer is honest about the job -- getCorrectionTechnique
+// already flags it "multi-step" -- so the strongest developer is what the colorist mixes
+// for the lift stage, rather than pickDeveloperVolume's `null`.
 export function getCorrectionDeveloper(startLevel: Level, targetLevel: Level): CorrectionDeveloper {
-  const diff = targetLevel - startLevel;
-  const volume: DeveloperVolume = diff <= 0 ? 10 : diff <= LIFT_MODERATE_MAX_DIFF ? 20 : diff === LIFT_HIGH_DIFF ? 30 : 40;
+  const volume = pickDeveloperVolume(startLevel, targetLevel, CORRECTION_LIFT_TABLE) ?? 40;
   return { volume, percent: Math.round(volume * 0.3 * 10) / 10 };
 }
 

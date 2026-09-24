@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ALL_LEVELS, type Level } from "../../engine/levels";
+import type { Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
-import { Select } from "../common/Select";
+import { LevelField } from "../common/LevelField";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
 import type { BleachHistoryStep, HistoryStep } from "../../history";
-import { getInheritedZoneState } from "./stepInheritance";
+import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
 const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
@@ -33,36 +33,29 @@ export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove 
   const { t } = useTranslation();
   const idSuffix = `-${stepId}`;
 
+  // Hair state an earlier step already recorded for this card's starting zone, captured
+  // once at mount. A lazy initializer, not an effect: it is an initial value, and running
+  // it as an effect both cascaded an extra render and tripped react-hooks/set-state-in-effect.
+  const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
+
   const [startLevel, setStartLevel] = useState<Level>(6);
-  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState();
+  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(inheritedOnMount?.canvas);
   const [targetLevel, setTargetLevel] = useState<Level>(8);
   const [totalGrams, setTotalGrams] = useState(60);
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
   const [pricePerGram, setPricePerGram] = useState(DEFAULT_BLEACH_PRICE_PER_GRAM);
-  const [strandZone, setStrandZone] = useState<StrandZone>("full-head");
-  const [startingBase, setStartingBase] = useState<StartingBase>({ kind: "natural" });
+  const [strandZone, setStrandZone] = useState<StrandZone>(DEFAULT_STEP_STRAND_ZONE);
+  const [startingBase, setStartingBase] = useState<StartingBase>(inheritedOnMount?.startingBase ?? { kind: "natural" });
 
-  // One-time on mount + on every explicit zone pick -- see ColorStepCard's identical
-  // (and more heavily commented) wiring for why this is imperative, not a continuously
-  // rerunning effect keyed on strandZone/previousSteps.
-  useEffect(() => {
-    const inherited = getInheritedZoneState(previousSteps, strandZone);
-    if (inherited !== null) {
-      setStartingBase(inherited.startingBase);
-      setPorosity(inherited.canvas.porosity);
-      setThickness(inherited.canvas.thickness);
-      setChemicalHistory(inherited.canvas.chemicalHistory);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
+  // -- an imperative one-shot default, not an ongoing sync, so it never overwrites values
+  // the colorist edits afterward (see the mount-time lazy initializer above for the same
+  // reasoning).
   const handleStrandZoneChange = (zone: StrandZone) => {
     setStrandZone(zone);
     const inherited = getInheritedZoneState(previousSteps, zone);
     if (inherited !== null) {
-      setStartingBase(inherited.startingBase);
-      setPorosity(inherited.canvas.porosity);
-      setThickness(inherited.canvas.thickness);
-      setChemicalHistory(inherited.canvas.chemicalHistory);
+      applyInheritedZoneState(inherited, { setStartingBase, setPorosity, setThickness, setChemicalHistory });
     }
   };
 
@@ -96,15 +89,7 @@ export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove 
       </div>
 
       <div className="calculator__form">
-        <div className="field">
-          <label htmlFor={`bleachCurrentLevel${idSuffix}`}>{t("bleach.currentLevel")}</label>
-          <Select
-            id={`bleachCurrentLevel${idSuffix}`}
-            value={String(startLevel)}
-            onChange={value => setStartLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
+        <LevelField id={`bleachCurrentLevel${idSuffix}`} label={t("bleach.currentLevel")} value={startLevel} onChange={setStartLevel} />
 
         <StrandZoneField strandZone={strandZone} onStrandZoneChange={handleStrandZoneChange} idSuffix={idSuffix} />
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
@@ -116,15 +101,7 @@ export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove 
           idSuffix={idSuffix}
         />
 
-        <div className="field">
-          <label htmlFor={`bleachTargetLevel${idSuffix}`}>{t("bleach.targetLevel")}</label>
-          <Select
-            id={`bleachTargetLevel${idSuffix}`}
-            value={String(targetLevel)}
-            onChange={value => setTargetLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
+        <LevelField id={`bleachTargetLevel${idSuffix}`} label={t("bleach.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
 
         <div className="field">
           <label htmlFor={`bleachTotalGrams${idSuffix}`}>{t("fields.totalGrams")}</label>

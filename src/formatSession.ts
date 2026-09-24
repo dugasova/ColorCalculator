@@ -2,7 +2,7 @@ import i18n from "./i18n";
 import { formatFormulaText } from "./engine/formatFormula";
 import { formatBleachText } from "./engine/formatBleach";
 import { formatFillerStepText } from "./engine/formatPrePigmentation";
-import { formatLineLabel } from "./engine/formatLineLabel";
+import { formatBrandLineLabel } from "./engine/formatLineLabel";
 import { STRAND_ZONE_I18N_KEY } from "./engine/strandZone";
 import type { ColorHistoryStep, HistoryStep } from "./history";
 
@@ -111,8 +111,9 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
     neutralizationApplied: step.neutralizationApplied,
   });
 
-  // Old docs saved before this field existed lack the `prePigmentation` key entirely,
-  // reading back as `undefined` (not `null`) -- normalize the same as history.ts does.
+  // `normalizeHistoryEntry` coerces this to `null` on the Firestore read path, but this
+  // function also runs directly on a session still being built (ComplexColoringCalculator
+  // passes orderedSteps straight from the step cards), so the fallback stays here too.
   const prePigmentation = step.prePigmentation ?? null;
   const fillerStepText = prePigmentation !== null ? formatFillerStepText(step.targetShade.level, prePigmentation) : null;
   const combinedText = fillerStepText !== null 
@@ -195,7 +196,7 @@ export function formatSessionSummary(steps: HistoryStep[]): string {
     target = String(lastStep.kind === "bleach" ? lastStep.targetLevel : lastStep.targetShade.level);
   } else if (distinctZones.size <= 1) {
     const lastColorStep = colorSteps[colorSteps.length - 1];
-    target = `${lastColorStep.brandName}${lastColorStep.line ? " " + formatLineLabel(lastColorStep.line) : ""} — ${lastColorStep.targetShade.code}`;
+    target = `${formatBrandLineLabel(lastColorStep.brandName, lastColorStep.line)} — ${lastColorStep.targetShade.code}`;
   } else {
     // Map.set on an already-present key updates its value without moving its position in
     // iteration order, so this ends up with each zone's LAST color step (its real final

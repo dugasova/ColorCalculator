@@ -1,40 +1,19 @@
 import { describe, it, expect } from "vitest";
 import { actualGramsScale, stepTotalGrams, calculateSessionProductCost } from "./sessionCost";
 import type { ColorHistoryStep, BleachHistoryStep } from "./history";
+import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep } from "./testFixtures";
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
-  return {
-    kind: "color",
+  return makeSharedColorStep({
     brandId: "wella",
     brandName: "Wella",
     line: "Koleston Perfect",
     targetShade: { code: "7/1", level: 7, tone: "ash", line: "Koleston Perfect" },
     startLevel: 6,
-    grayPercent: 0,
-    applicationZone: "full-head",
-    result: {
-      developerVolume: 20,
-      mixingRatio: { colorParts: 1, developerParts: 1 },
-      grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "" },
-      achievedLevel: 7,
-      underlyingPigment: null,
-      recommendedCorrectiveTone: null,
-      correctorGrams: null,
-      recommendedProcessingMinutes: 30,
-      toneWarning: null,
-      eligibilityWarning: null,
-      liftUnsupportedWarning: null,
-      grams: { colorGrams: 30, developerGrams: 30 },
-    },
-    additionalShade: null,
-    additionalShadeGrams: null,
-    blend: null,
-    prePigmentation: null,
-    neutralizationApplied: false,
-    processingMinutes: 30,
+    result: { ...COLOR_FULL_FORMULA, grams: { colorGrams: 30, developerGrams: 30 } },
     pricePerGram: 0.2,
     ...overrides,
-  };
+  });
 }
 
 const bleachStep: BleachHistoryStep = {

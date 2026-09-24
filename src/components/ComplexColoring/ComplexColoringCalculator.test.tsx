@@ -3,6 +3,11 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import "../../i18n";
 import ComplexColoringCalculator from "./ComplexColoringCalculator";
+import { PaletteReactContext } from "../../palette";
+import { BRANDS } from "../../engine/brands";
+import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
+import { shadeStockId, type StockRecord } from "../../stock";
+import { DEFAULT_PRICING_SETTINGS } from "../../salonSettings";
 
 // This project doesn't set vitest's `test.globals: true`, so @testing-library/react's
 // automatic afterEach cleanup never registers -- see ColorStepCard.interaction.test.tsx
@@ -55,5 +60,37 @@ describe("ComplexColoringCalculator", () => {
     }).not.toThrow();
 
     expect((screen.getByLabelText("Add pre-pigmentation step") as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("shows a stock shortage warning for the session once a step's shade is drawn from tracked, insufficient stock", () => {
+    const genericShade = GENERIC_SHADE_CHART[0];
+    const shortStock: StockRecord[] = [{
+      id: shadeStockId("generic", genericShade.line ?? null, genericShade.code),
+      kind: "shade",
+      brandId: "generic",
+      line: genericShade.line ?? null,
+      code: genericShade.code,
+      remainingGrams: 1,
+    }];
+
+    render(
+      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: shortStock, pricingSettings: DEFAULT_PRICING_SETTINGS }}>
+        <ComplexColoringCalculator appliedBy="Test Stylist" />
+      </PaletteReactContext.Provider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "+ Add color step" }));
+
+    expect(screen.getByText(/Not enough/)).toBeTruthy();
+  });
+
+  it("shows no stock shortage warning when nothing is tracked", () => {
+    render(
+      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS }}>
+        <ComplexColoringCalculator appliedBy="Test Stylist" />
+      </PaletteReactContext.Provider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "+ Add color step" }));
+
+    expect(screen.queryByText(/Not enough/)).toBeNull();
   });
 });

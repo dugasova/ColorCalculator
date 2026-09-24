@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { computeStockConsumption, consumeStock, reconcileStockConsumption, developerStockId, shadeStockId, getStockStatus, getShadeTubeSizeGrams, restockOneTube } from "./stock";
-import type { ColorHistoryStep, BleachHistoryStep, HistoryStep } from "./history";
+import { computeStockConsumption, consumeStock, reconcileStockConsumption, developerStockId, shadeStockId, getStockStatus, getShadeTubeSizeGrams, restockOneTube, findStockShortages, type StockRecord } from "./stock";
+import type { ColorHistoryStep, HistoryStep } from "./history";
 import type { Shade } from "./engine/shades";
+import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep, makeBleachStep } from "./testFixtures";
 
 const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
 const getDocMock = vi.fn();
@@ -28,60 +29,19 @@ beforeEach(() => {
 });
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
-  return {
-    kind: "color",
+  return makeSharedColorStep({
     brandId: "wella",
     brandName: "Wella",
     line: "Koleston Perfect",
     targetShade: { code: "7/1", level: 7, tone: "ash", line: "Koleston Perfect" },
     startLevel: 6,
-    grayPercent: 0,
-    applicationZone: "full-head",
-    result: {
-      developerVolume: 20,
-      mixingRatio: { colorParts: 1, developerParts: 2 },
-      grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "" },
-      achievedLevel: 7,
-      underlyingPigment: null,
-      recommendedCorrectiveTone: null,
-      correctorGrams: null,
-      recommendedProcessingMinutes: 30,
-      toneWarning: null,
-      eligibilityWarning: null,
-      liftUnsupportedWarning: null,
-      grams: { colorGrams: 30, developerGrams: 60 },
-    },
-    additionalShade: null,
-    additionalShadeGrams: null,
-    blend: null,
-    prePigmentation: null,
-    neutralizationApplied: false,
-    processingMinutes: 30,
+    result: { ...COLOR_FULL_FORMULA, mixingRatio: { colorParts: 1, developerParts: 2 }, grams: { colorGrams: 30, developerGrams: 60 } },
     pricePerGram: 0.2,
     ...overrides,
-  };
+  });
 }
 
-const bleachStep: BleachHistoryStep = {
-  kind: "bleach",
-  startLevel: 6,
-  targetLevel: 9,
-  result: {
-    startLevel: 6,
-    targetLevel: 9,
-    liftNeeded: 3,
-    developerVolume: 30,
-    multiStepRequired: false,
-    mixingRatio: { powderParts: 1, developerParts: 2 },
-    recommendedProcessingMinutes: 35,
-    maxScalpProcessingMinutes: 50,
-    checkIntervalMinMinutes: 5,
-    checkIntervalMaxMinutes: 10,
-    grams: { powderGrams: 20, developerGrams: 40 },
-  },
-  processingMinutes: 35,
-  pricePerGram: 0.1,
-};
+const bleachStep = makeBleachStep();
 
 describe("computeStockConsumption", () => {
   it("charges the primary shade and the developer volume actually used", () => {
@@ -140,6 +100,32 @@ describe("computeStockConsumption", () => {
     const byId = new Map(consumptions.map(c => [c.id, c]));
     expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/1"))?.grams).toBe(30);
     expect(byId.get(developerStockId("wella", 20))?.grams).toBe(60);
+  });
+});
+
+describe("findStockShortages", () => {
+  const shadeRecord = (remainingGrams: number): StockRecord => ({
+    id: shadeStockId("wella", "Koleston Perfect", "7/1"),
+    kind: "shade",
+    brandId: "wella",
+    line: "Koleston Perfect",
+    code: "7/1",
+    remainingGrams,
+  });
+
+  it("flags a product the session needs more of than the salon has on hand", () => {
+    const shortages = findStockShortages([makeColorStep()], [shadeRecord(10)]);
+    expect(shortages).toHaveLength(1);
+    expect(shortages[0].consumption.grams).toBe(30);
+    expect(shortages[0].remainingGrams).toBe(10);
+  });
+
+  it("is not a shortage when remaining stock exactly covers what's needed", () => {
+    expect(findStockShortages([makeColorStep()], [shadeRecord(30)])).toEqual([]);
+  });
+
+  it("treats a product with no stock record at all as untracked, not short", () => {
+    expect(findStockShortages([makeColorStep()], [])).toEqual([]);
   });
 });
 

@@ -103,8 +103,8 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     blendShadeACode: blend?.shadeA.code ?? null,
     blendShadeBCode: blend?.shadeB.code ?? null,
     blendPrimaryPercent,
-    // Old docs saved before this field existed lack the `prePigmentation` key entirely,
-    // reading back as `undefined` (not `null`) - treat that the same as `null` (off).
+    // `normalizeHistoryEntry` coerces this to `null` on the Firestore read path; kept
+    // defensive here too since this reads whatever `entry.steps` the caller passed in.
     prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
     processingMinutes: step.processingMinutes,
     applicationZone: step.applicationZone ?? "full-head",

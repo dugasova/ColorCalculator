@@ -1,6 +1,6 @@
 import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
-import type { HairCanvas } from "../../engine/canvas";
+import type { HairCanvas, Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { HistoryStep } from "../../history";
 
 export interface InheritedZoneState {
@@ -27,4 +27,24 @@ export function getInheritedZoneState(previousSteps: HistoryStep[], zone: Strand
     return { startingBase: step.startingBase, canvas: step.canvas };
   }
   return null;
+}
+
+// The zone every step card starts on before the colorist picks one -- shared so the
+// mount-time inheritance lookup and the field's own default can never disagree.
+export const DEFAULT_STEP_STRAND_ZONE: StrandZone = "full-head";
+
+export interface ZoneStateSetters {
+  setStartingBase: (base: StartingBase) => void;
+  setPorosity: (porosity: Porosity) => void;
+  setThickness: (thickness: HairThickness) => void;
+  setChemicalHistory: (history: ChemicalHistory[]) => void;
+}
+
+// Applies an earlier same-zone step's recorded hair state onto this card's own fields --
+// the one-shot default both step cards run when the colorist actively picks a zone.
+export function applyInheritedZoneState(inherited: InheritedZoneState, setters: ZoneStateSetters): void {
+  setters.setStartingBase(inherited.startingBase);
+  setters.setPorosity(inherited.canvas.porosity);
+  setters.setThickness(inherited.canvas.thickness);
+  setters.setChemicalHistory(inherited.canvas.chemicalHistory);
 }

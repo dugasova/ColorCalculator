@@ -3,19 +3,13 @@ import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverT
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { db } from "./firebase";
 import { parseSnapshotDocs } from "./firestoreSubscribe";
-import type { HairCanvas } from "./engine/canvas";
+import { canvasShapeSchema, type HairCanvas } from "./engine/canvas";
 
 const CLIENTS_COLLECTION = "clients";
 
-// Mirrors the shallow-validation trade-off in history/schema.ts's canvasShapeSchema:
-// this is the one nested value a corrupt document could feed back into UI state (the
-// "last visit" hint / a future auto-filled calculator), so it's the one worth checking.
-const canvasShapeSchema = z.object({
-  porosity: z.enum(["low", "normal", "high"]),
-  thickness: z.enum(["fine", "medium", "coarse"]),
-  chemicalHistory: z.array(z.enum(["keratin", "perm", "henna", "direct_dye"])),
-});
-
+// See engine/canvas.ts's canvasShapeSchema for why this is shallow-validated: it's the
+// one nested value a corrupt document could feed back into UI state (the "last visit"
+// hint / a future auto-filled calculator), so it's the one worth checking.
 const clientProfileShapeSchema = z.object({
   id: z.string(),
   ownedBy: z.string(),

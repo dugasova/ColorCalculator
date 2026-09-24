@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ALL_LEVELS, type Level } from "../../engine/levels";
+import type { Level } from "../../engine/levels";
 import { calculateBleachFormula, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
-import { Select } from "../common/Select";
+import { LevelField } from "../common/LevelField";
 import { useSalonMarkupMultiplier } from "../../palette";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./BleachCalculator.css";
@@ -137,25 +137,8 @@ export function BleachCalculator() {
       <p className="bleach__subtitle">{t("bleach.subtitle")}</p>
 
       <div className="calculator__form">
-        <div className="field">
-          <label htmlFor="currentLevel">{t("bleach.currentLevel")}</label>
-          <Select
-            id="currentLevel"
-            value={String(currentLevel)}
-            onChange={value => setCurrentLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="targetLevel">{t("bleach.targetLevel")}</label>
-          <Select
-            id="targetLevel"
-            value={String(targetLevel)}
-            onChange={value => setTargetLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
+        <LevelField id="currentLevel" label={t("bleach.currentLevel")} value={currentLevel} onChange={setCurrentLevel} />
+        <LevelField id="targetLevel" label={t("bleach.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
 
         <div className="field">
           <label htmlFor="totalGrams">{t("fields.totalGrams")}</label>

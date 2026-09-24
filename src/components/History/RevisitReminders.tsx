@@ -28,6 +28,17 @@ export function RevisitReminders({ revisitPlans, profilesByClientKey, nowMs }: R
           const weeks = Math.round(plan.intervalDays / 7);
           const phone = profilesByClientKey.get(plan.clientKey)?.phone ?? null;
           const reminderText = buildRevisitReminderText(plan);
+          const reason = plan.intervalBasis === "history"
+            ? t("history.reminderReasonHistory")
+            : t(`history.reminderReason.${plan.driver}`);
+          // drivers are ascending, so the first one further out than the chosen interval is
+          // the next service due after this one (e.g. toner refresh now, full balayage later).
+          const nextDriver = plan.intervalBasis === "service"
+            ? plan.drivers.find(d => d.intervalDays > plan.intervalDays)
+            : undefined;
+          const reasonText = nextDriver === undefined
+            ? reason
+            : `${reason} · ${t("history.reminderNextService", { reason: t(`history.reminderReason.${nextDriver.kind}`), weeks: Math.round(nextDriver.intervalDays / 7) })}`;
           return (
             <li key={plan.clientKey} className={`history__reminder history__reminder--${status}`}>
               <span className="history__reminder-client">{plan.clientName}</span>
@@ -35,6 +46,7 @@ export function RevisitReminders({ revisitPlans, profilesByClientKey, nowMs }: R
                 {t("history.reminderDetail", { weeks, date: plan.recommendedDate.toLocaleDateString() })}
               </span>
               <span className="history__reminder-status">{t(`history.reminderStatus.${status}`)}</span>
+              <span className="history__reminder-reason">{reasonText}</span>
               <span className="history__reminder-actions">
                 <button
                   type="button"

@@ -85,6 +85,25 @@ export function stockById(records: StockRecord[]): Map<string, StockRecord> {
   return new Map(records.map(record => [record.id, record]));
 }
 
+// A dye/developer a session would need more of than the salon has on hand -- surfaced as
+// an inline warning (see FormulaResults, ComplexColoringCalculator) rather than blocking
+// the save, since the stylist may already know to substitute or restock before mixing.
+export interface StockShortage {
+  consumption: StockConsumption;
+  remainingGrams: number;
+}
+
+// Products with no stock record at all are untracked, not short -- they are skipped.
+export function findStockShortages(steps: HistoryStep[], records: StockRecord[]): StockShortage[] {
+  const byId = stockById(records);
+  return computeStockConsumption(steps).flatMap(consumption => {
+    const record = byId.get(consumption.id);
+    return record === undefined || record.remainingGrams >= consumption.grams
+      ? []
+      : [{ consumption, remainingGrams: record.remainingGrams }];
+  });
+}
+
 // Malformed documents are skipped and logged rather than propagated -- see
 // firestoreSubscribe.ts's parseSnapshotDocs, shared by every `subscribeToX` live query.
 export function subscribeToStock(onChange: (records: StockRecord[]) => void): Unsubscribe {

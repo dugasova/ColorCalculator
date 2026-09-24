@@ -1,59 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { computeSalonAnalytics } from "./analytics";
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
+import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep, makeEntry as makeSharedEntry } from "./testFixtures";
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
-  return {
-    kind: "color",
+  return makeSharedColorStep({
     brandName: "Wella",
-    line: null,
-    targetShade: { code: "7.1", level: 7, tone: "ash" },
-    startLevel: 7,
-    grayPercent: 0,
-    applicationZone: "full-head",
-    result: {
-      developerVolume: 20,
-      mixingRatio: { colorParts: 1, developerParts: 1 },
-      grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "" },
-      achievedLevel: 7,
-      underlyingPigment: null,
-      recommendedCorrectiveTone: null,
-      correctorGrams: null,
-      recommendedProcessingMinutes: 30,
-      toneWarning: null,
-      eligibilityWarning: null,
-      liftUnsupportedWarning: null,
-      grams: null,
-    },
-    additionalShade: null,
-    additionalShadeGrams: null,
-    blend: null,
-    prePigmentation: null,
-    neutralizationApplied: false,
-    processingMinutes: 30,
-    pricePerGram: 0.18,
+    result: { ...COLOR_FULL_FORMULA, grams: null },
     ...overrides,
-  };
+  });
 }
 
 function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName: string }): FormulaHistoryEntry {
-  return {
-    id: "id",
-    clientId: null,
-    note: "",
-    appliedBy: "stylist",
-    appliedAt: null,
-    steps: [makeColorStep()],
-    markupMultiplier: 4,
-    productCost: null,
-    servicePrice: null,
-    patchTestDate: "",
-    allergyNotes: "",
-    patchTestOverride: true,
-    beforePhotoUrl: null,
-    afterPhotoUrl: null,
-    ...overrides,
-  };
+  return makeSharedEntry({ steps: [makeColorStep()], ...overrides });
 }
 
 describe("computeSalonAnalytics", () => {

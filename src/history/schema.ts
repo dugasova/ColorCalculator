@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Timestamp } from "firebase/firestore";
+import { canvasShapeSchema } from "../engine/canvas";
 import type { ColorHistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 
 // Validates a formulaHistory Firestore document's top-level shape (see subscribeToFormulaHistory
@@ -11,12 +12,6 @@ import type { ColorHistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry }
 // lockstep with the engine, for a read-only history/repeat feature -- a bad trade. This
 // still catches the realistic corruption case (a document missing/mistyped the top-level
 // scalar fields the UI reads directly: client name, pricing, patch-test/photo metadata)
-const canvasShapeSchema = z.object({
-  porosity: z.enum(["low", "normal", "high"]),
-  thickness: z.enum(["fine", "medium", "coarse"]),
-  chemicalHistory: z.array(z.enum(["keratin", "perm", "henna", "direct_dye"])),
-});
-
 const historyStepShapeSchema = z.union([
   z.looseObject({
     kind: z.literal("color"),
@@ -83,13 +78,22 @@ const legacyFormulaHistoryEntryShapeSchema = z.object({
 export const historyEntryShapeSchema = z.union([formulaHistoryEntryShapeSchema, legacyFormulaHistoryEntryShapeSchema]);
 
 export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHistoryEntry): FormulaHistoryEntry {
-  // `raw.clientId` reads as `undefined` (not `null`) for any steps-based document saved
-  // before this field existed -- coerce here so every caller downstream can rely on the
-  // type's `string | null` without re-deriving this fallback itself. Returns `raw`
-  // unchanged (not a copy) when it already has the field, same as the plain `return raw`
-  // this replaced for an already-well-formed modern entry.
+  // `raw.clientId` reads as `undefined` (not `null`), and a color step's
+  // `prePigmentation` reads back as `undefined` (not `null`), for any steps-based
+  // document saved before those fields existed -- coerced here so every caller
+  // downstream can rely on the declared `string | null` / `PrePigmentationResult | null`
+  // types without re-deriving the fallback itself (formatSession.ts, repeatFormula.ts
+  // and revisit.ts each used to, with two different idioms). Returns `raw` unchanged
+  // (not a copy) when it already has both fields, same as the plain `return raw` this
+  // replaced for an already-well-formed modern entry.
   if ("steps" in raw && raw.steps !== undefined) {
-    return raw.clientId !== undefined ? raw : { ...raw, clientId: null };
+    const needsCoercion = raw.clientId === undefined
+      || raw.steps.some(step => step.kind === "color" && step.prePigmentation === undefined);
+    if (!needsCoercion) return raw;
+    const steps = raw.steps.map(step => (
+      step.kind === "color" ? { ...step, prePigmentation: step.prePigmentation ?? null } : step
+    ));
+    return { ...raw, clientId: raw.clientId ?? null, steps };
   }
 
   const legacy = raw as LegacyFormulaHistoryEntry;

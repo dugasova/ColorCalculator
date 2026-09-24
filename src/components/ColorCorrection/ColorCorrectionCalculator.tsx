@@ -1,9 +1,9 @@
 import { useState, type CSSProperties } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { ALL_LEVELS, type Level } from "../../engine/levels";
+import type { Level } from "../../engine/levels";
 import { calculateColorCorrection, calculateCorrectorGrams, type UnwantedTone } from "../../engine/correction";
-import { Select } from "../common/Select";
+import { LevelField } from "../common/LevelField";
 import "../FormulaCalculator/FormulaCalculator.css";
 import "./ColorCorrectionCalculator.css";
 import { NeutralizationWheel } from "./NeutralizationWheel";
@@ -46,25 +46,8 @@ export function ColorCorrectionCalculator() {
       <p className="correction__subtitle">{t("correction.subtitle")}</p>
 
       <div className="calculator__form">
-        <div className="field">
-          <label htmlFor="currentLevel">{t("correction.currentLevel")}</label>
-          <Select
-            id="currentLevel"
-            value={String(currentLevel)}
-            onChange={value => setCurrentLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="targetLevel">{t("correction.targetLevel")}</label>
-          <Select
-            id="targetLevel"
-            value={String(targetLevel)}
-            onChange={value => setTargetLevel(Number(value) as Level)}
-            options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
-          />
-        </div>
+        <LevelField id="currentLevel" label={t("correction.currentLevel")} value={currentLevel} onChange={setCurrentLevel} />
+        <LevelField id="targetLevel" label={t("correction.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
 
         <div className="field correction__tone-field">
           <label id="unwantedToneLabel">{t("correction.unwantedTone")}</label>

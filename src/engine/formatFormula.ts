@@ -4,7 +4,7 @@ import type { Shade } from "./shades";
 import type { FullFormula, FormulaGrams } from "./formula";
 import { getGrayCoverageNote } from "./formula";
 import type { ApplicationZone } from "./applicationZone";
-import { formatLineLabel } from "./formatLineLabel";
+import { formatBrandLineLabel } from "./formatLineLabel";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatFormulaParams {
@@ -103,7 +103,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
   } = params;
 
-  const title = `${brandName}${line ? " " + formatLineLabel(line) : ""} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? "/" + targetShade.secondaryTone : ""})`;
+  const title = `${formatBrandLineLabel(brandName, line)} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? "/" + targetShade.secondaryTone : ""})`;
 
   const developer = formatDeveloperVolumeLine(result.developerVolume);
 
