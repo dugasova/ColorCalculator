@@ -120,6 +120,22 @@
   border: 1px solid var(--brand-border);
 }
 
+.history__entry-photo-button {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+.history__photo-lightbox-image {
+  display: block;
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 0.5rem;
+}
+
 .history__entry-footer {
   margin-top: 8px;
   display: flex;

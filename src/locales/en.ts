@@ -247,6 +247,7 @@ export const en = {
     computedColorGrams: "calculated: {{grams}} g",
     actualGramsInvalid: "Enter grams as a number of 0 or more",
     actualGramsSaveError: "Could not save the actual grams — check your connection and try again",
+    viewPhotoAria: "View {{label}} larger",
     editEntry: "Edit",
     editEntryAria: "Edit visit {{date}}",
     editEntryTitle: "Edit visit — {{name}}",

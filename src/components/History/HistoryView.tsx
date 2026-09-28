@@ -52,6 +52,10 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   // The one visit whose details are being amended in the edit dialog -- stacks on top of
   // the client's visit-list modal the same way the delete confirm above does.
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  // The before/after thumbnail currently blown up full-size -- stacks on top of the
+  // client's visit-list modal the same way the edit/delete dialogs above do, so a
+  // stylist can zoom in on a photo without losing their place in the visit list.
+  const [photoLightbox, setPhotoLightbox] = useState<{ url: string; label: string } | null>(null);
   const {
     entries, setEntries, isLoading, error, filtered, groups, profilesByClientKey,
     deleteClientGroup, deletingClientKey, deleteError,
@@ -200,8 +204,26 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                   )}
                   {(entry.beforePhotoUrl || entry.afterPhotoUrl) && (
                     <div className="history__entry-photos">
-                      {entry.beforePhotoUrl && <img src={entry.beforePhotoUrl} alt={t("results.beforePhotoLabel")} />}
-                      {entry.afterPhotoUrl && <img src={entry.afterPhotoUrl} alt={t("results.afterPhotoLabel")} />}
+                      {entry.beforePhotoUrl && (
+                        <button
+                          type="button"
+                          className="history__entry-photo-button"
+                          onClick={() => setPhotoLightbox({ url: entry.beforePhotoUrl!, label: t("results.beforePhotoLabel") })}
+                          aria-label={t("history.viewPhotoAria", { label: t("results.beforePhotoLabel") })}
+                        >
+                          <img src={entry.beforePhotoUrl} alt={t("results.beforePhotoLabel")} />
+                        </button>
+                      )}
+                      {entry.afterPhotoUrl && (
+                        <button
+                          type="button"
+                          className="history__entry-photo-button"
+                          onClick={() => setPhotoLightbox({ url: entry.afterPhotoUrl!, label: t("results.afterPhotoLabel") })}
+                          aria-label={t("history.viewPhotoAria", { label: t("results.afterPhotoLabel") })}
+                        >
+                          <img src={entry.afterPhotoUrl} alt={t("results.afterPhotoLabel")} />
+                        </button>
+                      )}
                     </div>
                   )}
                   <div className="history__entry-footer">
@@ -236,6 +258,12 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
           onSaved={(entryId, updated) =>
             setEntries(prev => prev.map(e => (e.id === entryId ? { ...e, ...updated } : e)))}
         />
+      )}
+
+      {photoLightbox !== null && (
+        <Modal title={photoLightbox.label} onClose={() => setPhotoLightbox(null)} size="large">
+          <img className="history__photo-lightbox-image" src={photoLightbox.url} alt={photoLightbox.label} />
+        </Modal>
       )}
 
       {confirmDeleteGroup !== null && (

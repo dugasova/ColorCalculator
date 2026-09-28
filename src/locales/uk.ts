@@ -249,6 +249,7 @@ export const uk: typeof en = {
     computedColorGrams: "розраховано: {{grams}} г",
     actualGramsInvalid: "Введіть грами числом від 0",
     actualGramsSaveError: "Не вдалося зберегти фактичну витрату - перевірте з'єднання та спробуйте ще раз",
+    viewPhotoAria: "Переглянути {{label}} у більшому розмірі",
     editEntry: "Редагувати",
     editEntryAria: "Редагувати візит {{date}}",
     editEntryTitle: "Редагування візиту — {{name}}",
