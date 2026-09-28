@@ -279,7 +279,7 @@ describe("HistoryView actual grams", () => {
     fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
     await screen.findByRole("dialog");
 
-    const input = await screen.findByLabelText("Actually used 7.1, g");
+    const input = await screen.findByLabelText("Actually used, g");
     fireEvent.change(input, { target: { value: "45" } });
     fireEvent.blur(input);
 

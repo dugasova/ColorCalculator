@@ -4,6 +4,7 @@ import { buildRepeatFormulaRequest, type FormulaHistoryEntry } from "../../histo
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { planClientRevisits } from "../../revisit";
 import { usePalette } from "../../palette";
+import { STRAND_ZONE_I18N_KEY } from "../../engine/strandZone";
 import { useActualGramsEditor } from "./useActualGramsEditor";
 import { useHistoryData } from "./useHistoryData";
 import { RevisitReminders } from "./RevisitReminders";
@@ -165,10 +166,23 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                     const key = `${entry.id}::${index}`;
                     const computed = step.result.grams?.colorGrams ?? null;
                     const persisted = typeof step.actualColorGrams === "number" ? String(step.actualColorGrams) : "";
+                    // A multi-zone session (color melt, root touch-up + lengths refresh, ...)
+                    // can have more than one color step -- lead with the zone whenever this
+                    // step has one (see formatStepHeader's identical reasoning) so the input
+                    // above the Mix breakdown it belongs to is unambiguous at a glance. Not
+                    // the shade code: this actual-grams figure is the step's *total* mix
+                    // weight, covering every shade in it (targetShade plus any additional/
+                    // blend shade -- see buildMixSummary), so naming just the one primary
+                    // code here read as claiming this input was only about that shade.
+                    const zoneLabel = step.strandZone !== undefined
+                      ? t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`)
+                      : null;
                     return (
                       <div className="history__entry-actual" key={key}>
                         <label htmlFor={`actualGrams-${key}`}>
-                          {t("history.actualColorGrams", { code: step.targetShade.code })}
+                          {zoneLabel !== null
+                            ? t("history.actualColorGramsWithZone", { zone: zoneLabel })
+                            : t("history.actualColorGrams")}
                         </label>
                         <input
                           id={`actualGrams-${key}`}
