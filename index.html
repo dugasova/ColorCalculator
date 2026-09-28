@@ -1,17 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" translate="no">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <meta name="theme-color" content="#7c3aed" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- The app already ships its own English/Ukrainian translations (src/i18n.ts) and
+         defaults to English. Without this, Chrome/Android's built-in page translator
+         offers to translate the page on a device with a Russian system language and
+         mangles brand/shade names (e.g. "Koleston Perfect" -> "Колестон Перфект")
+         that must stay verbatim -- both tags are needed since Chrome only honors the
+         meta tag and Safari/Edge only honor the `translate` attribute. -->
+    <meta name="google" content="notranslate" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <title>Formulist</title>
   </head>
-  <body>
+  <body class="notranslate" translate="no">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
