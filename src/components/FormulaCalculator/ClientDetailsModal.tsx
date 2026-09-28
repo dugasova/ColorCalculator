@@ -138,12 +138,12 @@ export function ClientDetailsModal({
       <div className="results__photos">
         <div className="field results__photo">
           <label htmlFor="beforePhoto">{t("results.beforePhotoLabel")}</label>
-          <input id="beforePhoto" type="file" accept="image/*" capture="environment" onChange={e => beforePhoto.handleChange(e.target.files?.[0] ?? null)} />
+          <input id="beforePhoto" type="file" accept="image/*" onChange={e => beforePhoto.handleChange(e.target.files?.[0] ?? null)} />
           {beforePhoto.previewUrl && <img className="results__photo-preview" src={beforePhoto.previewUrl} alt="" />}
         </div>
         <div className="field results__photo">
           <label htmlFor="afterPhoto">{t("results.afterPhotoLabel")}</label>
-          <input id="afterPhoto" type="file" accept="image/*" capture="environment" onChange={e => afterPhoto.handleChange(e.target.files?.[0] ?? null)} />
+          <input id="afterPhoto" type="file" accept="image/*" onChange={e => afterPhoto.handleChange(e.target.files?.[0] ?? null)} />
           {afterPhoto.previewUrl && <img className="results__photo-preview" src={afterPhoto.previewUrl} alt="" />}
         </div>
       </div>

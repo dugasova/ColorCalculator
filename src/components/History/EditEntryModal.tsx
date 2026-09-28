@@ -57,7 +57,6 @@ function PhotoSlot({ inputId, label, currentUrl, upload, removed, onRemovedChang
         id={inputId}
         type="file"
         accept="image/*"
-        capture="environment"
         onChange={e => handleFileChange(e.target.files?.[0] ?? null)}
       />
       <div className="history__edit-photo-actions">
