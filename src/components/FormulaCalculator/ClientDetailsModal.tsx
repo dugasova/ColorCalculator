@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Modal } from "../common/Modal";
+import { toWhatsAppPhone } from "../../reminder";
 import type { ClientLink } from "./useClientLink";
 import type { PhotoUpload } from "./usePhotoUpload";
 import type { SaveState } from "./SessionDetailsPanel";
@@ -35,6 +36,9 @@ export function ClientDetailsModal({
     handleSelectSuggestion, handleClearSelection, phone, setPhone, allergyNotes, setAllergyNotes,
     lastVisitCanvasText,
   } = clientLink;
+  // Only flagged once the colorist has actually typed something -- an untouched, still-
+  // empty phone field is not an error, just not filled in yet.
+  const phoneLooksInvalid = phone.trim() !== "" && toWhatsAppPhone(phone) === null;
 
   return (
     <Modal title={t("results.clientDetailsSectionTitle")} onClose={onClose}>
@@ -93,7 +97,16 @@ export function ClientDetailsModal({
           value={phone}
           onChange={e => setPhone(e.target.value)}
           placeholder={t("results.clientPhonePlaceholder")}
+          aria-invalid={phoneLooksInvalid}
         />
+        {/* Advisory, not a save-blocking requirement -- the phone field itself is optional
+            (RevisitReminders' WhatsApp button already degrades to the plain wa.me picker
+            for one it can't use, see buildWhatsAppReminderUrl), so a typo here shouldn't
+            trap a colorist who's mid-appointment and wants to save first, fix later. Reuses
+            toWhatsAppPhone -- the exact same "digits >= 8 once punctuation is stripped"
+            check the reminder feature itself relies on to build a real wa.me link, so this
+            flags precisely the inputs that feature couldn't use either. */}
+        {phoneLooksInvalid && <p className="warning" role="alert">{t("results.clientPhoneInvalid")}</p>}
       </div>
 
       <div className="field results__note">

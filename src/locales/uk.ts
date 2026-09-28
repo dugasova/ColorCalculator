@@ -152,6 +152,7 @@ export const uk: typeof en = {
     clientNamePlaceholder: "напр. Анна К.",
     clientPhoneLabel: "Телефон",
     clientPhonePlaceholder: "напр. +380 50 123 4567",
+    clientPhoneInvalid: "Схоже, номер неповний — вкажіть код країни/міста",
     lastVisitLabel: "Стан волосся на попередньому візиті",
     clientSuggestionsHeading: "Збережені клієнти — оберіть потрібного",
     clientNoPhoneOnFile: "телефон не вказано",

@@ -150,6 +150,7 @@ export const en = {
     clientNamePlaceholder: "e.g. Anna K.",
     clientPhoneLabel: "Phone",
     clientPhonePlaceholder: "e.g. +1 555 0100",
+    clientPhoneInvalid: "Doesn't look like a complete phone number — include the area/country code",
     lastVisitLabel: "Last visit's hair profile",
     clientSuggestionsHeading: "Saved clients — pick the right one",
     clientNoPhoneOnFile: "no phone on file",
