@@ -557,6 +557,14 @@ export const uk: typeof en = {
         "Chromatics (перманент): фіксовані 1:1 з власним Oil-in-Cream Developer — інша хімія, ніж у Shades EQ, попри спільний бренд.",
       ],
     },
+    matrix: {
+      title: "Matrix",
+      points: [
+        "SoColor Pre-Bonded (перманентна): завжди 1:1 з Matrix Cream Developer 10/20/30/40 vol.",
+        "Super Sync (безаміачна деми): завжди 1:1 лише з окислювачем 10 vol Matrix Cream Developer — реального вибору окислювача немає, 20 хв за кімнатної температури.",
+        "Букви рефлексу: N натуральний, A попелястий, G золотистий, C мідний, R червоний, V фіолетовий, P перламутровий, M мока, B коричневий, W теплий, J нефритовий, T титановий (лише Super Sync).",
+      ],
+    },
     generic: {
       title: "Generic",
       points: [

@@ -3,6 +3,39 @@ import { calculateFullFormula } from "./formula";
 import { IGORA_VIBRANCE_CHART, IGORA_ROYAL_CHART } from "./brands/igora";
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
 import { LOREAL_MAJIREL_CHART } from "./brands/loreal";
+import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
+import { BRANDS } from "./brands";
+
+describe("BRANDS.matrix", () => {
+  it("has the full 62-shade SoColor Pre-Bonded Blended Natural range, every shade tagged with the socolor line", () => {
+    expect(MATRIX_SOCOLOR_CHART.length).toBe(62);
+    for (const shade of MATRIX_SOCOLOR_CHART) {
+      expect(shade.line).toBe("socolor");
+    }
+  });
+
+  it("has the full 50-shade Super Sync range, every shade tagged with the super-sync line and a fixed 1:1 single-developer-choice ratio", () => {
+    expect(MATRIX_SUPER_SYNC_CHART.length).toBe(50);
+    for (const shade of MATRIX_SUPER_SYNC_CHART) {
+      expect(shade.line).toBe("super-sync");
+      expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
+      expect(shade.developerVolumeChoices).toEqual([10]);
+    }
+  });
+
+  it("decodes a two-letter reflect code into primary/secondary tone on both lines", () => {
+    const socolorShade = MATRIX_SOCOLOR_CHART.find(s => s.code === "3RV");
+    expect(socolorShade).toMatchObject({ level: 3, tone: "red", secondaryTone: "violet" });
+
+    const superSyncShade = MATRIX_SUPER_SYNC_CHART.find(s => s.code === "6WN");
+    expect(superSyncShade).toMatchObject({ level: 6, tone: "gold", secondaryTone: "natural" });
+  });
+
+  it("mixes 1:1 with developer regardless of level, on both lines combined in the catalog", () => {
+    expect(BRANDS.matrix.shades.length).toBe(112);
+    expect(BRANDS.matrix.mixingRatio(6, 7)).toEqual({ colorParts: 1, developerParts: 1 });
+  });
+});
 
 describe("IGORA_VIBRANCE_CHART", () => {
   it("mixes every shade -- including the Level 10 Toners sub-range -- 1:1 with Vibrance Activator", () => {

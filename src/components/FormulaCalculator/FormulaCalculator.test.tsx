@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
+import { describe, it, expect, afterEach } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import "../../i18n";
 import { calculateFullFormula, applyAdditionalShade, splitShadeBlend } from "../../engine/formula";
 import { calculatePrePigmentation } from "../../engine/prePigmentation";
@@ -9,6 +11,19 @@ import { BRANDS } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
 import FormulaCalculator from "./FormulaCalculator";
 import { FormulaResults } from "./FormulaResults";
+
+afterEach(cleanup);
+
+// The custom Select (see components/common/Select) has no native <select> "change" event
+// to fire -- it opens on a click of its trigger button and commits a value on a click of
+// the matching option, identified by the `data-value` the component stamps on each
+// <li role="option">. This mirrors how a colorist actually operates it.
+function chooseOption(labelText: string, value: string) {
+  fireEvent.click(screen.getByLabelText(labelText));
+  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
+  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
+  fireEvent.click(option);
+}
 
 describe("FormulaCalculator", () => {
   it("renders the additional shade selector but hides its grams input until a shade is chosen", () => {
@@ -123,6 +138,20 @@ describe("FormulaCalculator", () => {
 
     expect(html).toContain("id=\"markupMultiplier\"");
     expect(html).toContain("value=\"2.5\"");
+  });
+
+  it("offers the Matrix SoColor Pre-Bonded chart and computes a 1:1 ratio once a shade is chosen", () => {
+    render(<FormulaCalculator appliedBy="stylist@example.com" />);
+
+    chooseOption("Brand", "matrix");
+
+    fireEvent.click(screen.getByLabelText("Shade"));
+    expect(document.querySelector('[role="option"][data-value="7N"]')).not.toBeNull();
+    fireEvent.click(document.querySelector('[role="option"][data-value="7N"]')!);
+
+    // SoColor Pre-Bonded always mixes 1:1 with developer, regardless of level -- same
+    // ratio text the mixing-ratio-choice tests above assert on (e.g. "1 : 2").
+    expect(screen.getByText("1 : 1")).toBeInTheDocument();
   });
 });
 

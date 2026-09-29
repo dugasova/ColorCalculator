@@ -32,6 +32,10 @@ const SHADE_TUBE_SIZE_OVERRIDES_GRAMS: Record<string, number> = {
   "loreal::majirel": 50,
   "loreal::dia-light": 50,
   "loreal::dia-richesse": 50,
+  // unverified -- confirm first: assumed 90 ml (3 oz), SoColor's commonly cited US tube
+  // size, not independently confirmed against a real tube.
+  "matrix::socolor": 90,
+  "matrix::super-sync": 90,
 };
 
 export function getShadeTubeSizeGrams(brandId: BrandId, line: string | null): number {

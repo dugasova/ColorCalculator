@@ -5,6 +5,7 @@ import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
 import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from "./brands/loreal";
 import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from "./brands/igora";
 import { REDKEN_SHADES_EQ_CHART, REDKEN_CHROMATICS_CHART } from "./brands/redken";
+import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
 import { getMixingRatio } from "./formula";
 
 // A plain string, not a closed union: built-in ids ('generic' | 'wella' | 'loreal' | 'igora')
@@ -45,6 +46,14 @@ function redkenMixingRatio(): MixingRatio {
   return { colorParts: 1, developerParts: 1 };
 }
 
+// SoColor Pre-Bonded mixes 1:1 across the whole Blended Natural range; so does Super
+// Sync's own single 10 vol developer strength -- both Matrix lines share the same 1:1
+// ratio, unlike Redken above where the demi/permanent split also carries a real ratio
+// difference.
+function matrixMixingRatio(): MixingRatio {
+  return { colorParts: 1, developerParts: 1 };
+}
+
 // The built-in brand catalog. Runtime admin edits (custom brands, added/discontinued
 // shades) merge on top of this into the calculator-facing catalog -- see
 // `buildBrandCatalog` in ./paletteOverrides.
@@ -54,4 +63,5 @@ export const BRANDS: Record<BrandId, Brand> = {
   loreal: { id: "loreal", name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_RICHESSE_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
   igora: { id: "igora", name: "Igora", shades: [...IGORA_ROYAL_CHART, ...IGORA_VIBRANCE_CHART], mixingRatio: igoraMixingRatio, pricePerGram: 0.20 },
   redken: { id: "redken", name: "Redken", shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_CHROMATICS_CHART], mixingRatio: redkenMixingRatio, pricePerGram: 0.20 },
+  matrix: { id: "matrix", name: "Matrix", shades: [...MATRIX_SOCOLOR_CHART, ...MATRIX_SUPER_SYNC_CHART], mixingRatio: matrixMixingRatio, pricePerGram: 0.18 },
 };

@@ -555,6 +555,14 @@ export const en = {
         "Chromatics (permanent): fixed 1:1 with its own Oil-in-Cream Developer -- different chemistry from Shades EQ despite sharing the brand.",
       ],
     },
+    matrix: {
+      title: "Matrix",
+      points: [
+        "SoColor Pre-Bonded (permanent): always 1:1 with Matrix Cream Developer 10/20/30/40 vol.",
+        "Super Sync (ammonia-free demi): always 1:1 with 10 vol Matrix Cream Developer only -- no real developer-volume choice, 20 min at room temperature.",
+        "Reflect letters: N natural, A ash, G gold, C copper, R red, V violet, P pearl, M mocha, B brown, W warm, J jade, T titanium (Super Sync only).",
+      ],
+    },
     generic: {
       title: "Generic",
       points: [
