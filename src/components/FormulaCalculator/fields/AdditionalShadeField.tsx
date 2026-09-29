@@ -42,6 +42,7 @@ export function AdditionalShadeField({
           id={`additionalShadeCode${idSuffix}`}
           value={additionalShadeCode ?? ""}
           onChange={value => onAdditionalShadeCodeChange(value === "" ? null : value)}
+          searchable
           options={[
             { value: "", label: t("fields.additionalShadeNone") },
             ...lineShades.map(shade => ({

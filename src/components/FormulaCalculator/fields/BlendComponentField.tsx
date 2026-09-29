@@ -27,6 +27,7 @@ export function BlendComponentField({ label, placeholder, candidates, shadeCode,
           id={id}
           value={shadeCode ?? ""}
           onChange={value => onShadeCodeChange(value === "" ? null : value)}
+          searchable
           options={[
             { value: "", label: placeholder },
             ...candidates.map(candidate => ({

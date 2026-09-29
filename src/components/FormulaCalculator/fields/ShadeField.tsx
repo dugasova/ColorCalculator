@@ -21,6 +21,7 @@ export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetS
           id={`targetShadeCode${idSuffix}`}
           value={targetShadeCode}
           onChange={onTargetShadeCodeChange}
+          searchable
           options={lineShades.map(shade => ({
             value: shade.code,
             label: shadeLabel(shade),

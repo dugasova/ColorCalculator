@@ -2,6 +2,8 @@ export const en = {
   common: {
     close: "Close",
     cancel: "Cancel",
+    searchByCode: "Search by code",
+    noMatches: "No matches",
   },
   app: {
     titlePrefix: "Formu",

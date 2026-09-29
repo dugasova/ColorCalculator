@@ -4,6 +4,8 @@ export const uk: typeof en = {
   common: {
     close: "Закрити",
     cancel: "Скасувати",
+    searchByCode: "Пошук за кодом",
+    noMatches: "Немає збігів",
   },
   app: {
     titlePrefix: "Formu",

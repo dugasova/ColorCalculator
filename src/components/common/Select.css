@@ -89,11 +89,10 @@
   min-width: max(100%, 220px);
   width: max-content;
   max-width: min(320px, calc(100vw - 32px));
-  margin: 0;
   padding: 6px;
   max-height: 280px;
-  overflow-y: auto;
-  list-style: none;
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--border-field);
   border-radius: 0.85rem;
@@ -101,11 +100,45 @@
   animation: select-popup-enter 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.select__popup::-webkit-scrollbar {
+.select__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.select__search {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-field);
+  border-radius: 0.55rem;
+  background: var(--field-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px; /* >=16px: mobile WebViews don't zoom the page on focus */
+}
+
+.select__search:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.select__empty {
+  margin: 0;
+  padding: 9px 10px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.select__list::-webkit-scrollbar {
   width: 8px;
 }
 
-.select__popup::-webkit-scrollbar-thumb {
+.select__list::-webkit-scrollbar-thumb {
   background: var(--border-field);
   border-radius: 999px;
 }

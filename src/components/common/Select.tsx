@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import "./Select.css";
 
@@ -16,10 +17,18 @@ export interface SelectProps {
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
+  searchable?: boolean;
   className?: string;
 }
 
 const TYPEAHEAD_RESET_MS = 600;
+
+// Brands write the same code with different separators (Wella 7/1, Generic 7.1,
+// Igora 7-1), and Android numeric keyboards offer "," as the decimal key -- treat them
+// all as one separator so "7.1" finds "7/1".
+function normalizeSearch(text: string): string {
+  return text.trim().toLowerCase().replace(/[./,-]/g, "/");
+}
 
 // A from-scratch listbox replacing the native <select>: the native popup can't be
 // restyled to match the app's design (only `<option>` color/background is stylable, and
@@ -28,15 +37,27 @@ const TYPEAHEAD_RESET_MS = 600;
 // and DOM focus the whole time; the active option is tracked with `aria-activedescendant`
 // rather than moving focus into the popup, matching how a native <select> keeps focus on
 // itself while its (OS-drawn) popup is open.
-export function Select({ id, value, options, onChange, className }: SelectProps) {
+export function Select({ id, value, options, onChange, className, searchable = false }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
   const typeahead = useRef({ text: "", timeout: 0 as number });
+  const [query, setQuery] = useState("");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const selectedIndex = options.findIndex(o => o.value === value);
   const selected = selectedIndex >= 0 ? options[selectedIndex] : null;
+
+  function filterOptions(q: string): SelectOption[] {
+    const normalizedQuery = normalizeSearch(q);
+    if (normalizedQuery === "") return options;
+    return options.filter(o => normalizeSearch(o.searchText ?? (typeof o.label === "string" ? o.label : "")).startsWith(normalizedQuery));
+  }
+
+  const visibleOptions = searchable ? filterOptions(query) : options;
 
   useEffect(() => {
     if (!open) return;
@@ -55,8 +76,13 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
     }
   }, [open, activeIndex]);
 
+  useEffect(() => {
+    if (open && searchable) searchInputRef.current?.focus();
+  }, [open, searchable]);
+
   function openList() {
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setQuery("");
     setOpen(true);
   }
 
@@ -69,10 +95,11 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
   }
 
   function commit(index: number) {
-    const option = options[index];
+    const option = visibleOptions[index];
     if (option === undefined) return;
     onChange(option.value);
     setOpen(false);
+    triggerRef.current?.focus();
   }
 
   function jumpToTypeahead(char: string, autoCommitWhenClosed: boolean) {
@@ -94,6 +121,39 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
     }
   }
 
+  function handleQueryChange(next: string) {
+    setQuery(next);
+    const filtered = filterOptions(next);
+    setActiveIndex(filtered.length > 0 ? 0 : -1);
+  }
+
+  function handleSearchKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setActiveIndex(i => Math.min(visibleOptions.length - 1, i < 0 ? 0 : i + 1));
+        return;
+      case "ArrowUp":
+        e.preventDefault();
+        setActiveIndex(i => Math.max(0, i < 0 ? 0 : i - 1));
+        return;
+      case "Enter":
+        e.preventDefault();
+        if (activeIndex >= 0) commit(activeIndex);
+        return;
+      case "Escape":
+        e.preventDefault();
+        setOpen(false);
+        triggerRef.current?.focus();
+        return;
+      case "Tab":
+        setOpen(false);
+        return;
+      default:
+        return;
+    }
+  }
+
   function handleTriggerKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
     if (!open) {
       switch (e.key) {
@@ -105,15 +165,23 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
           openList();
           return;
         default:
-          if (e.key.length === 1) jumpToTypeahead(e.key, true);
+          if (e.key.length === 1) {
+            if (searchable) {
+              e.preventDefault();
+              openList();
+              handleQueryChange(e.key);
+            } else {
+              jumpToTypeahead(e.key, true);
+            }
+          }
           return;
       }
     }
-    if (options.length === 0) return;
+    if (visibleOptions.length === 0) return;
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        setActiveIndex(i => Math.min(options.length - 1, i < 0 ? 0 : i + 1));
+        setActiveIndex(i => Math.min(visibleOptions.length - 1, i < 0 ? 0 : i + 1));
         return;
       case "ArrowUp":
         e.preventDefault();
@@ -125,7 +193,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
         return;
       case "End":
         e.preventDefault();
-        setActiveIndex(options.length - 1);
+        setActiveIndex(visibleOptions.length - 1);
         return;
       case "Enter":
       case " ":
@@ -149,6 +217,7 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
   return (
     <div className={clsx("select", open && "select--open", className)} ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
         id={id}
         className="select__trigger"
@@ -171,36 +240,58 @@ export function Select({ id, value, options, onChange, className }: SelectProps)
         </svg>
       </button>
       {open && (
-        <ul id={listboxId} role="listbox" className="select__popup">
-          {options.map((option, index) => (
-            // Keyboard selection is handled entirely by the trigger button's onKeyDown
-            // (ArrowUp/Down/Enter move `activeIndex` and commit it via aria-activedescendant,
-            // see handleTriggerKeyDown above); this li's onClick is the mouse-only path and
-            // is never meant to receive keyboard focus itself.
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-            <li
-              key={option.value}
-              id={`${listboxId}-option-${index}`}
-              role="option"
-              data-value={option.value}
-              aria-selected={option.value === value}
-              ref={el => { optionRefs.current[index] = el; }}
-              className={clsx("select__option", index === activeIndex && "select__option--active", option.value === value && "select__option--selected")}
-              onMouseEnter={() => setActiveIndex(index)}
-              onClick={() => commit(index)}
-            >
-              {option.swatchColor !== undefined && (
-                <span className="select__swatch" style={{ backgroundColor: option.swatchColor }} />
-              )}
-              <span className="select__option-label">{option.label}</span>
-              {option.value === value && (
-                <svg className="select__check" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div className="select__popup">
+          {searchable && (
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="select__search"
+              value={query}
+              onChange={e => handleQueryChange(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder={t("common.searchByCode")}
+              aria-label={t("common.searchByCode")}
+              aria-controls={listboxId}
+              aria-activedescendant={activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              enterKeyHint="done"
+            />
+          )}
+          <ul id={listboxId} role="listbox" className="select__list">
+            {visibleOptions.map((option, index) => (
+              // Keyboard selection is handled entirely by the trigger button's onKeyDown
+              // (ArrowUp/Down/Enter move `activeIndex` and commit it via aria-activedescendant,
+              // see handleTriggerKeyDown above); this li's onClick is the mouse-only path and
+              // is never meant to receive keyboard focus itself.
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+              <li
+                key={option.value}
+                id={`${listboxId}-option-${index}`}
+                role="option"
+                data-value={option.value}
+                aria-selected={option.value === value}
+                ref={el => { optionRefs.current[index] = el; }}
+                className={clsx("select__option", index === activeIndex && "select__option--active", option.value === value && "select__option--selected")}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => commit(index)}
+              >
+                {option.swatchColor !== undefined && (
+                  <span className="select__swatch" style={{ backgroundColor: option.swatchColor }} />
+                )}
+                <span className="select__option-label">{option.label}</span>
+                {option.value === value && (
+                  <svg className="select__check" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </li>
+            ))}
+          </ul>
+          {visibleOptions.length === 0 && <p className="select__empty">{t("common.noMatches")}</p>}
+        </div>
       )}
     </div>
   );
