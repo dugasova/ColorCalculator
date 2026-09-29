@@ -83,8 +83,8 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
   const sessionCanvas = orderedSteps.find(step => step.canvas !== undefined)?.canvas;
   const shortages = findStockShortages(orderedSteps, useStock());
 
-  const handleSave = async (details: SessionDetails) => {
-    await saveFormulaToHistory({
+  const handleSave = (details: SessionDetails) => {
+    return saveFormulaToHistory({
       clientName: details.clientName,
       clientId: details.clientId,
       note: details.note,

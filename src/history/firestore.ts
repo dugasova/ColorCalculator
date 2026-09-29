@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
@@ -7,6 +7,7 @@ import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from
 import { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
 import { computeStockConsumption, consumeStock, reconcileStockConsumption } from "../stock";
 import { calculateSessionProductCost } from "../sessionCost";
+import { settleWrite, type WriteOutcome } from "../firestoreWrite";
 
 const HISTORY_COLLECTION = "formulaHistory";
 
@@ -39,8 +40,12 @@ async function uploadFormulaPhoto(historyId: string, slot: "before" | "after", f
   return getDownloadURL(photoRef);
 }
 
-export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<void> {
-  const docRef = await addDoc(collection(db, HISTORY_COLLECTION), {
+export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<WriteOutcome> {
+  // A locally-generated id (no network round-trip) so the write can be queued and the UI
+  // can move on immediately -- see settleWrite. Firestore's SDK applies this setDoc to the
+  // local cache synchronously and replays it once the connection returns.
+  const docRef = doc(collection(db, HISTORY_COLLECTION));
+  const outcome = await settleWrite(setDoc(docRef, {
     clientName: params.clientName,
     clientId: params.clientId,
     note: params.note,
@@ -55,40 +60,50 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<v
     beforePhotoUrl: null,
     afterPhotoUrl: null,
     appliedAt: serverTimestamp(),
-  });
+  }), `history entry ${docRef.id}`);
 
   // Stock is a convenience ledger, not part of the visit record: a failure here must not
   // surface as a save error (the stylist would retry and create a duplicate entry), and
-  // an untracked product is simply skipped -- see consumeStock.
-  try {
-    await consumeStock(computeStockConsumption(params.steps));
-  } catch (err) {
-    console.error(`Saved formula history entry "${docRef.id}", but updating dye stock failed:`, err);
-  }
-
-  // Photos upload after the doc exists so they can live at a path keyed by its id;
-  // attach the resulting URLs with a follow-up update rather than blocking doc creation
-  // on the (much slower) file upload. A failure here (flaky salon Wi-Fi on a large phone
-  // photo, a Storage hiccup) must not fail the whole save: the doc above - client name,
-  // formula, pricing, patch-test info - is already durably persisted. Letting this
-  // reject would surface as a generic save error to the stylist even though the entry
-  // was in fact saved, and a plausible retry would then create a second, duplicate
-  // history entry for the same visit. Logged rather than swallowed silently, so a
-  // missing photo is still traceable after the fact.
-  try {
-    const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
-      params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile) : Promise.resolve(null),
-      params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, "after", params.afterPhotoFile) : Promise.resolve(null),
-    ]);
-    if (beforePhotoUrl !== null || afterPhotoUrl !== null) {
-      await updateDoc(docRef, {
-        ...(beforePhotoUrl !== null ? { beforePhotoUrl } : {}),
-        ...(afterPhotoUrl !== null ? { afterPhotoUrl } : {}),
-      });
+  // an untracked product is simply skipped -- see consumeStock. Photos upload after the doc
+  // exists so they can live at a path keyed by its id; attach the resulting URLs with a
+  // follow-up update rather than blocking doc creation on the (much slower) file upload. A
+  // failure here (flaky salon Wi-Fi on a large phone photo, a Storage hiccup) must not fail
+  // the whole save: the doc above -- client name, formula, pricing, patch-test info -- is
+  // already durably persisted (or queued, see below). Letting this reject would surface as
+  // a generic save error to the stylist even though the entry was in fact saved, and a
+  // plausible retry would then create a second, duplicate history entry for the same visit.
+  // Logged rather than swallowed silently, so a missing photo is still traceable after the
+  // fact. When the doc write itself is still queued (offline), these follow-ups are not
+  // awaited -- there is no point blocking the UI on a stock/photo write for a document the
+  // server hasn't even seen yet; they keep running in the background and are logged if they
+  // eventually fail.
+  const followUps = (async () => {
+    try {
+      await consumeStock(computeStockConsumption(params.steps));
+    } catch (err) {
+      console.error(`Saved formula history entry "${docRef.id}", but updating dye stock failed:`, err);
     }
-  } catch (err) {
-    console.error(`Saved formula history entry "${docRef.id}", but attaching its photo(s) failed:`, err);
+    try {
+      const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
+        params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile) : Promise.resolve(null),
+        params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, "after", params.afterPhotoFile) : Promise.resolve(null),
+      ]);
+      if (beforePhotoUrl !== null || afterPhotoUrl !== null) {
+        await updateDoc(docRef, {
+          ...(beforePhotoUrl !== null ? { beforePhotoUrl } : {}),
+          ...(afterPhotoUrl !== null ? { afterPhotoUrl } : {}),
+        });
+      }
+    } catch (err) {
+      console.error(`Saved formula history entry "${docRef.id}", but attaching its photo(s) failed:`, err);
+    }
+  })();
+  if (outcome === "synced") {
+    await followUps;
+  } else {
+    void followUps;
   }
+  return outcome;
 }
 
 export interface SetActualColorGramsParams {
@@ -115,7 +130,9 @@ export interface ActualColorGramsResult {
 // a price the stylist manually agreed with the client, not a derived number), then
 // reconciles dye stock by the difference. The stock write is best-effort for the same
 // reason saveFormulaToHistory's consumeStock is: a stock failure must not make the stylist
-// retype a fact that is already recorded.
+// retype a fact that is already recorded. The doc write itself is offline-safe the same way
+// saveFormulaToHistory's is (see settleWrite): if it's still queued, the stock reconciliation
+// keeps running in the background instead of blocking the UI on it.
 export async function setActualColorGrams(params: SetActualColorGramsParams): Promise<ActualColorGramsResult> {
   const target = params.steps[params.stepIndex];
   if (target === undefined || target.kind !== "color") {
@@ -125,14 +142,24 @@ export async function setActualColorGrams(params: SetActualColorGramsParams): Pr
     index === params.stepIndex ? { ...step, actualColorGrams: params.actualColorGrams } : step
   );
   const productCost = calculateSessionProductCost(steps);
-  await updateDoc(doc(db, HISTORY_COLLECTION, params.id), {
-    steps: sanitizeForFirestore(steps),
-    productCost,
-  });
-  try {
-    await reconcileStockConsumption(params.steps, steps);
-  } catch (err) {
-    console.error(`Recorded actual grams on history entry "${params.id}", but adjusting dye stock failed:`, err);
+  const outcome = await settleWrite(
+    updateDoc(doc(db, HISTORY_COLLECTION, params.id), {
+      steps: sanitizeForFirestore(steps),
+      productCost,
+    }),
+    `actual grams ${params.id}`,
+  );
+  const followUps = (async () => {
+    try {
+      await reconcileStockConsumption(params.steps, steps);
+    } catch (err) {
+      console.error(`Recorded actual grams on history entry "${params.id}", but adjusting dye stock failed:`, err);
+    }
+  })();
+  if (outcome === "synced") {
+    await followUps;
+  } else {
+    void followUps;
   }
   return { steps, productCost };
 }

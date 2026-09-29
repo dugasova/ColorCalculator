@@ -1,10 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { subscribeToFormulaHistory, saveFormulaToHistory, deleteHistoryEntry, updateHistoryEntryDetails } from "./firestore";
 
-const addDocMock = vi.fn();
+let autoIdCounter = 0;
+const setDocMock = vi.fn();
 const updateDocMock = vi.fn();
 const deleteDocMock = vi.fn();
-const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
+// Real `doc(collectionRef)` (one arg) auto-generates a fresh id each call; `doc(db, path, id)`
+// (three args) addresses an existing document by the id given -- see clients.test.ts's docMock
+// for the same split. saveFormulaToHistory only ever uses the one-arg form.
+const docMock = vi.fn((...args: unknown[]) =>
+  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args }
+);
 const uploadBytesMock = vi.fn();
 const getDownloadURLMock = vi.fn();
 const deleteObjectMock = vi.fn();
@@ -15,7 +21,6 @@ const whereMock = vi.fn((...args: unknown[]) => ({ kind: "where", field: args[0]
 const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
 
 vi.mock("firebase/firestore", () => ({
-  addDoc: (...args: unknown[]) => addDocMock(...args),
   collection: vi.fn(() => "collection-ref"),
   deleteDoc: (...args: unknown[]) => deleteDocMock(...args),
   doc: (...args: unknown[]) => docMock(...args),
@@ -24,6 +29,7 @@ vi.mock("firebase/firestore", () => ({
   query: (...args: unknown[]) => queryMock(...args),
   where: (...args: unknown[]) => whereMock(...args),
   serverTimestamp: vi.fn(() => "server-timestamp"),
+  setDoc: (...args: unknown[]) => setDocMock(...args),
   updateDoc: (...args: unknown[]) => updateDocMock(...args),
   // schema.ts (imported transitively via firestore.ts) uses `Timestamp` as a
   // `z.instanceof` check - any distinct class works here since these tests never
@@ -57,7 +63,8 @@ function baseParams() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  addDocMock.mockResolvedValue({ id: "doc-1" });
+  autoIdCounter = 0;
+  setDocMock.mockResolvedValue(undefined);
   updateDocMock.mockResolvedValue(undefined);
   deleteDocMock.mockResolvedValue(undefined);
   uploadBytesMock.mockResolvedValue(undefined);
@@ -67,7 +74,7 @@ beforeEach(() => {
 });
 
 describe("saveFormulaToHistory", () => {
-  it("resolves even when the photo upload fails, instead of surfacing a false error that would prompt a duplicate-creating retry", async () => {
+  it("resolves 'synced' even when the photo upload fails, instead of surfacing a false error that would prompt a duplicate-creating retry", async () => {
     uploadBytesMock.mockRejectedValue(new Error("network drop"));
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => { });
 
@@ -75,11 +82,11 @@ describe("saveFormulaToHistory", () => {
       ...baseParams(),
       beforePhotoFile: new File(["x"], "before.jpg", { type: "image/jpeg" }),
       afterPhotoFile: null,
-    })).resolves.toBeUndefined();
+    })).resolves.toBe("synced");
 
     // The history entry itself (client, formula, pricing, patch-test info) was already
-    // durably saved via addDoc before the photo upload ran - exactly once, no retry loop.
-    expect(addDocMock).toHaveBeenCalledTimes(1);
+    // durably saved via setDoc before the photo upload ran - exactly once, no retry loop.
+    expect(setDocMock).toHaveBeenCalledTimes(1);
     // The failed attach is still traceable, just not fatal to the overall save.
     expect(consoleError).toHaveBeenCalledTimes(1);
     // No photo URL to attach, so no follow-up write was attempted.
@@ -97,9 +104,27 @@ describe("saveFormulaToHistory", () => {
 
     expect(updateDocMock).toHaveBeenCalledTimes(1);
     expect(updateDocMock).toHaveBeenCalledWith(
-      { id: "doc-1" },
+      { kind: "doc", id: "auto-1" },
       { beforePhotoUrl: "https://example.test/photo.jpg" }
     );
+  });
+
+  it("resolves 'queued' without waiting for the stock/photo follow-ups when the doc write itself doesn't settle in time", async () => {
+    vi.useFakeTimers();
+    setDocMock.mockReturnValue(new Promise(() => {})); // never resolves -- simulates offline
+    uploadBytesMock.mockReturnValue(new Promise(() => {}));
+
+    const promise = saveFormulaToHistory({
+      ...baseParams(),
+      beforePhotoFile: null,
+      afterPhotoFile: null,
+    });
+    await vi.advanceTimersByTimeAsync(4000);
+
+    await expect(promise).resolves.toBe("queued");
+    expect(setDocMock).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
   });
 });
 

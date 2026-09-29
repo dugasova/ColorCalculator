@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { db } from "./firebase";
 import { parseSnapshotDocs } from "./firestoreSubscribe";
+import { settleWrite } from "./firestoreWrite";
 import { canvasShapeSchema, type HairCanvas } from "./engine/canvas";
 
 const CLIENTS_COLLECTION = "clients";
@@ -44,14 +45,15 @@ export interface CreateClientParams {
 // (FormulaHistoryEntry.clientId), which is what actually lets "this client's history"/
 // "repeat formula" target the right person later.
 export async function createClient(params: CreateClientParams): Promise<string> {
-  const docRef = await addDoc(collection(db, CLIENTS_COLLECTION), {
+  const docRef = doc(collection(db, CLIENTS_COLLECTION));
+  await settleWrite(setDoc(docRef, {
     ownedBy: params.ownedBy,
     name: params.name.trim(),
     phone: params.phone.trim(),
     allergyNotes: params.allergyNotes,
     lastCanvas: params.canvas,
     updatedAt: serverTimestamp(),
-  });
+  }), `client ${docRef.id}`);
   return docRef.id;
 }
 
@@ -67,13 +69,13 @@ export interface UpdateClientParams {
 // name-based guess) with whatever changed this visit -- phone, allergy notes, and the
 // current hair canvas.
 export async function updateClient(id: string, params: UpdateClientParams): Promise<void> {
-  await updateDoc(doc(db, CLIENTS_COLLECTION, id), {
+  await settleWrite(updateDoc(doc(db, CLIENTS_COLLECTION, id), {
     name: params.name.trim(),
     phone: params.phone.trim(),
     allergyNotes: params.allergyNotes,
     lastCanvas: params.canvas,
     updatedAt: serverTimestamp(),
-  });
+  }), `client ${id}`);
 }
 
 // Every stylist's client book is private to them, mirroring formulaHistory's

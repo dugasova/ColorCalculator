@@ -93,3 +93,14 @@ describe("SessionDetailsPanel onSaved", () => {
     consoleError.mockRestore();
   });
 });
+
+describe("SessionDetailsPanel offline save", () => {
+  it("shows \"Saved on device\" instead of \"Saved\" when onSave resolves a queued write", async () => {
+    const onSave = vi.fn().mockResolvedValue("queued");
+    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
+
+    fillRequiredFieldsAndSave();
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Saved on device — will sync" })).toBeInTheDocument());
+  });
+});

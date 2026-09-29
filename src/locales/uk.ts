@@ -11,6 +11,7 @@ export const uk: typeof en = {
     titlePrefix: "Formu",
     titleAccent: "list",
     skipToContent: "Перейти до вмісту",
+    offlineBanner: "Немає з’єднання. Зміни зберігаються на пристрої й синхронізуються автоматично.",
   },
   language: {
     en: "EN",
@@ -170,6 +171,7 @@ export const uk: typeof en = {
     copied: "Скопійовано",
     save: "Зберегти в історію",
     saved: "Збережено",
+    savedOffline: "Збережено на пристрої — синхронізується",
     saving: "Збереження…",
     saveError: "Не вдалося зберегти — перевірте з’єднання та спробуйте ще раз",
     timerStart: "Старт",

@@ -142,6 +142,12 @@ describe("consumeStock", () => {
     expect(incrementMock).toHaveBeenCalledWith(-30);
     expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), { remainingGrams: { kind: "increment", n: -30 } });
   });
+
+  it("treats an offline, uncached lookup the same as untracked instead of throwing", async () => {
+    getDocMock.mockRejectedValue({ code: "unavailable" });
+    await expect(consumeStock([{ id: "shade::wella::x::y", kind: "shade", code: "y", grams: 30 }])).resolves.toBeUndefined();
+    expect(updateDocMock).not.toHaveBeenCalled();
+  });
 });
 
 describe("restockOneTube", () => {

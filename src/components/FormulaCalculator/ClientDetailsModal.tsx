@@ -168,7 +168,7 @@ export function ClientDetailsModal({
           onClick={onSave}
           disabled={clientName.trim() === "" || saveState === "saving" || !patchTestOk || saveDisabled}
         >
-          {saveState === "saved" ? t("results.saved") : saveState === "saving" ? t("results.saving") : t("results.save")}
+          {saveState === "saved" ? t("results.saved") : saveState === "savedOffline" ? t("results.savedOffline") : saveState === "saving" ? t("results.saving") : t("results.save")}
         </button>
       </div>
       {saveState === "error" && <p className="warning" role="alert">{t("results.saveError")}</p>}

@@ -5,6 +5,7 @@ import { BowlCard } from "./BowlCard";
 import { createClient, updateClient } from "../../clients";
 import { isPatchTestSufficient } from "../../patchTest";
 import type { RepeatFormulaRequest } from "../../history";
+import type { WriteOutcome } from "../../firestoreWrite";
 import type { HairCanvas } from "../../engine/canvas";
 import { usePhotoUpload } from "./usePhotoUpload";
 import { useClientLink } from "./useClientLink";
@@ -28,7 +29,7 @@ export interface SessionDetails {
 export interface SessionDetailsPanelProps {
   formulaText: string;
   processingMinutes: number;
-  onSave: (details: SessionDetails) => Promise<void>;
+  onSave: (details: SessionDetails) => Promise<WriteOutcome>;
   // Extra condition (beyond client name + patch test) the caller may need to gate saving on
   // — e.g. a complex-coloring session needs at least one step before it's savable.
   saveDisabled?: boolean;
@@ -57,7 +58,7 @@ export interface SessionDetailsPanelProps {
 const COPIED_FEEDBACK_MS = 1500;
 const SAVED_FEEDBACK_MS = 1500;
 
-export type SaveState = "idle" | "saving" | "saved" | "error";
+export type SaveState = "idle" | "saving" | "saved" | "savedOffline" | "error";
 
 // Copy/share actions (need only the already-computed formula text) plus the
 // client name/note/patch-test/photos + save action (need a real client identity), shared
@@ -159,7 +160,7 @@ export function SessionDetailsPanel({
         clientId = selectedClientId;
       }
 
-      await onSave({
+      const outcome = await onSave({
         clientName: clientName.trim(),
         clientId,
         note: note.trim(),
@@ -170,7 +171,7 @@ export function SessionDetailsPanel({
         beforePhotoFile: beforePhoto.file,
         afterPhotoFile: afterPhoto.file,
       });
-      setSaveState("saved");
+      setSaveState(outcome === "queued" ? "savedOffline" : "saved");
       clearTimeout(saveFeedbackTimeoutRef.current);
       saveFeedbackTimeoutRef.current = setTimeout(() => { setSaveState("idle"); setIsDetailsModalOpen(false); onSaved?.(); }, SAVED_FEEDBACK_MS);
     } catch {

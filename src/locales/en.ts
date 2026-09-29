@@ -9,6 +9,7 @@ export const en = {
     titlePrefix: "Formu",
     titleAccent: "list",
     skipToContent: "Skip to content",
+    offlineBanner: "No connection. Changes are saved on this device and will sync automatically.",
   },
   language: {
     en: "EN",
@@ -168,6 +169,7 @@ export const en = {
     copied: "Copied",
     save: "Save to history",
     saved: "Saved",
+    savedOffline: "Saved on device — will sync",
     saving: "Saving…",
     saveError: "Failed to save — check your connection and try again",
     timerStart: "Start",

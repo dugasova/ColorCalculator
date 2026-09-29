@@ -376,6 +376,15 @@ input[type="checkbox"]:disabled {
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
+.offline-banner {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: rgba(234, 88, 12, 0.08);
+  color: var(--status-warning-ink);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
 @keyframes view-enter {
   from {
     opacity: 0;

@@ -1,17 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createClient, updateClient, subscribeToClients, deleteClient } from "./clients";
 
-const addDocMock = vi.fn();
+let autoIdCounter = 0;
+const setDocMock = vi.fn();
 const updateDocMock = vi.fn();
 const deleteDocMock = vi.fn();
-const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
+// Real `doc(collectionRef)` (one arg) auto-generates a fresh id each call; `doc(db, path, id)`
+// (three args) addresses an existing document by the id given. Mirrors both shapes so
+// createClient's `doc(collection(db, ...))` and updateClient's `doc(db, ..., id)` each get
+// back what the real SDK would hand them.
+const docMock = vi.fn((...args: unknown[]) =>
+  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args }
+);
 const onSnapshotMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
 const whereMock = vi.fn((...args: unknown[]) => ({ kind: "where", field: args[0], op: args[1], value: args[2] }));
 const queryMock = vi.fn((...args: unknown[]) => ({ kind: "query", args }));
 
 vi.mock("firebase/firestore", () => ({
-  addDoc: (...args: unknown[]) => addDocMock(...args),
   collection: vi.fn(() => "collection-ref"),
   deleteDoc: (...args: unknown[]) => deleteDocMock(...args),
   doc: (...args: unknown[]) => docMock(...args),
@@ -19,6 +25,7 @@ vi.mock("firebase/firestore", () => ({
   orderBy: (...args: unknown[]) => orderByMock(...args),
   query: (...args: unknown[]) => queryMock(...args),
   serverTimestamp: vi.fn(() => "server-timestamp"),
+  setDoc: (...args: unknown[]) => setDocMock(...args),
   updateDoc: (...args: unknown[]) => updateDocMock(...args),
   where: (...args: unknown[]) => whereMock(...args),
 }));
@@ -26,7 +33,8 @@ vi.mock("./firebase", () => ({ db: {} }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-  addDocMock.mockResolvedValue({ id: "new-doc-id" });
+  autoIdCounter = 0;
+  setDocMock.mockResolvedValue(undefined);
   updateDocMock.mockResolvedValue(undefined);
   deleteDocMock.mockResolvedValue(undefined);
   onSnapshotMock.mockImplementation(() => () => {});
@@ -42,8 +50,8 @@ describe("createClient", () => {
       canvas: { porosity: "high", thickness: "fine", chemicalHistory: ["keratin"] },
     });
 
-    expect(id).toBe("new-doc-id");
-    expect(addDocMock).toHaveBeenCalledWith("collection-ref", {
+    expect(id).toBe("auto-1");
+    expect(setDocMock).toHaveBeenCalledWith({ kind: "doc", id: "auto-1" }, {
       ownedBy: "stylist@salon.test",
       name: "Anna K.",
       phone: "+1 555 0100",
@@ -57,13 +65,11 @@ describe("createClient", () => {
   // createClient twice for "Anna K." (e.g. two different people, same name) has to
   // produce two independent ids, since nothing here derives the id from the name.
   it("creates a distinct id on every call, even for the exact same name", async () => {
-    addDocMock.mockResolvedValueOnce({ id: "anna-1" }).mockResolvedValueOnce({ id: "anna-2" });
-
     const first = await createClient({ ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", canvas: null });
     const second = await createClient({ ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", canvas: null });
 
     expect(first).not.toBe(second);
-    expect(addDocMock).toHaveBeenCalledTimes(2);
+    expect(setDocMock).toHaveBeenCalledTimes(2);
   });
 });
 

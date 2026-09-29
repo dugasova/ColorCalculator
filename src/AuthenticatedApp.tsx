@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
 import { AccountMenu } from "./components/AccountMenu/AccountMenu";
 import { useNativeBackButton } from "./nativeBackButton";
+import { useOnlineStatus } from "./useOnlineStatus";
 
 const HistoryView = lazy(() =>
   import("./components/History/HistoryView").then(m => ({ default: m.HistoryView }))
@@ -49,6 +50,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
   const { t } = useTranslation();
   const brands = usePalette();
   const isAdmin = useIsAdmin(user.uid);
+  const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const location = useLocation();
   const [view, setView] = useState<AppView>("calculator");
@@ -126,6 +128,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
           </div>
         </div>
       </header>
+      {!isOnline && <p className="offline-banner" role="status">{t("app.offlineBanner")}</p>}
       {isChangePasswordOpen && (
         <Suspense fallback={null}>
           <ChangePasswordModal user={user} onClose={() => setIsChangePasswordOpen(false)} />

@@ -9,6 +9,7 @@ import type { DeveloperVolume } from "./engine/levels";
 import { developerVolumeSchema } from "./engine/shades";
 import type { HistoryStep } from "./history";
 import { actualGramsScale } from "./sessionCost";
+import { settleWrite } from "./firestoreWrite";
 
 const DYE_STOCK_COLLECTION = "dyeStock";
 
@@ -227,9 +228,20 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
 // Palette rather than being silently clamped to zero.
 async function applyStockDelta(id: string, deltaGrams: number): Promise<void> {
   const ref = doc(db, DYE_STOCK_COLLECTION, id);
-  const snapshot = await getDoc(ref);
+  let snapshot;
+  try {
+    snapshot = await getDoc(ref);
+  } catch (err) {
+    // Offline and not already in the local cache. PaletteProvider keeps the whole dyeStock
+    // collection subscribed for as long as the app is open, so an id missing from the cache
+    // here means an untracked product -- same no-op as the !exists() case below, rather than
+    // failing the whole save (see saveFormulaToHistory/setActualColorGrams, both best-effort
+    // callers of this function).
+    if ((err as { code?: unknown } | null)?.code === "unavailable") return;
+    throw err;
+  }
   if (!snapshot.exists()) return;
-  await updateDoc(ref, { remainingGrams: increment(deltaGrams) });
+  await settleWrite(updateDoc(ref, { remainingGrams: increment(deltaGrams) }), `stock ${id}`);
 }
 
 // Charges every consumption's grams off its tracked document -- see applyStockDelta.

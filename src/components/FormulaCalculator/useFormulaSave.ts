@@ -7,6 +7,7 @@ import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canv
 import type { ApplicationZone } from "../../engine/applicationZone";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
+import type { WriteOutcome } from "../../firestoreWrite";
 import { useStock } from "../../palette";
 import { findStockShortages, type StockShortage } from "../../stock";
 import type { SessionDetails } from "./SessionDetailsPanel";
@@ -44,7 +45,7 @@ export interface FormulaSave {
   // could drift from what actually gets saved.
   step: ColorHistoryStep;
   shortages: StockShortage[];
-  handleSave: (details: SessionDetails) => Promise<void>;
+  handleSave: (details: SessionDetails) => Promise<WriteOutcome>;
 }
 
 // Builds this formula's persistable ColorHistoryStep, checks it against live stock levels,
@@ -83,8 +84,8 @@ export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
 
   const shortages: StockShortage[] = findStockShortages([step], useStock());
 
-  const handleSave = async (details: SessionDetails) => {
-    await saveFormulaToHistory({
+  const handleSave = (details: SessionDetails) => {
+    return saveFormulaToHistory({
       clientName: details.clientName,
       clientId: details.clientId,
       note: details.note,
