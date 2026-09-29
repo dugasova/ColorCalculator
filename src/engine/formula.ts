@@ -128,14 +128,22 @@ export function calculateFormulaGrams(totalGrams: number, ratio: MixingRatio): F
   return { colorGrams, developerGrams };
 }
 
+// Same split as calculateFormulaGrams, but starting from the dye weight the colorist
+// actually wants to use (e.g. "40 g of color per root touch-up") rather than a total mix
+// weight to divide up -- developer is derived to match the ratio instead of the other way
+// around. Lets a colorist who needs more dye than the calculator's default total simply
+// enter the dye amount they're using; see calculateFullFormula's colorGramsOverride.
+export function calculateFormulaGramsFromColorGrams(colorGrams: number, ratio: MixingRatio): FormulaGrams {
+  const developerGrams = colorGrams * ratio.developerParts / ratio.colorParts;
+  return { colorGrams, developerGrams };
+}
+
 // Blends in an extra shade the colorist chooses at their own discretion (e.g. a small
 // corrective addition), on top of the calculated primary mix. The colorist enters the
 // additional shade's grams by hand; the developer amount is recalculated automatically so
 // the color:developer ratio stays correct for the new, larger total color weight.
 export function applyAdditionalShade(grams: FormulaGrams, ratio: MixingRatio, additionalColorGrams: number): FormulaGrams {
-  const colorGrams = grams.colorGrams + additionalColorGrams;
-  const developerGrams = colorGrams * ratio.developerParts / ratio.colorParts;
-  return { colorGrams, developerGrams };
+  return calculateFormulaGramsFromColorGrams(grams.colorGrams + additionalColorGrams, ratio);
 }
 
 export interface ShadeBlendSplit {
@@ -258,6 +266,13 @@ export function calculateFullFormula(
   mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio = getMixingRatio,
   manualDeveloperVolume?: DeveloperVolume,
   manualMixingRatio?: MixingRatio,
+  // Lets a colorist enter the dye weight directly (e.g. "40 g of color per root
+  // touch-up") instead of a total mix weight -- developer is then derived from it via
+  // the resolved ratio (see calculateFormulaGramsFromColorGrams) rather than backed out
+  // of `totalGrams`. When set, `totalGrams` is still used for anything unrelated to the
+  // color:developer split itself (e.g. corrector grams), scaled to match the resulting
+  // real total so those figures stay proportional to what's actually being mixed.
+  colorGramsOverride?: number,
 ): FullFormula {
   const isLifting = targetShade.level > startLevel;
   const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
@@ -276,15 +291,22 @@ export function calculateFullFormula(
   // No pigment is actually revealed if the line can't lift in the first place, or lifts
   // to nowhere (achievedLevel null alongside developerVolume null).
   const isActuallyLifting = isLifting && liftUnsupportedWarning === null && achievedLevel !== null;
+  const grams = developerVolume !== null
+    ? (colorGramsOverride !== undefined
+        ? calculateFormulaGramsFromColorGrams(colorGramsOverride, mixingRatio)
+        : calculateFormulaGrams(totalGrams, mixingRatio))
+    : null;
+  // Corrector grams scale with the real mix total when the dye weight was entered directly.
+  const correctorBaseGrams = colorGramsOverride !== undefined && grams !== null
+    ? grams.colorGrams + grams.developerGrams
+    : totalGrams;
   const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning } =
-    deriveCorrectiveGuidance(targetShade, isActuallyLifting, achievedLevel, totalGrams);
+    deriveCorrectiveGuidance(targetShade, isActuallyLifting, achievedLevel, correctorBaseGrams);
   const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
 
   const eligibilityWarning = targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
     ? i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel })
     : null;
-
-  const grams = developerVolume !== null ? calculateFormulaGrams(totalGrams, mixingRatio) : null;
 
   return {
     developerVolume,

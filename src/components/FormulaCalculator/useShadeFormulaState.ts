@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { compareShadesForDisplay } from "../../engine/shades";
 import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
-import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
+import { applyAdditionalShade, calculateFullFormula, calculateFormulaGramsFromColorGrams } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
-import { APPLICATION_ZONE_DEFAULT_GRAMS, type ApplicationZone } from "../../engine/applicationZone";
+import { APPLICATION_ZONE_DEFAULT_GRAMS, APPLICATION_ZONE_DEFAULT_COLOR_GRAMS, APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE, type ApplicationZone, type GramsInputMode } from "../../engine/applicationZone";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatio, Shade } from "../../engine/shades";
 import type { HairCanvas } from "../../engine/canvas";
@@ -28,10 +28,13 @@ function useComputedFullFormula(
   manualDeveloperVolume: DeveloperVolume | undefined,
   manualMixingRatio: MixingRatio | undefined,
   totalExtra: number,
+  colorGramsOverride: number | undefined,
 ) {
   const result = useMemo(
-    () => calculateFullFormula(startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume, manualMixingRatio),
-    [startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume, manualMixingRatio]
+    () => calculateFullFormula(
+      startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume, manualMixingRatio, colorGramsOverride
+    ),
+    [startLevel, targetShade, grayPercent, totalGrams, mixingRatioStrategy, manualDeveloperVolume, manualMixingRatio, colorGramsOverride]
   );
   const grams = useMemo(
     () => (result.grams !== null && totalExtra > 0
@@ -69,6 +72,13 @@ export function useShadeFormulaState({ brands, initialCanvas }: UseShadeFormulaS
   const [targetShadeCode, setTargetShadeCode] = useState(GENERIC_SHADE_CHART[0].code);
   const [applicationZone, setApplicationZone] = useState<ApplicationZone>("full-head");
   const [totalGrams, setTotalGrams] = useState(APPLICATION_ZONE_DEFAULT_GRAMS["full-head"]);
+  // Which unit the amount field starts in for the current zone (see
+  // APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE); colorGrams below is the dye weight alone
+  // for "color" mode -- a colorist who needs more than the default can just enter
+  // however much dye they're actually using, and developer is derived to match (see
+  // calculateFullFormula's colorGramsOverride).
+  const [gramsInputMode, setGramsInputMode] = useState<GramsInputMode>(APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE["full-head"]);
+  const [colorGrams, setColorGrams] = useState(APPLICATION_ZONE_DEFAULT_COLOR_GRAMS["full-head"]);
   const [brandId, setBrandId] = useState<BrandId>("generic");
   const [line, setLine] = useState<string | null>(null);
   const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(undefined);
@@ -137,6 +147,8 @@ export function useShadeFormulaState({ brands, initialCanvas }: UseShadeFormulaS
   const handleApplicationZoneChange = (zone: ApplicationZone) => {
     setApplicationZone(zone);
     setTotalGrams(APPLICATION_ZONE_DEFAULT_GRAMS[zone]);
+    setColorGrams(APPLICATION_ZONE_DEFAULT_COLOR_GRAMS[zone]);
+    setGramsInputMode(APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE[zone]);
   };
 
   const handleAdditionalShadeCodeChange = (code: string | null) => {
@@ -178,10 +190,17 @@ export function useShadeFormulaState({ brands, initialCanvas }: UseShadeFormulaS
   const hasShade1 = additionalShade !== null && additionalShadeGrams > 0;
   const hasShade2 = additionalShade2 !== null && additionalShade2Grams > 0;
   const totalExtra = (hasShade1 ? additionalShadeGrams : 0) + (hasShade2 ? additionalShade2Grams : 0);
+  const colorGramsOverride = gramsInputMode === "color" ? colorGrams : undefined;
   const { result, grams, effectiveResult } = useComputedFullFormula(
     startLevel, targetShade, grayPercent, totalGrams, brands[brandId].mixingRatio, effectiveManualDeveloperVolume,
-    effectiveManualMixingRatio, totalExtra
+    effectiveManualMixingRatio, totalExtra, colorGramsOverride
   );
+  // The real primary mix total (color + developer), excluding additional shades --
+  // "color" mode never touches `totalGrams` itself, so callers that need the actual
+  // total for something else (e.g. pre-pigmentation filler sizing) must read this
+  // instead of raw `totalGrams`.
+  const colorModeGrams = gramsInputMode === "color" ? calculateFormulaGramsFromColorGrams(colorGrams, result.mixingRatio) : null;
+  const effectiveTotalGrams = colorModeGrams !== null ? colorModeGrams.colorGrams + colorModeGrams.developerGrams : totalGrams;
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
   return {
@@ -193,6 +212,9 @@ export function useShadeFormulaState({ brands, initialCanvas }: UseShadeFormulaS
     targetShadeCode, setTargetShadeCode,
     applicationZone, setApplicationZone,
     totalGrams, setTotalGrams,
+    gramsInputMode, setGramsInputMode,
+    colorGrams, setColorGrams,
+    effectiveTotalGrams,
     brandId, setBrandId,
     line, setLine,
     manualDeveloperVolume, setManualDeveloperVolume,

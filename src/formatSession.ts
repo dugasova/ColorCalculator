@@ -107,6 +107,8 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
     applicationZone: step.strandZone !== undefined ? null : step.applicationZone,
     additionalShade: step.additionalShade,
     additionalShadeGrams: step.additionalShadeGrams ?? 0,
+    additionalShade2: step.additionalShade2 ?? null,
+    additionalShade2Grams: step.additionalShade2Grams ?? 0,
     blend: step.blend ?? null,
     neutralizationApplied: step.neutralizationApplied,
   });

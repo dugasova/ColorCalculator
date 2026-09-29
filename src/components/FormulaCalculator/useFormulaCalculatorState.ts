@@ -4,6 +4,7 @@ import { splitShadeBlend } from "../../engine/formula";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
 import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { Brand, BrandId } from "../../engine/brands";
+import { APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE } from "../../engine/applicationZone";
 import { useSalonMarkupMultiplier } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
 import { useShadeFormulaState } from "./useShadeFormulaState";
@@ -36,7 +37,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     startLevel, setStartLevel, grayPercent, setGrayPercent,
     porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory,
     targetShadeCode, setTargetShadeCode,
-    applicationZone, setApplicationZone, totalGrams, setTotalGrams, brandId, setBrandId, line, setLine,
+    applicationZone, setApplicationZone, totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode,
+    colorGrams, setColorGrams, effectiveTotalGrams, brandId, setBrandId, line, setLine,
     manualDeveloperVolume, setManualDeveloperVolume, manualMixingRatio, setManualMixingRatio,
     manualProcessingMinutes, setManualProcessingMinutes,
     additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
@@ -71,6 +73,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setGrayPercent(repeatRequest.grayPercent);
     setApplicationZone(repeatRequest.applicationZone);
     setTotalGrams(repeatRequest.totalGrams);
+    setGramsInputMode(APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE[repeatRequest.applicationZone]);
+    setColorGrams(repeatRequest.colorGrams);
     setManualDeveloperVolume(repeatRequest.manualDeveloperVolume);
     setManualMixingRatio(repeatRequest.manualMixingRatio);
     setManualProcessingMinutes(repeatRequest.processingMinutes);
@@ -167,10 +171,6 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     : null;
 
   const pricePerGram = manualPricePerGram ?? brands[brandId].pricePerGram;
-  const totalProductGrams = effectiveResult.grams !== null ? effectiveResult.grams.colorGrams + effectiveResult.grams.developerGrams : null;
-  const productCost = totalProductGrams !== null ? calculateProductCost(totalProductGrams, pricePerGram) : null;
-  const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
-  const servicePrice = manualServicePrice ?? recommendedServicePrice;
 
   // Reevaluated from startLevel/targetShade on every render rather than stored -- purely
   // derived, and needs to stay in sync the instant either field changes so the
@@ -183,8 +183,18 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   // Generic case, and the UI already renders the "no dedicated shade" fallback text.
   const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
   const prePigmentationResult = prePigmentationEnabled && prePigmentationNeed !== "none"
-    ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams, lineShades)
+    ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
     : null;
+
+  // Priced product weight: the dye actually mixed (never its developer -- a salon buys
+  // and prices developer completely separately, see sessionCost.ts's stepTotalGrams),
+  // plus any pre-pigmentation filler mixed on top (also never its diluent).
+  const totalProductGrams = effectiveResult.grams !== null
+    ? effectiveResult.grams.colorGrams + (prePigmentationResult?.grams?.fillerGrams ?? 0)
+    : null;
+  const productCost = totalProductGrams !== null ? calculateProductCost(totalProductGrams, pricePerGram) : null;
+  const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
+  const servicePrice = manualServicePrice ?? recommendedServicePrice;
 
   return {
     startLevel, setStartLevel,
@@ -195,6 +205,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     targetShadeCode,
     applicationZone,
     totalGrams, setTotalGrams,
+    gramsInputMode, setGramsInputMode,
+    colorGrams, setColorGrams,
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,

@@ -127,7 +127,10 @@ export function BleachCalculator() {
   const markupMultiplier = manualMarkupMultiplier ?? salonMarkupMultiplier;
 
   const result = calculateBleachFormula(currentLevel, targetLevel, totalGrams);
-  const totalProductGrams = result.grams !== null ? result.grams.powderGrams + result.grams.developerGrams : null;
+  // Priced product weight: the bleach powder alone -- a salon buys and prices developer
+  // completely separately (see sessionCost.ts's stepTotalGrams), so charging it at the
+  // powder's per-gram price would overstate the real product cost.
+  const totalProductGrams = result.grams !== null ? result.grams.powderGrams : null;
   const productCost = totalProductGrams !== null ? calculateProductCost(totalProductGrams, pricePerGram) : null;
   const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
 

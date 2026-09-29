@@ -1,6 +1,6 @@
 import type { Brand, BrandId } from "../engine/brands";
 import type { DeveloperVolume, Level } from "../engine/levels";
-import type { ApplicationZone } from "../engine/applicationZone";
+import { APPLICATION_ZONE_DEFAULT_COLOR_GRAMS, type ApplicationZone } from "../engine/applicationZone";
 import type { HairCanvas } from "../engine/canvas";
 import { sameMixingRatio, type MixingRatio } from "../engine/shades";
 import { DEFAULT_MARKUP_MULTIPLIER } from "../engine/pricing";
@@ -19,6 +19,9 @@ export interface RepeatFormulaRequest {
   startLevel: Level;
   grayPercent: number;
   totalGrams: number;
+  // Primary dye grams (additional shades excluded), restored into "Color only" mode
+  // for zones that default to it (see APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE).
+  colorGrams: number;
   manualDeveloperVolume: DeveloperVolume | undefined;
   manualMixingRatio: MixingRatio | undefined;
   additionalShadeCode: string | null;
@@ -47,9 +50,9 @@ export interface RepeatFormulaRequest {
 // into, so this returns null and History hides the "Repeat" action for those entries.
 // The step only stores brandName (a display string), so the brand is matched back by name
 // against the live catalog (built-ins plus whatever an admin has added/renamed via
-// PaletteAdminView — see `usePalette`); totalGrams isn't stored either, but the
-// color+developer split in `result.grams` sums back to the exact original total. Returns
-// null if the brand no longer exists (e.g. it was renamed or removed since the entry was
+// PaletteAdminView — see `usePalette`); neither totalGrams nor colorGrams is stored
+// directly, but both are reconstructed from the color+developer split in `result.grams`.
+// Returns null if the brand no longer exists (e.g. it was renamed or removed since the entry was
 // saved).
 export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Record<BrandId, Brand>): RepeatFormulaRequest | null {
   if (entry.steps.length !== 1 || entry.steps[0].kind !== "color") return null;
@@ -69,13 +72,16 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   const blend = step.blend ?? null;
   const additionalShadeGrams = step.additionalShadeGrams ?? 0;
   const additionalShade2Grams = step.additionalShade2Grams ?? 0;
+  const applicationZone = step.applicationZone ?? "full-head";
   let totalGrams = 60;
+  let colorGrams = APPLICATION_ZONE_DEFAULT_COLOR_GRAMS[applicationZone];
   if (step.result.grams !== null) {
     const primaryColorGrams = blend !== null
       ? step.result.grams.colorGrams
       : step.result.grams.colorGrams - additionalShadeGrams - additionalShade2Grams;
     const primaryDeveloperGrams = primaryColorGrams * step.result.mixingRatio.developerParts / step.result.mixingRatio.colorParts;
     totalGrams = Math.round(primaryColorGrams + primaryDeveloperGrams);
+    colorGrams = Math.round(primaryColorGrams);
   }
   const blendTotal = blend !== null ? blend.shadeAGrams + blend.shadeBGrams : 0;
   const blendPrimaryPercent = blend !== null && blendTotal > 0 ? Math.round(blend.shadeAGrams / blendTotal * 100) : 70;
@@ -89,6 +95,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     startLevel: step.startLevel,
     grayPercent: step.grayPercent,
     totalGrams,
+    colorGrams,
     canvas: step.canvas ?? { porosity: "normal", thickness: "medium", chemicalHistory: [] },
     manualDeveloperVolume: step.targetShade.developerVolumeChoices !== undefined
       ? (step.result.developerVolume ?? undefined)
@@ -107,7 +114,7 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     // defensive here too since this reads whatever `entry.steps` the caller passed in.
     prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
     processingMinutes: step.processingMinutes,
-    applicationZone: step.applicationZone ?? "full-head",
+    applicationZone,
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,
     markupMultiplier: entry.markupMultiplier ?? DEFAULT_MARKUP_MULTIPLIER,
     servicePrice: entry.servicePrice ?? undefined,

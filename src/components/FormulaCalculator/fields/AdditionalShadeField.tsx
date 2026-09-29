@@ -30,7 +30,7 @@ export function AdditionalShadeField({
   const additionalShade = lineShades.find(s => s.code === additionalShadeCode) ?? null;
   // See useClampedNumberText's own comment: a plain `type="number"` input bound directly
   // to `additionalShadeGrams` can briefly show "040" when typing over the default 0
-  // before the parent's re-render catches up. min: 0 (not TotalGramsField's 1) since 0
+  // before the parent's re-render catches up. min: 0 (not GramsInputField's 1) since 0
   // additional-shade grams is a valid "not blending anything in yet" state.
   const { inputProps: gramsInputProps } = useClampedNumberText(additionalShadeGrams, onAdditionalShadeGramsChange, { min: 0 });
 

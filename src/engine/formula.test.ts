@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, applyAdditionalShade, splitShadeBlend, getRecommendedProcessingMinutes } from "./formula";
+import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, calculateFormulaGramsFromColorGrams, applyAdditionalShade, splitShadeBlend, getRecommendedProcessingMinutes } from "./formula";
 import type { Shade } from "./shades";
 
 describe("getGrayCoverageStrategy", () => {
@@ -69,6 +69,29 @@ describe("calculateFormulaGrams", () => {
   it("always accounts for the full total", () => {
     const { colorGrams, developerGrams } = calculateFormulaGrams(90, { colorParts: 1, developerParts: 1.5 });
     expect(colorGrams + developerGrams).toBeCloseTo(90);
+  });
+});
+
+describe("calculateFormulaGramsFromColorGrams", () => {
+  it("derives developer 1:1 from the dye weight alone", () => {
+    expect(calculateFormulaGramsFromColorGrams(40, { colorParts: 1, developerParts: 1 })).toEqual({
+      colorGrams: 40,
+      developerGrams: 40,
+    });
+  });
+
+  it("derives developer 1:1.5 from the dye weight alone", () => {
+    expect(calculateFormulaGramsFromColorGrams(40, { colorParts: 1, developerParts: 1.5 })).toEqual({
+      colorGrams: 40,
+      developerGrams: 60,
+    });
+  });
+
+  it("derives developer 1:2 from the dye weight alone", () => {
+    expect(calculateFormulaGramsFromColorGrams(40, { colorParts: 1, developerParts: 2 })).toEqual({
+      colorGrams: 40,
+      developerGrams: 80,
+    });
   });
 });
 

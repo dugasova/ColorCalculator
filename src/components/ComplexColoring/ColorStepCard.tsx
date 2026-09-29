@@ -12,7 +12,7 @@ import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShad
 import { PrePigmentationField } from "../FormulaCalculator/fields/PrePigmentationField";
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
 import { MixingRatioField } from "../FormulaCalculator/fields/MixingRatioField";
-import { TotalGramsField } from "../FormulaCalculator/fields/TotalGramsField";
+import { GramsInputField } from "../FormulaCalculator/fields/GramsInputField";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
@@ -65,7 +65,7 @@ export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }
     chemicalHistory, setChemicalHistory,
     targetShadeCode,
     applicationZone,
-    totalGrams, setTotalGrams,
+    totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode, colorGrams, setColorGrams, effectiveTotalGrams,
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
@@ -120,9 +120,9 @@ export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }
   const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
   const prePigmentationResult = useMemo(
     () => (prePigmentationEnabled && prePigmentationNeed !== "none"
-      ? calculatePrePigmentation(startLevel, targetShade.level, totalGrams, lineShades)
+      ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
       : null),
-    [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, totalGrams, lineShades]
+    [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, effectiveTotalGrams, lineShades]
   );
 
   // Report the computed step up on every change — the parent aggregates all steps'
@@ -226,7 +226,15 @@ export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }
           onManualMixingRatioChange={setManualMixingRatio}
           idSuffix={idSuffix}
         />
-        <TotalGramsField totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} idSuffix={idSuffix} />
+        <GramsInputField
+          gramsInputMode={gramsInputMode}
+          onGramsInputModeChange={setGramsInputMode}
+          totalGrams={totalGrams}
+          onTotalGramsChange={setTotalGrams}
+          colorGrams={colorGrams}
+          onColorGramsChange={setColorGrams}
+          idSuffix={idSuffix}
+        />
         <div className="field">
           <label htmlFor={`stepProcessingMinutes${idSuffix}`}>{t("results.processingTime")}</label>
           <input

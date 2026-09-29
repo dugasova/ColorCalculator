@@ -224,6 +224,20 @@ describe("buildRepeatFormulaRequest", () => {
     expect(buildRepeatFormulaRequest(entry, BRANDS)).toBeNull();
   });
 
+  it("reconstructs the dye-only grams for a root touch-up entry", () => {
+    const step = makeColorStep({
+      applicationZone: "root-touch-up",
+      result: { ...colorFullFormula, grams: { colorGrams: 40, developerGrams: 40 } },
+    });
+    const entry = makeEntry({ clientName: "Anna", steps: [step] });
+    const request = buildRepeatFormulaRequest(entry, BRANDS);
+
+    expect(request).not.toBeNull();
+    expect(request!.applicationZone).toBe("root-touch-up");
+    expect(request!.colorGrams).toBe(40);
+    expect(request!.totalGrams).toBe(80);
+  });
+
   it("returns null when the saved brand no longer exists", () => {
     const entry = makeEntry({ clientName: "Anna", steps: [makeColorStep({ brandName: "Deleted Brand" })] });
     expect(buildRepeatFormulaRequest(entry, BRANDS)).toBeNull();

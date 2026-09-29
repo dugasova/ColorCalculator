@@ -55,6 +55,19 @@ describe("formatSessionText", () => {
     expect(text).toContain("Mix: 9.1- 20.0 g developer 40.0 g");
   });
 
+  it("includes the second additional shade in the Mix line (regression: formatStepText dropped it, even though it's saved and Repeat restores it correctly)", () => {
+    const stepWithAdditional2: ColorHistoryStep = {
+      ...colorStep,
+      additionalShade: { code: "7.1", level: 7, tone: "ash" },
+      additionalShadeGrams: 10,
+      additionalShade2: { code: "7.17", level: 7, tone: "ash", secondaryTone: "chocolate" },
+      additionalShade2Grams: 5,
+      result: { ...colorStep.result, grams: { colorGrams: 35, developerGrams: 40 } },
+    };
+    const text = formatSessionText([stepWithAdditional2]);
+    expect(text).toContain("Mix: 9.1- 20.0 g 7.1- 10.0 g 7.17- 5.0 g developer 40.0 g");
+  });
+
   it("numbers each step and appends the combined total processing time for a multi-step session", () => {
     const text = formatSessionText([bleachStep, colorStep]);
 

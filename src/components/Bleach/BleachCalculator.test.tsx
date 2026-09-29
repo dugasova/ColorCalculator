@@ -26,8 +26,8 @@ describe("BleachCalculator", () => {
     expect(html).toContain("g bleach powder");
     expect(html).toContain("id=\"bleachPricePerGram\"");
     expect(html).toContain("id=\"bleachMarkupMultiplier\"");
-    expect(html).toContain("6.00"); // productCost: 60g total @ default 0.10/g
-    expect(html).toContain("24.00"); // recommendedServicePrice: 6.00 * default 4x markup
+    expect(html).toContain("2.00"); // productCost: 20g powder (developer excluded) @ default 0.10/g
+    expect(html).toContain("8.00"); // recommendedServicePrice: 2.00 * default 4x markup
     expect(html).not.toContain("choose a target level above your current level");
     expect(html).not.toContain("cannot be done in a single session");
   });

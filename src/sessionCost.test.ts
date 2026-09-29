@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { actualGramsScale, stepTotalGrams, calculateSessionProductCost } from "./sessionCost";
 import type { ColorHistoryStep, BleachHistoryStep } from "./history";
 import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep } from "./testFixtures";
+import { calculatePrePigmentation } from "./engine/prePigmentation";
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
   return makeSharedColorStep({
@@ -54,18 +55,26 @@ describe("actualGramsScale", () => {
 });
 
 describe("stepTotalGrams", () => {
-  it("scales the whole mix (dye + developer) by the actual/computed ratio", () => {
+  it("scales the priced dye weight (never developer) by the actual/computed ratio", () => {
     const step = makeColorStep({ actualColorGrams: 45 });
-    expect(stepTotalGrams(step)).toBe(90);
+    expect(stepTotalGrams(step)).toBe(45);
   });
 
-  it("returns the unscaled total when no actual figure was recorded", () => {
-    expect(stepTotalGrams(makeColorStep({ actualColorGrams: null }))).toBe(60);
-    expect(stepTotalGrams(makeColorStep({ actualColorGrams: undefined }))).toBe(60);
+  it("returns the unscaled dye weight (never developer) when no actual figure was recorded", () => {
+    expect(stepTotalGrams(makeColorStep({ actualColorGrams: null }))).toBe(30);
+    expect(stepTotalGrams(makeColorStep({ actualColorGrams: undefined }))).toBe(30);
   });
 
-  it("sums powder and developer for a bleach step, ignoring actual dye figures", () => {
-    expect(stepTotalGrams(bleachStep)).toBe(60);
+  it("adds the pre-pigmentation filler weight on top of the dye weight, ignoring its diluent", () => {
+    const step = makeColorStep({
+      prePigmentation: calculatePrePigmentation(9, 5, 40),
+    });
+    // 30g dye (developer excluded) + 20g filler (1:1 filler:diluent of 40g, diluent excluded) = 50g.
+    expect(stepTotalGrams(step)).toBe(50);
+  });
+
+  it("uses only the powder grams for a bleach step -- never developer -- ignoring actual dye figures", () => {
+    expect(stepTotalGrams(bleachStep)).toBe(20);
   });
 
   it("returns 0 for a step with no computed grams", () => {
@@ -79,9 +88,9 @@ describe("calculateSessionProductCost", () => {
     expect(calculateSessionProductCost([])).toBeNull();
   });
 
-  it("sums each step's product cost using its own pricePerGram", () => {
+  it("sums each step's product cost using its own pricePerGram, dye only", () => {
     const steps = [makeColorStep({ pricePerGram: 0.2 }), makeColorStep({ pricePerGram: 0.1 })];
-    // Each step: 60g * pricePerGram
-    expect(calculateSessionProductCost(steps)).toBeCloseTo(60 * 0.2 + 60 * 0.1, 5);
+    // Each step: 30g dye (developer excluded) * pricePerGram
+    expect(calculateSessionProductCost(steps)).toBeCloseTo(30 * 0.2 + 30 * 0.1, 5);
   });
 });

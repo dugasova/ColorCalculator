@@ -37,7 +37,7 @@ describe("FormulaCalculator", () => {
     function repeatFor(brandId: RepeatFormulaRequest["brandId"], line: string | null, targetShadeCode: string): RepeatFormulaRequest {
       return {
         clientName: "Anna K.", clientId: "anna-1",
-        brandId, line, targetShadeCode, startLevel: 8, grayPercent: 0, totalGrams: 60,
+        brandId, line, targetShadeCode, startLevel: 8, grayPercent: 0, totalGrams: 60, colorGrams: 30,
         manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
         blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
         processingMinutes: 20, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
@@ -67,7 +67,7 @@ describe("FormulaCalculator", () => {
   it("hides the pre-pigmentation checkbox when the level drop is under 2 (no lift/no drop)", () => {
     const repeatRequest: RepeatFormulaRequest = {
       clientName: "Anna K.", clientId: "anna-1",
-      brandId: "generic", line: null, targetShadeCode: "8.1", startLevel: 8, grayPercent: 0, totalGrams: 60,
+      brandId: "generic", line: null, targetShadeCode: "8.1", startLevel: 8, grayPercent: 0, totalGrams: 60, colorGrams: 30,
       manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
       processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
@@ -81,7 +81,7 @@ describe("FormulaCalculator", () => {
   it("shows the pre-pigmentation checkbox, unchecked, when the level drop is 2 or more and the repeated entry never opted in", () => {
     const repeatRequest: RepeatFormulaRequest = {
       clientName: "Anna K.", clientId: "anna-1",
-      brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30,
+      brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30, colorGrams: 15,
       manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
       processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
@@ -97,7 +97,7 @@ describe("FormulaCalculator", () => {
   it("restores an opted-in filler step when repeating an entry that had it checked", () => {
     const repeatRequest: RepeatFormulaRequest = {
       clientName: "Anna K.", clientId: "anna-1",
-      brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30,
+      brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30, colorGrams: 15,
       manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
       blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
       processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,

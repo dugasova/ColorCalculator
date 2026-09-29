@@ -17,7 +17,7 @@ import { BlendRatioField } from "./fields/BlendRatioField";
 import { DeveloperVolumeField } from "./fields/DeveloperVolumeField";
 import { MixingRatioField } from "./fields/MixingRatioField";
 import { ApplicationZoneField } from "./fields/ApplicationZoneField";
-import { TotalGramsField } from "./fields/TotalGramsField";
+import { GramsInputField } from "./fields/GramsInputField";
 import { CrossBrandMatchField } from "./fields/CrossBrandMatchField";
 import { FormulaResults } from "./FormulaResults";
 
@@ -40,7 +40,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     chemicalHistory, setChemicalHistory,
     targetShadeCode,
     applicationZone,
-    totalGrams, setTotalGrams,
+    totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode, colorGrams, setColorGrams,
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
@@ -179,7 +179,14 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
           onManualMixingRatioChange={setManualMixingRatio}
         />
         <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} />
-        <TotalGramsField totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} />
+        <GramsInputField
+          gramsInputMode={gramsInputMode}
+          onGramsInputModeChange={setGramsInputMode}
+          totalGrams={totalGrams}
+          onTotalGramsChange={setTotalGrams}
+          colorGrams={colorGrams}
+          onColorGramsChange={setColorGrams}
+        />
       </div>
       <FormulaResults
         brandId={brandId}

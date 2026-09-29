@@ -165,4 +165,27 @@ describe("ColorStepCard interaction", () => {
     // not the bleach step's targetLevel (9).
     expect(lastStep(onChange).startLevel).toBe(10);
   });
+
+  it("derives developer from a dye-only amount", () => {
+    const { onChange } = renderStep();
+    chooseOption("Amount entered as", "color");
+    fireEvent.change(screen.getByLabelText("Color, g"), { target: { value: "50" } });
+
+    const step = lastStep(onChange);
+    expect(step.result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
+    expect(step.result.grams).toEqual({ colorGrams: 50, developerGrams: 50 });
+  });
+
+  it("does not grow the pre-pigmentation filler when an additional shade is added", () => {
+    const { onChange } = renderStep();
+    fireEvent.click(screen.getByLabelText("Add pre-pigmentation step"));
+    const fillerBefore = lastStep(onChange).prePigmentation?.grams;
+
+    chooseOption("Additional shade (colorist's discretion)", "2.1");
+    fireEvent.change(screen.getByLabelText("Additional shade, g"), { target: { value: "10" } });
+
+    const step = lastStep(onChange);
+    expect(step.result.grams?.colorGrams).toBeGreaterThan(40);
+    expect(step.prePigmentation?.grams).toEqual(fillerBefore);
+  });
 });

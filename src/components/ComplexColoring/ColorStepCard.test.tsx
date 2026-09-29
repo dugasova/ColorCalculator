@@ -14,7 +14,7 @@ describe("ColorStepCard", () => {
     expect(html).toContain("id=\"grayPercent-1\"");
     expect(html).toContain("id=\"targetShadeCode-1\"");
     expect(html).toContain("id=\"additionalShadeCode-1\"");
-    expect(html).toContain("id=\"totalGrams-1\"");
+    expect(html).toContain("id=\"gramsAmount-1\"");
     expect(html).toContain("id=\"stepProcessingMinutes-1\"");
     expect(html).toContain("id=\"stepPricePerGram-1\"");
   });

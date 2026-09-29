@@ -47,6 +47,16 @@ describe("calculateFullFormula", () => {
     expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
   });
 
+  it("splits grams from the dye weight alone when colorGramsOverride is set, ignoring totalGrams for the split but keeping corrector grams proportional to the real mix total", () => {
+    const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
+    const result = calculateFullFormula(6, targetShade, 0, 60, undefined, undefined, undefined, 40);
+
+    expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1.5 });
+    expect(result.grams).toEqual({ colorGrams: 40, developerGrams: 60 });
+    expect(result.correctorGrams).not.toBeNull();
+    expect(result.correctorGrams).toBe(calculateFullFormula(6, targetShade, 0, 100).correctorGrams);
+  });
+
   it("has no warning when the chosen tone matches the recommended corrective tone", () => {
     // level 8 -> underlying pigment 'yellow' -> recommended corrective tone 'violet'
     const targetShade: Shade = { code: "8.2", level: 8, tone: "violet" };
