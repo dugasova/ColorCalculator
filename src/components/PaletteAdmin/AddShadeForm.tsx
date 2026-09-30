@@ -7,6 +7,7 @@ import type { Level } from "../../engine/levels";
 import type { Shade, ToneFamily } from "../../engine/shades";
 import { Select } from "../common/Select";
 import { LevelField } from "../common/LevelField";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 export interface AddShadeFormProps {
   // The brand the new shade is added to — see PaletteAdminView's `effectiveSelectedBrandId`.
@@ -74,8 +75,7 @@ export function AddShadeForm({ brandId, brandName, existingShades }: AddShadeFor
   };
 
   return (
-    <section className="palette-admin__section">
-      <h2 className="results__section-heading">{t("palette.addShadeTitle")}</h2>
+    <CollapsibleSection id="addShade" title={t("palette.addShadeTitle")} defaultOpen={false}>
       <p className="palette-admin__hint">{t("palette.addShadeForBrand", { brand: brandName })}</p>
       <form className="calculator__form" onSubmit={handleAddShade}>
         <div className="field">
@@ -119,6 +119,6 @@ export function AddShadeForm({ brandId, brandName, existingShades }: AddShadeFor
         </button>
         {shadeStatus === "saved" && <span className="palette-admin__status" role="status">{t("palette.shadeAdded")}</span>}
       </form>
-    </section>
+    </CollapsibleSection>
   );
 }

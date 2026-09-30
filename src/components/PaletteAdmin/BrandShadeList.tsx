@@ -7,6 +7,7 @@ import { shadeKey } from "../../engine/paletteOverrides";
 import type { Shade } from "../../engine/shades";
 import { shadeToHexColor } from "../../engine/color";
 import { Select } from "../common/Select";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 export interface BrandShadeListProps {
   brands: Record<BrandId, Brand>;
@@ -50,8 +51,7 @@ export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBran
   };
 
   return (
-    <section className="palette-admin__section">
-      <h2 className="results__section-heading">{t("palette.shadesTitle")}</h2>
+    <CollapsibleSection id="shades" title={t("palette.shadesTitle")} defaultOpen={true}>
       <div className="field">
         <label htmlFor="paletteSelectedBrand">{t("palette.selectBrandLabel")}</label>
         <Select
@@ -89,6 +89,6 @@ export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBran
           ))}
         </ul>
       )}
-    </section>
+    </CollapsibleSection>
   );
 }

@@ -4,6 +4,7 @@ import { addCustomBrand } from "../../palette";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatioConfig } from "../../engine/paletteOverrides";
 import { Select } from "../common/Select";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 export interface AddBrandFormProps {
   brands: Record<BrandId, Brand>;
@@ -85,8 +86,7 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
   };
 
   return (
-    <section className="palette-admin__section">
-      <h2 className="results__section-heading">{t("palette.addBrandTitle")}</h2>
+    <CollapsibleSection id="addBrand" title={t("palette.addBrandTitle")} defaultOpen={false}>
       <form className="calculator__form" onSubmit={handleAddBrand}>
         <div className="field">
           <label htmlFor="paletteBrandName">{t("palette.brandName")}</label>
@@ -144,6 +144,6 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
         </button>
         {brandStatus === "saved" && <span className="palette-admin__status" role="status">{t("palette.brandAdded")}</span>}
       </form>
-    </section>
+    </CollapsibleSection>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSalonMarkupMultiplier } from "../../palette";
 import { setSalonMarkupMultiplier } from "../../salonSettings";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 // Admin-editable salon-wide markup default (src/salonSettings.ts) -- seeds every new
 // calculator's starting markup; a stylist can still override it for one session. Copies
@@ -37,8 +38,7 @@ export function PricingSettingsForm() {
   };
 
   return (
-    <section className="palette-admin__section">
-      <h2 className="results__section-heading">{t("palette.pricingTitle")}</h2>
+    <CollapsibleSection id="pricing" title={t("palette.pricingTitle")} defaultOpen={false}>
       <p className="palette-admin__hint">{t("palette.markupHint")}</p>
       <div className="field">
         <label htmlFor="salonMarkupMultiplier">{t("palette.markupLabel")}</label>
@@ -55,6 +55,6 @@ export function PricingSettingsForm() {
       </div>
       {isSaving && <span className="palette-admin__status" role="status">{t("palette.saving")}</span>}
       {error !== null && <p className="warning" role="alert">{error}</p>}
-    </section>
+    </CollapsibleSection>
   );
 }

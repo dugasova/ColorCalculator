@@ -132,3 +132,31 @@
   background: rgba(234, 88, 12, 0.08);
   color: var(--status-warning-ink);
 }
+
+.palette-admin__section-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.palette-admin__section-chevron {
+  width: 12px;
+  height: 8px;
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.palette-admin__section-toggle[aria-expanded="true"] .palette-admin__section-chevron {
+  transform: rotate(180deg);
+}

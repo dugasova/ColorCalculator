@@ -12,6 +12,7 @@ import {
   getShadeTubeSizeGrams, getStockStatus, restockOneTube, setDeveloperStockGrams, setShadeStockGrams, shadeStockId,
   stockById, stopTrackingStock, LOW_STOCK_THRESHOLD_GRAMS,
 } from "../../stock";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 export interface BrandStockListProps {
   brandId: BrandId;
@@ -175,11 +176,11 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
   };
 
   return (
-    <section className="palette-admin__section">
-      <h2 className="results__section-heading">
-        {t("palette.stockTitle")}
-        {lowOrOutCount > 0 && ` — ${t("palette.stockLowSummary", { count: lowOrOutCount })}`}
-      </h2>
+    <CollapsibleSection
+      id="stock"
+      title={<>{t("palette.stockTitle")}{lowOrOutCount > 0 && ` — ${t("palette.stockLowSummary", { count: lowOrOutCount })}`}</>}
+      defaultOpen={true}
+    >
       <p className="palette-admin__hint">{t("palette.stockHint")}</p>
       {error !== null && <p className="warning" role="alert">{error}</p>}
 
@@ -191,6 +192,6 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
       <ul className="palette-admin__stock-list">
         {rows.slice(activeShades.length).map(renderRow)}
       </ul>
-    </section>
+    </CollapsibleSection>
   );
 }
