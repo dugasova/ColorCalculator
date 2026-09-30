@@ -8,6 +8,7 @@ import { useIsAdmin } from "./roles";
 import FormulaCalculator from "./components/FormulaCalculator/FormulaCalculator";
 import { Nav, type AppView } from "./components/Nav/Nav";
 import { buildRepeatFormulaRequest, type FormulaHistoryEntry, type RepeatFormulaRequest } from "./history";
+import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
 import { AccountMenu } from "./components/AccountMenu/AccountMenu";
@@ -45,6 +46,9 @@ const BrandCheatSheetPage = lazy(() =>
 const GuideCheatSheetPage = lazy(() =>
   import("./components/Guides/GuideCheatSheetPage").then(m => ({ default: m.GuideCheatSheetPage }))
 );
+const FavoritesPage = lazy(() =>
+  import("./components/FormulaCalculator/FavoritesPage").then(m => ({ default: m.FavoritesPage }))
+);
 
 export function AuthenticatedApp({ user }: { user: User }) {
   const { t } = useTranslation();
@@ -55,6 +59,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
   const location = useLocation();
   const [view, setView] = useState<AppView>("calculator");
   const [repeatRequest, setRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+  const [favoriteRequest, setFavoriteRequest] = useState<FavoriteFormulaRecipe | null>(null);
   // Bumped after a formula/session save finishes showing its "Saved!" confirmation --
   // passed as `key` to whichever calculator is mounted below, forcing React to unmount
   // and remount it from scratch (brand/shade/level state, session-panel client fields,
@@ -103,10 +108,20 @@ export function AuthenticatedApp({ user }: { user: User }) {
     setView("calculator");
   };
 
+  // Mirrors handleRepeat above: FavoritesPage only picks which recipe, the actual
+  // insertion into the live calculator form happens back on "/" (see
+  // FormulaCalculator's favoriteRequest prop + useFormulaCalculatorState's replay).
+  const handleApplyFavorite = (recipe: FavoriteFormulaRecipe) => {
+    setFavoriteRequest(recipe);
+    navigate("/");
+    setView("calculator");
+  };
+
   const handleFormulaSaved = () => {
-    // A stale repeatRequest would otherwise replay itself into the freshly remounted
-    // calculator (see useFormulaCalculatorState's apply-on-render effect).
+    // A stale repeatRequest/favoriteRequest would otherwise replay itself into the
+    // freshly remounted calculator (see useFormulaCalculatorState's apply-on-render effect).
     setRepeatRequest(null);
+    setFavoriteRequest(null);
     setFormResetKey(key => key + 1);
   };
 
@@ -149,6 +164,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
                       key={formResetKey}
                       appliedBy={user.email ?? "unknown"}
                       repeatRequest={repeatRequest}
+                      favoriteRequest={favoriteRequest}
                       onSaved={handleFormulaSaved}
                     />
                   )}
@@ -158,6 +174,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
                   {view === "prepigment" && <PrePigmentationCalculator />}
                   {view === "history" && <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
                   {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
+                  {view === "favorites" && <FavoritesPage appliedBy={user.email ?? "unknown"} brands={brands} onApply={handleApplyFavorite} />}
                   {view === "palette" && isAdmin && <PaletteAdminView />}
                 </>
               }

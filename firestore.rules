@@ -65,6 +65,16 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // A stylist's personal favorite-formula library (src/favoriteFormulas.ts) -- private to
+    // its owner with no admin override. create/update pin `ownedBy` to the caller's own token
+    // email so a favorite can't be created in, or moved into, another stylist's library.
+    match /favoriteFormulas/{favoriteId} {
+      allow read, delete: if isSignedIn() && resource.data.ownedBy == request.auth.token.email;
+      allow create: if isSignedIn() && request.resource.data.ownedBy == request.auth.token.email;
+      allow update: if isSignedIn() && resource.data.ownedBy == request.auth.token.email
+        && request.resource.data.ownedBy == request.auth.token.email;
+    }
+
     // Palette management (src/palette.ts, src/components/PaletteAdmin): every stylist
     // reads the live catalog, but only an admin may add a dye line, add a shade, or mark
     // one discontinued.

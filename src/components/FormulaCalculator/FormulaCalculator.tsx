@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import "./FormulaCalculator.css";
 import { usePalette } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
+import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 import { useFormulaCalculatorState } from "./useFormulaCalculatorState";
 import { BrandField } from "./fields/BrandField";
 import { LineField } from "./fields/LineField";
@@ -20,16 +21,18 @@ import { ApplicationZoneField } from "./fields/ApplicationZoneField";
 import { GramsInputField } from "./fields/GramsInputField";
 import { CrossBrandMatchField } from "./fields/CrossBrandMatchField";
 import { FormulaResults } from "./FormulaResults";
+import { SaveFavoriteButton } from "./SaveFavoriteButton";
 
 export interface FormulaCalculatorProps {
   appliedBy: string;
   repeatRequest?: RepeatFormulaRequest | null;
+  favoriteRequest?: FavoriteFormulaRecipe | null;
   // Bubbled up to the caller once a save's "Saved!" confirmation has finished showing --
   // App.tsx uses it to remount this whole calculator with a fresh key, resetting every
   // field (brand/shade/level down through the client-details panel) for the next client.
   onSaved?: () => void;
 }
-export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }: FormulaCalculatorProps) {
+export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRequest, onSaved }: FormulaCalculatorProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const {
@@ -72,6 +75,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     blendShadeA,
     blendShadeB,
     blend,
+    favoriteRecipe,
     processingMinutes,
     pricePerGram,
     productCost,
@@ -86,7 +90,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
     handleAdditionalShadeCodeChange,
     handleBlendModeChange,
     handleApplicationZoneChange,
-  } = useFormulaCalculatorState(brands, repeatRequest);
+  } = useFormulaCalculatorState(brands, repeatRequest, favoriteRequest);
 
   return (
     <div className="calculator calculator--wide">
@@ -222,6 +226,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, onSaved }:
         onSaved={onSaved}
         repeatRequest={repeatRequest}
       />
+      <SaveFavoriteButton appliedBy={appliedBy} brands={brands} currentRecipe={favoriteRecipe} />
     </div>
   );
 }

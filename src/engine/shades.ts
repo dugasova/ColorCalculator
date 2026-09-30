@@ -60,7 +60,7 @@ export interface Shade {
   acceptsPartialLift?: boolean
 }
 
-const mixingRatioSchema = z.object({
+export const mixingRatioSchema = z.object({
   colorParts: z.number(),
   developerParts: z.number(),
 });

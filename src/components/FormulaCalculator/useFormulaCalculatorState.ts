@@ -7,6 +7,7 @@ import type { Brand, BrandId } from "../../engine/brands";
 import { APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE } from "../../engine/applicationZone";
 import { useSalonMarkupMultiplier } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
+import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 import { useShadeFormulaState } from "./useShadeFormulaState";
 
 const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
@@ -19,7 +20,7 @@ const BLEND_LEVEL_TOLERANCE = 1;
 // cross-brand match, markup/service price -- on top of the brand/line/shade/formula state
 // shared with ColorStepCard (see useShadeFormulaState). The component itself stays a thin
 // render of already-computed values.
-export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeatRequest?: RepeatFormulaRequest | null) {
+export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeatRequest?: RepeatFormulaRequest | null, favoriteRequest?: FavoriteFormulaRecipe | null) {
   const [manualPricePerGram, setManualPricePerGram] = useState<number | undefined>(undefined);
   const salonMarkupMultiplier = useSalonMarkupMultiplier();
   const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
@@ -30,6 +31,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   const [blendShadeBCode, setBlendShadeBCode] = useState<string | null>(null);
   const [blendPrimaryPercent, setBlendPrimaryPercent] = useState(DEFAULT_BLEND_PRIMARY_PERCENT);
   const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+  const [appliedFavoriteRequest, setAppliedFavoriteRequest] = useState<FavoriteFormulaRecipe | null>(null);
   const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(false);
 
   const base = useShadeFormulaState({ brands });
@@ -92,6 +94,41 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setNeutralizationApplied(false);
     setPrePigmentationEnabled(repeatRequest.prePigmentationEnabled);
   }
+
+  // Insert a saved favorite's recipe (src/favoriteFormulas.ts) into the calculator --
+  // mirrors the repeatRequest replay above (same "adjust state when a prop changes"
+  // pattern: https://react.dev/learn/you-might-not-need-an-effect), fired by navigating
+  // here from the standalone Favorites page (see FavoritesPage + AuthenticatedApp's
+  // handleApplyFavorite) rather than a same-page chip click. Deliberately never touches
+  // startLevel/grayPercent/canvas/markup/client fields: a favorite is a shade+mix recipe
+  // to reuse for the client *already* on screen, not a whole past session to restore.
+  // Resets the manual price/service-price overrides exactly like handleBrandIdChange
+  // does, so price re-derives from the (possibly new) brand.
+  if (favoriteRequest && favoriteRequest !== appliedFavoriteRequest) {
+    setAppliedFavoriteRequest(favoriteRequest);
+    setBrandId(favoriteRequest.brandId);
+    setLine(favoriteRequest.line);
+    setTargetShadeCode(favoriteRequest.targetShadeCode);
+    setApplicationZone(favoriteRequest.applicationZone);
+    setGramsInputMode(favoriteRequest.gramsInputMode);
+    setTotalGrams(favoriteRequest.totalGrams);
+    setColorGrams(favoriteRequest.colorGrams);
+    setManualDeveloperVolume(favoriteRequest.manualDeveloperVolume ?? undefined);
+    setManualMixingRatio(favoriteRequest.manualMixingRatio ?? undefined);
+    setManualProcessingMinutes(favoriteRequest.manualProcessingMinutes ?? undefined);
+    setAdditionalShadeCode(favoriteRequest.additionalShadeCode);
+    setAdditionalShadeGrams(favoriteRequest.additionalShadeGrams);
+    setAdditionalShade2Code(favoriteRequest.additionalShade2Code);
+    setAdditionalShade2Grams(favoriteRequest.additionalShade2Grams);
+    setBlendModeEnabled(favoriteRequest.blendShadeACode !== null && favoriteRequest.blendShadeBCode !== null);
+    setBlendShadeACode(favoriteRequest.blendShadeACode);
+    setBlendShadeBCode(favoriteRequest.blendShadeBCode);
+    setBlendPrimaryPercent(favoriteRequest.blendPrimaryPercent);
+    setNeutralizationApplied(false);
+    setManualPricePerGram(undefined);
+    setManualServicePrice(undefined);
+  }
+
 
   const handleBrandIdChange = (newBrandId: BrandId) => {
     base.handleBrandIdChange(newBrandId);
@@ -170,6 +207,22 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
       }
     : null;
 
+  // The current recipe in "save as favorite" shape (src/favoriteFormulas.ts) --
+  // deliberately excludes startLevel/grayPercent/canvas/pricing, the same fields
+  // applyFavoriteRecipe above never touches, since a favorite is a shade/mix recipe to
+  // reuse across clients, not a snapshot of this one visit.
+  const favoriteRecipe: FavoriteFormulaRecipe = {
+    brandId, line: targetShade.line ?? null, targetShadeCode: targetShade.code,
+    additionalShadeCode, additionalShadeGrams, additionalShade2Code, additionalShade2Grams,
+    blendShadeACode: blendModeEnabled ? blendShadeACodeEffective : null,
+    blendShadeBCode: blendModeEnabled ? blendShadeBCodeEffective : null,
+    blendPrimaryPercent,
+    manualDeveloperVolume: manualDeveloperVolume ?? null,
+    manualMixingRatio: manualMixingRatio ?? null,
+    manualProcessingMinutes: manualProcessingMinutes ?? null,
+    applicationZone, gramsInputMode, totalGrams, colorGrams,
+  };
+
   const pricePerGram = manualPricePerGram ?? brands[brandId].pricePerGram;
 
   // Reevaluated from startLevel/targetShade on every render rather than stored -- purely
@@ -238,6 +291,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     blendShadeA,
     blendShadeB,
     blend,
+    favoriteRecipe,
     processingMinutes,
     pricePerGram,
     productCost,
