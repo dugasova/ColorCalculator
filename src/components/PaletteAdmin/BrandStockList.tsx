@@ -8,8 +8,9 @@ import { formatLineLabel } from "../../engine/formatLineLabel";
 import { ALL_DEVELOPER_VOLUMES } from "../../engine/levels";
 import { useStock } from "../../palette";
 import {
-  developerStockId, DEVELOPER_BOTTLE_SIZE_GRAMS, getShadeTubeSizeGrams, getStockStatus, restockOneTube,
-  setDeveloperStockGrams, setShadeStockGrams, shadeStockId, stockById, stopTrackingStock, LOW_STOCK_THRESHOLD_GRAMS,
+  developerStockId, DEVELOPER_BOTTLE_SIZE_GRAMS, getBrandScopedDeveloperLines, getScopedDeveloperVolumes,
+  getShadeTubeSizeGrams, getStockStatus, restockOneTube, setDeveloperStockGrams, setShadeStockGrams, shadeStockId,
+  stockById, stopTrackingStock, LOW_STOCK_THRESHOLD_GRAMS,
 } from "../../stock";
 
 export interface BrandStockListProps {
@@ -56,14 +57,23 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
         commit: (grams: number) => setShadeStockGrams(brandId, shade.line ?? null, shade.code, grams),
       };
     }),
-    ...ALL_DEVELOPER_VOLUMES.map(volume => ({
-      id: developerStockId(brandId, volume),
-      label: t("format.developerVolume", { value: volume }),
-      thresholdGrams: LOW_STOCK_THRESHOLD_GRAMS,
-      restockGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
-      unit: "bottle" as const,
-      commit: (grams: number) => setDeveloperStockGrams(brandId, volume, grams),
-    })),
+    // Every developer volume for the brand's shared bucket, plus (for the handful of
+    // chemically-distinct-developer lines in stock.ts's SEPARATE_DEVELOPER_LINES, e.g.
+    // INOA, Chromatics) one more set of volume rows per such line, restricted to the
+    // volumes that real product actually ships in -- `null` first so the shared bucket's
+    // rows render before any scoped line's own rows.
+    ...[null, ...getBrandScopedDeveloperLines(brandId)].flatMap(line =>
+      (line === null ? ALL_DEVELOPER_VOLUMES : getScopedDeveloperVolumes(brandId, line)).map(volume => ({
+        id: developerStockId(brandId, line, volume),
+        label: line === null
+          ? t("format.developerVolume", { value: volume })
+          : `${t("format.developerVolume", { value: volume })} · ${formatLineLabel(line)}`,
+        thresholdGrams: LOW_STOCK_THRESHOLD_GRAMS,
+        restockGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
+        unit: "bottle" as const,
+        commit: (grams: number) => setDeveloperStockGrams(brandId, line, volume, grams),
+      }))
+    ),
   ];
 
   const lowOrOutCount = rows

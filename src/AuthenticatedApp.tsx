@@ -34,6 +34,9 @@ const AnalyticsView = lazy(() =>
 const PaletteAdminView = lazy(() =>
   import("./components/PaletteAdmin/PaletteAdminView").then(m => ({ default: m.PaletteAdminView }))
 );
+const OrderListView = lazy(() =>
+  import("./components/OrderList/OrderListView").then(m => ({ default: m.OrderListView }))
+);
 const ChangePasswordModal = lazy(() =>
   import("./components/Account/ChangePasswordModal").then(m => ({ default: m.ChangePasswordModal }))
 );
@@ -176,6 +179,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
                   {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
                   {view === "favorites" && <FavoritesPage appliedBy={user.email ?? "unknown"} brands={brands} onApply={handleApplyFavorite} />}
                   {view === "palette" && isAdmin && <PaletteAdminView />}
+                  {view === "orders" && isAdmin && <OrderListView />}
                 </>
               }
             />

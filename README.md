@@ -59,7 +59,7 @@ src/
                     data, color-to-hex preview) — framework-agnostic, unit tested.
   components/       One folder per screen/feature (FormulaCalculator, Bleach,
                     ComplexColoring, ColorCorrection, History, Analytics, PaletteAdmin,
-                    Nav, LoginForm, LanguageSwitcher).
+                    OrderList, Nav, LoginForm, LanguageSwitcher).
   history.ts        Firestore-backed client history (CRUD + legacy-shape migration).
   clients.ts        Firestore-backed per-stylist client profiles, identified by a real id
                      (not name) so two same-named clients never collide — contacts,

@@ -4,8 +4,8 @@ import {
 import { z } from "zod";
 import { db } from "./firebase";
 import { parseSnapshotDocs } from "./firestoreSubscribe";
-import type { BrandId } from "./engine/brands";
-import type { DeveloperVolume } from "./engine/levels";
+import type { Brand, BrandId } from "./engine/brands";
+import { ALL_DEVELOPER_VOLUMES, type DeveloperVolume } from "./engine/levels";
 import { developerVolumeSchema } from "./engine/shades";
 import type { HistoryStep } from "./history";
 import { actualGramsScale } from "./sessionCost";
@@ -48,20 +48,69 @@ export function getShadeTubeSizeGrams(brandId: BrandId, line: string | null): nu
 // comment above).
 export const DEVELOPER_BOTTLE_SIZE_GRAMS = 1000;
 
+// Lines whose developer is a chemically distinct product from the rest of their brand's
+// other lines, not a shared bottle -- INOA's own Oxydant Crème (oil-delivery system)
+// isn't interchangeable with Majirel/Dia Light/Dia Richesse's regular Oxydant Crème, and
+// Chromatics' Oil-in-Cream Developer isn't the same product as Shades EQ's Processing
+// Solution (itself not even a real graded developer -- see redken.ts). The value is the
+// exact set of volumes that real product actually ships in -- both INOA Developer and
+// Chromatics Oil-in-Cream Developer are sold only in 10/20/30 vol, unlike the full
+// 6/10/13/20/30/40 vol range ALL_DEVELOPER_VOLUMES offers for a brand's shared bucket.
+// Every other line in this catalog still shares one developer-per-volume stock bucket
+// with the rest of its brand, same as before this distinction existed -- keyed
+// "<brandId>::<line>", same shape as SHADE_TUBE_SIZE_OVERRIDES_GRAMS above.
+const SEPARATE_DEVELOPER_LINES: Record<string, DeveloperVolume[]> = {
+  "loreal::inoa": [10, 20, 30],
+  "redken::chromatics": [10, 20, 30],
+};
+
+// The scoped-developer lines that exist within one brand (see SEPARATE_DEVELOPER_LINES
+// above) -- BrandStockList and buildReorderList both use this to render/derive one extra
+// developer row per scoped line, on top of the brand's own shared bucket. Empty for every
+// brand with no chemically-distinct-developer line.
+export function getBrandScopedDeveloperLines(brandId: BrandId): string[] {
+  return Object.keys(SEPARATE_DEVELOPER_LINES)
+    .filter(key => key.startsWith(`${brandId}::`))
+    .map(key => key.slice(brandId.length + 2))
+    .sort();
+}
+
+// The real volumes a scoped line's developer ships in (see SEPARATE_DEVELOPER_LINES
+// above) -- callers only pass a `line` already returned by getBrandScopedDeveloperLines,
+// so this is always found.
+export function getScopedDeveloperVolumes(brandId: BrandId, line: string): DeveloperVolume[] {
+  return SEPARATE_DEVELOPER_LINES[`${brandId}::${line}`] ?? ALL_DEVELOPER_VOLUMES;
+}
+
+// The line a given (brandId, line) pair's developer is actually tracked under: itself, if
+// it needs its own bucket (see SEPARATE_DEVELOPER_LINES above), else `null` -- the
+// brand-wide shared bucket every other line already used before this distinction existed.
+function developerStockLine(brandId: BrandId, line: string | null): string | null {
+  return line !== null && SEPARATE_DEVELOPER_LINES[`${brandId}::${line}`] !== undefined ? line : null;
+}
+
 // Remaining grams of one physical product: either a specific shade within a brand's line
 // (identity is (brandId, line, code), same as `shadeKey` -- a bare code isn't unique
-// within a brand) or a developer at a given volume (developer isn't shade-scoped, so it's
-// tracked per (brandId, volume) instead).
+// within a brand) or a developer at a given volume, additionally scoped by line for the
+// handful of chemically-distinct-developer lines in SEPARATE_DEVELOPER_LINES above --
+// every other line's developer still shares one bucket per (brandId, volume), with
+// `line: null`.
 export type StockRecord =
   | { id: string; kind: "shade"; brandId: BrandId; line: string | null; code: string; remainingGrams: number }
-  | { id: string; kind: "developer"; brandId: BrandId; volume: DeveloperVolume; remainingGrams: number };
+  | { id: string; kind: "developer"; brandId: BrandId; line: string | null; volume: DeveloperVolume; remainingGrams: number };
 
 // Validates a dyeStock Firestore document's payload -- everything but `id`, which comes
 // from the document id itself (see subscribeToStock below), same pattern as
 // paletteOverrideSchema in engine/paletteOverrides.ts.
+// The developer variant's `line` is `.default(null)`, not plain `.nullable()`, because
+// every developer stock document written before this line-scoping feature existed (see
+// SEPARATE_DEVELOPER_LINES above) has no `line` key at all, not even `null` -- without
+// the default, every one of those pre-existing documents fails validation and gets
+// silently dropped by parseSnapshotDocs, making an admin's already-tracked developer
+// stock vanish from the app the moment this feature ships.
 export const stockRecordSchema: z.ZodType<Omit<StockRecord, "id">> = z.union([
   z.object({ kind: z.literal("shade"), brandId: z.string(), line: z.string().nullable(), code: z.string(), remainingGrams: z.number() }),
-  z.object({ kind: z.literal("developer"), brandId: z.string(), volume: developerVolumeSchema, remainingGrams: z.number() }),
+  z.object({ kind: z.literal("developer"), brandId: z.string(), line: z.string().nullable().default(null), volume: developerVolumeSchema, remainingGrams: z.number() }),
 ]);
 
 // Deterministic doc ids (same rationale as palette.ts's `disableOverrideId`): a re-edit
@@ -74,8 +123,15 @@ export function shadeStockId(brandId: BrandId, line: string | null, code: string
   return `shade::${encodeURIComponent(brandId)}::${encodeURIComponent(line ?? "")}::${encodeURIComponent(code)}`;
 }
 
-export function developerStockId(brandId: BrandId, volume: DeveloperVolume): string {
-  return `dev::${encodeURIComponent(brandId)}::${volume}`;
+// `line` picks the developer's stock bucket, not its display: only a scoped line (see
+// SEPARATE_DEVELOPER_LINES above) actually changes the resulting id -- every other line
+// resolves to the same brand-wide bucket as passing `null`, so an existing developer
+// stock document stays valid without any migration when this line-scoping ships.
+export function developerStockId(brandId: BrandId, line: string | null, volume: DeveloperVolume): string {
+  const stockLine = developerStockLine(brandId, line);
+  return stockLine !== null
+    ? `dev::${encodeURIComponent(brandId)}::${volume}::${encodeURIComponent(stockLine)}`
+    : `dev::${encodeURIComponent(brandId)}::${volume}`;
 }
 
 export type StockStatus = "out" | "low" | "ok";
@@ -88,6 +144,65 @@ export function getStockStatus(remainingGrams: number, thresholdGrams: number = 
 
 export function stockById(records: StockRecord[]): Map<string, StockRecord> {
   return new Map(records.map(record => [record.id, record]));
+}
+
+// Fewest packs (tubes/bottles) that lift a product strictly above its low-stock
+// threshold -- the same boundary getStockStatus uses (remaining <= threshold is "low").
+// Callers only pass low/out products (remaining <= threshold), so the result is always >= 1.
+export function suggestReorderPacks(remainingGrams: number, thresholdGrams: number, packGrams: number): number {
+  return Math.floor((thresholdGrams - remainingGrams) / packGrams) + 1;
+}
+
+interface ReorderItemBase { id: string; brandId: BrandId; remainingGrams: number; status: "low" | "out"; packGrams: number; suggestedPacks: number }
+export type ReorderItem =
+  | (ReorderItemBase & { kind: "shade"; line: string | null; code: string; unit: "tube" })
+  | (ReorderItemBase & { kind: "developer"; line: string | null; volume: DeveloperVolume; unit: "bottle" });
+
+// The SalonScale-style order list (OrderListView): every tracked product across every
+// brand whose stock has dropped to "low" or "out", with a suggested pack quantity to
+// order -- mirrors BrandStockList's own row derivation (same thresholds/pack sizes) so
+// the two views never disagree about what counts as low or how big a tube/bottle is.
+// Iterates the live catalog (not the raw records) deliberately: `usePalette()`'s brands
+// already exclude discontinued shades and removed brands, so a stale stock doc left
+// behind for one of those is never surfaced here.
+export function buildReorderList(brands: Record<BrandId, Brand>, records: StockRecord[]): ReorderItem[] {
+  const byId = stockById(records);
+  const brandIds = Object.keys(brands).sort((a, b) => brands[a].name.localeCompare(brands[b].name));
+  const items: ReorderItem[] = [];
+
+  for (const brandId of brandIds) {
+    const shades = brands[brandId].shades.slice().sort((a, b) => a.level - b.level || a.code.localeCompare(b.code));
+    for (const shade of shades) {
+      const id = shadeStockId(brandId, shade.line ?? null, shade.code);
+      const record = byId.get(id);
+      if (record === undefined) continue;
+      const packGrams = getShadeTubeSizeGrams(brandId, shade.line ?? null);
+      const status = getStockStatus(record.remainingGrams, packGrams);
+      if (status === "ok") continue;
+      items.push({
+        id, brandId, remainingGrams: record.remainingGrams, status, packGrams,
+        suggestedPacks: suggestReorderPacks(record.remainingGrams, packGrams, packGrams),
+        kind: "shade", line: shade.line ?? null, code: shade.code, unit: "tube",
+      });
+    }
+    for (const line of [null, ...getBrandScopedDeveloperLines(brandId)]) {
+      const volumes = line === null ? ALL_DEVELOPER_VOLUMES : getScopedDeveloperVolumes(brandId, line);
+      for (const volume of volumes) {
+        const id = developerStockId(brandId, line, volume);
+        const record = byId.get(id);
+        if (record === undefined) continue;
+        const status = getStockStatus(record.remainingGrams, LOW_STOCK_THRESHOLD_GRAMS);
+        if (status === "ok") continue;
+        items.push({
+          id, brandId, remainingGrams: record.remainingGrams, status, packGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
+          suggestedPacks: suggestReorderPacks(record.remainingGrams, LOW_STOCK_THRESHOLD_GRAMS, DEVELOPER_BOTTLE_SIZE_GRAMS),
+          kind: "developer", line, volume, unit: "bottle",
+        });
+      }
+    }
+  }
+
+  return items;
 }
 
 // A dye/developer a session would need more of than the salon has on hand -- surfaced as
@@ -123,9 +238,13 @@ export async function setShadeStockGrams(brandId: BrandId, line: string | null, 
   });
 }
 
-export async function setDeveloperStockGrams(brandId: BrandId, volume: DeveloperVolume, remainingGrams: number): Promise<void> {
-  await setDoc(doc(db, DYE_STOCK_COLLECTION, developerStockId(brandId, volume)), {
-    kind: "developer", brandId, volume, remainingGrams,
+// `line` determines which stock bucket this write lands in -- see developerStockId's own
+// comment: only a scoped line (SEPARATE_DEVELOPER_LINES above) actually changes it, every
+// other line resolves to the same brand-wide bucket as passing `null`.
+export async function setDeveloperStockGrams(brandId: BrandId, line: string | null, volume: DeveloperVolume, remainingGrams: number): Promise<void> {
+  const stockLine = developerStockLine(brandId, line);
+  await setDoc(doc(db, DYE_STOCK_COLLECTION, developerStockId(brandId, line, volume)), {
+    kind: "developer", brandId, line: stockLine, volume, remainingGrams,
   });
 }
 
@@ -163,9 +282,10 @@ export interface StockConsumption {
 //    shade's own share.
 //  - The gray-coverage natural-base share of colorGrams and any corrector grams are never
 //    charged: neither is tied to a specific product code in the saved data.
-//  - Developer is charged by (brandId, developerVolume) whenever a developer volume was
-//    actually used.
-//    split above) are summed into one consumption; non-positive totals are dropped.
+//  - Developer is charged by (brandId, line, developerVolume) whenever a developer volume
+//    was actually used -- `line` only changes the resulting bucket for the handful of
+//    chemically-distinct-developer lines in SEPARATE_DEVELOPER_LINES above (INOA,
+//    Chromatics); every other line still charges the same brand-wide bucket as before.
 //  - A step with a recorded actualColorGrams (see history/types.ts) charges that figure
 //    instead of the computed colorGrams, scaling developer and every shade share by the
 //    same ratio.
@@ -192,7 +312,7 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
     const scale = actualGramsScale(step);
     const addScaled = (id: string, kind: "shade" | "developer", code: string, g: number) =>
       add(id, kind, code, scale === 1 ? g : Math.round(g * scale * 10) / 10);
-    const { brandId, targetShade, blend, additionalShade, additionalShade2, result } = step;
+    const { brandId, line, targetShade, blend, additionalShade, additionalShade2, result } = step;
     const additionalShadeGrams = step.additionalShadeGrams ?? 0;
     const additionalShade2Grams = step.additionalShade2Grams ?? 0;
 
@@ -215,7 +335,7 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
     }
 
     if (result.developerVolume !== null) {
-      addScaled(developerStockId(brandId, result.developerVolume), "developer", String(result.developerVolume), grams.developerGrams);
+      addScaled(developerStockId(brandId, line, result.developerVolume), "developer", String(result.developerVolume), grams.developerGrams);
     }
   }
 
