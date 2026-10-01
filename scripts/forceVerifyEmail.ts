@@ -10,11 +10,10 @@
 //
 // Setup (once):
 //   1. Firebase Console -> Project settings (gear icon) -> Service accounts ->
-//      "Generate new private key" -- downloads a JSON key file. Save it OUTSIDE this
-//      repo (or anywhere covered by .gitignore's `*firebase-adminsdk*.json` pattern) --
-//      it grants full admin access to the whole Firebase project, treat it like a
-//      password.
-//   2. Add to .env: GOOGLE_APPLICATION_CREDENTIALS=/full/path/to/that-file.json
+//      "Generate new private key" -- downloads a JSON key file. Save it under
+//      secrets/ (gitignored, nothing under it is tracked) -- it grants full admin
+//      access to the whole Firebase project, treat it like a password.
+//   2. Add to .env: GOOGLE_APPLICATION_CREDENTIALS=secrets/that-file.json
 //
 // Usage:
 //   npm run verify-email:force -- someone@example.com

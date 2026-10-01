@@ -16,20 +16,34 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.email_verified == true;
     }
 
+    // Real salon membership: a verified Auth account with no admin-created
+    // `users/{uid}` document (see that match block below) is signed in but not yet a
+    // member. The shared invite code in src/inviteCode.ts is only a UX speed bump on
+    // sign-up -- it ships in the client bundle and can't stop anyone from calling the
+    // Auth API directly and skipping it -- so it is deliberately not checked here.
+    // Every collection below uses this, not isSignedIn() alone, as its real boundary.
+    function isMember() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     // Role assignment has no self-service UI on purpose — an admin (or the salon owner,
     // via the Firebase console) sets `role: 'admin'` on a user's document by hand. See
     // src/roles.ts.
     function isAdmin() {
-      return isSignedIn() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+      return isMember() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Every authenticated account belongs to the same single salon (see the shared
-    // invite code in src/inviteCode.ts) — any signed-in user may read/write shared
-    // salon data. Only role assignment itself is locked down.
+    // This document is what makes an account an actual salon member (see isMember()
+    // above), not self-service -- an admin (or the salon owner via the Firebase
+    // console) creates it by hand for a new hire, the same way role assignment itself
+    // already works (see src/roles.ts). A verified Auth account with no document here
+    // is signed in but can't read or write anything else in this file. Public sign-up
+    // stays open in Auth (see src/inviteCode.ts's invite code) -- that's a UX speed
+    // bump against casual visitors, not the enforcement boundary; whether this
+    // document exists is.
     match /users/{uid} {
-      allow read: if isSignedIn();
+      allow read: if isMember();
       allow write: if false;
     }
 
@@ -38,14 +52,17 @@ service cloud.firestore {
     // see src/App.tsx); an admin sees and manages the whole salon's history. `create`
     // pins `appliedBy` to the caller's own token email so a client can't spoof another
     // stylist's ownership and later have that entry excluded from their own filtered
-    // list (or, worse, injected into it). This is the real boundary: src/history/
+    // list (or, worse, injected into it). `update` additionally requires `appliedBy`
+    // to stay unchanged, so a stylist can't reassign their own entry onto someone
+    // else's (or an admin's) list by editing it. This is the real boundary: src/history/
     // firestore.ts's `fetchFormulaHistory` scope param is the client-side UX to match,
     // not the enforcement -- Firestore rejects an unscoped `list` query outright for a
     // non-admin once this condition depends on `resource.data`.
     match /formulaHistory/{entryId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.appliedBy == request.auth.token.email);
-      allow create: if isAdmin() || (isSignedIn() && request.resource.data.appliedBy == request.auth.token.email);
-      allow update: if isAdmin() || (isSignedIn() && resource.data.appliedBy == request.auth.token.email);
+      allow read: if isAdmin() || (isMember() && resource.data.appliedBy == request.auth.token.email);
+      allow create: if isAdmin() || (isMember() && request.resource.data.appliedBy == request.auth.token.email);
+      allow update: if isAdmin() || (isMember() && resource.data.appliedBy == request.auth.token.email
+        && request.resource.data.appliedBy == resource.data.appliedBy);
       // Deleting a whole client's record (src/clients.ts's deleteClient +
       // src/history/firestore.ts's deleteHistoryEntry, wired from HistoryView's
       // admin-only "Delete client" confirm) removes every visit belonging to them --
@@ -57,11 +74,12 @@ service cloud.firestore {
     // hair canvas -- src/clients.ts) are private to them, same `appliedBy`-style
     // ownership boundary as formulaHistory above; an admin sees and manages every
     // profile. `create`/`update` pin `ownedBy` to the caller's own token email for the
-    // same spoofing reason formulaHistory pins `appliedBy`.
+    // same spoofing/reassignment reason formulaHistory pins `appliedBy` on both.
     match /clients/{clientId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.ownedBy == request.auth.token.email);
-      allow create: if isAdmin() || (isSignedIn() && request.resource.data.ownedBy == request.auth.token.email);
-      allow update: if isAdmin() || (isSignedIn() && resource.data.ownedBy == request.auth.token.email);
+      allow read: if isAdmin() || (isMember() && resource.data.ownedBy == request.auth.token.email);
+      allow create: if isAdmin() || (isMember() && request.resource.data.ownedBy == request.auth.token.email);
+      allow update: if isAdmin() || (isMember() && resource.data.ownedBy == request.auth.token.email
+        && request.resource.data.ownedBy == resource.data.ownedBy);
       allow delete: if isAdmin();
     }
 
@@ -69,9 +87,9 @@ service cloud.firestore {
     // its owner with no admin override. create/update pin `ownedBy` to the caller's own token
     // email so a favorite can't be created in, or moved into, another stylist's library.
     match /favoriteFormulas/{favoriteId} {
-      allow read, delete: if isSignedIn() && resource.data.ownedBy == request.auth.token.email;
-      allow create: if isSignedIn() && request.resource.data.ownedBy == request.auth.token.email;
-      allow update: if isSignedIn() && resource.data.ownedBy == request.auth.token.email
+      allow read, delete: if isMember() && resource.data.ownedBy == request.auth.token.email;
+      allow create: if isMember() && request.resource.data.ownedBy == request.auth.token.email;
+      allow update: if isMember() && resource.data.ownedBy == request.auth.token.email
         && request.resource.data.ownedBy == request.auth.token.email;
     }
 
@@ -79,31 +97,35 @@ service cloud.firestore {
     // reads the live catalog, but only an admin may add a dye line, add a shade, or mark
     // one discontinued.
     match /customBrands/{brandId} {
-      allow read: if isSignedIn();
+      allow read: if isMember();
       allow create, update, delete: if isAdmin();
     }
 
     match /paletteOverrides/{overrideId} {
-      allow read: if isSignedIn();
+      allow read: if isMember();
       allow create, update, delete: if isAdmin();
     }
 
     // Dye/developer stock (src/stock.ts). Registering or clearing a tracked product is an
     // admin action, like every other palette edit -- but *every* stylist's save
-    // auto-decrements what their formula consumed (see consumeStock), so `update` has to
-    // be open to any signed-in salon account. Same trust level as the shared formula
-    // history all accounts already write.
+    // auto-decrements what their formula consumed (see consumeStock/applyStockDelta), so
+    // `update` has to stay open to any member -- but restricted to only the
+    // `remainingGrams` field, the only one a stylist's save ever touches, so a non-admin
+    // can bump a tracked product's count but can't repoint the document at a different
+    // brand/line/shade/volume.
     match /dyeStock/{stockId} {
-      allow read: if isSignedIn();
+      allow read: if isMember();
       allow create, delete: if isAdmin();
-      allow update: if isSignedIn();
+      allow update: if isAdmin() || (isMember()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['remainingGrams'])
+        && request.resource.data.remainingGrams is number);
     }
 
     // Salon-wide pricing settings (src/salonSettings.ts): every stylist's calculator reads
     // the markup default, only an admin may change it -- same split as the palette
     // collections above.
     match /salonSettings/{settingId} {
-      allow read: if isSignedIn();
+      allow read: if isMember();
       allow create, update, delete: if isAdmin();
     }
 

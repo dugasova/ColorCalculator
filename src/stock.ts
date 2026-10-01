@@ -1,5 +1,6 @@
 import {
-  collection, deleteDoc, doc, getDoc, increment, onSnapshot, setDoc, updateDoc, type Unsubscribe,
+  collection, deleteDoc, doc, getDoc, increment, onSnapshot, setDoc, updateDoc,
+  type FirestoreError, type Unsubscribe,
 } from "firebase/firestore";
 import { z } from "zod";
 import { db } from "./firebase";
@@ -226,16 +227,20 @@ export function findStockShortages(steps: HistoryStep[], records: StockRecord[])
 
 // Malformed documents are skipped and logged rather than propagated -- see
 // firestoreSubscribe.ts's parseSnapshotDocs, shared by every `subscribeToX` live query.
-export function subscribeToStock(onChange: (records: StockRecord[]) => void): Unsubscribe {
+// A listener-level failure (e.g. this collection's Firestore rule rejecting the
+// `onSnapshot` call) is reported via `onError` instead of throwing -- PaletteContext.tsx
+// wires it to `console.error` so stale stock data is at least traceable instead of
+// silently never updating again.
+export function subscribeToStock(onChange: (records: StockRecord[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
   return onSnapshot(collection(db, DYE_STOCK_COLLECTION), snapshot => {
     onChange(parseSnapshotDocs(snapshot, stockRecordSchema, "dye stock"));
-  });
+  }, onError);
 }
 
 export async function setShadeStockGrams(brandId: BrandId, line: string | null, code: string, remainingGrams: number): Promise<void> {
-  await setDoc(doc(db, DYE_STOCK_COLLECTION, shadeStockId(brandId, line, code)), {
+  await settleWrite(setDoc(doc(db, DYE_STOCK_COLLECTION, shadeStockId(brandId, line, code)), {
     kind: "shade", brandId, line, code, remainingGrams,
-  });
+  }), "set shade stock");
 }
 
 // `line` determines which stock bucket this write lands in -- see developerStockId's own
@@ -243,9 +248,9 @@ export async function setShadeStockGrams(brandId: BrandId, line: string | null, 
 // other line resolves to the same brand-wide bucket as passing `null`.
 export async function setDeveloperStockGrams(brandId: BrandId, line: string | null, volume: DeveloperVolume, remainingGrams: number): Promise<void> {
   const stockLine = developerStockLine(brandId, line);
-  await setDoc(doc(db, DYE_STOCK_COLLECTION, developerStockId(brandId, line, volume)), {
+  await settleWrite(setDoc(doc(db, DYE_STOCK_COLLECTION, developerStockId(brandId, line, volume)), {
     kind: "developer", brandId, line: stockLine, volume, remainingGrams,
-  });
+  }), "set developer stock");
 }
 
 // Stops tracking a product (an admin clearing the field back to blank) -- distinct from

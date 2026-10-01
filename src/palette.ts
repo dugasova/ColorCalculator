@@ -1,4 +1,5 @@
-import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, type Unsubscribe } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, type FirestoreError, type Unsubscribe } from "firebase/firestore";
+import { settleWrite } from "./firestoreWrite";
 import { createContext, useContext } from "react";
 import { db } from "./firebase";
 import { parseSnapshotDocs } from "./firestoreSubscribe";
@@ -78,16 +79,19 @@ function disableOverrideId(brandId: BrandId, line: string | null, code: string):
 // firestoreSubscribe.ts's parseSnapshotDocs, shared by every `subscribeToX` live query:
 // previously an unchecked `as` cast let one bad document produce garbage that would crash
 // deep inside the formula engine, far from this read, with no clue which document caused it.
-export function subscribeToCustomBrands(onChange: (brands: CustomBrandRecord[]) => void): Unsubscribe {
+// A listener-level failure is reported via `onError` instead of throwing -- see
+// stock.ts's subscribeToStock for the same pattern, wired to `console.error` by
+// PaletteContext.tsx.
+export function subscribeToCustomBrands(onChange: (brands: CustomBrandRecord[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
   return onSnapshot(collection(db, CUSTOM_BRANDS_COLLECTION), snapshot => {
     onChange(parseSnapshotDocs(snapshot, customBrandRecordSchema, "custom brand"));
-  });
+  }, onError);
 }
 
-export function subscribeToPaletteOverrides(onChange: (overrides: PaletteOverride[]) => void): Unsubscribe {
+export function subscribeToPaletteOverrides(onChange: (overrides: PaletteOverride[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
   return onSnapshot(collection(db, PALETTE_OVERRIDES_COLLECTION), snapshot => {
     onChange(parseSnapshotDocs(snapshot, paletteOverrideSchema, "palette override"));
-  });
+  }, onError);
 }
 
 export interface AddCustomBrandInput {
@@ -101,26 +105,26 @@ export interface AddCustomBrandInput {
 // responsible for picking one that doesn't collide with a built-in or existing custom brand
 // — see PaletteAdminView's slug validation.
 export async function addCustomBrand(input: AddCustomBrandInput): Promise<void> {
-  await setDoc(doc(db, CUSTOM_BRANDS_COLLECTION, input.id), sanitizeForFirestore({
+  await settleWrite(setDoc(doc(db, CUSTOM_BRANDS_COLLECTION, input.id), sanitizeForFirestore({
     name: input.name,
     pricePerGram: input.pricePerGram,
     mixingRatioConfig: input.mixingRatioConfig,
-  }));
+  })), "add custom brand");
 }
 
 export async function addShadeToBrand(brandId: BrandId, shade: Shade): Promise<void> {
-  await addDoc(collection(db, PALETTE_OVERRIDES_COLLECTION), sanitizeForFirestore({
+  await settleWrite(addDoc(collection(db, PALETTE_OVERRIDES_COLLECTION), sanitizeForFirestore({
     kind: "add" as const,
     brandId,
     shade,
-  }));
+  })), "add shade");
 }
 
 export async function setShadeDisabled(brandId: BrandId, line: string | null, code: string, disabled: boolean): Promise<void> {
   const overrideRef = doc(db, PALETTE_OVERRIDES_COLLECTION, disableOverrideId(brandId, line, code));
   if (disabled) {
-    await setDoc(overrideRef, { kind: "disable", brandId, line, code });
+    await settleWrite(setDoc(overrideRef, { kind: "disable", brandId, line, code }), "set shade disabled");
   } else {
-    await deleteDoc(overrideRef);
+    await settleWrite(deleteDoc(overrideRef), "set shade disabled");
   }
 }

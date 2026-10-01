@@ -211,7 +211,10 @@ async function resolvePhotoUrl(
 // at any point recoverable: uploads first (a reject leaves the document untouched), then
 // a single updateDoc carrying text fields and photo URLs together, and only then the
 // best-effort Storage delete for removed photos -- so a crash never leaves a document
-// pointing at an already-deleted file.
+// pointing at an already-deleted file. The updateDoc itself goes through settleWrite
+// (see that file) so a stylist editing offline sees the edit queue instead of the UI
+// hanging on a write the server hasn't acknowledged yet; the photo delete that follows
+// is unaffected either way, since it's already best-effort.
 export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetailsParams): Promise<HistoryEntryDetailsResult> {
   const { entry } = params;
   const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
@@ -226,7 +229,7 @@ export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetail
     beforePhotoUrl,
     afterPhotoUrl,
   };
-  await updateDoc(doc(db, HISTORY_COLLECTION, entry.id), result);
+  await settleWrite(updateDoc(doc(db, HISTORY_COLLECTION, entry.id), result), `update history entry ${entry.id}`);
   await Promise.all([
     params.beforePhoto.kind === "remove" && entry.beforePhotoUrl !== null ? deleteFormulaPhoto(entry.id, "before") : Promise.resolve(),
     params.afterPhoto.kind === "remove" && entry.afterPhotoUrl !== null ? deleteFormulaPhoto(entry.id, "after") : Promise.resolve(),

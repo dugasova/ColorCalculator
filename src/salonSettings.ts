@@ -1,4 +1,5 @@
 import { doc, onSnapshot, setDoc, type Unsubscribe } from "firebase/firestore";
+import { settleWrite } from "./firestoreWrite";
 import { z } from "zod";
 import { db } from "./firebase";
 import { DEFAULT_MARKUP_MULTIPLIER } from "./engine/pricing";
@@ -51,5 +52,5 @@ export function subscribeToPricingSettings(onChange: (settings: PricingSettings)
 }
 
 export async function setSalonMarkupMultiplier(markupMultiplier: number): Promise<void> {
-  await setDoc(doc(db, SALON_SETTINGS_COLLECTION, PRICING_SETTINGS_DOC_ID), { markupMultiplier });
+  await settleWrite(setDoc(doc(db, SALON_SETTINGS_COLLECTION, PRICING_SETTINGS_DOC_ID), { markupMultiplier }), "set salon markup");
 }

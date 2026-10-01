@@ -1,13 +1,38 @@
 rules_version = '2';
 
-// Deploy with `firebase deploy --only storage`. Mirrors firestore.rules: there is no
-// server in this project, so the same single-salon, any-signed-in-user model applies to
-// the before/after formula photos uploaded by uploadFormulaPhoto (src/history.ts) at
-// formulaHistory/{entryId}/before and formulaHistory/{entryId}/after.
+// Deploy with `firebase deploy --only storage`. Mirrors firestore.rules' membership
+// model: there is no server in this project, so every write-time invariant has to be
+// enforced here too, not just hidden behind client-side UI. Storage rules can't
+// reference the `firestore.rules` file directly but can read Firestore documents
+// through the `firestore.*` namespace, so `isMember` below checks the same
+// admin-created `users/{uid}` document that firestore.rules' `isMember()` does.
+//
+// Ownership (did this stylist create the formulaHistory entry this photo belongs to)
+// is deliberately not checked here: src/history/firestore.ts uploads both the before
+// and after photos (uploadFormulaPhoto) before the formulaHistory document exists --
+// there's no document yet to read `appliedBy` off of at upload time. Every member can
+// read/write any slot; the real per-stylist ownership boundary is the Firestore
+// document these photos are attached to (firestore.rules' `formulaHistory` match).
 service firebase.storage {
   match /b/{bucket}/o {
+    function isMember() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid));
+    }
+
+    // `slot` is whitelisted to the two names uploadFormulaPhoto ever writes
+    // (formulaHistory/{entryId}/before|after) -- there is no other legitimate upload
+    // path in this app. The 10 MB ceiling is generous for a phone photo (even an
+    // uncompressed one) while still ruling out someone using this bucket as free
+    // arbitrary file storage; `image/*` similarly rules out non-photo uploads. Both
+    // checks only apply when a file is actually being written (`request.resource` is
+    // null for a delete, which deleteFormulaPhoto in src/history/firestore.ts needs).
     match /formulaHistory/{entryId}/{slot} {
-      allow read, write: if request.auth != null;
+      allow read: if isMember();
+      allow write: if isMember() && slot in ['before', 'after']
+        && (request.resource == null
+          || (request.resource.size < 10 * 1024 * 1024 && request.resource.contentType.matches('image/.*')));
     }
   }
 }

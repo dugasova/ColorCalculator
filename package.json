@@ -16,6 +16,7 @@
     "migrate:repair-wella-special-blonde": "tsx --env-file=.env scripts/repairWellaSpecialBlondePalette.ts",
     "migrate:repair-dia": "tsx --env-file=.env scripts/repairDiaPalette.ts",
     "verify-email:force": "tsx --env-file=.env scripts/forceVerifyEmail.ts",
+    "backfill:user-docs": "tsx --env-file=.env scripts/backfillUserDocs.ts",
     "pwa:icons": "tsx scripts/generatePwaIcons.ts",
     "cap:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",

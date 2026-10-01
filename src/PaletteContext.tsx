@@ -12,9 +12,18 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
   const [pricingSettings, setPricingSettings] = useState<PricingSettings>(DEFAULT_PRICING_SETTINGS);
 
   useEffect(() => {
-    const unsubscribeBrands = subscribeToCustomBrands(setCustomBrands);
-    const unsubscribeOverrides = subscribeToPaletteOverrides(setOverrides);
-    const unsubscribeStock = subscribeToStock(setStock);
+    const unsubscribeBrands = subscribeToCustomBrands(
+      setCustomBrands,
+      err => console.error("Falling back to the last known custom brands -- could not subscribe to customBrands:", err)
+    );
+    const unsubscribeOverrides = subscribeToPaletteOverrides(
+      setOverrides,
+      err => console.error("Falling back to the last known palette overrides -- could not subscribe to paletteOverrides:", err)
+    );
+    const unsubscribeStock = subscribeToStock(
+      setStock,
+      err => console.error("Falling back to the last known dye stock -- could not subscribe to dyeStock:", err)
+    );
     const unsubscribePricing = subscribeToPricingSettings(setPricingSettings);
     return () => {
       unsubscribeBrands();
