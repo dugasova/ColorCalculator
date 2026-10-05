@@ -124,6 +124,7 @@ export const uk: typeof en = {
       perm: "Хім. завивка",
       henna: "Хна",
       direct_dye: "Прямі пігменти",
+      "bleached-blonde": "Блондовані",
     },
   },
   results: {

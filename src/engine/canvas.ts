@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export type Porosity = "low" | "normal" | "high";
 export type HairThickness = "fine" | "medium" | "coarse";
-export type ChemicalHistory = "keratin" | "perm" | "henna" | "direct_dye";
+export type ChemicalHistory = "keratin" | "perm" | "henna" | "direct_dye" | "bleached-blonde";
 
 export interface HairCanvas {
   porosity: Porosity;
@@ -23,5 +23,5 @@ export function createDefaultCanvas(): HairCanvas {
 export const canvasShapeSchema = z.object({
   porosity: z.enum(["low", "normal", "high"]),
   thickness: z.enum(["fine", "medium", "coarse"]),
-  chemicalHistory: z.array(z.enum(["keratin", "perm", "henna", "direct_dye"])),
+  chemicalHistory: z.array(z.enum(["keratin", "perm", "henna", "direct_dye", "bleached-blonde"])),
 });

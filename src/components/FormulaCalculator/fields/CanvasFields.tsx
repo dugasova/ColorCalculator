@@ -14,7 +14,7 @@ export interface CanvasFieldsProps {
 
 const POROSITY_OPTIONS: Porosity[] = ["low", "normal", "high"];
 const THICKNESS_OPTIONS: HairThickness[] = ["fine", "medium", "coarse"];
-const CHEMICAL_HISTORY_OPTIONS: ChemicalHistory[] = ["keratin", "perm", "henna", "direct_dye"];
+const CHEMICAL_HISTORY_OPTIONS: ChemicalHistory[] = ["keratin", "perm", "henna", "direct_dye", "bleached-blonde"];
 
 export function CanvasFields({
   porosity, onPorosityChange,

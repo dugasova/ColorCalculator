@@ -122,6 +122,7 @@ export const en = {
       perm: "Perm",
       henna: "Henna",
       direct_dye: "Direct Dye",
+      "bleached-blonde": "Bleached Blonde",
     },
   },
   results: {
