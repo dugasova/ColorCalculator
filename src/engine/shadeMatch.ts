@@ -13,7 +13,7 @@ export type PermanenceCategory = "permanent" | "semi-permanent";
 
 // Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, Redken Chromatics, and
 // Matrix SoColor Pre-Bonded are permanent oxidative dyes; Wella Color Touch, L'Oréal Dia
-// Light/Dia Richesse, Igora Vibrance, Redken Shades EQ, and Matrix Super Sync are
+// Light/Dia Color, Igora Vibrance, Redken Shades EQ, and Matrix Super Sync are
 // semi-permanent (demi) dyes -- a fundamentally different chemistry (little to no
 // ammonia, shorter processing, doesn't lift level) that a colorist can't just swap one
 // for the other and expect the same service. findClosestShadeByBrand uses this to keep
@@ -28,7 +28,7 @@ const LINE_PERMANENCE: Record<string, PermanenceCategory> = {
   chromatics: "permanent",
   "color-touch": "semi-permanent",
   "dia-light": "semi-permanent",
-  "dia-richesse": "semi-permanent",
+  "dia-color": "semi-permanent",
   vibrance: "semi-permanent",
   "shades-eq": "semi-permanent",
   socolor: "permanent",

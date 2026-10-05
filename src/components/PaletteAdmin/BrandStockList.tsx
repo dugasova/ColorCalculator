@@ -36,7 +36,7 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
   const activeShades = shades.filter(shade => !disabledKeys.has(shadeKey(shade)));
   // `thresholdGrams` drives the low-stock badge (one service's worth left); `restockGrams`
   // is the amount the "+1" button below adds and is sized to how the product is actually
-  // sold -- a shade's tube (60 g, or 50 g for Majirel/Dia Light/Dia Richesse) vs. a
+  // sold -- a shade's tube (60 g, or 50 g for Majirel/Dia Light) vs. a
   // developer's 1000 g/ml bottle. The two differ for developer: a bottle is drawn down
   // gradually, so it still goes "low" at 60 g left even though restocking adds 1000 g back.
   const rows: {
@@ -48,7 +48,7 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
       return {
         id: shadeStockId(brandId, shade.line ?? null, shade.code),
         // Several lines legitimately reuse the same numeric code (e.g. L'Oréal's Majirel,
-        // Dia Light, and Dia Richesse all have a "7.1") -- shade.code alone would show two
+        // Dia Light, and Dia Color all have a "7.1") -- shade.code alone would show two
         // indistinguishable rows, so the line name (when the shade has one) is appended,
         // same disambiguation BrandShadeList already shows in its own detail line.
         label: shade.line !== undefined ? `${shade.code} · ${formatLineLabel(shade.line)}` : shade.code,

@@ -2,7 +2,7 @@ import type { Level } from "./levels";
 import type { MixingRatio, Shade } from "./shades";
 import { GENERIC_SHADE_CHART } from "./brands/generic";
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
-import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_RICHESSE_CHART } from "./brands/loreal";
+import { LOREAL_MAJIREL_CHART, LOREAL_INOA_CHART, LOREAL_DIA_LIGHT_CHART, LOREAL_DIA_COLOR_CHART } from "./brands/loreal";
 import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from "./brands/igora";
 import { REDKEN_SHADES_EQ_CHART, REDKEN_CHROMATICS_CHART } from "./brands/redken";
 import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
@@ -60,7 +60,7 @@ function matrixMixingRatio(): MixingRatio {
 export const BRANDS: Record<BrandId, Brand> = {
   generic: { id: "generic", name: "Generic", shades: GENERIC_SHADE_CHART, mixingRatio: getMixingRatio, pricePerGram: 0.10 },
   wella: { id: "wella", name: "Wella", shades: [...WELLA_SHADE_CHART, ...WELLA_COLOR_TOUCH_CHART], mixingRatio: wellaMixingRatio, pricePerGram: 0.18 },
-  loreal: { id: "loreal", name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_RICHESSE_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
+  loreal: { id: "loreal", name: "L'Oréal", shades: [...LOREAL_MAJIREL_CHART, ...LOREAL_INOA_CHART, ...LOREAL_DIA_LIGHT_CHART, ...LOREAL_DIA_COLOR_CHART], mixingRatio: getMixingRatio, pricePerGram: 0.20 },
   igora: { id: "igora", name: "Igora", shades: [...IGORA_ROYAL_CHART, ...IGORA_VIBRANCE_CHART], mixingRatio: igoraMixingRatio, pricePerGram: 0.20 },
   redken: { id: "redken", name: "Redken", shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_CHROMATICS_CHART], mixingRatio: redkenMixingRatio, pricePerGram: 0.20 },
   matrix: { id: "matrix", name: "Matrix", shades: [...MATRIX_SOCOLOR_CHART, ...MATRIX_SUPER_SYNC_CHART], mixingRatio: matrixMixingRatio, pricePerGram: 0.18 },

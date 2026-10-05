@@ -20,9 +20,9 @@ const DYE_STOCK_COLLECTION = "dyeStock";
 // SHADE_TUBE_SIZE_OVERRIDES_GRAMS/getShadeTubeSizeGrams below for those.
 export const LOW_STOCK_THRESHOLD_GRAMS = 60;
 
-// Real per-tube size differs by product: L'Oréal's Majirel, Dia Light, and Dia Richesse
-// ship in 50 g tubes; every other built-in line ships in the standard 60 g tube (INOA
-// included -- only these three are smaller). Keyed by "<brandId>::<line>"; a custom
+// Real per-tube size differs by product: L'Oréal's Majirel and Dia Light ship in 50 g
+// tubes; every other built-in line ships in the standard 60 g tube (INOA and Dia Color
+// included -- only these two are smaller). Keyed by "<brandId>::<line>"; a custom
 // admin-added line (or a built-in line with no entry here) falls back to the 60 g
 // default. Developer isn't tube-packaged at all (it's tracked per volume, not per line),
 // so this only applies to shade stock -- getStockStatus's `thresholdGrams` defaults to
@@ -32,7 +32,6 @@ export const LOW_STOCK_THRESHOLD_GRAMS = 60;
 const SHADE_TUBE_SIZE_OVERRIDES_GRAMS: Record<string, number> = {
   "loreal::majirel": 50,
   "loreal::dia-light": 50,
-  "loreal::dia-richesse": 50,
   // unverified -- confirm first: assumed 90 ml (3 oz), SoColor's commonly cited US tube
   // size, not independently confirmed against a real tube.
   "matrix::socolor": 90,
@@ -51,7 +50,7 @@ export const DEVELOPER_BOTTLE_SIZE_GRAMS = 1000;
 
 // Lines whose developer is a chemically distinct product from the rest of their brand's
 // other lines, not a shared bottle -- INOA's own Oxydant Crème (oil-delivery system)
-// isn't interchangeable with Majirel/Dia Light/Dia Richesse's regular Oxydant Crème, and
+// isn't interchangeable with Majirel/Dia Light/Dia Color's regular Oxydant Crème, and
 // Chromatics' Oil-in-Cream Developer isn't the same product as Shades EQ's Processing
 // Solution (itself not even a real graded developer -- see redken.ts). The value is the
 // exact set of volumes that real product actually ships in -- both INOA Developer and

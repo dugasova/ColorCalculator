@@ -51,7 +51,7 @@ export const customBrandRecordSchema: z.ZodType<Omit<CustomBrandRecord, "id">> =
 // entries that already reference it (those store a denormalized snapshot of the shade,
 // see `history.ts`). `code` alone isn't a unique shade identity within a brand — e.g.
 // Wella's Koleston Perfect and Color Touch reuse the same numeric codes, as do several
-// L'Oréal lines (Majirel/Inoa/Dia Light/Dia Richesse) — so `disable` carries `line`
+// L'Oréal lines (Majirel/Inoa/Dia Light/Dia Color) — so `disable` carries `line`
 // alongside `code` to target exactly one shade.
 export type PaletteOverride =
   | { id: string; kind: "add"; brandId: BrandId; shade: Shade }

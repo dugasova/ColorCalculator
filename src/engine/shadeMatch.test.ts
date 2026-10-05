@@ -65,10 +65,10 @@ describe("getLinePermanence", () => {
     expect(getLinePermanence("socolor")).toBe("permanent");
   });
 
-  it("classifies Wella Color Touch, L'Oréal Dia Light/Dia Richesse, Igora Vibrance, Redken Shades EQ, and Matrix Super Sync as semi-permanent", () => {
+  it("classifies Wella Color Touch, L'Oréal Dia Light/Dia Color, Igora Vibrance, Redken Shades EQ, and Matrix Super Sync as semi-permanent", () => {
     expect(getLinePermanence("color-touch")).toBe("semi-permanent");
     expect(getLinePermanence("dia-light")).toBe("semi-permanent");
-    expect(getLinePermanence("dia-richesse")).toBe("semi-permanent");
+    expect(getLinePermanence("dia-color")).toBe("semi-permanent");
     expect(getLinePermanence("vibrance")).toBe("semi-permanent");
     expect(getLinePermanence("shades-eq")).toBe("semi-permanent");
     expect(getLinePermanence("super-sync")).toBe("semi-permanent");

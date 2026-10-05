@@ -566,7 +566,8 @@ export const en = {
       points: [
         "Majirel: fixed 1:1.5 with developer, never level-based. 50 g tubes (not the usual 60 g).",
         "INOA: fixed 1:1. Standard 60 g tubes.",
-        "Dia Light / Dia Richesse (ammonia-free gloss): 1:1.5 default, colorist can pick 1:2; developer choice of 6 or 10 vol. 50 g tubes.",
+        "Dia Light (ammonia-free gloss): 1:1.5 default, colorist can pick 1:2; developer choice of 6 or 10 vol. 50 g tubes.",
+        "Dia Color (ammonia-free demi-permanent): fixed 1:1.5; Diactivateur 6, 9 (shown as 10) or 15 (shown as 13) vol. 60 ml tubes.",
         "Majiblond Ultra (high-lift): fixed 50 min, no heat, regardless of gray %.",
       ],
     },

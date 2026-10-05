@@ -200,14 +200,14 @@ describe("getStockStatus", () => {
 });
 
 describe("getShadeTubeSizeGrams", () => {
-  it("uses the 50 g override for Majirel, Dia Light, and Dia Richesse", () => {
+  it("uses the 50 g override for Majirel and Dia Light", () => {
     expect(getShadeTubeSizeGrams("loreal", "majirel")).toBe(50);
     expect(getShadeTubeSizeGrams("loreal", "dia-light")).toBe(50);
-    expect(getShadeTubeSizeGrams("loreal", "dia-richesse")).toBe(50);
   });
 
-  it("falls back to the standard 60 g tube for every other line, including L'Oréal's own INOA", () => {
+  it("falls back to the standard 60 g tube for every other line, including L'Oréal's own INOA and Dia Color", () => {
     expect(getShadeTubeSizeGrams("loreal", "inoa")).toBe(60);
+    expect(getShadeTubeSizeGrams("loreal", "dia-color")).toBe(60);
     expect(getShadeTubeSizeGrams("wella", "Koleston Perfect")).toBe(60);
     expect(getShadeTubeSizeGrams("generic", null)).toBe(60);
   });
