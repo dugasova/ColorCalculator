@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { navItems } from "./navItems";
 import "./Nav.css";
 
 export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "favorites" | "palette" | "orders" | "reference";
@@ -89,12 +90,17 @@ export interface NavProps {
   isAdmin?: boolean;
 }
 
+export function NavIcon({ view, className }: { view: AppView; className: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {ICON_PATHS[view]}
+    </svg>
+  );
+}
+
 export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const items: AppView[] = ["calculator", "complex", "correction", "bleach", "prepigment", "history", "favorites", "analytics", "reference"];
-  if (isAdmin) {
-    items.push("palette", "orders");
-  }
+  const items = navItems(isAdmin);
 
   return (
     <div className="app-nav" role="tablist" aria-label={t("nav.ariaLabel")}>
@@ -107,9 +113,7 @@ export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
           className={clsx("app-nav__item", view === item && "app-nav__item--active")}
           onClick={() => onViewChange(item)}
         >
-          <svg className="app-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            {ICON_PATHS[item]}
-          </svg>
+          <NavIcon view={item} className="app-nav__icon" />
           <span>{t(`nav.${item}`)}</span>
         </button>
       ))}

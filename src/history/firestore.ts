@@ -241,7 +241,7 @@ export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetail
 // `appliedBy` email captured at save time - see App.tsx, which always passes the
 // signed-in `user.email`, never a free-typed name); an admin sees the whole salon's
 // history. `isAdmin`/`currentUserEmail` come from the caller (HistoryView/AnalyticsView),
-// which already reads them off the authenticated session (useIsAdmin/user.email).
+// which already reads them off the authenticated session (useMembership/user.email).
 //
 // The `where("appliedBy", "==", currentUserEmail)` filter isn't just a client-side
 // convenience: firestore.rules denies a non-admin's read of any document whose

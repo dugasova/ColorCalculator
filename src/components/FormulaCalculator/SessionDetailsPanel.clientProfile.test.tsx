@@ -40,7 +40,7 @@ function mockClients(clients: ClientProfile[]) {
 }
 
 function openModal() {
-  fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save for a client…" }));
 }
 
 async function waitForClientListLoaded(count: number) {

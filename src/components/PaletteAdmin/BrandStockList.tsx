@@ -6,13 +6,14 @@ import type { Shade } from "../../engine/shades";
 import { shadeKey } from "../../engine/paletteOverrides";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import { ALL_DEVELOPER_VOLUMES } from "../../engine/levels";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { useStock } from "../../palette";
 import {
   developerStockId, DEVELOPER_BOTTLE_SIZE_GRAMS, getBrandScopedDeveloperLines, getScopedDeveloperVolumes,
   getShadeTubeSizeGrams, getStockStatus, restockOneTube, setDeveloperStockGrams, setShadeStockGrams, shadeStockId,
   stockById, stopTrackingStock, LOW_STOCK_THRESHOLD_GRAMS,
 } from "../../stock";
-import { CollapsibleSection } from "./CollapsibleSection";
+import { CollapsibleSection } from "../common/CollapsibleSection";
 
 export interface BrandStockListProps {
   brandId: BrandId;
@@ -67,8 +68,8 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
       (line === null ? ALL_DEVELOPER_VOLUMES : getScopedDeveloperVolumes(brandId, line)).map(volume => ({
         id: developerStockId(brandId, line, volume),
         label: line === null
-          ? t("format.developerVolume", { value: volume })
-          : `${t("format.developerVolume", { value: volume })} · ${formatLineLabel(line)}`,
+          ? formatDeveloperVolume(volume)
+          : `${formatDeveloperVolume(volume)} · ${formatLineLabel(line)}`,
         thresholdGrams: LOW_STOCK_THRESHOLD_GRAMS,
         restockGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
         unit: "bottle" as const,
@@ -180,6 +181,7 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
       id="stock"
       title={<>{t("palette.stockTitle")}{lowOrOutCount > 0 && ` — ${t("palette.stockLowSummary", { count: lowOrOutCount })}`}</>}
       defaultOpen={true}
+      className="palette-admin__section"
     >
       <p className="palette-admin__hint">{t("palette.stockHint")}</p>
       {error !== null && <p className="warning" role="alert">{error}</p>}

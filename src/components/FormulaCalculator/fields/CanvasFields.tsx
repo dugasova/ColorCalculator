@@ -10,6 +10,7 @@ export interface CanvasFieldsProps {
   chemicalHistory: ChemicalHistory[];
   onChemicalHistoryChange: (value: ChemicalHistory[]) => void;
   idSuffix?: string;
+  porosityHint?: string;
 }
 
 const POROSITY_OPTIONS: Porosity[] = ["low", "normal", "high"];
@@ -20,7 +21,7 @@ export function CanvasFields({
   porosity, onPorosityChange,
   thickness, onThicknessChange,
   chemicalHistory, onChemicalHistoryChange,
-  idSuffix = ""
+  idSuffix = "", porosityHint
 }: CanvasFieldsProps) {
   const { t } = useTranslation();
 
@@ -42,6 +43,7 @@ export function CanvasFields({
           onChange={(v) => onPorosityChange(v as Porosity)}
           options={POROSITY_OPTIONS.map(p => ({ value: p, label: t(`canvas.porosity.${p}`) }))}
         />
+        {porosityHint !== undefined && <p className="field__hint">{porosityHint}</p>}
       </div>
 
       <div className="field">

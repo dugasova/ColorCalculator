@@ -5,6 +5,7 @@ import { calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { BrandId } from "../../engine/brands";
 import { usePalette } from "../../palette";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
@@ -109,7 +110,7 @@ export function PrePigmentationCalculator() {
         <div className="results__row">
           <span className="results__row-label">{t("prePigmentation.finalStepLabel")}</span>
           <span>
-            {result.finalStepDeveloperVolume !== null ? t("format.developerVolume", { value: result.finalStepDeveloperVolume }) : "—"}
+            {result.finalStepDeveloperVolume !== null ? formatDeveloperVolume(result.finalStepDeveloperVolume) : "—"}
             {" · "}
             {t("format.ratio", { color: result.finalStepMixingRatio.colorParts, developer: result.finalStepMixingRatio.developerParts })}
           </span>

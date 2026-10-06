@@ -103,7 +103,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
       {gramsError !== null && <p className="warning" role="alert">{gramsError}</p>}
       {deleteError !== null && <p className="warning" role="alert">{deleteError}</p>}
       {!isLoading && error === null && filtered.length === 0 && (
-        <p className="history__status" aria-live="polite">{t("history.empty")}</p>
+        <p className="history__status" aria-live="polite">{t(entries.length === 0 ? "history.emptyFirstRun" : "history.empty")}</p>
       )}
 
       <ul className="history__list">

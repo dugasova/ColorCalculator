@@ -32,7 +32,7 @@ describe("BrandStockList restock button", () => {
     vi.mocked(useStock).mockReturnValue(stock);
     render(<BrandStockList brandId="wella" shades={[shade]} disabledKeys={new Set()} />);
 
-    const developerRow = screen.getByText("20 vol").closest("li");
+    const developerRow = screen.getByText("6% (20 vol)").closest("li");
     if (developerRow === null) throw new Error("developer row not found");
     const developerButton = within(developerRow).getByRole("button", { name: "+1 bottle (1000 g)" });
     fireEvent.click(developerButton);
@@ -60,22 +60,22 @@ describe("BrandStockList restock button", () => {
     vi.mocked(useStock).mockReturnValue(stock);
     render(<BrandStockList brandId="loreal" shades={[shade]} disabledKeys={new Set()} />);
 
-    const inoaRow = screen.getByText("20 vol · Inoa").closest("li");
+    const inoaRow = screen.getByText("6% (20 vol) · Inoa").closest("li");
     if (inoaRow === null) throw new Error("INOA developer row not found");
     expect((within(inoaRow).getByRole("spinbutton") as HTMLInputElement).value).toBe("10");
 
     fireEvent.click(within(inoaRow).getByRole("button", { name: "+1 bottle (1000 g)" }));
     expect(restockOneTube).toHaveBeenCalledWith(developerStockId("loreal", "inoa", 20), 1000);
 
-    const sharedRow = screen.getByText("20 vol").closest("li");
+    const sharedRow = screen.getByText("6% (20 vol)").closest("li");
     if (sharedRow === null) throw new Error("shared developer row not found");
     expect(sharedRow).not.toBe(inoaRow);
 
     // INOA Developer is only ever sold in 10/20/30 vol -- no 6/13/40 vol row should be
     // offered for it, unlike the brand's shared bucket which still shows all six.
-    expect(screen.queryByText("40 vol · Inoa")).not.toBeInTheDocument();
-    expect(screen.queryByText("6 vol · Inoa")).not.toBeInTheDocument();
-    expect(screen.queryByText("13 vol · Inoa")).not.toBeInTheDocument();
-    expect(screen.getByText("40 vol")).toBeInTheDocument();
+    expect(screen.queryByText("12% (40 vol) · Inoa")).not.toBeInTheDocument();
+    expect(screen.queryByText("1.9% (6 vol) · Inoa")).not.toBeInTheDocument();
+    expect(screen.queryByText("4% (13 vol) · Inoa")).not.toBeInTheDocument();
+    expect(screen.getByText("12% (40 vol)")).toBeInTheDocument();
   });
 });

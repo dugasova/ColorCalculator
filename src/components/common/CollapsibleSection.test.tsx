@@ -37,11 +37,11 @@ describe("CollapsibleSection", () => {
 
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(panel).not.toHaveAttribute("hidden");
-    expect(localStorage.getItem("formulist.paletteSection.x")).toBe("open");
+    expect(localStorage.getItem("formulist.collapsible.x")).toBe("open");
   });
 
   it("a stored 'closed' value wins over defaultOpen={true}", () => {
-    localStorage.setItem("formulist.paletteSection.y", "closed");
+    localStorage.setItem("formulist.collapsible.y", "closed");
     render(
       <CollapsibleSection id="y" title="Title" defaultOpen={true}>
         <input aria-label="child" />
@@ -69,5 +69,19 @@ describe("CollapsibleSection", () => {
     fireEvent.click(toggle); // expand
 
     expect((screen.getByLabelText("stateful") as HTMLInputElement).value).toBe("hello");
+  });
+
+  it("forceOpen keeps the panel visible and the toggle disabled even over a stored 'closed' value", () => {
+    localStorage.setItem("formulist.collapsible.w", "closed");
+    render(
+      <CollapsibleSection id="w" title="Title" defaultOpen={false} forceOpen={true}>
+        <input aria-label="child" />
+      </CollapsibleSection>
+    );
+
+    const toggle = screen.getByRole("button", { name: "Title" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(toggle).toBeDisabled();
+    expect(document.getElementById("w-panel")).not.toHaveAttribute("hidden");
   });
 });

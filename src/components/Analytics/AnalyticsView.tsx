@@ -58,6 +58,7 @@ export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps)
             <div className="analytics__kpi">
               <span className="analytics__kpi-value">{Math.round(stats.retentionRate * 100)}%</span>
               <span className="analytics__kpi-label">{t("analytics.retentionRate")}</span>
+              <span className="analytics__kpi-hint">{t("analytics.retentionRateHint")}</span>
             </div>
             <div className="analytics__kpi">
               <span className="analytics__kpi-value">{stats.averageColorGrams !== null ? stats.averageColorGrams.toFixed(1) : "—"}</span>
@@ -74,6 +75,7 @@ export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps)
             <div className="analytics__kpi">
               <span className="analytics__kpi-value">{stats.actualVsComputedRatio !== null ? `${Math.round(stats.actualVsComputedRatio * 100)}%` : "—"}</span>
               <span className="analytics__kpi-label">{t("analytics.actualVsComputedRatio")}</span>
+              <span className="analytics__kpi-hint">{t("analytics.actualVsComputedRatioHint")}</span>
             </div>
           </div>
 

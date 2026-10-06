@@ -4,9 +4,9 @@ import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { signOut, type User } from "firebase/auth";
 import { auth } from "./firebase";
 import { usePalette } from "./palette";
-import { useIsAdmin } from "./roles";
 import FormulaCalculator from "./components/FormulaCalculator/FormulaCalculator";
 import { Nav, type AppView } from "./components/Nav/Nav";
+import { BottomNav } from "./components/Nav/BottomNav";
 import { buildRepeatFormulaRequest, type FormulaHistoryEntry, type RepeatFormulaRequest } from "./history";
 import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
@@ -53,10 +53,9 @@ const FavoritesPage = lazy(() =>
   import("./components/FormulaCalculator/FavoritesPage").then(m => ({ default: m.FavoritesPage }))
 );
 
-export function AuthenticatedApp({ user }: { user: User }) {
+export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boolean }) {
   const { t } = useTranslation();
   const brands = usePalette();
-  const isAdmin = useIsAdmin(user.uid);
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
   const location = useLocation();
@@ -186,6 +185,7 @@ export function AuthenticatedApp({ user }: { user: User }) {
           </Routes>
         </Suspense>
       </main>
+      <BottomNav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} />
     </div>
   );
 }

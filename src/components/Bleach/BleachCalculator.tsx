@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { useSalonMarkupMultiplier } from "../../palette";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -39,7 +40,7 @@ export function BleachResults({
         <div className="stat">
           <span className="stat__label">{t("results.developer")}</span>
           <span className="stat__value">
-            {result.developerVolume !== null ? t("format.developerVolume", { value: result.developerVolume }) : "—"}
+            {result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume) : "—"}
           </span>
         </div>
         <div className="stat">

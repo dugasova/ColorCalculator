@@ -39,6 +39,17 @@
   width: 100%;
 }
 
+.account-menu__popup a.button {
+  text-align: center;
+  text-decoration: none;
+}
+
+.account-menu__build {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+  color: var(--brand-muted);
+}
+
 .account-menu__email {
   margin: 0 0 4px;
   padding-bottom: 8px;

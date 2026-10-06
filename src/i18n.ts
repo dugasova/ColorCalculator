@@ -20,7 +20,8 @@ function getInitialLanguage(): Language {
       return stored;
     }
   }
-  if (typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("uk")) {
+  const lang = typeof navigator !== "undefined" ? navigator.language?.toLowerCase() : undefined;
+  if (lang?.startsWith("uk") || lang?.startsWith("ru")) {
     return "uk";
   }
   return "en";

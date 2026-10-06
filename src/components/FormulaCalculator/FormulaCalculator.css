@@ -42,10 +42,29 @@
   color: transparent;
 }
 
+.calculator__intro {
+  margin: -16px 0 20px;
+  color: var(--brand-muted);
+  font-size: 0.9rem;
+}
+
 .calculator__form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px 16px;
+}
+
+.calculator__step-heading {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.calculator__advanced {
+  grid-column: 1 / -1;
+}
+
+.calculator__advanced .calculator__form {
+  margin-top: 12px;
 }
 
 .field {
@@ -61,6 +80,13 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.field__hint {
+  margin: -4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--muted);
 }
 
 .results__client-name,
@@ -849,6 +875,7 @@
   }
 
   .calculator--wide > .calculator__title,
+  .calculator--wide > .calculator__intro,
   .calculator--wide > .favorites__save-trigger {
     grid-column: 1 / -1;
   }

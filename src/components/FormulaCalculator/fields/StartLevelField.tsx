@@ -6,11 +6,12 @@ export interface StartLevelFieldProps {
   startLevel: Level;
   onStartLevelChange: (level: Level) => void;
   idSuffix?: string;
+  hint?: string;
 }
 
-export function StartLevelField({ startLevel, onStartLevelChange, idSuffix = "" }: StartLevelFieldProps) {
+export function StartLevelField({ startLevel, onStartLevelChange, idSuffix = "", hint }: StartLevelFieldProps) {
   const { t } = useTranslation();
   return (
-    <LevelField id={`startLevel${idSuffix}`} label={t("fields.startLevel")} value={startLevel} onChange={onStartLevelChange} />
+    <LevelField id={`startLevel${idSuffix}`} label={t("fields.startLevel")} value={startLevel} onChange={onStartLevelChange} hint={hint} />
   );
 }

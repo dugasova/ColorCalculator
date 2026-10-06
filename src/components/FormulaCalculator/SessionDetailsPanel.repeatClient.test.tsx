@@ -56,7 +56,7 @@ function mockClients(clients: ClientProfile[]) {
 }
 
 function openModal() {
-  fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save for a client…" }));
 }
 
 // Regression: repeating a returning client's past visit used to leave the client name

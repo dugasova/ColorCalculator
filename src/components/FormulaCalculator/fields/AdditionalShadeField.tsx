@@ -12,6 +12,7 @@ export interface AdditionalShadeFieldProps {
   onAdditionalShadeGramsChange: (grams: number) => void;
   idSuffix?: string;
   label?: string;
+  hint?: string;
 }
 
 // Lets the colorist blend in an extra shade at their own discretion — e.g. a small
@@ -24,7 +25,7 @@ export interface AdditionalShadeFieldProps {
 // the shade it belongs to) and only appears once a shade is picked.
 export function AdditionalShadeField({
   lineShades, additionalShadeCode, onAdditionalShadeCodeChange,
-  additionalShadeGrams, onAdditionalShadeGramsChange, idSuffix = "", label,
+  additionalShadeGrams, onAdditionalShadeGramsChange, idSuffix = "", label, hint,
 }: AdditionalShadeFieldProps) {
   const { t } = useTranslation();
   const additionalShade = lineShades.find(s => s.code === additionalShadeCode) ?? null;
@@ -70,6 +71,7 @@ export function AdditionalShadeField({
           />
         )}
       </div>
+      {hint !== undefined && <p className="field__hint">{hint}</p>}
     </div>
   );
 }

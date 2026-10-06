@@ -5,9 +5,10 @@ export interface GrayPercentFieldProps {
   grayPercent: number;
   onGrayPercentChange: (percent: number) => void;
   idSuffix?: string;
+  hint?: string;
 }
 
-export function GrayPercentField({ grayPercent, onGrayPercentChange, idSuffix = "" }: GrayPercentFieldProps) {
+export function GrayPercentField({ grayPercent, onGrayPercentChange, idSuffix = "", hint }: GrayPercentFieldProps) {
   const { t } = useTranslation();
   const { inputProps } = useClampedNumberText(grayPercent, onGrayPercentChange, { min: 0, max: 100 });
 
@@ -15,6 +16,7 @@ export function GrayPercentField({ grayPercent, onGrayPercentChange, idSuffix = 
     <div className="field">
       <label htmlFor={`grayPercent${idSuffix}`}>{t("fields.grayPercent")}</label>
       <input id={`grayPercent${idSuffix}`} {...inputProps} />
+      {hint !== undefined && <p className="field__hint">{hint}</p>}
     </div>
   );
 }

@@ -35,7 +35,7 @@ describe("OrderListView", () => {
     render(<OrderListView />);
 
     const shadeInput = screen.getByLabelText("Quantity of 7/1 · Koleston Perfect to order") as HTMLInputElement;
-    const developerInput = screen.getByLabelText("Quantity of 20 vol to order") as HTMLInputElement;
+    const developerInput = screen.getByLabelText("Quantity of 6% (20 vol) to order") as HTMLInputElement;
     expect(shadeInput.value).toBe("1");
     expect(developerInput.value).toBe("1");
 

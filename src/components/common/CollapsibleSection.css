@@ -1,0 +1,31 @@
+.collapsible-section__toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.collapsible-section__toggle:disabled {
+  cursor: default;
+}
+
+.collapsible-section__chevron {
+  width: 12px;
+  height: 8px;
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.collapsible-section__toggle[aria-expanded="true"] .collapsible-section__chevron {
+  transform: rotate(180deg);
+}

@@ -1,0 +1,7 @@
+.error-boundary__details {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--brand-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

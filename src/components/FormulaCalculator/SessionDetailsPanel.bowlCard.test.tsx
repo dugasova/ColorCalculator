@@ -19,7 +19,7 @@ const APPLIED_BY = "stylist@salon.test";
 afterEach(cleanup);
 
 function typeClientName(name: string) {
-  fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save for a client…" }));
   fireEvent.change(screen.getByLabelText("Client name"), { target: { value: name } });
   // Closes the details modal so only the bowl card (opened below) ends up as the sole
   // open dialog when its own assertions run.

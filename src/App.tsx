@@ -1,8 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "./firebase";
-import { PaletteProvider } from "./PaletteContext";
-import { AuthenticatedApp } from "./AuthenticatedApp";
+import { MemberGate } from "./components/MemberGate/MemberGate";
 
 const LoginForm = lazy(() => import("./components/LoginForm/LoginForm"));
 const VerifyEmailScreen = lazy(() =>
@@ -51,10 +50,7 @@ export default function App() {
 
   // The palette catalog (built-in brands plus whatever an admin has added/discontinued)
   // is shared by the calculator, complex-coloring, history-repeat, and admin screens
-  // below, so it's subscribed to once here rather than once per consumer.
-  return (
-    <PaletteProvider>
-      <AuthenticatedApp user={user} />
-    </PaletteProvider>
-  );
+  // below, so MemberGate subscribes to it once membership resolves rather than once
+  // per consumer.
+  return <MemberGate user={user} />;
 }

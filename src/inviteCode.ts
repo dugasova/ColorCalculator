@@ -7,4 +7,4 @@
 // `users/{uid}` document for it (see that file's comment, and src/roles.ts). Change
 // this code here if it leaks or when rotating staff -- that only affects who bothers
 // signing up, not who can act once signed up.
-export const SALON_INVITE_CODE = "SALON_INVITE_CODE";
+export const SALON_INVITE_CODE = "482026";

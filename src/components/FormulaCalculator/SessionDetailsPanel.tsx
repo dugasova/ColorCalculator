@@ -201,19 +201,19 @@ export function SessionDetailsPanel({
       <div className="results__client-summary">
         <button
           type="button"
-          className="button button--secondary results__client-summary-trigger"
+          className="button results__client-summary-trigger"
           onClick={() => setIsDetailsModalOpen(true)}
         >
-          {t("results.clientDetailsSectionTitle")}
+          {t("results.saveForClient")}
         </button>
+        <p className="field__hint">{t("results.saveForClientHint")}</p>
         {clientName.trim() !== "" && (
           <button
             type="button"
             className="results__client-summary-name"
             onClick={() => setIsBowlCardOpen(true)}
-            aria-label={t("results.bowlCardOpenAria", { name: clientName.trim() })}
           >
-            {clientName.trim()}
+            {t("results.bowlCardOpen", { name: clientName.trim() })}
           </button>
         )}
         {clientName.trim() !== "" && !patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
@@ -152,7 +153,7 @@ export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove 
           </div>
           <div className="results__row">
             <span className="results__row-label">{t("results.developer")}</span>
-            <span>{result.developerVolume !== null ? t("format.developerVolume", { value: result.developerVolume }) : "—"}</span>
+            <span>{result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume) : "—"}</span>
           </div>
           <p className="bleach__note">{t("bleach.maxScalpTimeNote", { max: result.maxScalpProcessingMinutes })}</p>
           <p className="bleach__note">{t("bleach.checkIntervalNote", { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>

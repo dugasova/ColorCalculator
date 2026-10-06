@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { usePalette, useStock } from "../../palette";
 import { buildReorderList, type ReorderItem } from "../../stock";
 import { formatLineLabel } from "../../engine/formatLineLabel";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { Select } from "../common/Select";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -44,7 +45,7 @@ export function OrderListView() {
 
   const labelOf = (item: ReorderItem): string => {
     if (item.kind === "shade") return item.line !== null ? `${item.code} · ${formatLineLabel(item.line)}` : item.code;
-    const volumeLabel = t("format.developerVolume", { value: item.volume });
+    const volumeLabel = formatDeveloperVolume(item.volume);
     return item.line !== null ? `${volumeLabel} · ${formatLineLabel(item.line)}` : volumeLabel;
   };
 

@@ -8,7 +8,7 @@ describe("ColorCorrectionCalculator", () => {
     const html = renderToStaticMarkup(<ColorCorrectionCalculator />);
 
     expect(html).toContain("calculator__title-accent\">Correction<");
-    expect(html).toContain("20 vol (6%)"); // 2-level lift -> 20vol/6%
+    expect(html).toContain("6% (20 vol)"); // 2-level lift -> 20vol/6%
     expect(html).toContain("Lift + Tone");
     expect(html).toContain("Blue ash");
     expect(html).toContain(".1, .01");

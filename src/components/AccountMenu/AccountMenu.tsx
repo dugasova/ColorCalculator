@@ -2,6 +2,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./AccountMenu.css";
 
+// Set per deployment via `.env`'s VITE_FEEDBACK_URL (see .env.example) -- e.g. the
+// owner's Telegram or a mailto: link. Left unset, the feedback button is hidden rather
+// than linking nowhere.
+const FEEDBACK_URL: string | undefined = import.meta.env.VITE_FEEDBACK_URL;
+
 export interface AccountMenuProps {
   email: string | null;
   onChangePassword: () => void;
@@ -78,6 +83,18 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
           >
             {t("account.signOut")}
           </button>
+          {FEEDBACK_URL !== undefined && FEEDBACK_URL !== "" && (
+            <a
+              className="button button--secondary"
+              href={FEEDBACK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+            >
+              {t("account.feedback")}
+            </a>
+          )}
+          <p className="account-menu__build">{t("account.build", { date: __BUILD_TIME__ })}</p>
         </div>
       )}
     </div>

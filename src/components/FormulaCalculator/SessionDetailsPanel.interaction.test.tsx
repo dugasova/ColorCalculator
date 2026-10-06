@@ -19,7 +19,7 @@ const APPLIED_BY = "stylist@salon.test";
 afterEach(cleanup);
 
 function fillRequiredFieldsAndSave() {
-  fireEvent.click(screen.getByRole("button", { name: "Client & visit details" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save for a client…" }));
   fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Anna K." } });
   fireEvent.click(screen.getByLabelText("Patch test not required (no new product, no reaction history)"));
   fireEvent.click(screen.getByRole("button", { name: "Save to history" }));

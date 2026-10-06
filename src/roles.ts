@@ -1,8 +1,9 @@
-import { doc, onSnapshot, type Unsubscribe } from "firebase/firestore";
+import { doc, onSnapshot, type FirestoreError, type Unsubscribe } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "./firebase";
 
 export type UserRole = "admin" | "stylist";
+export type Membership = "loading" | "pending" | UserRole;
 
 const USERS_COLLECTION = "users";
 
@@ -10,18 +11,41 @@ const USERS_COLLECTION = "users";
 // with console access) sets `role: 'admin'` on a `users/{uid}` document by hand in the
 // Firebase console; everyone else defaults to 'stylist'. See firestore.rules: only the
 // palette collections check this role, and only reads of `users` are allowed client-side.
-export function subscribeToUserRole(uid: string, onChange: (role: UserRole) => void): Unsubscribe {
-  return onSnapshot(doc(db, USERS_COLLECTION, uid), snapshot => {
-    onChange(snapshot.data()?.role === "admin" ? "admin" : "stylist");
-  });
+//
+// A signed-up, email-verified user has no `users/{uid}` document until the salon owner
+// provisions them (see `scripts/backfillUserDocs.ts`), so a missing doc or a permission
+// error both mean "not provisioned yet" rather than a real failure — see firestore.rules
+// lines 25–27 and 45–48. We only report "pending" once we're sure the doc is really
+// missing server-side; a cache miss while offline would otherwise flash that screen.
+export function subscribeToMembership(uid: string, onChange: (membership: Exclude<Membership, "loading">) => void): Unsubscribe {
+  return onSnapshot(
+    doc(db, USERS_COLLECTION, uid),
+    snapshot => {
+      if (snapshot.exists()) {
+        onChange(snapshot.data().role === "admin" ? "admin" : "stylist");
+        return;
+      }
+      if (!snapshot.metadata.fromCache) {
+        onChange("pending");
+      }
+    },
+    (error: FirestoreError) => {
+      if (error.code === "permission-denied") {
+        onChange("pending");
+        return;
+      }
+      console.error(error);
+      onChange("stylist");
+    }
+  );
 }
 
 // `uid` is a Firebase `User.uid`, always a non-empty string for a signed-in user — see the
-// only call site, `AuthenticatedApp` in App.tsx, which only renders once `user` exists.
-export function useIsAdmin(uid: string): boolean {
-  const [isAdmin, setIsAdmin] = useState(false);
+// only call site, `MemberGate`, which only renders once `user` exists.
+export function useMembership(uid: string): Membership {
+  const [membership, setMembership] = useState<Membership>("loading");
 
-  useEffect(() => subscribeToUserRole(uid, role => setIsAdmin(role === "admin")), [uid]);
+  useEffect(() => subscribeToMembership(uid, setMembership), [uid]);
 
-  return isAdmin;
+  return membership;
 }

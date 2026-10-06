@@ -4,6 +4,7 @@ export interface BlendModeFieldProps {
   substituteBlend: boolean;
   onSubstituteBlendChange: (value: boolean) => void;
   idSuffix?: string;
+  hint?: string;
 }
 
 // Lets the colorist flag that the target shade isn't in stock: instead of the additional
@@ -12,7 +13,7 @@ export interface BlendModeFieldProps {
 // and 7/3 at a chosen ratio (see BlendRatioField) to approximate it. Spans the full form
 // row (blend-toggle-field) so the additional-shade fields below always start their own
 // row instead of sharing this one, regardless of this checkbox's state.
-export function BlendModeField({ substituteBlend, onSubstituteBlendChange, idSuffix = "" }: BlendModeFieldProps) {
+export function BlendModeField({ substituteBlend, onSubstituteBlendChange, idSuffix = "", hint }: BlendModeFieldProps) {
   const { t } = useTranslation();
   return (
     <div className="field blend-toggle-field">
@@ -25,6 +26,7 @@ export function BlendModeField({ substituteBlend, onSubstituteBlendChange, idSuf
         />
         {t("fields.substituteBlend")}
       </label>
+      {hint !== undefined && <p className="field__hint">{hint}</p>}
     </div>
   );
 }

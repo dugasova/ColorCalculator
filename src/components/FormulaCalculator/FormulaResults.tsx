@@ -5,6 +5,7 @@ import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
 import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../engine/formatPrePigmentation";
@@ -112,7 +113,7 @@ export function FormulaResults({
         <div className="stat">
           <span className="stat__label">{t("results.developer")}</span>
           <span className="stat__value">
-            {result.developerVolume !== null ? t("format.developerVolume", { value: result.developerVolume }) : "—"}
+            {result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume, targetShade.developerPercentOverride) : "—"}
           </span>
         </div>
         <div className="stat">

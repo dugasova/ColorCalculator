@@ -7,6 +7,7 @@ import { indexedDBLocalPersistence, setPersistence } from "firebase/auth";
 import "./i18n";
 import "./index.css";
 import App from "./App.tsx";
+import { ErrorBoundary } from "./components/ErrorBoundary/ErrorBoundary";
 import { auth } from "./firebase";
 
 if (Capacitor.isNativePlatform()) {
@@ -27,7 +28,9 @@ if (Capacitor.isNativePlatform()) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
 );

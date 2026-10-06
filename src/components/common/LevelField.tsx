@@ -6,11 +6,12 @@ export interface LevelFieldProps {
   label: string;
   value: Level;
   onChange: (level: Level) => void;
+  hint?: string;
 }
 
 // The 1-12 depth picker every calculator shows. One component so the option list, the
 // `field` wrapper and the label/control wiring can't drift between surfaces.
-export function LevelField({ id, label, value, onChange }: LevelFieldProps) {
+export function LevelField({ id, label, value, onChange, hint }: LevelFieldProps) {
   return (
     <div className="field">
       <label htmlFor={id}>{label}</label>
@@ -20,6 +21,7 @@ export function LevelField({ id, label, value, onChange }: LevelFieldProps) {
         onChange={next => onChange(Number(next) as Level)}
         options={ALL_LEVELS.map(level => ({ value: String(level), label: String(level) }))}
       />
+      {hint !== undefined && <p className="field__hint">{hint}</p>}
     </div>
   );
 }

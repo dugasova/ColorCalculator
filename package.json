@@ -21,7 +21,8 @@
     "cap:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
     "android:apk": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
-    "android:aab": "npm run build && npx cap sync android && cd android && ./gradlew bundleRelease"
+    "android:aab": "npm run build && npx cap sync android && cd android && ./gradlew bundleRelease",
+    "deploy:web": "npm run build && npx firebase-tools deploy --only hosting"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",

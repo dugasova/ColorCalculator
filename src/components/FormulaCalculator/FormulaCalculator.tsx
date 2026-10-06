@@ -3,7 +3,10 @@ import "./FormulaCalculator.css";
 import { usePalette } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
+import { GRAY_LIGHT_THRESHOLD, GRAY_MEDIUM_THRESHOLD, GRAY_COVERAGE_MIN_DEVELOPER_VOLUME } from "../../engine/formula";
+import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { useFormulaCalculatorState } from "./useFormulaCalculatorState";
+import { CollapsibleSection } from "../common/CollapsibleSection";
 import { BrandField } from "./fields/BrandField";
 import { LineField } from "./fields/LineField";
 import { StartLevelField } from "./fields/StartLevelField";
@@ -95,16 +98,29 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
   return (
     <div className="calculator calculator--wide">
       <h1 className="calculator__title">{t("app.titlePrefix")} <span className="calculator__title-accent">{t("app.titleAccent")}</span></h1>
+      <p className="calculator__intro">{t("calculator.intro")}</p>
       <div className="calculator__form">
-        <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} />
-        <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} />
-        <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} />
-        <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} />
+        <h2 className="results__section-heading calculator__step-heading">{t("calculator.stepHair")}</h2>
+        <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} hint={t("fields.startLevelHint")} />
+        <GrayPercentField
+          grayPercent={grayPercent}
+          onGrayPercentChange={setGrayPercent}
+          hint={t("fields.grayPercentHint", {
+            light: GRAY_LIGHT_THRESHOLD,
+            medium: GRAY_MEDIUM_THRESHOLD,
+            developer: formatDeveloperVolume(GRAY_COVERAGE_MIN_DEVELOPER_VOLUME),
+          })}
+        />
         <CanvasFields
           porosity={porosity} onPorosityChange={setPorosity}
           thickness={thickness} onThicknessChange={setThickness}
           chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+          porosityHint={t("canvas.porosity.hint")}
         />
+
+        <h2 className="results__section-heading calculator__step-heading">{t("calculator.stepColor")}</h2>
+        <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} />
+        <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} />
         <ShadeField
           lineShades={lineShades}
           targetShadeCode={targetShadeCode}
@@ -116,62 +132,6 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
           enabled={prePigmentationEnabled}
           onEnabledChange={setPrePigmentationEnabled}
         />
-        <CrossBrandMatchField
-          targetShade={targetShade}
-          currentBrandId={brandId}
-          brands={brands}
-          onSelectMatch={handleCrossBrandMatchSelect}
-        />
-        <BlendModeField substituteBlend={blendModeEnabled} onSubstituteBlendChange={handleBlendModeChange} />
-        <AdditionalShadeField
-          lineShades={lineShades}
-          additionalShadeCode={additionalShadeCode}
-          onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
-          additionalShadeGrams={additionalShadeGrams}
-          onAdditionalShadeGramsChange={setAdditionalShadeGrams}
-        />
-        {additionalShadeCode !== null && (
-          <AdditionalShadeField
-            lineShades={lineShades}
-            additionalShadeCode={additionalShade2Code}
-            onAdditionalShadeCodeChange={setAdditionalShade2Code}
-            additionalShadeGrams={additionalShade2Grams}
-            onAdditionalShadeGramsChange={setAdditionalShade2Grams}
-            idSuffix="_2"
-            label={t("fields.additionalShade2")}
-          />
-        )}
-        {blendModeEnabled && (
-          <div className="blend-group">
-            <div className="blend-group__fields">
-              <BlendComponentField
-                id="blendShadeA"
-                label={t("fields.blendShadeA")}
-                placeholder={t("fields.blendShadeNone")}
-                candidates={blendCandidates}
-                shadeCode={blendShadeACodeEffective}
-                onShadeCodeChange={setBlendShadeACode}
-              />
-              <BlendComponentField
-                id="blendShadeB"
-                label={t("fields.blendShadeB")}
-                placeholder={t("fields.blendShadeNone")}
-                candidates={blendCandidates}
-                shadeCode={blendShadeBCodeEffective}
-                onShadeCodeChange={setBlendShadeBCode}
-              />
-            </div>
-            {blendShadeA !== null && blendShadeB !== null && result.grams !== null && (
-              <BlendRatioField
-                shadeA={blendShadeA}
-                shadeB={blendShadeB}
-                colorGrams={result.grams.colorGrams}
-                primaryPercent={blendPrimaryPercent}
-                onPrimaryPercentChange={setBlendPrimaryPercent}
-              />
-            )}
-          </div>
-        )}
         <DeveloperVolumeField
           targetShade={targetShade}
           manualDeveloperVolume={manualDeveloperVolume}
@@ -182,6 +142,8 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
           manualMixingRatio={manualMixingRatio}
           onManualMixingRatioChange={setManualMixingRatio}
         />
+
+        <h2 className="results__section-heading calculator__step-heading">{t("calculator.stepAmount")}</h2>
         <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} />
         <GramsInputField
           gramsInputMode={gramsInputMode}
@@ -191,6 +153,74 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
           colorGrams={colorGrams}
           onColorGramsChange={setColorGrams}
         />
+
+        <CollapsibleSection
+          id="calculatorAdvanced"
+          title={t("calculator.advanced")}
+          defaultOpen={false}
+          forceOpen={blendModeEnabled || additionalShadeCode !== null}
+          className="calculator__advanced"
+        >
+          <div className="calculator__form">
+            <CrossBrandMatchField
+              targetShade={targetShade}
+              currentBrandId={brandId}
+              brands={brands}
+              onSelectMatch={handleCrossBrandMatchSelect}
+            />
+            <BlendModeField substituteBlend={blendModeEnabled} onSubstituteBlendChange={handleBlendModeChange} hint={t("fields.substituteBlendHint")} />
+            <AdditionalShadeField
+              lineShades={lineShades}
+              additionalShadeCode={additionalShadeCode}
+              onAdditionalShadeCodeChange={handleAdditionalShadeCodeChange}
+              additionalShadeGrams={additionalShadeGrams}
+              onAdditionalShadeGramsChange={setAdditionalShadeGrams}
+              hint={t("fields.additionalShadeHint")}
+            />
+            {additionalShadeCode !== null && (
+              <AdditionalShadeField
+                lineShades={lineShades}
+                additionalShadeCode={additionalShade2Code}
+                onAdditionalShadeCodeChange={setAdditionalShade2Code}
+                additionalShadeGrams={additionalShade2Grams}
+                onAdditionalShadeGramsChange={setAdditionalShade2Grams}
+                idSuffix="_2"
+                label={t("fields.additionalShade2")}
+              />
+            )}
+            {blendModeEnabled && (
+              <div className="blend-group">
+                <div className="blend-group__fields">
+                  <BlendComponentField
+                    id="blendShadeA"
+                    label={t("fields.blendShadeA")}
+                    placeholder={t("fields.blendShadeNone")}
+                    candidates={blendCandidates}
+                    shadeCode={blendShadeACodeEffective}
+                    onShadeCodeChange={setBlendShadeACode}
+                  />
+                  <BlendComponentField
+                    id="blendShadeB"
+                    label={t("fields.blendShadeB")}
+                    placeholder={t("fields.blendShadeNone")}
+                    candidates={blendCandidates}
+                    shadeCode={blendShadeBCodeEffective}
+                    onShadeCodeChange={setBlendShadeBCode}
+                  />
+                </div>
+                {blendShadeA !== null && blendShadeB !== null && result.grams !== null && (
+                  <BlendRatioField
+                    shadeA={blendShadeA}
+                    shadeB={blendShadeB}
+                    colorGrams={result.grams.colorGrams}
+                    primaryPercent={blendPrimaryPercent}
+                    onPrimaryPercentChange={setBlendPrimaryPercent}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
       </div>
       <FormulaResults
         brandId={brandId}
