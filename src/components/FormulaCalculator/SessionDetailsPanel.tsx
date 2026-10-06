@@ -46,13 +46,14 @@ export interface SessionDetailsPanelProps {
   // client-name field exists to match against.
   canvas?: HairCanvas;
   // Pre-fills and re-links the client name to the same profile when replaying a "Repeat
-  // formula" request from History (see FormulaCalculator's repeatRequest and
-  // buildRepeatFormulaRequest) -- without this, a repeated visit for a returning client
+  // formula"/"Repeat" request from History (see FormulaCalculator's repeatRequest and
+  // buildRepeatFormulaRequest, or ComplexColoringCalculator's repeatRequest and
+  // buildRepeatSessionRequest) -- without this, a repeated visit for a returning client
   // silently created a second, duplicate client profile unless the colorist happened to
   // re-pick the exact suggestion by hand, which double-counted that person in every
-  // "unique clients" figure (History's grouping, AnalyticsView's retention). Omitted (not
-  // just `null`) for a caller with no repeat concept at all, e.g. ComplexColoringCalculator.
-  repeatRequest?: RepeatFormulaRequest | null;
+  // "unique clients" figure (History's grouping, AnalyticsView's retention). Only the two
+  // client-identity fields are needed here, so both request shapes satisfy this type.
+  repeatRequest?: Pick<RepeatFormulaRequest, "clientName" | "clientId"> | null;
 }
 
 const COPIED_FEEDBACK_MS = 1500;

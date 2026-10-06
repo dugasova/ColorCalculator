@@ -8,6 +8,8 @@ import { BRANDS } from "../../engine/brands";
 import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
 import { shadeStockId, type StockRecord } from "../../stock";
 import { DEFAULT_PRICING_SETTINGS } from "../../salonSettings";
+import { buildRepeatSessionRequest } from "../../history";
+import { makeBleachStep, makeColorStep, makeEntry } from "../../testFixtures";
 
 // This project doesn't set vitest's `test.globals: true`, so @testing-library/react's
 // automatic afterEach cleanup never registers -- see ColorStepCard.interaction.test.tsx
@@ -92,5 +94,28 @@ describe("ComplexColoringCalculator", () => {
     fireEvent.click(screen.getByRole("button", { name: "+ Add color step" }));
 
     expect(screen.queryByText(/Not enough/)).toBeNull();
+  });
+
+  it("seeds every step, markup, and service price from a History 'Repeat' of a saved multi-step session", () => {
+    const bleachStep = makeBleachStep({ result: { ...makeBleachStep().result, grams: { powderGrams: 30, developerGrams: 60 } } });
+    const entry = makeEntry({
+      clientName: "Anna", markupMultiplier: 3, servicePrice: 120,
+      steps: [bleachStep, makeColorStep({ strandZone: "mid-lengths" })],
+    });
+    const repeatRequest = buildRepeatSessionRequest(entry, BRANDS)!;
+
+    render(<ComplexColoringCalculator appliedBy="Test Stylist" repeatRequest={repeatRequest} />);
+
+    expect(screen.getAllByRole("button", { name: "Remove step" })).toHaveLength(2);
+    expect(document.getElementById("bleachTargetLevel-step-0")).toHaveTextContent("9");
+    expect((document.getElementById("bleachTotalGrams-step-0") as HTMLInputElement).value).toBe("90");
+    expect(document.getElementById("startLevel-step-1")).toHaveTextContent("7");
+    expect(document.getElementById("targetShadeCode-step-1")).toHaveTextContent("7.1");
+
+    // 35 (seeded bleach step) + 30 (seeded color step) -- proves both steps reported
+    // their seeded formula up to the session-level total, not just rendered their fields.
+    const processingRow = screen.getByText("Total processing time, min").closest(".results__row");
+    expect(processingRow).not.toBeNull();
+    expect(processingRow!).toHaveTextContent("65");
   });
 });

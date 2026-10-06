@@ -202,6 +202,34 @@ describe("HistoryView client grouping", () => {
   });
 });
 
+describe("HistoryView repeat", () => {
+  it("shows the Repeat action for a multi-step complex-coloring session and calls onRepeat with that entry", async () => {
+    const entry = makeEntry({
+      id: "1",
+      clientName: "Anna K.",
+      steps: [
+        {
+          kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
+            startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
+            mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
+            recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
+          }, processingMinutes: 35, pricePerGram: 0.1,
+        },
+        { ...colorStep, strandZone: "ends" },
+      ],
+    });
+    mockHistory([entry]);
+    mockClients([]);
+    const onRepeat = vi.fn();
+
+    render(<HistoryView onRepeat={onRepeat} isAdmin={false} currentUserEmail="stylist@salon.test" />);
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Repeat formula" }));
+    expect(onRepeat).toHaveBeenCalledWith(entry);
+  });
+});
+
 describe("HistoryView revisit reminders", () => {
   it("opens a WhatsApp link addressed to the client's saved phone, prefilled with their name and recommended date", async () => {
     mockHistory([

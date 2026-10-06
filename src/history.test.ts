@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  normalizeHistoryEntry, buildRepeatFormulaRequest, historyEntryShapeSchema,
+  normalizeHistoryEntry, buildRepeatFormulaRequest, buildRepeatSessionRequest, historyEntryShapeSchema,
   type ColorHistoryStep, type LegacyFormulaHistoryEntry,
 } from "./history";
 import { BRANDS } from "./engine/brands";
@@ -241,6 +241,51 @@ describe("buildRepeatFormulaRequest", () => {
   it("returns null when the saved brand no longer exists", () => {
     const entry = makeEntry({ clientName: "Anna", steps: [makeColorStep({ brandName: "Deleted Brand" })] });
     expect(buildRepeatFormulaRequest(entry, BRANDS)).toBeNull();
+  });
+});
+
+describe("buildRepeatSessionRequest", () => {
+  it("reconstructs calculator input for every step of a multi-zone session, plus the session-level fields", () => {
+    const entry = makeEntry({
+      clientName: "Anna", clientId: "anna-1", markupMultiplier: 3, servicePrice: 120,
+      steps: [makeBleachStep({ targetLevel: 9 }), makeColorStep({ strandZone: "mid-lengths" })],
+    });
+    const request = buildRepeatSessionRequest(entry, BRANDS);
+
+    expect(request).not.toBeNull();
+    expect(request!.clientId).toBe("anna-1");
+    expect(request!.markupMultiplier).toBe(3);
+    expect(request!.servicePrice).toBe(120);
+    expect(request!.steps[0]).toMatchObject({
+      kind: "bleach", startLevel: 6, targetLevel: 9, totalGrams: 60, processingMinutes: 35, pricePerGram: 0.1,
+    });
+    expect(request!.steps[1]).toMatchObject({
+      kind: "color", brandId: "generic", targetShadeCode: "7.1", startLevel: 7, totalGrams: 60, colorGrams: 30,
+      strandZone: "mid-lengths", prePigmentationEnabled: false,
+    });
+  });
+
+  it("returns null for a plain single-color-step entry (the simple calculator's own shape)", () => {
+    const entry = makeEntry({ clientName: "Anna" });
+    expect(buildRepeatSessionRequest(entry, BRANDS)).toBeNull();
+  });
+
+  it("routes a single color step saved from Complex Coloring (it carries a strandZone) away from the simple calculator and into a session repeat instead", () => {
+    const entry = makeEntry({ clientName: "Anna", steps: [makeColorStep({ strandZone: "full-head" })] });
+
+    expect(buildRepeatFormulaRequest(entry, BRANDS)).toBeNull();
+    const request = buildRepeatSessionRequest(entry, BRANDS);
+    expect(request).not.toBeNull();
+    expect(request!.steps).toHaveLength(1);
+    expect(request!.steps[0].kind).toBe("color");
+  });
+
+  it("returns null when a color step's saved brand no longer exists", () => {
+    const entry = makeEntry({
+      clientName: "Anna",
+      steps: [makeBleachStep(), makeColorStep({ brandName: "Deleted Brand" })],
+    });
+    expect(buildRepeatSessionRequest(entry, BRANDS)).toBeNull();
   });
 });
 

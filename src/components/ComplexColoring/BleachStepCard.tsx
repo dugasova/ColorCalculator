@@ -9,7 +9,7 @@ import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
-import type { BleachHistoryStep, HistoryStep } from "../../history";
+import type { BleachHistoryStep, BleachStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
@@ -23,6 +23,11 @@ export interface BleachStepCardProps {
   // wiring). Optional/defaults to empty so a lone BleachStepCard works unchanged with no
   // inheritance.
   previousSteps?: HistoryStep[];
+  // Reconstructed input from a History "Repeat" of a saved session (see
+  // buildRepeatSessionRequest) -- read once at mount to seed every field below,
+  // overriding both the hardcoded defaults and same-zone inheritance. Absent for a
+  // freshly added step.
+  seed?: BleachStepSeed;
   onChange: (step: BleachHistoryStep) => void;
   onRemove: () => void;
 }
@@ -30,7 +35,7 @@ export interface BleachStepCardProps {
 // One bleach (lightening powder) step within a complex-coloring session — e.g. lifting a
 // section before toning. Mirrors BleachCalculator's fields and calculation, minus the
 // per-session bits (overall markup/service price) that live in ComplexColoringCalculator.
-export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove }: BleachStepCardProps) {
+export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onRemove }: BleachStepCardProps) {
   const { t } = useTranslation();
   const idSuffix = `-${stepId}`;
 
@@ -39,14 +44,14 @@ export function BleachStepCard({ stepId, previousSteps = [], onChange, onRemove 
   // it as an effect both cascaded an extra render and tripped react-hooks/set-state-in-effect.
   const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
 
-  const [startLevel, setStartLevel] = useState<Level>(6);
-  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(inheritedOnMount?.canvas);
-  const [targetLevel, setTargetLevel] = useState<Level>(8);
-  const [totalGrams, setTotalGrams] = useState(60);
-  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
-  const [pricePerGram, setPricePerGram] = useState(DEFAULT_BLEACH_PRICE_PER_GRAM);
-  const [strandZone, setStrandZone] = useState<StrandZone>(DEFAULT_STEP_STRAND_ZONE);
-  const [startingBase, setStartingBase] = useState<StartingBase>(inheritedOnMount?.startingBase ?? { kind: "natural" });
+  const [startLevel, setStartLevel] = useState<Level>(seed?.startLevel ?? 6);
+  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(seed?.canvas ?? inheritedOnMount?.canvas);
+  const [targetLevel, setTargetLevel] = useState<Level>(seed?.targetLevel ?? 8);
+  const [totalGrams, setTotalGrams] = useState(seed?.totalGrams ?? 60);
+  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(seed?.processingMinutes);
+  const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_BLEACH_PRICE_PER_GRAM);
+  const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
+  const [startingBase, setStartingBase] = useState<StartingBase>(seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" });
 
   // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
   // -- an imperative one-shot default, not an ongoing sync, so it never overwrites values

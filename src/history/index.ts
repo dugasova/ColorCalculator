@@ -15,4 +15,7 @@ export {
   type SaveFormulaParams, type SetActualColorGramsParams, type ActualColorGramsResult,
   type PhotoEdit, type UpdateHistoryEntryDetailsParams, type HistoryEntryDetailsResult,
 } from "./firestore";
-export { buildRepeatFormulaRequest, type RepeatFormulaRequest } from "./repeatFormula";
+export {
+  buildRepeatFormulaRequest, buildRepeatSessionRequest, type RepeatFormulaRequest,
+  type RepeatSessionRequest, type StepSeed, type ColorStepSeed, type BleachStepSeed,
+} from "./repeatFormula";

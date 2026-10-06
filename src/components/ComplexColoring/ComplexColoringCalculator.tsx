@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { calculateRecommendedServicePrice } from "../../engine/pricing";
-import { saveFormulaToHistory, type HistoryStep } from "../../history";
+import { saveFormulaToHistory, type HistoryStep, type RepeatSessionRequest, type ColorStepSeed, type BleachStepSeed } from "../../history";
 import { useSalonMarkupMultiplier, useStock } from "../../palette";
 import { calculateSessionProductCost } from "../../sessionCost";
 import { formatSessionText } from "../../formatSession";
@@ -21,27 +21,38 @@ export interface ComplexColoringCalculatorProps {
   // App.tsx uses it to remount this whole calculator with a fresh key, resetting every
   // step and the client-details panel for the next client.
   onSaved?: () => void;
+  // Reconstructed input from a History "Repeat" of a saved multi-step session (see
+  // buildRepeatSessionRequest) -- read only at mount to seed the step scaffold, markup,
+  // service price, and (via SessionDetailsPanel) the client link below. AuthenticatedApp
+  // guarantees a fresh mount per repeat: this view is unmounted while History is open,
+  // and remounts with a fresh `key` on every "Repeat" click and after every save.
+  repeatRequest?: RepeatSessionRequest | null;
 }
 
-interface StepScaffold {
-  id: string;
-  kind: HistoryStep["kind"];
-}
+type StepScaffold =
+  | { id: string; kind: "color"; seed?: ColorStepSeed }
+  | { id: string; kind: "bleach"; seed?: BleachStepSeed };
 
 // A saved multi-step session for complex color work — one or more bleach (lift) steps
 // combined with one or more color/tone steps, e.g. balayage: bleach powder on sections,
 // then a permanent color to tone the rest. Each step is calculated independently by its own
 // card; this page only aggregates their totals (time, cost) and hands the combined recipe
 // off to the shared save/copy/share panel.
-export default function ComplexColoringCalculator({ appliedBy, onSaved }: ComplexColoringCalculatorProps) {
+export default function ComplexColoringCalculator({ appliedBy, onSaved, repeatRequest }: ComplexColoringCalculatorProps) {
   const { t } = useTranslation();
-  const [scaffold, setScaffold] = useState<StepScaffold[]>([]);
+  // Continues id assignment for any step added after a seeded repeat, so a newly added
+  // step's id never collides with one of the seeded step-<index> ids below.
+  const nextIdRef = useRef(repeatRequest?.steps.length ?? 0);
+  const [scaffold, setScaffold] = useState<StepScaffold[]>(() =>
+    (repeatRequest?.steps ?? []).map((seed, index): StepScaffold =>
+      (seed.kind === "color" ? { id: `step-${index}`, kind: "color", seed } : { id: `step-${index}`, kind: "bleach", seed })
+    )
+  );
   const [computedSteps, setComputedSteps] = useState<Record<string, HistoryStep>>({});
   const salonMarkupMultiplier = useSalonMarkupMultiplier();
-  const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
+  const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(repeatRequest?.markupMultiplier);
   const markupMultiplier = manualMarkupMultiplier ?? salonMarkupMultiplier;
-  const [manualServicePrice, setManualServicePrice] = useState<number | undefined>(undefined);
-  const nextIdRef = useRef(0);
+  const [manualServicePrice, setManualServicePrice] = useState<number | undefined>(repeatRequest?.servicePrice);
 
   const handleAddColorStep = () => {
     const id = `step-${nextIdRef.current++}`;
@@ -127,6 +138,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
               key={s.id}
               stepId={s.id}
               previousSteps={previousSteps}
+              seed={s.seed}
               onChange={step => handleStepChange(s.id, step)}
               onRemove={() => handleRemoveStep(s.id)}
             />
@@ -135,6 +147,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
               key={s.id}
               stepId={s.id}
               previousSteps={previousSteps}
+              seed={s.seed}
               onChange={step => handleStepChange(s.id, step)}
               onRemove={() => handleRemoveStep(s.id)}
             />
@@ -212,6 +225,7 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved }: Comple
             onSaved={onSaved}
             appliedBy={appliedBy}
             canvas={sessionCanvas}
+            repeatRequest={repeatRequest}
           />
         </div>
       )}

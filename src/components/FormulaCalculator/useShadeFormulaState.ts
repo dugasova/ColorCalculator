@@ -7,6 +7,7 @@ import { APPLICATION_ZONE_DEFAULT_GRAMS, APPLICATION_ZONE_DEFAULT_COLOR_GRAMS, A
 import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatio, Shade } from "../../engine/shades";
 import type { HairCanvas } from "../../engine/canvas";
+import type { ColorStepSeed } from "../../history";
 import { useHairCanvasState } from "./useHairCanvasState";
 
 // Split out of useShadeFormulaState below (not just inlined there) so this memoization
@@ -52,7 +53,17 @@ function useComputedFullFormula(
 export interface UseShadeFormulaStateOptions {
   brands: Record<BrandId, Brand>;
   initialCanvas?: HairCanvas;
+  // Mount-time seed for a History "Repeat" of a saved session (see
+  // buildRepeatSessionRequest) -- same lazy-initial-value contract as `initialCanvas`
+  // above: read once into each `useState` default below, never replayed on a later render.
+  initial?: ShadeFormulaSeed;
 }
+
+export type ShadeFormulaSeed = Pick<ColorStepSeed,
+  | "brandId" | "line" | "targetShadeCode" | "startLevel" | "grayPercent" | "totalGrams" | "colorGrams"
+  | "manualDeveloperVolume" | "manualMixingRatio" | "processingMinutes"
+  | "additionalShadeCode" | "additionalShadeGrams" | "additionalShade2Code" | "additionalShade2Grams"
+>;
 
 // The brand/line/shade selection, developer/application/gram overrides, additional-shade
 // blend-on-top, and resulting formula calculation shared by FormulaCalculator and
@@ -65,29 +76,29 @@ export interface UseShadeFormulaStateOptions {
 // same `grams` total, so this hook applies the additional-shade grams unconditionally;
 // the blend split itself works off the pre-additional `result.grams.colorGrams` (see
 // useFormulaCalculatorState's `blend`), so the two calculations never collide.
-export function useShadeFormulaState({ brands, initialCanvas }: UseShadeFormulaStateOptions) {
+export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShadeFormulaStateOptions) {
   const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(initialCanvas);
-  const [startLevel, setStartLevel] = useState<Level>(10);
-  const [grayPercent, setGrayPercent] = useState(0);
-  const [targetShadeCode, setTargetShadeCode] = useState(GENERIC_SHADE_CHART[0].code);
+  const [startLevel, setStartLevel] = useState<Level>(initial?.startLevel ?? 10);
+  const [grayPercent, setGrayPercent] = useState(initial?.grayPercent ?? 0);
+  const [targetShadeCode, setTargetShadeCode] = useState(initial?.targetShadeCode ?? GENERIC_SHADE_CHART[0].code);
   const [applicationZone, setApplicationZone] = useState<ApplicationZone>("full-head");
-  const [totalGrams, setTotalGrams] = useState(APPLICATION_ZONE_DEFAULT_GRAMS["full-head"]);
+  const [totalGrams, setTotalGrams] = useState(initial?.totalGrams ?? APPLICATION_ZONE_DEFAULT_GRAMS["full-head"]);
   // Which unit the amount field starts in for the current zone (see
   // APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE); colorGrams below is the dye weight alone
   // for "color" mode -- a colorist who needs more than the default can just enter
   // however much dye they're actually using, and developer is derived to match (see
   // calculateFullFormula's colorGramsOverride).
   const [gramsInputMode, setGramsInputMode] = useState<GramsInputMode>(APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE["full-head"]);
-  const [colorGrams, setColorGrams] = useState(APPLICATION_ZONE_DEFAULT_COLOR_GRAMS["full-head"]);
-  const [brandId, setBrandId] = useState<BrandId>("generic");
-  const [line, setLine] = useState<string | null>(null);
-  const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(undefined);
-  const [manualMixingRatio, setManualMixingRatio] = useState<MixingRatio | undefined>(undefined);
-  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(undefined);
-  const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(null);
-  const [additionalShadeGrams, setAdditionalShadeGrams] = useState(0);
-  const [additionalShade2Code, setAdditionalShade2Code] = useState<string | null>(null);
-  const [additionalShade2Grams, setAdditionalShade2Grams] = useState(0);
+  const [colorGrams, setColorGrams] = useState(initial?.colorGrams ?? APPLICATION_ZONE_DEFAULT_COLOR_GRAMS["full-head"]);
+  const [brandId, setBrandId] = useState<BrandId>(initial?.brandId ?? "generic");
+  const [line, setLine] = useState<string | null>(initial?.line ?? null);
+  const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(initial?.manualDeveloperVolume);
+  const [manualMixingRatio, setManualMixingRatio] = useState<MixingRatio | undefined>(initial?.manualMixingRatio);
+  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(initial?.processingMinutes);
+  const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(initial?.additionalShadeCode ?? null);
+  const [additionalShadeGrams, setAdditionalShadeGrams] = useState(initial?.additionalShadeGrams ?? 0);
+  const [additionalShade2Code, setAdditionalShade2Code] = useState<string | null>(initial?.additionalShade2Code ?? null);
+  const [additionalShade2Grams, setAdditionalShade2Grams] = useState(initial?.additionalShade2Grams ?? 0);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
 
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { buildRepeatFormulaRequest, type FormulaHistoryEntry } from "../../history";
+import { buildRepeatFormulaRequest, buildRepeatSessionRequest, type FormulaHistoryEntry } from "../../history";
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { planClientRevisits } from "../../revisit";
 import { usePalette } from "../../palette";
@@ -149,7 +149,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
           )}
           <ul className="history__entry-list">
             {openGroup.entries.map(entry => {
-              const repeatRequest = buildRepeatFormulaRequest(entry, brands);
+              const canRepeat = buildRepeatFormulaRequest(entry, brands) !== null || buildRepeatSessionRequest(entry, brands) !== null;
               return (
                 <li key={entry.id} className="history__entry">
                   <div className="history__entry-header">
@@ -251,7 +251,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                       >
                         {t("history.editEntry")}
                       </button>
-                      {repeatRequest !== null && (
+                      {canRepeat && (
                         <button type="button" className="button button--secondary history__entry-repeat" onClick={() => onRepeat(entry)}>
                           {t("history.repeat")}
                         </button>

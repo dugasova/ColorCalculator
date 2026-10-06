@@ -7,7 +7,7 @@ import { usePalette } from "./palette";
 import FormulaCalculator from "./components/FormulaCalculator/FormulaCalculator";
 import { Nav, type AppView } from "./components/Nav/Nav";
 import { BottomNav } from "./components/Nav/BottomNav";
-import { buildRepeatFormulaRequest, type FormulaHistoryEntry, type RepeatFormulaRequest } from "./history";
+import { buildRepeatFormulaRequest, buildRepeatSessionRequest, type FormulaHistoryEntry, type RepeatFormulaRequest, type RepeatSessionRequest } from "./history";
 import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
@@ -61,6 +61,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
   const location = useLocation();
   const [view, setView] = useState<AppView>("calculator");
   const [repeatRequest, setRepeatRequest] = useState<RepeatFormulaRequest | null>(null);
+  const [repeatSessionRequest, setRepeatSessionRequest] = useState<RepeatSessionRequest | null>(null);
   const [favoriteRequest, setFavoriteRequest] = useState<FavoriteFormulaRecipe | null>(null);
   // Bumped after a formula/session save finishes showing its "Saved!" confirmation --
   // passed as `key` to whichever calculator is mounted below, forcing React to unmount
@@ -104,10 +105,17 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
 
   const handleRepeat = (entry: FormulaHistoryEntry) => {
     const request = buildRepeatFormulaRequest(entry, brands);
-    if (request === null) return;
-    setRepeatRequest(request);
+    if (request !== null) {
+      setRepeatRequest(request);
+      navigate("/");
+      setView("calculator");
+      return;
+    }
+    const sessionRequest = buildRepeatSessionRequest(entry, brands);
+    if (sessionRequest === null) return;
+    setRepeatSessionRequest(sessionRequest);
     navigate("/");
-    setView("calculator");
+    setView("complex");
   };
 
   // Mirrors handleRepeat above: FavoritesPage only picks which recipe, the actual
@@ -120,9 +128,11 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
   };
 
   const handleFormulaSaved = () => {
-    // A stale repeatRequest/favoriteRequest would otherwise replay itself into the
-    // freshly remounted calculator (see useFormulaCalculatorState's apply-on-render effect).
+    // A stale repeatRequest/repeatSessionRequest/favoriteRequest would otherwise replay
+    // itself into the freshly remounted calculator (see useFormulaCalculatorState's
+    // apply-on-render effect).
     setRepeatRequest(null);
+    setRepeatSessionRequest(null);
     setFavoriteRequest(null);
     setFormResetKey(key => key + 1);
   };
@@ -172,7 +182,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                   )}
                   {view === "correction" && <ColorCorrectionCalculator />}
                   {view === "bleach" && <BleachCalculator />}
-                  {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} onSaved={handleFormulaSaved} />}
+                  {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} repeatRequest={repeatSessionRequest} onSaved={handleFormulaSaved} />}
                   {view === "prepigment" && <PrePigmentationCalculator />}
                   {view === "history" && <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
                   {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}

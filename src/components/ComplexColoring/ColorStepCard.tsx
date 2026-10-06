@@ -21,7 +21,7 @@ import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../engine/formatFormula";
 import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
-import type { ColorHistoryStep, HistoryStep } from "../../history";
+import type { ColorHistoryStep, ColorStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 
 export interface ColorStepCardProps {
@@ -32,17 +32,23 @@ export interface ColorStepCardProps {
   // a lone ColorStepCard (e.g. in tests, or a future standalone use) works unchanged
   // with no inheritance.
   previousSteps?: HistoryStep[];
+  // Reconstructed input from a History "Repeat" of a saved session (see
+  // buildRepeatSessionRequest) -- read once at mount (via useShadeFormulaState's own
+  // `initial`) to seed every field below, overriding both the hardcoded defaults and
+  // same-zone inheritance. Absent for a freshly added step.
+  seed?: ColorStepSeed;
   onChange: (step: ColorHistoryStep) => void;
   onRemove: () => void;
 }
 
 // One color/tone step within a complex-coloring session. Shares its brand/line/shade and
 // formula calculation with FormulaCalculator (see useShadeFormulaState), minus the parts
-// that only make sense once per session (repeat-formula replay, substitute-blend mode,
-// cross-brand match, overall markup/service price) — those live at the session level in
+// that only make sense once per session (substitute-blend mode, cross-brand match,
+// overall markup/service price) — those live at the session level in
 // ComplexColoringCalculator, aggregated across every step. `pricePerGram` here is a plain
 // flat field, unlike FormulaCalculator's manual-override-over-a-brand-default pattern.
-export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }: ColorStepCardProps) {
+// Seeded once via `seed` for session repeat (see ColorStepCardProps); no render-time replay.
+export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRemove }: ColorStepCardProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const idSuffix = `-${stepId}`;
@@ -52,10 +58,10 @@ export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }
   // it as an effect both cascaded an extra render and tripped react-hooks/set-state-in-effect.
   const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
 
-  const [pricePerGram, setPricePerGram] = useState(DEFAULT_PRICE_PER_GRAM);
-  const [strandZone, setStrandZone] = useState<StrandZone>(DEFAULT_STEP_STRAND_ZONE);
-  const [startingBase, setStartingBase] = useState<StartingBase>(inheritedOnMount?.startingBase ?? { kind: "natural" });
-  const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(false);
+  const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_PRICE_PER_GRAM);
+  const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
+  const [startingBase, setStartingBase] = useState<StartingBase>(seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" });
+  const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(seed?.prePigmentationEnabled ?? false);
 
   const {
     startLevel, setStartLevel,
@@ -91,7 +97,7 @@ export function ColorStepCard({ stepId, previousSteps = [], onChange, onRemove }
     handleLineChange,
     handleTargetShadeCodeChange,
     handleAdditionalShadeCodeChange,
-  } = useShadeFormulaState({ brands, initialCanvas: inheritedOnMount?.canvas });
+  } = useShadeFormulaState({ brands, initialCanvas: seed?.canvas ?? inheritedOnMount?.canvas, initial: seed });
 
   // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
   // -- an imperative one-shot default, not an ongoing sync, so it never overwrites values
