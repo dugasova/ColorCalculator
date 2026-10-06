@@ -290,6 +290,13 @@ export const uk: typeof en = {
       "due-soon": "Скоро",
       upcoming: "Заплановано",
     },
+    reminderSummary: {
+      overdue: "Прострочено: {{count}}",
+      "due-soon": "Скоро: {{count}}",
+      upcoming: "Заплановано: {{count}}",
+    },
+    remindersShowAll: "Показати всі ({{count}})",
+    remindersShowLess: "Згорнути",
     reminderReasonHistory: "За власним ритмом візитів цієї клієнтки",
     reminderReason: {
       "multi-visit-filler": "Другий візит роздільної препігментації",

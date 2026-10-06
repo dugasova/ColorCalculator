@@ -288,6 +288,13 @@ export const en = {
       "due-soon": "Due soon",
       upcoming: "Upcoming",
     },
+    reminderSummary: {
+      overdue: "{{count}} overdue",
+      "due-soon": "{{count}} due soon",
+      upcoming: "{{count}} upcoming",
+    },
+    remindersShowAll: "Show all ({{count}})",
+    remindersShowLess: "Show less",
     reminderReasonHistory: "Based on this client's own visit rhythm",
     reminderReason: {
       "multi-visit-filler": "Second appointment of the split pre-pigmentation service",

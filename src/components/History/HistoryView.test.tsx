@@ -265,6 +265,28 @@ describe("HistoryView revisit reminders", () => {
     const reason = await screen.findByText(/Toner refresh on the lengths/);
     expect(reason.textContent).toContain("Balayage/highlights grow out softly");
   });
+
+  it("shows only the 5 most urgent reminders until 'Show all' is clicked, and collapses back on 'Show less'", async () => {
+    const names = ["Anna", "Boris", "Clara", "Dmytro", "Eva", "Fedir", "Galyna"];
+    mockHistory(names.map((clientName, i) => makeEntry({ id: String(i + 1), clientName })));
+    mockClients([]);
+
+    renderHistoryView();
+
+    const toggle = await screen.findByRole("button", { name: "Show all (7)" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getAllByRole("button", { name: /Remind via WhatsApp/ })).toHaveLength(5);
+    // every fixture visit is 2024-03-01, so all 7 revisits are overdue
+    expect(screen.getByText("7 overdue")).toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    expect(screen.getAllByRole("button", { name: /Remind via WhatsApp/ })).toHaveLength(7);
+    const less = screen.getByRole("button", { name: "Show less" });
+    expect(less).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(less);
+    expect(screen.getAllByRole("button", { name: /Remind via WhatsApp/ })).toHaveLength(5);
+  });
 });
 
 describe("HistoryView actual grams", () => {

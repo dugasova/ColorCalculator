@@ -244,12 +244,49 @@
   border: 1px solid var(--brand-border);
 }
 
+.history__reminders + .field {
+  margin-top: 20px;
+}
+
 .history__reminders-title {
-  margin: 0 0 12px;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 500;
   color: var(--brand-ink);
+}
+
+.history__reminders-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+}
+
+.history__reminders-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--brand-muted);
+}
+
+.history__reminders-count--overdue {
+  font-weight: 600;
+  color: var(--status-warning-ink);
+}
+
+.history__reminders-count--due-soon {
+  font-weight: 600;
+  color: var(--brand-primary-ink);
+}
+
+.history__reminders-toggle {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .history__reminders-list {
