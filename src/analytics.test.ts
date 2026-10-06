@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { computeSalonAnalytics } from "./analytics";
+import { Timestamp } from "firebase/firestore";
+import { computeSalonAnalytics, computeStylistStats, filterEntriesByPeriod } from "./analytics";
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
-import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep, makeEntry as makeSharedEntry } from "./testFixtures";
+import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep, makeBleachStep, makeEntry as makeSharedEntry } from "./testFixtures";
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
   return makeSharedColorStep({
@@ -152,5 +153,106 @@ describe("computeSalonAnalytics", () => {
     expect(stats.uniqueClients).toBe(0);
     expect(stats.retentionRate).toBe(0);
     expect(stats.totalVisits).toBe(0);
+  });
+});
+
+describe("computeStylistStats", () => {
+  it("aggregates per-stylist metrics, sorted by revenue desc", () => {
+    const color = makeColorStep({ result: COLOR_FULL_FORMULA });
+    const entries = [
+      makeEntry({ appliedBy: "a@salon.test", clientName: "Anna", servicePrice: 100, productCost: 10, steps: [color] }),
+      makeEntry({ appliedBy: "a@salon.test", clientName: "Anna", servicePrice: null, productCost: 5, steps: [color] }),
+      makeEntry({ appliedBy: "a@salon.test", clientName: "Boris", servicePrice: 50, productCost: null, steps: [makeBleachStep(), color] }),
+      makeEntry({ appliedBy: "b@salon.test", clientName: "Clara", servicePrice: 200, productCost: 20, steps: [color] }),
+    ];
+
+    const stats = computeStylistStats(entries);
+    expect(stats.map(s => s.stylist)).toEqual(["b@salon.test", "a@salon.test"]);
+
+    const a = stats.find(s => s.stylist === "a@salon.test")!;
+    expect(a.visits).toBe(3);
+    expect(a.uniqueClients).toBe(2);
+    expect(a.returningClients).toBe(1);
+    expect(a.retentionRate).toBeCloseTo(0.5);
+    expect(a.revenue).toBe(150);
+    expect(a.pricedVisits).toBe(2);
+    expect(a.productCost).toBe(15);
+    expect(a.grossProfit).toBe(90);
+    expect(a.averageTicket).toBe(75);
+    expect(a.bleachPowderGrams).toBe(20);
+    expect(a.dyeGrams).toBe(90);
+    expect(a.processingMinutes).toBe(125);
+    expect(a.averageProcessingMinutes).toBeCloseTo(125 / 3);
+    expect(a.topShade).toMatchObject({ shadeCode: "7.1", count: 3 });
+  });
+
+  it("breaks revenue/visit ties by stylist email ascending", () => {
+    const color = makeColorStep({ result: COLOR_FULL_FORMULA });
+    const entries = [
+      makeEntry({ appliedBy: "zed@salon.test", clientName: "A", servicePrice: 100, steps: [color] }),
+      makeEntry({ appliedBy: "amy@salon.test", clientName: "B", servicePrice: 100, steps: [color] }),
+    ];
+
+    const stats = computeStylistStats(entries);
+    expect(stats.map(s => s.stylist)).toEqual(["amy@salon.test", "zed@salon.test"]);
+  });
+
+  it("excludes a legacy entry with no servicePrice/productCost field, instead of poisoning averages with NaN", () => {
+    const legacy = makeEntry({ appliedBy: "a@salon.test", clientName: "A" });
+    const legacyWithoutPricing: Partial<FormulaHistoryEntry> = { ...legacy };
+    delete legacyWithoutPricing.servicePrice;
+    delete legacyWithoutPricing.productCost;
+
+    const [stats] = computeStylistStats([legacyWithoutPricing as FormulaHistoryEntry]);
+    expect(stats.revenue).toBe(0);
+    expect(stats.averageTicket).toBeNull();
+    expect(stats.grossProfit).toBeNull();
+  });
+
+  it("finds the latest appliedAt as lastVisitAt, null when every entry is still pending", () => {
+    const earlier = Timestamp.fromDate(new Date(2024, 0, 1));
+    const later = Timestamp.fromDate(new Date(2024, 5, 1));
+    const [withDates] = computeStylistStats([
+      makeEntry({ appliedBy: "a@salon.test", clientName: "A", appliedAt: earlier }),
+      makeEntry({ appliedBy: "a@salon.test", clientName: "B", appliedAt: later }),
+    ]);
+    expect(withDates.lastVisitAt).toEqual(later.toDate());
+
+    const [pendingOnly] = computeStylistStats([
+      makeEntry({ appliedBy: "a@salon.test", clientName: "A", appliedAt: null }),
+    ]);
+    expect(pendingOnly.lastVisitAt).toBeNull();
+  });
+
+  it("returns an empty array for no entries", () => {
+    expect(computeStylistStats([])).toEqual([]);
+  });
+});
+
+describe("filterEntriesByPeriod", () => {
+  const now = new Date(2026, 9, 6, 12);
+  const octFirst = Timestamp.fromDate(new Date(2026, 9, 1));
+  const sep20 = Timestamp.fromDate(new Date(2026, 8, 20));
+  const aug1 = Timestamp.fromDate(new Date(2026, 7, 1));
+
+  function dated(appliedAt: Timestamp | null) {
+    return makeEntry({ clientName: "A", appliedAt });
+  }
+
+  it("'all' returns every entry, same array reference", () => {
+    const entries = [dated(octFirst), dated(sep20), dated(aug1), dated(null)];
+    expect(filterEntriesByPeriod(entries, "all", now)).toBe(entries);
+  });
+
+  it("'last30Days' keeps entries within the trailing 30 days", () => {
+    const entries = [dated(octFirst), dated(sep20), dated(aug1), dated(null)];
+    const filtered = filterEntriesByPeriod(entries, "last30Days", now);
+    expect(filtered).toEqual([dated(octFirst), dated(sep20)]);
+  });
+
+  it("'thisMonth' keeps only entries from the 1st of the current month", () => {
+    const entries = [dated(octFirst), dated(sep20), dated(aug1), dated(null)];
+    const filtered = filterEntriesByPeriod(entries, "thisMonth", now);
+    expect(filtered).toEqual([dated(octFirst)]);
   });
 });
