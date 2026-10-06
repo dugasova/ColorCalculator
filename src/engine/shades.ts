@@ -41,6 +41,15 @@ export interface Shade {
   // GRAY_COVERAGE_MIN_DEVELOPER_VOLUME floor wins instead) or once any lift is needed (the
   // level-diff ladder already calls for 20+ vol by then).
   noLiftDeveloperVolume?: DeveloperVolume
+  // Corrects the displayed developer percentage when `developerVolumeChoices`' nearest
+  // real DeveloperVolume is only an approximation of the manufacturer's own product --
+  // e.g. Redken Shades EQ's Processing Solution is a fixed ~2% activator with no real
+  // graded-volume ladder, routed through the engine via the closest existing
+  // DeveloperVolume (6vol, see brands/redken.ts), whose generic table value (1.9%,
+  // src/engine/levels.ts's DEVELOPER_VOLUME_PERCENT) is a genuine different product's
+  // label, not this one's. formatDeveloperVolume/formatDeveloperVolumeLine use this
+  // instead of the table lookup whenever it's set.
+  developerPercentOverride?: number
   // Overrides getRecommendedProcessingMinutes' gray-percent-based default (30/45 min) with
   // a fixed value - for shades whose manufacturer instructions call for a specific
   // processing window regardless of gray coverage, e.g. Wella Koleston Perfect Special
@@ -94,6 +103,7 @@ export const shadeSchema: z.ZodType<Shade> = z.object({
   minStartLevel: levelSchema.optional(),
   developerVolumeChoices: z.array(developerVolumeSchema).optional(),
   noLiftDeveloperVolume: developerVolumeSchema.optional(),
+  developerPercentOverride: z.number().optional(),
   fixedProcessingMinutes: z.number().optional(),
   acceptsPartialLift: z.boolean().optional(),
 });

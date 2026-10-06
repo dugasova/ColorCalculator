@@ -13,7 +13,7 @@ describe("formatPrePigmentationText", () => {
       "Starting level: 6 → Target: 6\n" +
       "Pre-pigmentation: Not needed — apply the target formula directly.\n" +
       "Step 2 — Target color\n" +
-      "Developer: 10 vol\n" +
+      "Developer: 3% (10 vol)\n" +
       "Ratio: 1:1\n" +
       "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 6, not the filled level.\n" +
       "Basic guidance — does not replace a complete color diagnosis and strand test."
@@ -37,7 +37,7 @@ describe("formatPrePigmentationText", () => {
       "Mix: 15.0 g filler : 15.0 g water\n" +
       "Processing time: 15 min\n" +
       "Step 2 — Target color\n" +
-      "Developer: 10 vol\n" +
+      "Developer: 3% (10 vol)\n" +
       "Ratio: 1:1\n" +
       "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 9, not the filled level.\n" +
       "Basic guidance — does not replace a complete color diagnosis and strand test."
@@ -62,7 +62,7 @@ describe("formatPrePigmentationText", () => {
       "Processing time: 15 min\n" +
       "Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.\n" +
       "Step 2 — Target color\n" +
-      "Developer: 10 vol\n" +
+      "Developer: 3% (10 vol)\n" +
       "Ratio: 1:1\n" +
       "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 10, not the filled level.\n" +
       "Basic guidance — does not replace a complete color diagnosis and strand test."

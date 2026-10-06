@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Shade } from "../../../engine/shades";
 import type { DeveloperVolume } from "../../../engine/levels";
+import { formatDeveloperVolume } from "../../../engine/formatDeveloperVolume";
 import { Select } from "../../common/Select";
 
 export interface DeveloperVolumeFieldProps {
@@ -25,7 +26,7 @@ export function DeveloperVolumeField({ targetShade, manualDeveloperVolume, onMan
         onChange={value => onManualDeveloperVolumeChange(Number(value) as DeveloperVolume)}
         options={targetShade.developerVolumeChoices.map(volume => ({
           value: String(volume),
-          label: t("format.developerVolume", { value: volume }),
+          label: formatDeveloperVolume(volume, targetShade.developerPercentOverride),
         }))}
       />
     </div>

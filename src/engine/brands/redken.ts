@@ -43,7 +43,10 @@ import type { Shade } from "../shades";
 // the engine's existing demi-permanent machinery (20-minute processing time, no-lift
 // warning if a colorist tries to select it while lifting) -- the UI's volume picker
 // will show exactly one option, which is honest to the real product (there IS only one
-// strength) rather than implying a false choice.
+// strength) rather than implying a false choice. `developerPercentOverride: 2` below
+// corrects the *displayed* percentage to match -- 6vol's generic table value (1.9%,
+// DEVELOPER_VOLUME_PERCENT in levels.ts) is Wella/Igora/L'Oréal's genuine 6vol product
+// label, not this one.
 //
 // Deliberately excluded: the "010-" (level 10) sub-range (name/code pairs disagree
 // across sources -- lower confidence than levels 1-9); Shades EQ Gloss Pastels (a
@@ -169,6 +172,7 @@ export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
   ...shade,
   line: "shades-eq",
   developerVolumeChoices: [6],
+  developerPercentOverride: 2,
 }));
 
 // Chromatics (Prismatic) -- Redken's ammonia-free PERMANENT oxidative color, in the

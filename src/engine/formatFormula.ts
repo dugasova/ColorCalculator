@@ -105,7 +105,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
 
   const title = `${formatBrandLineLabel(brandName, line)} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? "/" + targetShade.secondaryTone : ""})`;
 
-  const developer = formatDeveloperVolumeLine(result.developerVolume);
+  const developer = formatDeveloperVolumeLine(result.developerVolume, targetShade.developerPercentOverride);
 
   const applyNeutralization = neutralizationApplied && result.recommendedCorrectiveTone !== null;
   const correctiveToneLine = applyNeutralization

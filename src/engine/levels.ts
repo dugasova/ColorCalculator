@@ -60,6 +60,11 @@ export function canReachTarget(
 // per developer a salon can stock (PaletteAdmin's stock list). Deliberately separate from
 // the lift-ladder list above, which encodes cream-color lift capability, not inventory.
 export const ALL_DEVELOPER_VOLUMES: DeveloperVolume[] = [6, 10, 13, 20, 30, 40];
+
+// The actual peroxide strength printed on each developer's bottle, keyed by the nominal
+// "vol" marketing number — not a flat `vol * 0.3`, which undershoots 13 vol (Wella
+// Welloxon's 13 vol bottle is 4%, not 3.9%; see src/engine/wella.ts).
+export const DEVELOPER_VOLUME_PERCENT: Record<DeveloperVolume, number> = { 6: 1.9, 10: 3, 13: 4, 20: 6, 30: 9, 40: 12 };
 const ALL_VOLUMES: DeveloperVolume[] = [10, 20, 30, 40];
 
 export function pickDeveloperVolume(

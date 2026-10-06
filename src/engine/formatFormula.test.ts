@@ -26,7 +26,7 @@ describe("formatFormulaText", () => {
       "Generic — 8.1 (ash)\n" +
       "Starting level: 8 → Target: 8\n" +
       "Application: Full head\n" +
-      "Developer: 10 vol\n" +
+      "Developer: 3% (10 vol)\n" +
       "Ratio: 1:1\n" +
       "Mix: 8.1- 30.0 g developer 30.0 g\n" +
       "Processing time: 30 min\n" +
@@ -127,7 +127,7 @@ describe("formatFormulaText", () => {
       neutralizationApplied: false,
     });
 
-    expect(text).toContain("Developer: 13 vol");
+    expect(text).toContain("Developer: 4% (13 vol)");
     expect(text).toMatch(/Mix: 8\/73.*24\.0 g.*developer 36\.0 g/);
     expect(text).not.toContain("Mix: '8/73' can't lift level");
     expect(text).toContain("Warning: '8/73' can't lift level");

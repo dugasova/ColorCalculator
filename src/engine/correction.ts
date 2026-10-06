@@ -1,4 +1,4 @@
-import { pickDeveloperVolume, type DeveloperVolume, type Level, type LiftTable } from "./levels";
+import { pickDeveloperVolume, DEVELOPER_VOLUME_PERCENT, type DeveloperVolume, type Level, type LiftTable } from "./levels";
 
 export type UnwantedTone = "red" | "orange" | "yellow" | "green" | "blue" | "violet";
 
@@ -50,13 +50,14 @@ const CORRECTION_LIFT_TABLE: LiftTable = volume => {
   }
 };
 
-// Mirrors the standard vol-to-percentage peroxide conversion (vol * 0.3). Beyond a
-// 4-level lift no single developer is honest about the job -- getCorrectionTechnique
-// already flags it "multi-step" -- so the strongest developer is what the colorist mixes
-// for the lift stage, rather than pickDeveloperVolume's `null`.
+// The strength actually printed on each developer's bottle (see DEVELOPER_VOLUME_PERCENT
+// in levels.ts), not a flat vol-to-percentage conversion. Beyond a 4-level lift no single
+// developer is honest about the job -- getCorrectionTechnique already flags it
+// "multi-step" -- so the strongest developer is what the colorist mixes for the lift
+// stage, rather than pickDeveloperVolume's `null`.
 export function getCorrectionDeveloper(startLevel: Level, targetLevel: Level): CorrectionDeveloper {
   const volume = pickDeveloperVolume(startLevel, targetLevel, CORRECTION_LIFT_TABLE) ?? 40;
-  return { volume, percent: Math.round(volume * 0.3 * 10) / 10 };
+  return { volume, percent: DEVELOPER_VOLUME_PERCENT[volume] };
 }
 
 export function getCorrectionTechnique(startLevel: Level, targetLevel: Level): CorrectionTechnique {
