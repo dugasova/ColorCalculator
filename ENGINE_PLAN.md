@@ -1,20 +1,20 @@
-# Расчёты остаются на клиенте
+# Calculations stay on the client
 
 ## Context
-Вопрос: нужно ли переносить расчёты (engine) этого проекта на бэкенд. Решение: не переносить. Код, rules и инфраструктура не меняются.
+Question: should this project's calculations (engine) be moved to a backend. Decision: don't move them. Code, rules, and infrastructure stay unchanged.
 
-Основания (проверено в коде):
-- `src/engine/*` (~6000 строк) — чистые детерминированные функции без импортов `firebase`. Зависимости только `zod`, `../i18n`, `../levels`, `../shades`.
-- Работа без сети обязательна: `src/firebase.ts` использует `persistentLocalCache`, сохранение без сети показывает «Saved on device». Приложение собирается как Capacitor APK.
-- Бэкенда нет (каталога `functions/` нет). Чтобы он появился, нужен тариф Blaze.
+Grounds (verified in code):
+- `src/engine/*` (~6000 lines) — pure deterministic functions with no `firebase` imports. Dependencies are only `zod`, `../i18n`, `../levels`, `../shades`.
+- Offline operation is required: `src/firebase.ts` uses `persistentLocalCache`, saving without network shows "Saved on device". The app is built as a Capacitor APK.
+- There is no backend (no `functions/` directory). Getting one would require the Blaze plan.
 
-Принятое ограничение: `productCost`/`servicePrice` (`src/engine/pricing.ts`) и списание со склада (`computeStockConsumption` → `applyStockDelta` в `src/stock.ts`) считает клиент. Правило `dyeStock` в `firestore.rules` проверяет только, что меняется одно поле `remainingGrams` и что это число. Участник салона считается доверенным.
+Accepted constraint: `productCost`/`servicePrice` (`src/engine/pricing.ts`) and stock deduction (`computeStockConsumption` → `applyStockDelta` in `src/stock.ts`) are computed client-side. The `dyeStock` rule in `firestore.rules` only checks that a single field `remainingGrams` changes and that it's a number. A salon member is treated as trusted.
 
 ## Approach
-1. Изменений в рабочем дереве нет. Ничего не создавать, не редактировать и не деплоить.
+1. No changes to the working tree. Nothing to create, edit, or deploy.
 
 ## Verification
-- `git status --short` показывает те же файлы, что и до выполнения. Новых изменений нет.
+- `git status --short` shows the same files as before. No new changes.
 
 ## Assumptions & contingencies
-- К вопросу о бэкенде стоит вернуться, если появятся несколько салонов, расчёт зарплат или бонусов по истории, интеграция с оплатой или нужно будет скрыть формулы engine из бандла.
+- Revisit the backend question if multiple salons appear, payroll/bonus calculations based on history, payment integration, or a need to hide the engine formulas from the bundle.
