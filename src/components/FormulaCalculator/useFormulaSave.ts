@@ -7,6 +7,7 @@ import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canv
 import type { ApplicationZone } from "../../engine/applicationZone";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import { saveFormulaToHistory, type ColorHistoryStep } from "../../history";
+import { trackEvent } from "../../productAnalytics";
 import type { WriteOutcome } from "../../firestoreWrite";
 import { useStock } from "../../palette";
 import { findStockShortages, type StockShortage } from "../../stock";
@@ -99,6 +100,9 @@ export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
       patchTestOverride: details.patchTestOverride,
       beforePhotoFile: details.beforePhotoFile,
       afterPhotoFile: details.afterPhotoFile,
+    }).then(outcome => {
+      trackEvent("formula_saved", { kind: "single", step_count: 1, offline: outcome === "queued" ? 1 : 0 });
+      return outcome;
     });
   };
 

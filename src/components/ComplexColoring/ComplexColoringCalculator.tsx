@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { calculateRecommendedServicePrice } from "../../engine/pricing";
 import { saveFormulaToHistory, type HistoryStep, type RepeatSessionRequest, type ColorStepSeed, type BleachStepSeed } from "../../history";
+import { trackEvent } from "../../productAnalytics";
 import { useSalonMarkupMultiplier, useStock } from "../../palette";
 import { calculateSessionProductCost } from "../../sessionCost";
 import { formatSessionText } from "../../formatSession";
@@ -109,6 +110,9 @@ export default function ComplexColoringCalculator({ appliedBy, onSaved, repeatRe
       patchTestOverride: details.patchTestOverride,
       beforePhotoFile: details.beforePhotoFile,
       afterPhotoFile: details.afterPhotoFile,
+    }).then(outcome => {
+      trackEvent("formula_saved", { kind: "session", step_count: orderedSteps.length, offline: outcome === "queued" ? 1 : 0 });
+      return outcome;
     });
   };
 

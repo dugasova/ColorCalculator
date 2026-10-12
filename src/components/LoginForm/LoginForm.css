@@ -18,3 +18,16 @@
   flex: 1;
 }
 
+.login-form__privacy-link {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.85em;
+}
+
+.login-form__copyright {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 0.75em;
+  color: var(--brand-muted);
+}
+

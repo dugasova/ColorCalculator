@@ -10,6 +10,7 @@ import type { HairCanvas } from "../../engine/canvas";
 import { usePhotoUpload } from "./usePhotoUpload";
 import { useClientLink } from "./useClientLink";
 import { ClientDetailsModal } from "./ClientDetailsModal";
+import { trackEvent } from "../../productAnalytics";
 
 export interface SessionDetails {
   clientName: string;
@@ -117,10 +118,12 @@ export function SessionDetailsPanel({
     setIsCopied(true);
     clearTimeout(copyFeedbackTimeoutRef.current);
     copyFeedbackTimeoutRef.current = setTimeout(() => setIsCopied(false), COPIED_FEEDBACK_MS);
+    trackEvent("formula_copied");
   };
 
   const handleShareWhatsApp = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(formulaText)}`, "_blank", "noopener,noreferrer");
+    trackEvent("formula_shared", { channel: "whatsapp" });
   };
 
   const handleShareTelegram = () => {
@@ -129,6 +132,7 @@ export function SessionDetailsPanel({
     // "share plain text" endpoint, so the formula text goes in `url` itself (Telegram
     // renders it as the shared message, same trick used for chat/link previews).
     window.open(`https://t.me/share/url?url=${encodeURIComponent(formulaText)}`, "_blank", "noopener,noreferrer");
+    trackEvent("formula_shared", { channel: "telegram" });
   };
 
   const handleSave = async () => {

@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
 import clsx from "clsx";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase";
 import { SALON_INVITE_CODE } from "../../inviteCode";
+import { trackEvent } from "../../productAnalytics";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
 import { PasswordInput } from "../common/PasswordInput";
 import "../FormulaCalculator/FormulaCalculator.css";
@@ -34,8 +36,10 @@ export default function LoginForm() {
     try {
       if (mode === "sign-in") {
         await signInWithEmailAndPassword(auth, email, password);
+        trackEvent("login", { method: "password" });
       } else {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
+        trackEvent("sign_up", { method: "password" });
         try {
           await sendEmailVerification(credential.user);
         } catch (err) {
@@ -146,6 +150,8 @@ export default function LoginForm() {
             : (mode === "sign-in" ? t("login.signIn") : t("login.createAccount"))}
         </button>
       </form>
+      <p className="login-form__privacy-link"><Link to="/privacy">{t("login.privacyPolicy")}</Link></p>
+      <p className="login-form__copyright">{t("app.copyright")}</p>
     </div>
   );
 }

@@ -9,6 +9,11 @@ import "./index.css";
 import App from "./App.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary/ErrorBoundary";
 import { auth } from "./firebase";
+import { initMonitoring, reactErrorHandler } from "./monitoring";
+import { initProductAnalytics } from "./productAnalytics";
+
+initMonitoring();
+initProductAnalytics();
 
 if (Capacitor.isNativePlatform()) {
   // Assets already ship inside the app package, so a service worker would only add a second,
@@ -25,7 +30,10 @@ if (Capacitor.isNativePlatform()) {
   registerSW({ immediate: true });
 }
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root")!, {
+  onUncaughtError: reactErrorHandler(),
+  onRecoverableError: reactErrorHandler(),
+}).render(
   <StrictMode>
     <BrowserRouter>
       <ErrorBoundary>

@@ -1,14 +1,20 @@
 import { useEffect, useState, lazy, Suspense } from "react";
+import { useLocation } from "react-router-dom";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "./firebase";
 import { MemberGate } from "./components/MemberGate/MemberGate";
+import { setMonitoringUser } from "./monitoring";
 
 const LoginForm = lazy(() => import("./components/LoginForm/LoginForm"));
 const VerifyEmailScreen = lazy(() =>
   import("./components/VerifyEmail/VerifyEmailScreen").then(m => ({ default: m.VerifyEmailScreen }))
 );
+const PrivacyPolicyPage = lazy(() =>
+  import("./components/Privacy/PrivacyPolicyPage").then(m => ({ default: m.PrivacyPolicyPage }))
+);
 
 export default function App() {
+  const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // Bumped after VerifyEmailScreen's `reload(user)` call resolves -- `reload` mutates
@@ -21,8 +27,20 @@ export default function App() {
     return onAuthStateChanged(auth, u => {
       setUser(u);
       setIsLoading(false);
+      setMonitoringUser(u?.uid ?? null);
     });
   }, []);
+
+  // Reachable without signing in -- see PrivacyPolicyPage's own comment on why this
+  // check has to come before the loading/auth gates below, not inside AuthenticatedApp's
+  // router (which only a signed-in, approved member ever reaches).
+  if (location.pathname === "/privacy") {
+    return (
+      <Suspense fallback={null}>
+        <PrivacyPolicyPage />
+      </Suspense>
+    );
+  }
 
   if (isLoading) {
     return null;

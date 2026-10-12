@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./AccountMenu.css";
 
@@ -94,6 +95,10 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
               {t("account.feedback")}
             </a>
           )}
+          <Link className="button button--secondary" to="/privacy" onClick={() => setOpen(false)}>
+            {t("login.privacyPolicy")}
+          </Link>
+          <p className="account-menu__build">{t("app.copyright")}</p>
           <p className="account-menu__build">{t("account.build", { date: __BUILD_TIME__ })}</p>
         </div>
       )}
