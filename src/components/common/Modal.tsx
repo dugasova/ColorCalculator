@@ -21,6 +21,13 @@ export interface ModalProps {
 // aliases `.calculator` sets in FormulaCalculator.css -- the portal renders as a sibling of
 // `.calculator`, not a descendant, so shared classes like `.field` used inside a modal
 // (see SessionDetailsPanel) would otherwise resolve those custom properties to nothing.
+
+// Shared by every mounted Modal: stacked dialogs (HistoryView's client modal + its
+// confirm-delete modal) can unmount in the same commit in either order, so each instance
+// restoring its own snapshot would let the last cleanup re-apply "hidden" forever.
+let openModalCount = 0;
+let overflowBeforeFirstModal = "";
+
 export function Modal({ title, onClose, children, size = "default" }: ModalProps) {
   const { t } = useTranslation();
   const titleId = useId();
@@ -30,10 +37,16 @@ export function Modal({ title, onClose, children, size = "default" }: ModalProps
   useEffect(() => {
     triggerRef.current = document.activeElement;
     dialogRef.current?.focus();
-    const previousOverflow = document.body.style.overflow;
+    if (openModalCount === 0) {
+      overflowBeforeFirstModal = document.body.style.overflow;
+    }
+    openModalCount += 1;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = previousOverflow;
+      openModalCount -= 1;
+      if (openModalCount === 0) {
+        document.body.style.overflow = overflowBeforeFirstModal;
+      }
       (triggerRef.current as HTMLElement | null)?.focus?.();
     };
   }, []);

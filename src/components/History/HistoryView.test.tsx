@@ -404,6 +404,8 @@ describe("HistoryView delete client", () => {
 
     // Both dialogs close and Anna's card is gone -- Boris's is untouched.
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    // Both stacked dialogs unmount in one commit -- the body scroll lock must be fully released.
+    expect(document.body.style.overflow).toBe("");
     await waitFor(() => expect(screen.getAllByRole("button", { name: /Visits: \d/ })).toHaveLength(1));
     expect(screen.getByRole("button", { name: /^Boris P\./ })).toBeInTheDocument();
   });
