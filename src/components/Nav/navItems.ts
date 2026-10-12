@@ -7,7 +7,7 @@ import type { AppView } from "./Nav";
 export function navItems(isAdmin: boolean): AppView[] {
   const items: AppView[] = ["calculator", "complex", "correction", "bleach", "prepigment", "history", "favorites", "analytics", "reference"];
   if (isAdmin) {
-    items.push("palette", "orders");
+    items.push("palette", "orders", "team");
   }
   return items;
 }

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { navItems } from "./navItems";
 import "./Nav.css";
 
-export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "favorites" | "palette" | "orders" | "reference";
+export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "favorites" | "palette" | "orders" | "team" | "reference";
 
 const ICON_PATHS: Record<AppView, ReactNode> = {
   calculator: (
@@ -71,6 +71,14 @@ const ICON_PATHS: Record<AppView, ReactNode> = {
       <path d="M2.5 3.5h2.8l2.2 11h11l2-7.5H6.4" />
       <circle cx="9" cy="20" r="1.2" fill="currentColor" stroke="none" />
       <circle cx="17" cy="20" r="1.2" fill="currentColor" stroke="none" />
+    </>
+  ),
+  team: (
+    <>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" />
+      <circle cx="17" cy="9" r="2.4" />
+      <path d="M16 14.2c2.7 0 5 1.8 5 4.8" />
     </>
   ),
   favorites: (

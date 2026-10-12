@@ -26,25 +26,65 @@ service cloud.firestore {
       return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    // Role assignment has no self-service UI on purpose — an admin (or the salon owner,
-    // via the Firebase console) sets `role: 'admin'` on a user's document by hand. See
-    // src/roles.ts.
+    // Promotion to 'admin' has no self-service UI on purpose — an admin (or the salon
+    // owner, via the Firebase console) sets `role: 'admin'` on a user's document by
+    // hand. (A brand-new 'stylist' document, unlike 'admin', *is* self-service via the
+    // accessRequests flow below.) See src/roles.ts.
     function isAdmin() {
       return isMember() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // This document is what makes an account an actual salon member (see isMember()
-    // above), not self-service -- an admin (or the salon owner via the Firebase
-    // console) creates it by hand for a new hire, the same way role assignment itself
-    // already works (see src/roles.ts). A verified Auth account with no document here
-    // is signed in but can't read or write anything else in this file. Public sign-up
+    // above). It's created one of two ways: an admin approves a pending accessRequests/
+    // {uid} document in-app (TeamView, src/accessRequests.ts's approveAccessRequest --
+    // the only client-side `create` path, and it only ever grants 'stylist'), or an
+    // admin/the salon owner sets one by hand via the Firebase console (still the only
+    // way to grant 'admin', or to backfill a pre-existing account -- see
+    // scripts/backfillUserDocs.ts). A verified Auth account with no document here is
+    // signed in but can't read or write anything else in this file. Public sign-up
     // stays open in Auth (see src/inviteCode.ts's invite code) -- that's a UX speed
     // bump against casual visitors, not the enforcement boundary; whether this
     // document exists is.
     match /users/{uid} {
-      allow read: if isMember();
-      allow write: if false;
+      // A user may also read their own (possibly nonexistent) document even before
+      // they're a member -- roles.ts's subscribeToMembership relies on getting "not
+      // found" rather than "permission-denied" so it can tell "not provisioned yet"
+      // apart from a real error, and so it picks up the document the instant an admin
+      // approves it, with no reload.
+      allow read: if isMember() || (isSignedIn() && request.auth.uid == uid);
+      // In-app provisioning only ever grants 'stylist' -- promoting to 'admin' stays a
+      // manual console action (see the comment above).
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['role'])
+        && request.resource.data.role == 'stylist';
+      allow update, delete: if false;
+    }
+
+    // A verified Auth account's request for salon access (src/accessRequests.ts),
+    // created by the requester themselves and resolved by an admin from TeamView. The
+    // document id is the requester's own uid, mirroring users/{uid} above. Approval
+    // itself isn't a write here -- TeamView's approveAccessRequest batches creating
+    // users/{uid} (see that match block's `create`) with *deleting* this document, so a
+    // resolved-and-approved request simply stops existing rather than needing a third
+    // status value.
+    match /accessRequests/{uid} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      // Pins both the document id and the stored email to the caller's own verified
+      // token, and `requestedAt` to the server's own clock, so a requester can't file a
+      // request under someone else's uid/email or backdate it. Always starts 'pending'
+      // -- 'rejected' is admin-only, set via `update` below.
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['email', 'status', 'requestedAt'])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pending'
+        && request.resource.data.requestedAt == request.time;
+      // The only admin update is rejecting a still-pending request; approving deletes it
+      // instead (see the comment above).
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'rejected';
+      allow delete: if isAdmin();
     }
 
     // A stylist may only read/write the client history entries they personally

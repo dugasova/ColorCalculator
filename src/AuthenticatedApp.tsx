@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { signOut, type User } from "firebase/auth";
@@ -9,6 +9,7 @@ import { Nav, type AppView } from "./components/Nav/Nav";
 import { BottomNav } from "./components/Nav/BottomNav";
 import { buildRepeatFormulaRequest, buildRepeatSessionRequest, type FormulaHistoryEntry, type RepeatFormulaRequest, type RepeatSessionRequest } from "./history";
 import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
+import { trackEvent } from "./productAnalytics";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
 import { AccountMenu } from "./components/AccountMenu/AccountMenu";
@@ -36,6 +37,9 @@ const PaletteAdminView = lazy(() =>
 );
 const OrderListView = lazy(() =>
   import("./components/OrderList/OrderListView").then(m => ({ default: m.OrderListView }))
+);
+const TeamView = lazy(() =>
+  import("./components/Team/TeamView").then(m => ({ default: m.TeamView }))
 );
 const ChangePasswordModal = lazy(() =>
   import("./components/Account/ChangePasswordModal").then(m => ({ default: m.ChangePasswordModal }))
@@ -79,6 +83,10 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
   // screen in the app.
   const activeView: AppView = location.pathname === "/" ? view : "reference";
 
+  useEffect(() => {
+    trackEvent("screen_view", { firebase_screen: activeView, firebase_screen_class: activeView });
+  }, [activeView]);
+
   // One step of Android back-button/swipe navigation: leave a brand cheat-sheet route,
   // else return from a non-calculator tab to the calculator, else (already home) hand
   // back `false` so useNativeBackButton lets the app actually exit. See nativeBackButton.ts.
@@ -109,6 +117,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
       setRepeatRequest(request);
       navigate("/");
       setView("calculator");
+      trackEvent("formula_repeated", { kind: "single" });
       return;
     }
     const sessionRequest = buildRepeatSessionRequest(entry, brands);
@@ -116,6 +125,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
     setRepeatSessionRequest(sessionRequest);
     navigate("/");
     setView("complex");
+    trackEvent("formula_repeated", { kind: "session" });
   };
 
   // Mirrors handleRepeat above: FavoritesPage only picks which recipe, the actual
@@ -125,6 +135,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
     setFavoriteRequest(recipe);
     navigate("/");
     setView("calculator");
+    trackEvent("favorite_applied");
   };
 
   const handleFormulaSaved = () => {
@@ -189,6 +200,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                   {view === "favorites" && <FavoritesPage appliedBy={user.email ?? "unknown"} brands={brands} onApply={handleApplyFavorite} />}
                   {view === "palette" && isAdmin && <PaletteAdminView />}
                   {view === "orders" && isAdmin && <OrderListView />}
+                  {view === "team" && isAdmin && <TeamView />}
                 </>
               }
             />

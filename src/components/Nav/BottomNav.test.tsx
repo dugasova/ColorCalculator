@@ -27,6 +27,7 @@ describe("BottomNav", () => {
     expect(screen.getByRole("button", { name: "Analytics" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Palette" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Orders" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Team" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Analytics" }));
 

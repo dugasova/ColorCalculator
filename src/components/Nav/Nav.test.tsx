@@ -26,4 +26,12 @@ describe("Nav", () => {
     const adminHtml = renderToStaticMarkup(<Nav view="calculator" onViewChange={() => {}} isAdmin />);
     expect(adminHtml).toContain("Orders");
   });
+
+  it("shows the Team tab only to admins", () => {
+    const nonAdminHtml = renderToStaticMarkup(<Nav view="calculator" onViewChange={() => {}} />);
+    expect(nonAdminHtml).not.toContain("Team");
+
+    const adminHtml = renderToStaticMarkup(<Nav view="calculator" onViewChange={() => {}} isAdmin />);
+    expect(adminHtml).toContain("Team");
+  });
 });
