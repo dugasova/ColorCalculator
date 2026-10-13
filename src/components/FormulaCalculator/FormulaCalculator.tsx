@@ -122,6 +122,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
         <BrandField brandId={brandId} onBrandIdChange={handleBrandIdChange} />
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} />
         <ShadeField
+          brandId={brandId}
           lineShades={lineShades}
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}

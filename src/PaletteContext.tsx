@@ -4,12 +4,15 @@ import { buildBrandCatalog, type CustomBrandRecord, type PaletteOverride } from 
 import { PaletteReactContext, subscribeToCustomBrands, subscribeToPaletteOverrides, type PaletteState } from "./palette";
 import { subscribeToStock, type StockRecord } from "./stock";
 import { subscribeToPricingSettings, DEFAULT_PRICING_SETTINGS, type PricingSettings } from "./salonSettings";
+import { subscribeToShadeCalibrations } from "./shadeCalibrations";
+import { indexShadeCalibrations, type ShadeCalibration } from "./engine/shadeCalibration";
 
 export function PaletteProvider({ children }: { children: ReactNode }) {
   const [customBrands, setCustomBrands] = useState<CustomBrandRecord[]>([]);
   const [overrides, setOverrides] = useState<PaletteOverride[]>([]);
   const [stock, setStock] = useState<StockRecord[]>([]);
   const [pricingSettings, setPricingSettings] = useState<PricingSettings>(DEFAULT_PRICING_SETTINGS);
+  const [calibrations, setCalibrations] = useState<ShadeCalibration[]>([]);
 
   useEffect(() => {
     const unsubscribeBrands = subscribeToCustomBrands(
@@ -24,19 +27,25 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
       setStock,
       err => console.error("Falling back to the last known dye stock -- could not subscribe to dyeStock:", err)
     );
+    const unsubscribeCalibrations = subscribeToShadeCalibrations(
+      setCalibrations,
+      err => console.error("Falling back to the last known shade calibrations -- could not subscribe to shadeCalibrations:", err)
+    );
     const unsubscribePricing = subscribeToPricingSettings(setPricingSettings);
     return () => {
       unsubscribeBrands();
       unsubscribeOverrides();
       unsubscribeStock();
+      unsubscribeCalibrations();
       unsubscribePricing();
     };
   }, []);
 
   const brands = useMemo(() => buildBrandCatalog(BRANDS, customBrands, overrides), [customBrands, overrides]);
+  const calibrationIndex = useMemo(() => indexShadeCalibrations(calibrations), [calibrations]);
   const value = useMemo<PaletteState>(
-    () => ({ brands, customBrands, overrides, stock, pricingSettings }),
-    [brands, customBrands, overrides, stock, pricingSettings]
+    () => ({ brands, customBrands, overrides, stock, pricingSettings, calibrationIndex }),
+    [brands, customBrands, overrides, stock, pricingSettings, calibrationIndex]
   );
 
   return <PaletteReactContext.Provider value={value}>{children}</PaletteReactContext.Provider>;

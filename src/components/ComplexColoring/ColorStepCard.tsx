@@ -187,6 +187,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
           idSuffix={idSuffix}
         />
         <ShadeField
+          brandId={brandId}
           lineShades={lineShades}
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}

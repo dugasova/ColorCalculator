@@ -3,7 +3,10 @@ import { highLiftOverride, type Shade } from "../shades";
 // Coded from the official Koleston Perfect chart. The primary reflect digit (first
 // digit after the slash) maps to `tone`; a second digit, if present, maps to
 // `secondaryTone` (informational only — the calculation engine only reads `tone`).
-// The "Intensive" double-prefix sub-line (33/0, 44/65, ...) is left out for now.
+// The "Intensive" double-prefix sub-line (used for extra gray coverage/deposit) is
+// mostly left out for now -- only the plain-natural and pure-reflect codes stylists
+// actually stock are included below (33/0, 44/0, 55/0, 55/02, 66/0, 77/0, 77/02,
+// 77/44, 88/0, 88/02, 99/0).
 // Digit->name reading of this chart: 0 natural, 1 ash, 2 matt, 3 gold, 4 red,
 // 5 mahogany, 6 violet, 7 brown, 8 pearl, 9 cendré. ToneFamily has no 'cendré'
 // entry, so that one is still approximated: cendré -> 'slate-grey'.
@@ -41,10 +44,12 @@ const kolestonPerfectShades: Shade[] = [
   // Level 3
   { code: "3/0", level: 3, tone: "natural" },
   { code: "3/00", level: 3, tone: "natural", secondaryTone: "natural" },
+  { code: "33/0", level: 3, tone: "natural" },
 
   // Level 4
   { code: "4/0", level: 4, tone: "natural" },
   { code: "4/00", level: 4, tone: "natural", secondaryTone: "natural" },
+  { code: "44/0", level: 4, tone: "natural" },
   { code: "4/07", level: 4, tone: "natural", secondaryTone: "chocolate" },
   { code: "4/3", level: 4, tone: "gold" },
   { code: "4/82", level: 4, tone: "pearl", secondaryTone: "matt" },
@@ -56,6 +61,8 @@ const kolestonPerfectShades: Shade[] = [
   { code: "5/00", level: 5, tone: "natural", secondaryTone: "natural" },
   { code: "5/05", level: 5, tone: "natural", secondaryTone: "mahogany" },
   { code: "5/07", level: 5, tone: "natural", secondaryTone: "chocolate" },
+  { code: "55/0", level: 5, tone: "natural" },
+  { code: "55/02", level: 5, tone: "natural", secondaryTone: "matt" },
   { code: "5/1", level: 5, tone: "ash" },
   { code: "5/18", level: 5, tone: "ash", secondaryTone: "pearl" },
   { code: "5/3", level: 5, tone: "gold" },
@@ -74,6 +81,7 @@ const kolestonPerfectShades: Shade[] = [
   { code: "6/0", level: 6, tone: "natural" },
   { code: "6/00", level: 6, tone: "natural", secondaryTone: "natural" },
   { code: "6/07", level: 6, tone: "natural", secondaryTone: "chocolate" },
+  { code: "66/0", level: 6, tone: "natural" },
   { code: "6/1", level: 6, tone: "ash" },
   { code: "6/3", level: 6, tone: "gold" },
   { code: "6/91", level: 6, tone: "slate-grey", secondaryTone: "ash" },
@@ -96,6 +104,8 @@ const kolestonPerfectShades: Shade[] = [
   { code: "7/03", level: 7, tone: "natural", secondaryTone: "gold" },
   { code: "7/05", level: 7, tone: "natural", secondaryTone: "mahogany" },
   { code: "7/07", level: 7, tone: "natural", secondaryTone: "chocolate" },
+  { code: "77/0", level: 7, tone: "natural" },
+  { code: "77/02", level: 7, tone: "natural", secondaryTone: "matt" },
   { code: "7/1", level: 7, tone: "ash" },
   { code: "7/17", level: 7, tone: "ash", secondaryTone: "chocolate" },
   { code: "7/18", level: 7, tone: "ash", secondaryTone: "pearl" },
@@ -107,6 +117,7 @@ const kolestonPerfectShades: Shade[] = [
   { code: "7/34", level: 7, tone: "gold", secondaryTone: "red" },
   { code: "7/43", level: 7, tone: "red", secondaryTone: "gold" },
   { code: "7/47", level: 7, tone: "red", secondaryTone: "chocolate" },
+  { code: "77/44", level: 7, tone: "red", secondaryTone: "red" },
   { code: "7/7", level: 7, tone: "chocolate" },
   { code: "7/71", level: 7, tone: "chocolate", secondaryTone: "ash" },
   { code: "7/73", level: 7, tone: "chocolate", secondaryTone: "gold" },
@@ -120,6 +131,8 @@ const kolestonPerfectShades: Shade[] = [
   { code: "8/03", level: 8, tone: "natural", secondaryTone: "gold" },
   { code: "8/04", level: 8, tone: "natural", secondaryTone: "red" },
   { code: "8/07", level: 8, tone: "natural", secondaryTone: "chocolate" },
+  { code: "88/0", level: 8, tone: "natural" },
+  { code: "88/02", level: 8, tone: "natural", secondaryTone: "matt" },
   { code: "8/1", level: 8, tone: "ash" },
   { code: "8/3", level: 8, tone: "gold" },
   { code: "8/38", level: 8, tone: "gold", secondaryTone: "pearl" },
@@ -141,6 +154,7 @@ const kolestonPerfectShades: Shade[] = [
   { code: "9/03", level: 9, tone: "natural", secondaryTone: "gold" },
   { code: "9/04", level: 9, tone: "natural", secondaryTone: "red" },
   { code: "9/05", level: 9, tone: "natural", secondaryTone: "mahogany" },
+  { code: "99/0", level: 9, tone: "natural" },
   { code: "9/1", level: 9, tone: "ash" },
   { code: "9/16", level: 9, tone: "ash", secondaryTone: "violet" },
   { code: "9/17", level: 9, tone: "ash", secondaryTone: "chocolate" },

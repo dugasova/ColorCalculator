@@ -11,6 +11,7 @@ import {
 import type { Shade } from "./engine/shades";
 import type { StockRecord } from "./stock";
 import { DEFAULT_PRICING_SETTINGS, type PricingSettings } from "./salonSettings";
+import type { Lab } from "./engine/color";
 
 export interface PaletteState {
   // Built-ins merged with every admin-added custom brand/shade, discontinued shades
@@ -27,6 +28,11 @@ export interface PaletteState {
   // Live salon-wide pricing default (src/salonSettings.ts) -- rides this context for the
   // same live-admin-data reason `stock` does.
   pricingSettings: PricingSettings;
+  // Live measured shade colors (src/shadeCalibrations.ts), keyed by shadeCalibrationId --
+  // what photo matching ranks against (see engine/photoColor.ts's calibratedShades/
+  // buildNaturalLevelReferences) and what PaletteAdmin's shade rows check to show
+  // "Calibrated".
+  calibrationIndex: Map<string, Lab>;
 }
 
 // Lives here (not in PaletteContext.tsx) so that file can export nothing but the
@@ -34,6 +40,7 @@ export interface PaletteState {
 // React Fast Refresh.
 export const PaletteReactContext = createContext<PaletteState>({
   brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS,
+  calibrationIndex: new Map(),
 });
 
 // The merged, calculator-facing brand catalog. Live: updates the moment an admin adds a
@@ -58,6 +65,12 @@ export function useStock(): StockRecord[] {
 // markup, still overridable per session in the results panel.
 export function useSalonMarkupMultiplier(): number {
   return useContext(PaletteReactContext).pricingSettings.markupMultiplier;
+}
+
+// Live measured shade colors (src/shadeCalibrations.ts) -- what PhotoEstimate's photo
+// matching ranks against (see engine/photoColor.ts).
+export function useShadeCalibrationIndex(): Map<string, Lab> {
+  return useContext(PaletteReactContext).calibrationIndex;
 }
 
 const CUSTOM_BRANDS_COLLECTION = "customBrands";

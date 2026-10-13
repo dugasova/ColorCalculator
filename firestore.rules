@@ -169,5 +169,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Measured shade colors behind photo matching (src/shadeCalibrations.ts): every stylist's
+    // photo analysis reads them, only an admin calibrates -- same split as the palette collections.
+    match /shadeCalibrations/{calibrationId} {
+      allow read: if isMember();
+      allow create, update, delete: if isAdmin();
+    }
+
   }
 }

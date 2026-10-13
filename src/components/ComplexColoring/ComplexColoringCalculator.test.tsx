@@ -76,7 +76,7 @@ describe("ComplexColoringCalculator", () => {
     }];
 
     render(
-      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: shortStock, pricingSettings: DEFAULT_PRICING_SETTINGS }}>
+      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: shortStock, pricingSettings: DEFAULT_PRICING_SETTINGS, calibrationIndex: new Map() }}>
         <ComplexColoringCalculator appliedBy="Test Stylist" />
       </PaletteReactContext.Provider>
     );
@@ -87,7 +87,7 @@ describe("ComplexColoringCalculator", () => {
 
   it("shows no stock shortage warning when nothing is tracked", () => {
     render(
-      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS }}>
+      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS, calibrationIndex: new Map() }}>
         <ComplexColoringCalculator appliedBy="Test Stylist" />
       </PaletteReactContext.Provider>
     );

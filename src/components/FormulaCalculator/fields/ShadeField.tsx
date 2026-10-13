@@ -1,9 +1,12 @@
 import { useTranslation } from "react-i18next";
+import type { BrandId } from "../../../engine/brands";
 import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
+import { PhotoEstimate } from "../../PhotoAnalysis/PhotoEstimate";
 
 export interface ShadeFieldProps {
+  brandId: BrandId;
   lineShades: Shade[];
   targetShadeCode: string;
   targetShade: Shade;
@@ -11,7 +14,7 @@ export interface ShadeFieldProps {
   idSuffix?: string;
 }
 
-export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetShadeCodeChange, idSuffix = "" }: ShadeFieldProps) {
+export function ShadeField({ brandId, lineShades, targetShadeCode, targetShade, onTargetShadeCodeChange, idSuffix = "" }: ShadeFieldProps) {
   const { t } = useTranslation();
   return (
     <div className="field">
@@ -35,6 +38,7 @@ export function ShadeField({ lineShades, targetShadeCode, targetShade, onTargetS
           title={shadeLabel(targetShade)}
         />
       </div>
+      <PhotoEstimate mode="targetShade" brandId={brandId} lineShades={lineShades} onApplyShade={onTargetShadeCodeChange} idSuffix={idSuffix} />
     </div>
   );
 }

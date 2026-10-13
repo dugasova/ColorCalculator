@@ -129,7 +129,7 @@ describe("FormulaCalculator", () => {
       <PaletteReactContext.Provider
         value={{
           brands: BRANDS, customBrands: [], overrides: [], stock: [],
-          pricingSettings: { markupMultiplier: 2.5 },
+          pricingSettings: { markupMultiplier: 2.5 }, calibrationIndex: new Map(),
         }}
       >
         <FormulaCalculator appliedBy="stylist@example.com" />

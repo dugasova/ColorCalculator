@@ -77,6 +77,13 @@
   white-space: nowrap;
 }
 
+.palette-admin__calibration {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .palette-admin__hint {
   color: rgba(var(--brand-ink-rgb), 0.65);
   font-size: 0.9rem;

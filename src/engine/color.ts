@@ -37,7 +37,7 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-function rgbToHex([r, g, b]: [number, number, number]): string {
+export function rgbToHex([r, g, b]: [number, number, number]): string {
   return (
     "#" +
     [r, g, b]
@@ -146,16 +146,36 @@ export function blendShadeHexColors(shadeA: Shade, shadeB: Shade, primaryPercent
   ]);
 }
 
+export type Lab = [number, number, number];
+
 // sRGB (0-255) -> CIE Lab (D65 reference white), the standard input space for perceptual
 // color-difference formulas (see ciede2000). RGB/HSL distances over- or under-weight hue
 // differences relative to how people actually perceive them; Lab is built so that a fixed
 // numeric distance corresponds to a roughly fixed *perceived* difference, hue or no hue.
-function rgbToLab([r, g, b]: [number, number, number]): [number, number, number] {
-  function toLinear(c: number): number {
-    const v = c / 255;
-    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  }
-  const rl = toLinear(r), gl = toLinear(g), bl = toLinear(b);
+
+// sRGB channel (0-255) -> linear-light channel (0-1) -- the inverse companding curve a
+// camera/display pipeline applies. First step of both rgbToLab below and
+// photoColor.ts's grey-card white-balance correction, which operates in linear light
+// (the gamma curve would otherwise distort the ratio between channels the correction
+// relies on).
+export function srgbToLinear(c: number): number {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+}
+
+// Inverse of srgbToLinear: linear-light channel (0-1; values above 1, from a grey-card
+// gain correction, are fine) -> sRGB channel (0-255). Clamped to [0,1] before companding
+// so an overexposed corrected channel still renders as a valid 255 instead of NaN/out of
+// range.
+export function linearToSrgb(v: number): number {
+  const clamped = Math.min(1, Math.max(0, v));
+  return (clamped <= 0.0031308 ? 12.92 * clamped : 1.055 * clamped ** (1 / 2.4) - 0.055) * 255;
+}
+
+// Linear-light RGB (0-1 per channel) -> CIE Lab (D65 reference white) -- shared by
+// rgbToLab below (sRGB input) and photoColor.ts's measureHairColor (already-linear,
+// white-balance-corrected input).
+export function linearRgbToLab([rl, gl, bl]: [number, number, number]): Lab {
   const x = rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375;
   const y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750;
   const z = rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041;
@@ -168,8 +188,9 @@ function rgbToLab([r, g, b]: [number, number, number]): [number, number, number]
   return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
 }
 
-export function hexToLab(hex: string): [number, number, number] {
-  return rgbToLab(hexToRgb(hex));
+export function hexToLab(hex: string): Lab {
+  const [r, g, b] = hexToRgb(hex);
+  return linearRgbToLab([srgbToLinear(r), srgbToLinear(g), srgbToLinear(b)]);
 }
 
 // CIEDE2000 perceptual color difference (delta-E) between two Lab colors -- see Sharma,
