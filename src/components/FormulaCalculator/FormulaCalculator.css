@@ -789,6 +789,10 @@
   margin-top: 12px;
 }
 
+.results__client-summary .field__hint {
+  margin-top: 8px;
+}
+
 .results__client-summary-trigger {
   width: 100%;
 }
