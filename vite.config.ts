@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import { readFileSync } from 'node:fs'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -12,10 +13,19 @@ export default defineConfig(({ mode }) => {
   // .env.example) -- never left in `dist/` for a plain build, and never shipped to the
   // hosted site or the Android APK (filesToDeleteAfterUpload below).
   const uploadSourceMaps = Boolean(env.SENTRY_AUTH_TOKEN && env.SENTRY_ORG && env.SENTRY_PROJECT)
+  // package.json is the single source of the app version (android/app/build.gradle reads
+  // it too). Read from disk rather than `npm_package_version`, which is only set when vite
+  // is launched through an npm script. One release name feeds both the runtime
+  // `Sentry.init` (monitoring.ts) and the source-map upload below -- they must match
+  // exactly or uploaded maps never attach to incoming errors.
+  const appVersion: string = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')).version
+  const sentryRelease = `formulist@${appVersion}`
 
   return {
     define: {
       __BUILD_TIME__: JSON.stringify(new Date().toISOString().slice(0, 16).replace("T", " ")),
+      __APP_VERSION__: JSON.stringify(appVersion),
+      __SENTRY_RELEASE__: JSON.stringify(sentryRelease),
     },
     plugins: [
       react(),
@@ -42,6 +52,7 @@ export default defineConfig(({ mode }) => {
         org: env.SENTRY_ORG,
         project: env.SENTRY_PROJECT,
         authToken: env.SENTRY_AUTH_TOKEN,
+        release: { name: sentryRelease },
         sourcemaps: { filesToDeleteAfterUpload: ["./dist/**/*.map"] },
       })] : []),
     ],

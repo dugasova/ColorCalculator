@@ -42,6 +42,13 @@ const formulaHistoryEntryShapeSchema = z.object({
   patchTestOverride: z.boolean(),
   beforePhotoUrl: z.string().nullable(),
   afterPhotoUrl: z.string().nullable(),
+  // Optional: absent on every document saved before versioning existed (filled in by
+  // normalizeHistoryEntry). A `schemaVersion` above CURRENT_HISTORY_SCHEMA_VERSION --
+  // written by a newer app than a stale cached PWA reading it -- is still accepted and
+  // shown as-is rather than hidden: a newer format only ever adds fields, and losing a
+  // client's visit from their history is worse than not displaying a field it can't know.
+  schemaVersion: z.number().int().positive().optional(),
+  appVersion: z.string().nullable().optional(),
 });
 
 const legacyFormulaHistoryEntryShapeSchema = z.object({
@@ -77,23 +84,38 @@ const legacyFormulaHistoryEntryShapeSchema = z.object({
 // document, and never both reject a genuinely well-formed one.
 export const historyEntryShapeSchema = z.union([formulaHistoryEntryShapeSchema, legacyFormulaHistoryEntryShapeSchema]);
 
+// The `schemaVersion` every new history document is written with (see
+// saveFormulaToHistory). Bump it -- and teach normalizeHistoryEntry to upgrade the previous
+// value -- whenever a change makes old documents need conversion on read.
+export const CURRENT_HISTORY_SCHEMA_VERSION = 2;
+const LEGACY_HISTORY_SCHEMA_VERSION = 1;
+
 export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHistoryEntry): FormulaHistoryEntry {
   // `raw.clientId` reads as `undefined` (not `null`), and a color step's
   // `prePigmentation` reads back as `undefined` (not `null`), for any steps-based
   // document saved before those fields existed -- coerced here so every caller
   // downstream can rely on the declared `string | null` / `PrePigmentationResult | null`
   // types without re-deriving the fallback itself (formatSession.ts, repeatFormula.ts
-  // and revisit.ts each used to, with two different idioms). Returns `raw` unchanged
-  // (not a copy) when it already has both fields, same as the plain `return raw` this
-  // replaced for an already-well-formed modern entry.
+  // and revisit.ts each used to, with two different idioms). `schemaVersion`/`appVersion`
+  // are likewise absent on documents saved before versioning existed. Returns `raw`
+  // unchanged (not a copy) when it already has every one of these fields, same as the
+  // plain `return raw` this replaced for an already-well-formed modern entry.
   if ("steps" in raw && raw.steps !== undefined) {
     const needsCoercion = raw.clientId === undefined
+      || raw.schemaVersion === undefined
+      || raw.appVersion === undefined
       || raw.steps.some(step => step.kind === "color" && step.prePigmentation === undefined);
     if (!needsCoercion) return raw;
     const steps = raw.steps.map(step => (
       step.kind === "color" ? { ...step, prePigmentation: step.prePigmentation ?? null } : step
     ));
-    return { ...raw, clientId: raw.clientId ?? null, steps };
+    return {
+      ...raw,
+      clientId: raw.clientId ?? null,
+      schemaVersion: raw.schemaVersion ?? CURRENT_HISTORY_SCHEMA_VERSION,
+      appVersion: raw.appVersion ?? null,
+      steps,
+    };
   }
 
   const legacy = raw as LegacyFormulaHistoryEntry;
@@ -134,5 +156,7 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
     patchTestOverride: legacy.patchTestOverride,
     beforePhotoUrl: legacy.beforePhotoUrl,
     afterPhotoUrl: legacy.afterPhotoUrl,
+    schemaVersion: LEGACY_HISTORY_SCHEMA_VERSION,
+    appVersion: null,
   };
 }

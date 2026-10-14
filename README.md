@@ -170,3 +170,18 @@ Safe to run even if Majirel was never migrated, and safe to re-run.
 | `npm run preview`          | Preview a production build locally               |
 | `npm run migrate:palette`  | One-off migration of built-in shades to Firestore |
 | `npm run migrate:repair-majirel` | Clears stale migrated Majirel overrides after a chart fix |
+
+## Releasing
+
+`package.json`'s `version` (SemVer) is the single source of truth: the web build shows it
+in the account menu and tags Sentry events with it, and `android/app/build.gradle` derives
+`versionName` and `versionCode` (`major*10000 + minor*100 + patch`) from it. Every deploy
+— Firebase Hosting or a Play upload — is a new version.
+
+1. Add a section for the new version to `CHANGELOG.md`.
+2. `npm version patch|minor|major` — bumps `package.json`, commits, and tags `vX.Y.Z`
+   (PATCH: fixes; MINOR: new features, brands, modes; MAJOR: data changes older app
+   versions can't read).
+3. `git push --follow-tags`
+4. `npm run build && firebase deploy`
+5. `npm run android:aab` for the Play Store bundle.

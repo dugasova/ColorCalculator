@@ -68,7 +68,7 @@ export const en = {
     forgotCurrentPasswordSent: "Password reset email sent to {{email}}. Use the link there to set a new password.",
     forgotCurrentPasswordError: "Could not send the reset email. Try again in a moment.",
     feedback: "Feedback / report a problem",
-    build: "Build {{date}} UTC",
+    build: "v{{version}} · Build {{date}} UTC",
   },
   calculator: {
     intro: "Fill in the steps top to bottom — the formula updates instantly.",
@@ -321,6 +321,7 @@ export const en = {
     emptyFirstRun: "Your clients will appear here. Calculate a formula in the Calculator and tap \"Save for a client…\".",
     empty: "Nothing matches this search.",
     appliedBy: "Applied by {{name}}",
+    savedInVersion: "v{{version}}",
     patchTestOn: "Patch test: {{date}}",
     repeat: "Repeat formula",
     stepLabel: "Step {{number}}",

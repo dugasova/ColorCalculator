@@ -241,7 +241,10 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
                     </div>
                   )}
                   <div className="history__entry-footer">
-                    <span>{t("history.appliedBy", { name: entry.appliedBy })}</span>
+                    <span>
+                      {t("history.appliedBy", { name: entry.appliedBy })}
+                      {entry.appVersion !== null && ` · ${t("history.savedInVersion", { version: entry.appVersion })}`}
+                    </span>
                     <div className="history__entry-footer-actions">
                       <button
                         type="button"

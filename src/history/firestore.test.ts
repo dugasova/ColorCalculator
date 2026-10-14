@@ -95,6 +95,12 @@ describe("saveFormulaToHistory", () => {
     consoleError.mockRestore();
   });
 
+  it("stamps the new document with the current schema and app version", async () => {
+    await saveFormulaToHistory({ ...baseParams(), beforePhotoFile: null, afterPhotoFile: null });
+
+    expect(setDocMock.mock.calls[0][1]).toMatchObject({ schemaVersion: 2, appVersion: __APP_VERSION__ });
+  });
+
   it("still attaches the uploaded photo URL on the happy path", async () => {
     await saveFormulaToHistory({
       ...baseParams(),

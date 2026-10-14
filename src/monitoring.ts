@@ -9,6 +9,7 @@ export function initMonitoring(): void {
   if (!import.meta.env.PROD || !SENTRY_DSN) return;
   Sentry.init({
     dsn: SENTRY_DSN,
+    release: __SENTRY_RELEASE__,
     // `sendDefaultPii` was replaced by the more granular `dataCollection` in this SDK
     // major (11.x) -- `userInfo: false` is its closest equivalent: don't auto-populate
     // `user.*` from IP/instrumentation. The only user data this app ever sends is the

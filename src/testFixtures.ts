@@ -72,6 +72,8 @@ export function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName
     patchTestOverride: true,
     beforePhotoUrl: null,
     afterPhotoUrl: null,
+    schemaVersion: 2,
+    appVersion: null,
     ...overrides,
   };
 }

@@ -99,7 +99,7 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
             {t("login.privacyPolicy")}
           </Link>
           <p className="account-menu__build">{t("app.copyright")}</p>
-          <p className="account-menu__build">{t("account.build", { date: __BUILD_TIME__ })}</p>
+          <p className="account-menu__build">{t("account.build", { version: __APP_VERSION__, date: __BUILD_TIME__ })}</p>
         </div>
       )}
     </div>

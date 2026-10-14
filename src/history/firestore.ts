@@ -4,7 +4,7 @@ import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage
 import { db, storage } from "../firebase";
 import { parseSnapshotDocs } from "../firestoreSubscribe";
 import type { HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
-import { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
+import { CURRENT_HISTORY_SCHEMA_VERSION, historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
 import { computeStockConsumption, consumeStock, reconcileStockConsumption } from "../stock";
 import { calculateSessionProductCost } from "../sessionCost";
 import { settleWrite, type WriteOutcome } from "../firestoreWrite";
@@ -60,6 +60,8 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<W
     beforePhotoUrl: null,
     afterPhotoUrl: null,
     appliedAt: serverTimestamp(),
+    schemaVersion: CURRENT_HISTORY_SCHEMA_VERSION,
+    appVersion: __APP_VERSION__,
   }), `history entry ${docRef.id}`);
 
   // Stock is a convenience ledger, not part of the visit record: a failure here must not

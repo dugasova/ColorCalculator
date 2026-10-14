@@ -12,6 +12,22 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// App version: package.json at the repo root is the single source of truth (vite.config.ts
+// reads the same field for the web build). versionCode is derived as
+// major*10000 + minor*100 + patch, so it rises monotonically with every SemVer bump --
+// Play rejects an upload whose versionCode isn't higher than the last one. Pre-release
+// suffixes aren't supported, and minor/patch must stay <= 99 or codes would collide.
+def appVersionName = new groovy.json.JsonSlurper().parse(rootProject.file("../package.json")).version
+def appVersionMatch = appVersionName =~ /^(\d+)\.(\d+)\.(\d+)$/
+if (!appVersionMatch.matches()) {
+    throw new GradleException("package.json version \"${appVersionName}\" must be plain MAJOR.MINOR.PATCH")
+}
+def (appMajor, appMinor, appPatch) = (1..3).collect { appVersionMatch.group(it) as int }
+if (appMinor > 99 || appPatch > 99) {
+    throw new GradleException("package.json version ${appVersionName}: minor and patch must be <= 99 to derive versionCode")
+}
+def appVersionCode = appMajor * 10000 + appMinor * 100 + appPatch
+
 android {
     namespace = "com.formulist.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -19,8 +35,8 @@ android {
         applicationId "com.formulist.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

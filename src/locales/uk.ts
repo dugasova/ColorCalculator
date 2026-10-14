@@ -70,7 +70,7 @@ export const uk: typeof en = {
     forgotCurrentPasswordSent: "Лист для скидання пароля надіслано на {{email}}. Перейдіть за посиланням, щоб встановити новий пароль.",
     forgotCurrentPasswordError: "Не вдалося надіслати лист. Спробуйте ще раз за хвилину.",
     feedback: "Відгук або проблема",
-    build: "Збірка {{date}} UTC",
+    build: "v{{version}} · Збірка {{date}} UTC",
   },
   calculator: {
     intro: "Заповніть кроки зверху вниз — формула оновлюється одразу.",
@@ -323,6 +323,7 @@ export const uk: typeof en = {
     emptyFirstRun: "Тут з'являться ваші клієнти. Розрахуйте формулу в «Калькуляторі» й натисніть «Зберегти для клієнта…».",
     empty: "За цим пошуком нічого не знайдено.",
     appliedBy: "Застосував(ла): {{name}}",
+    savedInVersion: "v{{version}}",
     patchTestOn: "Алергопроба: {{date}}",
     repeat: "Повторити формулу",
     stepLabel: "Крок {{number}}",

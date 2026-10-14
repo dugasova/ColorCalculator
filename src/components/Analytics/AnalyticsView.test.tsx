@@ -37,6 +37,8 @@ function makeEntry(overrides: Partial<FormulaHistoryEntry> & { id: string; clien
     patchTestOverride: true,
     beforePhotoUrl: null,
     afterPhotoUrl: null,
+    schemaVersion: 2,
+    appVersion: null,
     ...overrides,
   };
 }

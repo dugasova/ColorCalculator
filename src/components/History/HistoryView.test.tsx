@@ -57,6 +57,8 @@ function makeEntry(overrides: Partial<FormulaHistoryEntry> & { id: string; clien
     patchTestOverride: true,
     beforePhotoUrl: null,
     afterPhotoUrl: null,
+    schemaVersion: 2,
+    appVersion: null,
     ...overrides,
   };
 }
@@ -148,6 +150,27 @@ describe("HistoryView client grouping", () => {
     // display name -- confirms it opened the right client's visits, not the other one's.
     const dialog = await screen.findByRole("dialog", { name: "Anna K." });
     expect(within(dialog).queryByText("Boris P.")).not.toBeInTheDocument();
+  });
+
+  it("shows the app version a visit was saved with, and nothing for visits saved before versioning", async () => {
+    mockHistory([
+      makeEntry({ id: "1", clientName: "Anna K.", appVersion: "1.2.3" }),
+      makeEntry({ id: "2", clientName: "Boris P.", appVersion: null }),
+    ]);
+    mockClients([]);
+
+    renderHistoryView();
+    fireEvent.click(await screen.findByRole("button", { name: /^Anna K\./ }));
+    const annaDialog = await screen.findByRole("dialog", { name: "Anna K." });
+    expect(within(annaDialog).getByText(/Applied by .* · v1\.2\.3$/)).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /^Boris P\./ }));
+    const borisDialog = await screen.findByRole("dialog", { name: "Boris P." });
+    expect(within(borisDialog).getByText(/^Applied by /)).toBeInTheDocument();
+    expect(within(borisDialog).queryByText(/· v\d/)).not.toBeInTheDocument();
   });
 
   it("closes the modal on Escape, returning to the collapsed card list", async () => {

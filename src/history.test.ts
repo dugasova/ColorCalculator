@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   normalizeHistoryEntry, buildRepeatFormulaRequest, buildRepeatSessionRequest, historyEntryShapeSchema,
-  type ColorHistoryStep, type LegacyFormulaHistoryEntry,
+  type ColorHistoryStep, type FormulaHistoryEntry, type LegacyFormulaHistoryEntry,
 } from "./history";
 import { BRANDS } from "./engine/brands";
 import { calculatePrePigmentation } from "./engine/prePigmentation";
@@ -64,6 +64,25 @@ describe("normalizeHistoryEntry", () => {
     expect(normalized.markupMultiplier).toBe(3);
     expect(normalized.productCost).toBe(12);
     expect(normalized.clientName).toBe("Old Client");
+    expect(normalized.schemaVersion).toBe(1);
+    expect(normalized.appVersion).toBeNull();
+  });
+
+  it("fills in schemaVersion 2 and a null appVersion for a steps-based entry saved before versioning", () => {
+    const entry = makeEntry({ clientName: "Anna" }) as unknown as Record<string, unknown>;
+    delete entry.schemaVersion;
+    delete entry.appVersion;
+    const normalized = normalizeHistoryEntry(entry as unknown as FormulaHistoryEntry);
+    expect(normalized.schemaVersion).toBe(2);
+    expect(normalized.appVersion).toBeNull();
+  });
+
+  it("keeps the stored versions as-is, including a schemaVersion newer than this app knows", () => {
+    const entry = makeEntry({ clientName: "Anna", schemaVersion: 3, appVersion: "2.0.0" });
+    const normalized = normalizeHistoryEntry(entry);
+    expect(normalized).toBe(entry);
+    expect(normalized.schemaVersion).toBe(3);
+    expect(normalized.appVersion).toBe("2.0.0");
   });
 
   it("preserves a legacy entry's additional shade fields when present", () => {
@@ -324,6 +343,18 @@ describe("historyEntryShapeSchema", () => {
       afterPhotoUrl: null,
     };
     expect(historyEntryShapeSchema.safeParse(legacy).success).toBe(true);
+  });
+
+  it("keeps schemaVersion/appVersion through parsing, and accepts a newer schemaVersion", () => {
+    const entry = makeEntry({ clientName: "Anna", schemaVersion: 3, appVersion: "2.0.0" });
+    const result = historyEntryShapeSchema.safeParse(entry);
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({ schemaVersion: 3, appVersion: "2.0.0" });
+  });
+
+  it("rejects a non-integer schemaVersion", () => {
+    const entry = makeEntry({ clientName: "Anna" });
+    expect(historyEntryShapeSchema.safeParse({ ...entry, schemaVersion: "2" }).success).toBe(false);
   });
 
   it("rejects a document missing a required top-level field", () => {
