@@ -21,7 +21,7 @@ interface ClientVisitsModalProps {
 // One client's full visit list, opened from a ClientGroupList card. Owns no state: the
 // edit/photo/delete-confirm dialogs it opens stack on top of it from HistoryView, which
 // keeps every dialog's open/closed state in one place.
-export default function ClientVisitsModal({
+export function ClientVisitsModal({
   group, isAdmin, gramsEditor, onClose, onRequestDelete, onEditEntry, onOpenPhoto, onRepeat,
 }: ClientVisitsModalProps) {
   const { t } = useTranslation();

@@ -6,9 +6,9 @@ import { useActualGramsEditor } from "./useActualGramsEditor";
 import { useHistoryData } from "./useHistoryData";
 import { RevisitReminders } from "./RevisitReminders";
 import { EditEntryModal } from "./EditEntryModal";
-import ClientGroupList from "./ClientGroupList";
-import ClientVisitsModal from "./ClientVisitsModal";
 import { Modal } from "../common/Modal";
+import { ClientVisitsModal } from "./ClientVisitsModal";
+import { ClientGroupList } from "./ClientGroupList";
 import "./HistoryView.css";
 
 export interface HistoryViewProps {
@@ -84,7 +84,7 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
         <p className="history__status" aria-live="polite">{t(entries.length === 0 ? "history.emptyFirstRun" : "history.empty")}</p>
       )}
 
-      <ClientGroupList groups={groups} setOpenGroupKey={setOpenGroupKey} />
+      <ClientGroupList groups={groups} onOpenGroup={setOpenGroupKey} />
 
       {openGroup !== null && (
         <ClientVisitsModal
