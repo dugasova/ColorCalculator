@@ -14,7 +14,7 @@ const FAVORITE_FORMULAS_COLLECTION = "favoriteFormulas";
 
 // A favorite's saved recipe deliberately excludes the client-specific inputs a formula
 // also depends on (startLevel, grayPercent, hair canvas) and pricing (pricePerGram,
-// markup, service price) -- see applyFavoriteRecipe in useFormulaCalculatorState.ts for
+// markup, service price) -- see applyFavoriteRecipe in formulaRequests.ts for
 // why: inserting a favorite is meant to swap in a shade/mix recipe for *this* client's
 // existing diagnostics, not replay a whole past session the way History's "Repeat
 // formula" does.

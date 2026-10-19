@@ -4,11 +4,11 @@ import { splitShadeBlend } from "../../engine/formula";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
 import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { Brand, BrandId } from "../../engine/brands";
-import { APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE } from "../../engine/applicationZone";
 import { useSalonMarkupMultiplier } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 import { useShadeFormulaState } from "./useShadeFormulaState";
+import { applyFavoriteRecipe, applyFormValues, repeatRequestToFormValues, type FormulaFormSetters } from "./formulaRequests";
 
 const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
 // How far a blend component's own level may sit from the target's for it to be offered
@@ -52,83 +52,43 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     resetShadePoolOverrides,
   } = base;
 
+  // Which field each request restores lives in formulaRequests.ts; this only routes the
+  // resulting values to their setters.
+  const formSetters: FormulaFormSetters = {
+    porosity: setPorosity, thickness: setThickness, chemicalHistory: setChemicalHistory,
+    brandId: setBrandId, line: setLine, targetShadeCode: setTargetShadeCode,
+    startLevel: setStartLevel, grayPercent: setGrayPercent,
+    applicationZone: setApplicationZone, gramsInputMode: setGramsInputMode, totalGrams: setTotalGrams, colorGrams: setColorGrams,
+    manualDeveloperVolume: setManualDeveloperVolume, manualMixingRatio: setManualMixingRatio,
+    manualProcessingMinutes: setManualProcessingMinutes,
+    manualPricePerGram: setManualPricePerGram, manualMarkupMultiplier: setManualMarkupMultiplier, manualServicePrice: setManualServicePrice,
+    additionalShadeCode: setAdditionalShadeCode, additionalShadeGrams: setAdditionalShadeGrams,
+    additionalShade2Code: setAdditionalShade2Code, additionalShade2Grams: setAdditionalShade2Grams,
+    blendModeEnabled: setBlendModeEnabled, blendShadeACode: setBlendShadeACode, blendShadeBCode: setBlendShadeBCode,
+    blendPrimaryPercent: setBlendPrimaryPercent,
+    neutralizationApplied: setNeutralizationApplied, prePigmentationEnabled: setPrePigmentationEnabled,
+  };
+
   // Replay a "Repeat formula" request from history right during render — this is React's
   // documented pattern for adjusting state when a prop changes (no effect/extra render
   // tick needed): https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
   if (repeatRequest && repeatRequest !== appliedRepeatRequest) {
-    if (repeatRequest.canvas) {
-      setPorosity(repeatRequest.canvas.porosity);
-      setThickness(repeatRequest.canvas.thickness);
-      setChemicalHistory(repeatRequest.canvas.chemicalHistory);
-    } else {
-      setPorosity("normal");
-      setThickness("medium");
-      setChemicalHistory([]);
-    }
-  // `repeatRequest` is a fresh object each time History's "Repeat" button is clicked, so
-  // comparing by reference here is enough to apply each click exactly once.
+    // `repeatRequest` is a fresh object each time History's "Repeat" button is clicked, so
+    // comparing by reference here is enough to apply each click exactly once.
     setAppliedRepeatRequest(repeatRequest);
-    setBrandId(repeatRequest.brandId);
-    setLine(repeatRequest.line);
-    setTargetShadeCode(repeatRequest.targetShadeCode);
-    setStartLevel(repeatRequest.startLevel);
-    setGrayPercent(repeatRequest.grayPercent);
-    setApplicationZone(repeatRequest.applicationZone);
-    setTotalGrams(repeatRequest.totalGrams);
-    setGramsInputMode(APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE[repeatRequest.applicationZone]);
-    setColorGrams(repeatRequest.colorGrams);
-    setManualDeveloperVolume(repeatRequest.manualDeveloperVolume);
-    setManualMixingRatio(repeatRequest.manualMixingRatio);
-    setManualProcessingMinutes(repeatRequest.processingMinutes);
-    setManualPricePerGram(repeatRequest.pricePerGram);
-    setManualMarkupMultiplier(repeatRequest.markupMultiplier);
-    setManualServicePrice(repeatRequest.servicePrice);
-    setAdditionalShadeCode(repeatRequest.additionalShadeCode);
-    setAdditionalShadeGrams(repeatRequest.additionalShadeGrams);
-    setAdditionalShade2Code(repeatRequest.additionalShade2Code ?? null);
-    setAdditionalShade2Grams(repeatRequest.additionalShade2Grams ?? 0);
-    setBlendModeEnabled(repeatRequest.blendShadeACode !== null && repeatRequest.blendShadeBCode !== null);
-    setBlendShadeACode(repeatRequest.blendShadeACode);
-    setBlendShadeBCode(repeatRequest.blendShadeBCode);
-    setBlendPrimaryPercent(repeatRequest.blendPrimaryPercent);
-    setNeutralizationApplied(false);
-    setPrePigmentationEnabled(repeatRequest.prePigmentationEnabled);
+    applyFormValues(repeatRequestToFormValues(repeatRequest), formSetters);
   }
 
   // Insert a saved favorite's recipe (src/favoriteFormulas.ts) into the calculator --
   // mirrors the repeatRequest replay above (same "adjust state when a prop changes"
   // pattern: https://react.dev/learn/you-might-not-need-an-effect), fired by navigating
   // here from the standalone Favorites page (see FavoritesPage + AuthenticatedApp's
-  // handleApplyFavorite) rather than a same-page chip click. Deliberately never touches
-  // startLevel/grayPercent/canvas/markup/client fields: a favorite is a shade+mix recipe
-  // to reuse for the client *already* on screen, not a whole past session to restore.
-  // Resets the manual price/service-price overrides exactly like handleBrandIdChange
-  // does, so price re-derives from the (possibly new) brand.
+  // handleApplyFavorite) rather than a same-page chip click. See applyFavoriteRecipe for
+  // which fields a favorite deliberately leaves untouched.
   if (favoriteRequest && favoriteRequest !== appliedFavoriteRequest) {
     setAppliedFavoriteRequest(favoriteRequest);
-    setBrandId(favoriteRequest.brandId);
-    setLine(favoriteRequest.line);
-    setTargetShadeCode(favoriteRequest.targetShadeCode);
-    setApplicationZone(favoriteRequest.applicationZone);
-    setGramsInputMode(favoriteRequest.gramsInputMode);
-    setTotalGrams(favoriteRequest.totalGrams);
-    setColorGrams(favoriteRequest.colorGrams);
-    setManualDeveloperVolume(favoriteRequest.manualDeveloperVolume ?? undefined);
-    setManualMixingRatio(favoriteRequest.manualMixingRatio ?? undefined);
-    setManualProcessingMinutes(favoriteRequest.manualProcessingMinutes ?? undefined);
-    setAdditionalShadeCode(favoriteRequest.additionalShadeCode);
-    setAdditionalShadeGrams(favoriteRequest.additionalShadeGrams);
-    setAdditionalShade2Code(favoriteRequest.additionalShade2Code);
-    setAdditionalShade2Grams(favoriteRequest.additionalShade2Grams);
-    setBlendModeEnabled(favoriteRequest.blendShadeACode !== null && favoriteRequest.blendShadeBCode !== null);
-    setBlendShadeACode(favoriteRequest.blendShadeACode);
-    setBlendShadeBCode(favoriteRequest.blendShadeBCode);
-    setBlendPrimaryPercent(favoriteRequest.blendPrimaryPercent);
-    setNeutralizationApplied(false);
-    setManualPricePerGram(undefined);
-    setManualServicePrice(undefined);
+    applyFormValues(applyFavoriteRecipe(favoriteRequest), formSetters);
   }
-
 
   const handleBrandIdChange = (newBrandId: BrandId) => {
     base.handleBrandIdChange(newBrandId);
@@ -209,7 +169,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
 
   // The current recipe in "save as favorite" shape (src/favoriteFormulas.ts) --
   // deliberately excludes startLevel/grayPercent/canvas/pricing, the same fields
-  // applyFavoriteRecipe above never touches, since a favorite is a shade/mix recipe to
+  // applyFavoriteRecipe (formulaRequests.ts) never touches, since a favorite is a shade/mix recipe to
   // reuse across clients, not a snapshot of this one visit.
   const favoriteRecipe: FavoriteFormulaRecipe = {
     brandId, line: targetShade.line ?? null, targetShadeCode: targetShade.code,
