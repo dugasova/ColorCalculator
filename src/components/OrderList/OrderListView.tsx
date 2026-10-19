@@ -14,7 +14,7 @@ const COPIED_FEEDBACK_MS = 1500;
 // Admin-only reorder list: every tracked product (any brand) at "low" or "out" stock,
 // with an editable suggested quantity, copyable/shareable as one WhatsApp/Telegram-ready
 // message -- nothing here is persisted, it's derived live from the same `dyeStock`
-// subscription Palette's own BrandStockList reads (see stock.ts's buildReorderList).
+// subscription Palette's own BrandStockList reads (see stock/reorder.ts's buildReorderList).
 // Restocking itself still happens in Palette; this view is order-drafting only.
 export function OrderListView() {
   const { t } = useTranslation();

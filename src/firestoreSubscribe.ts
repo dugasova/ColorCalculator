@@ -2,7 +2,7 @@ import type { QuerySnapshot } from "firebase/firestore";
 import type { ZodType } from "zod";
 
 // Shared defensive-parse loop for every `subscribeToX` live query in this project (see
-// clients.ts, stock.ts, palette.ts, history/firestore.ts) -- a hand-edited Firestore
+// clients.ts, stock/firestore.ts, palette.ts, history/firestore.ts) -- a hand-edited Firestore
 // console change, or a future schema change read by an old client, must never crash deep
 // inside the formula engine, far from this read, with no clue which document caused it.
 // Skips and logs a malformed document instead of propagating a throw or producing garbage.
@@ -10,7 +10,7 @@ import type { ZodType } from "zod";
 // `includeId` picks which of the two shapes this project's schemas come in:
 // - `false` (default): the schema has no `id` field of its own -- validates the
 //   document's raw data, then appends `{ id: doc.id, ...parsed }` onto whatever
-//   validated. Used by stock.ts/palette.ts's schemas.
+//   validated. Used by stock/types.ts/palette.ts's schemas.
 // - `true`: the schema declares its own `id: z.string()` field and genuinely validates
 //   it -- `doc.id` is merged into the input *before* parsing, and the parsed result
 //   already carries `id`. Used by clients.ts/history/firestore.ts's schemas.

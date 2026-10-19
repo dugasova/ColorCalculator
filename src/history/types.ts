@@ -17,7 +17,7 @@ export interface ColorHistoryStep {
   kind: "color";
   brandName: string;
   // The catalog id (`BrandId`) of `brandName`'s brand, needed to charge this step's
-  // grams against the right stock document (see stock.ts's computeStockConsumption).
+  // grams against the right stock document (see stock/consumption.ts's computeStockConsumption).
   // Absent on entries saved before stock tracking existed and on legacy-shape entries
   // upgraded by `normalizeHistoryEntry` -- those steps simply don't move stock. New
   // saves always set it.

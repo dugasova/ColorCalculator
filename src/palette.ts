@@ -21,7 +21,7 @@ export interface PaletteState {
   // discontinued shades too (to let an admin re-enable them) — see `getFullBrandShades`.
   customBrands: CustomBrandRecord[];
   overrides: PaletteOverride[];
-  // Remaining-grams records (src/stock.ts) — surfaced here (not a separate context) since
+  // Remaining-grams records (src/stock/) — surfaced here (not a separate context) since
   // it's admin-editable palette-adjacent data with the exact same live-subscription shape
   // as customBrands/overrides above.
   stock: StockRecord[];
@@ -55,7 +55,7 @@ export function usePaletteAdmin(): PaletteState {
   return useContext(PaletteReactContext);
 }
 
-// Live remaining-grams records (src/stock.ts) -- used by FormulaResults (shortage
+// Live remaining-grams records (src/stock/) -- used by FormulaResults (shortage
 // warnings) and PaletteAdmin's stock editor.
 export function useStock(): StockRecord[] {
   return useContext(PaletteReactContext).stock;
@@ -93,7 +93,7 @@ function disableOverrideId(brandId: BrandId, line: string | null, code: string):
 // previously an unchecked `as` cast let one bad document produce garbage that would crash
 // deep inside the formula engine, far from this read, with no clue which document caused it.
 // A listener-level failure is reported via `onError` instead of throwing -- see
-// stock.ts's subscribeToStock for the same pattern, wired to `console.error` by
+// stock/firestore.ts's subscribeToStock for the same pattern, wired to `console.error` by
 // PaletteContext.tsx.
 export function subscribeToCustomBrands(onChange: (brands: CustomBrandRecord[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
   return onSnapshot(collection(db, CUSTOM_BRANDS_COLLECTION), snapshot => {

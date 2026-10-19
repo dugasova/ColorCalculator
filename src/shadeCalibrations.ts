@@ -23,7 +23,7 @@ export function subscribeToShadeCalibrations(
 
 // Deterministic doc id (shadeCalibrationId) -- recalibrating the same shade overwrites
 // its one document instead of accumulating duplicates, same rationale as
-// stock.ts's setShadeStockGrams.
+// stock/firestore.ts's setShadeStockGrams.
 export async function setShadeCalibration(brandId: BrandId, line: string | null, code: string, lab: Lab): Promise<void> {
   await settleWrite(setDoc(doc(db, SHADE_CALIBRATIONS_COLLECTION, shadeCalibrationId(brandId, line, code)), {
     brandId, line, code, lab,

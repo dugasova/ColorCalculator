@@ -253,7 +253,7 @@ export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetail
 // not just different client-side filtering of the same fetch.
 // Live query instead of a one-shot read so an entry saved on another device (the salon's
 // web browser, another stylist's phone) shows up in an already-open History/Analytics
-// screen without a reload -- same pattern as stock.ts's subscribeToStock. Scope rules
+// screen without a reload -- same pattern as stock/firestore.ts's subscribeToStock. Scope rules
 // are identical to the previous one-shot read: a non-admin's query MUST stay constrained
 // to their own `appliedBy`, or firestore.rules rejects the whole listen.
 export function subscribeToFormulaHistory(

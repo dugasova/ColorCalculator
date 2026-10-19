@@ -23,7 +23,7 @@ export const shadeCalibrationSchema: z.ZodType<Omit<ShadeCalibration, "id">> = z
 });
 
 // Deterministic doc id, same format/rationale as palette.ts's disableOverrideId and
-// stock.ts's shadeStockId: a recalibration overwrites the same document instead of
+// stock/products.ts's shadeStockId: a recalibration overwrites the same document instead of
 // accumulating duplicates, and every part is URI-encoded since Firestore document ids
 // can't contain "/" (several Wella codes do, e.g. "5/41").
 export function shadeCalibrationId(brandId: BrandId, line: string | null, code: string): string {
