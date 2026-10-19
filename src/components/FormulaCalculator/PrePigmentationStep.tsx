@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
+import "./PrePigmentationStep.css";
 
 export interface PrePigmentationStepProps {
   targetLevel: Level;

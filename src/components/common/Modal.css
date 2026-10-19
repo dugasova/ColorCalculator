@@ -13,7 +13,7 @@
 }
 
 .modal {
-  /* Re-declares FormulaCalculator.css's `.calculator` aliases -- see Modal.tsx's comment
+  /* Re-declares src/styles/layout.css's `.calculator` aliases -- see Modal.tsx's comment
      for why: content portaled here (e.g. SessionDetailsPanel's `.field`s) needs them and
      can't inherit from `.calculator`, which this isn't a descendant of. */
   --ink: var(--brand-ink);

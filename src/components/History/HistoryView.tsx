@@ -11,7 +11,6 @@ import { RevisitReminders } from "./RevisitReminders";
 import { EditEntryModal } from "./EditEntryModal";
 import { Modal } from "../common/Modal";
 import { ZoneProgressPreview } from "../common/ZoneProgressPreview";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./HistoryView.css";
 
 export interface HistoryViewProps {

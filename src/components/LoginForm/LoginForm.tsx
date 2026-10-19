@@ -8,7 +8,6 @@ import { SALON_INVITE_CODE } from "../../inviteCode";
 import { trackEvent } from "../../productAnalytics";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
 import { PasswordInput } from "../common/PasswordInput";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./LoginForm.css";
 
 type Mode = "sign-in" | "sign-up";

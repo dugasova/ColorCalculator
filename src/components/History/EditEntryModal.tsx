@@ -4,6 +4,7 @@ import { updateHistoryEntryDetails, type FormulaHistoryEntry, type HistoryEntryD
 import { isPatchTestSufficient } from "../../patchTest";
 import { usePhotoUpload, type PhotoUpload } from "../FormulaCalculator/usePhotoUpload";
 import { Modal } from "../common/Modal";
+import "../FormulaCalculator/clientDetails.css";
 
 export interface EditEntryModalProps {
   entry: FormulaHistoryEntry;

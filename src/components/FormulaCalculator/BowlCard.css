@@ -1,6 +1,6 @@
 /* Big-print card meant to be read at arm's length next to the mixing bowl, not squinted
    at on a phone -- every value here is deliberately oversized compared to the rest of the
-   app's UI (see FormulaCalculator.css's normal 0.85-1rem body text). */
+   app's UI (see the shared src/styles/ sheets' normal 0.85-1rem body text). */
 .bowl-card {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,7 @@
 import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
+import "./fields.css";
 
 export interface BlendComponentFieldProps {
   label: string;

@@ -8,7 +8,6 @@ import { useMembership } from "../../roles";
 import { ensureAccessRequest, type AccessRequestStatus } from "../../accessRequests";
 import { trackEvent } from "../../productAnalytics";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "../LoginForm/LoginForm.css";
 import "../VerifyEmail/VerifyEmailScreen.css";
 

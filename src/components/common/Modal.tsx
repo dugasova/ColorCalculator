@@ -18,7 +18,7 @@ export interface ModalProps {
 // tree. Follows the WAI-ARIA dialog pattern: focus moves to the dialog on open and back to
 // whatever triggered it on close, Tab is trapped inside while open, and Escape or a click
 // on the backdrop closes it. `.modal` re-declares the same --ink/--muted/--field-bg/etc.
-// aliases `.calculator` sets in FormulaCalculator.css -- the portal renders as a sibling of
+// aliases `.calculator` sets in src/styles/layout.css -- the portal renders as a sibling of
 // `.calculator`, not a descendant, so shared classes like `.field` used inside a modal
 // (see SessionDetailsPanel) would otherwise resolve those custom properties to nothing.
 

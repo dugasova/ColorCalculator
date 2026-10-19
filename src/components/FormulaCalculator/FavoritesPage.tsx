@@ -10,7 +10,7 @@ import {
   type FavoriteFormula,
   type FavoriteFormulaRecipe,
 } from "../../favoriteFormulas";
-import "./FormulaCalculator.css";
+import "./FavoritesPage.css";
 
 export interface FavoritesPageProps {
   appliedBy: string;

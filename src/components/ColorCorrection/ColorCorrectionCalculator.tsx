@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateColorCorrection, calculateCorrectorGrams, type UnwantedTone } from "../../engine/correction";
 import { LevelField } from "../common/LevelField";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./ColorCorrectionCalculator.css";
 import { NeutralizationWheel } from "./NeutralizationWheel";
 import { TONES, TONE_COLORS } from "./toneColors";

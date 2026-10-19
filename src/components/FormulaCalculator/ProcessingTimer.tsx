@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import "./ProcessingTimer.css";
 
 export interface ProcessingTimerProps {
   minutes: number;

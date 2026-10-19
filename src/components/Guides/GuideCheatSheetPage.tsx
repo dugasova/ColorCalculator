@@ -1,7 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TECHNIQUE_GUIDE_IDS, hasTechniqueGuide } from "../../techniqueGuides";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "../BrandNotes/BrandNotes.css";
 
 // One technique's short reference cheat sheet -- reached via the "Reference" nav tab

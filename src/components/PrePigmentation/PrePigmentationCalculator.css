@@ -5,7 +5,7 @@
   line-height: 1.4;
 }
 
-/* The shared .calculator--wide layout (FormulaCalculator.css) splits into a
+/* The shared .calculator--wide layout (src/styles/layout.css) splits into a
    minmax(320px,400px) + 1fr grid at this breakpoint, matching a form on the left with
    results in the right column -- unlike that layout, pre-pigmentation's results (the
    need tier, filler step, and target-color step) read better as one continuous report

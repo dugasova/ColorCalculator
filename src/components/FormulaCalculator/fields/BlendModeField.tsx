@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import "./fields.css";
 
 export interface BlendModeFieldProps {
   substituteBlend: boolean;

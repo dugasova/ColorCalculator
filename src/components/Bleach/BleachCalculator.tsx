@@ -6,7 +6,6 @@ import { calculateProductCost, calculateRecommendedServicePrice } from "../../en
 import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { useSalonMarkupMultiplier } from "../../palette";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./BleachCalculator.css";
 
 // Rough per-gram cost of generic bleach powder; fully editable below, mirrors

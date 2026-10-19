@@ -13,6 +13,7 @@ import { usePalette, useShadeCalibrationIndex } from "../../palette";
 import { Modal } from "../common/Modal";
 import { PhotoSampler } from "./PhotoSampler";
 import "./PhotoEstimate.css";
+import "../FormulaCalculator/fields/fields.css";
 
 export type PhotoEstimateProps =
   | { mode: "startLevel"; onApplyLevel: (level: Level) => void; idSuffix?: string }

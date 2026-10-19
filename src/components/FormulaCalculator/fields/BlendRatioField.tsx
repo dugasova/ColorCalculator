@@ -3,6 +3,7 @@ import clsx from "clsx";
 import type { Shade } from "../../../engine/shades";
 import { splitShadeBlend } from "../../../engine/formula";
 import { blendShadeHexColors } from "../../../engine/color";
+import "./fields.css";
 
 export interface BlendRatioFieldProps {
   shadeA: Shade;

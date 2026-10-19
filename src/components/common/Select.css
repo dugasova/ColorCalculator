@@ -1,6 +1,6 @@
 /* Custom listbox replacing the native <select>. Reuses the same field surface tokens
    (--ink, --muted, --gold, --field-bg, --border-field, --surface) the rest of the
-   calculator's form controls use — see FormulaCalculator.css .field input/textarea —
+   calculator's form controls use — see src/styles/forms.css .field input/textarea —
    so it reads as part of the same design instead of a bolted-on widget. */
 
 .select {

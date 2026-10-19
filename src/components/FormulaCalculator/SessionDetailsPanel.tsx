@@ -11,6 +11,7 @@ import { usePhotoUpload } from "./usePhotoUpload";
 import { useClientLink } from "./useClientLink";
 import { ClientDetailsModal } from "./ClientDetailsModal";
 import { trackEvent } from "../../productAnalytics";
+import "./clientDetails.css";
 
 export interface SessionDetails {
   clientName: string;

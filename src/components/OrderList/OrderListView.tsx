@@ -7,7 +7,6 @@ import { formatLineLabel } from "../../engine/formatLineLabel";
 import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { Select } from "../common/Select";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "../PaletteAdmin/PaletteAdminView.css";
 
 const COPIED_FEEDBACK_MS = 1500;

@@ -6,6 +6,7 @@ import { Capacitor } from "@capacitor/core";
 import { indexedDBLocalPersistence, setPersistence } from "firebase/auth";
 import "./i18n";
 import "./index.css";
+import "./styles/calculator.css";
 import App from "./App.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary/ErrorBoundary";
 import { auth } from "./firebase";

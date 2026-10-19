@@ -8,7 +8,6 @@ import { BrandShadeList } from "./BrandShadeList";
 import { BrandStockList } from "./BrandStockList";
 import { AddShadeForm } from "./AddShadeForm";
 import { PricingSettingsForm } from "./PricingSettingsForm";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./PaletteAdminView.css";
 
 // Three independent admin tasks over the shared brand/shade catalog (see palette.ts):

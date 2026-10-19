@@ -11,7 +11,6 @@ import {
 import { auth } from "../../firebase";
 import { Modal } from "../common/Modal";
 import { PasswordInput } from "../common/PasswordInput";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./ChangePasswordModal.css";
 
 export interface ChangePasswordModalProps {

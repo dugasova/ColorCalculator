@@ -4,6 +4,7 @@ import { toWhatsAppPhone } from "../../reminder";
 import type { ClientLink } from "./useClientLink";
 import type { PhotoUpload } from "./usePhotoUpload";
 import type { SaveState } from "./SessionDetailsPanel";
+import "./clientDetails.css";
 
 export interface ClientDetailsModalProps {
   onClose: () => void;

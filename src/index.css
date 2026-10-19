@@ -33,7 +33,7 @@
   /* Small-text status/quality/brand colors placed directly on a plain or lightly-tinted
      surface (corrective-note chips, cross-brand match quality labels, WhatsApp/Telegram
      share buttons) -- each already WCAG-AA-tuned against a *light* surface (see the
-     WhatsApp/Telegram darkening note in FormulaCalculator.css); parametrized so the dark
+     WhatsApp/Telegram darkening note in src/styles/results.css); parametrized so the dark
      theme below can lighten them to keep clearing AA once the surface underneath flips. */
   --status-warning-ink: #9a3412;
   --brand-danger: #dc2626;

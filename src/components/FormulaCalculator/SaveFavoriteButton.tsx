@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Modal } from "../common/Modal";
 import type { Brand, BrandId } from "../../engine/brands";
 import { createFavoriteFormula, defaultFavoriteName, type FavoriteFormulaRecipe } from "../../favoriteFormulas";
+import "./FavoritesPage.css";
 
 export interface SaveFavoriteButtonProps {
   appliedBy: string;

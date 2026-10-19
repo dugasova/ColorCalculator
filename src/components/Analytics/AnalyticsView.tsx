@@ -4,7 +4,6 @@ import { subscribeToFormulaHistory, type FormulaHistoryEntry } from "../../histo
 import { computeSalonAnalytics, computeStylistStats, filterEntriesByPeriod, ANALYTICS_PERIODS, type AnalyticsPeriod } from "../../analytics";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import { Select } from "../common/Select";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./AnalyticsView.css";
 
 const TOP_SHADES_LIMIT = 8;

@@ -1,0 +1,108 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field__hint {
+  margin: -4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.field input:not([type="checkbox"]),
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-field);
+  border-radius: 0.65rem;
+  background: var(--field-bg);
+  color: var(--ink);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input:not([type="checkbox"]):focus,
+.field textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.shade-swatch {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border-field), 0 2px 6px -2px rgba(22, 18, 31, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.shade-swatch:hover {
+  transform: scale(1.08);
+}
+
+.processing-time-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.processing-time-hint button {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--gold-ink);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Reusable plain-link button -- same treatment as `.processing-time-hint button`
+   above, pulled out as a class so LoginForm's "Forgot password?",
+   ChangePasswordModal's "Forgot your current password?" and the client/history modals
+   can share it instead of each declaring their own copy. */
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gold-ink);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.forgot-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: -4px;
+}

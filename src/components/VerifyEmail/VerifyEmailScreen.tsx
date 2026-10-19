@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { sendEmailVerification, reload, getIdToken, signOut, type User } from "firebase/auth";
 import { auth } from "../../firebase";
 import { LanguageSwitcher } from "../LanguageSwitcher/LanguageSwitcher";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "../LoginForm/LoginForm.css";
 import "./VerifyEmailScreen.css";
 

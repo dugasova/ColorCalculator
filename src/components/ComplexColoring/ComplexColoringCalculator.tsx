@@ -12,7 +12,6 @@ import { BleachStepCard } from "./BleachStepCard";
 import { ZoneProgressPreview } from "../common/ZoneProgressPreview";
 import { StockShortageWarnings } from "../common/StockShortageWarnings";
 import { findStockShortages } from "../../stock";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "../Bleach/BleachCalculator.css";
 import "./ComplexColoringCalculator.css";
 

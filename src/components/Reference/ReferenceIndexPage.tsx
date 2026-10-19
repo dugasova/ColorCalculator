@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BRAND_CHEAT_SHEET_IDS } from "../../brandCheatSheets";
 import { TECHNIQUE_GUIDE_IDS } from "../../techniqueGuides";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "../BrandNotes/BrandNotes.css";
 
 // Landing page for the single "Reference" nav tab -- both brand mixing/processing cheat

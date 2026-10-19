@@ -9,8 +9,8 @@ import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./PrePigmentationCalculator.css";
+import "../FormulaCalculator/PrePigmentationStep.css";
 
 export function PrePigmentationCalculator() {
   const { t } = useTranslation();

@@ -4,6 +4,7 @@ import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
 import { PhotoEstimate } from "../../PhotoAnalysis/PhotoEstimate";
+import "./fields.css";
 
 export interface ShadeFieldProps {
   brandId: BrandId;

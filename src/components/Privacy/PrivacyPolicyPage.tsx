@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import "../FormulaCalculator/FormulaCalculator.css";
 
 // Set per deployment via `.env`'s VITE_FEEDBACK_URL (see .env.example and
 // AccountMenu.tsx's identical constant) -- e.g. the salon owner's Telegram or a mailto:

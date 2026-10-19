@@ -4,6 +4,7 @@ import type { Shade } from "../../../engine/shades";
 import type { Brand, BrandId } from "../../../engine/brands";
 import { shadeToHexColor } from "../../../engine/color";
 import { findClosestShadeByBrand, describeShadeMatchQuality, getLinePermanence } from "../../../engine/shadeMatch";
+import "./fields.css";
 
 export interface CrossBrandMatchFieldProps {
   targetShade: Shade;

@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { PrePigmentationNeed } from "../../../engine/prePigmentation";
+import "./fields.css";
+import "../PrePigmentationStep.css";
 
 export interface PrePigmentationFieldProps {
   need: PrePigmentationNeed;

@@ -1,7 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BRAND_CHEAT_SHEET_IDS, hasBrandCheatSheet } from "../../brandCheatSheets";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./BrandNotes.css";
 
 // One brand's short mixing/processing cheat sheet -- reached either via the "Reference"

@@ -1,0 +1,9 @@
+/* Shared calculator look used by every screen (calculators, history, auth, admin pages).
+   Imported once from main.tsx, right after index.css and before any component, so
+   component stylesheets -- loaded later, often from lazy route chunks -- can override
+   these rules at equal specificity without depending on import order. Component-only
+   styles live next to their component, not here. */
+@import "./layout.css";
+@import "./forms.css";
+@import "./feedback.css";
+@import "./results.css";

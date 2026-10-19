@@ -7,7 +7,6 @@ import {
   type AccessRequest,
 } from "../../accessRequests";
 import { trackEvent } from "../../productAnalytics";
-import "../FormulaCalculator/FormulaCalculator.css";
 import "./TeamView.css";
 
 // Admin-only screen (see AuthenticatedApp's `view === "team" && isAdmin` gate, mirroring
