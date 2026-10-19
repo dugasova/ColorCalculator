@@ -15,7 +15,7 @@ import { useHairCanvasState } from "./useHairCanvasState";
 // calculateFullFormula/applyAdditionalShade are pure functions that build a fresh object
 // literal on every call, so without memoization `result`/`grams`/`effectiveResult` would
 // get a brand-new identity on every render even when nothing actually changed.
-// ColorStepCard's "report the computed step up" effect (see ColorStepCard.tsx) depends
+// ColorStepCard's "report the computed step up" effect (see useColorStepReport) depends
 // on `effectiveResult`'s identity -- an unmemoized new object every render fires that
 // effect every render, which calls the parent's setState, which re-renders this hook,
 // which produces yet another new object: an infinite "Maximum update depth exceeded"
@@ -106,8 +106,9 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   // real palette change gives it a new one), so this only recomputes when the brand/line
   // selection or the palette itself actually changes -- an unmemoized `.filter().sort()`
   // would return a brand-new array every render, which is exactly the kind of unstable
-  // identity a caller's own memoized derivation (e.g. ColorStepCard's prePigmentationResult,
-  // via useComputedFullFormula's own identical concern above) can't safely depend on.
+  // identity a caller's own memoized derivation (e.g. useColorStepReport's
+  // prePigmentationResult, via useComputedFullFormula's own identical concern above) can't
+  // safely depend on.
   const lineShades = useMemo(
     () => brands[brandId].shades.filter(s => (s.line ?? null) === line).sort(compareShadesForDisplay),
     [brands, brandId, line]
@@ -255,3 +256,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     handleAdditionalShadeCodeChange,
   };
 }
+
+// Everything useShadeFormulaState returns -- lets a layering hook (see
+// ComplexColoring/useColorStepReport) take the whole formula state as one parameter.
+export type ShadeFormulaState = ReturnType<typeof useShadeFormulaState>;

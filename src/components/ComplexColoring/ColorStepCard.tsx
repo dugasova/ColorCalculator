@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePalette } from "../../palette";
-const DEFAULT_PRICE_PER_GRAM = 0.18;
 import { useShadeFormulaState } from "../FormulaCalculator/useShadeFormulaState";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
@@ -19,10 +18,12 @@ import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../engine/formatFormula";
-import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
 import type { ColorHistoryStep, ColorStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
+import { useColorStepReport } from "./useColorStepReport";
+
+const DEFAULT_PRICE_PER_GRAM = 0.18;
 
 export interface ColorStepCardProps {
   stepId: string;
@@ -63,6 +64,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
   const [startingBase, setStartingBase] = useState<StartingBase>(seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" });
   const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(seed?.prePigmentationEnabled ?? false);
 
+  const formula = useShadeFormulaState({ brands, initialCanvas: seed?.canvas ?? inheritedOnMount?.canvas, initial: seed });
   const {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
@@ -70,8 +72,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     thickness, setThickness,
     chemicalHistory, setChemicalHistory,
     targetShadeCode,
-    applicationZone,
-    totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode, colorGrams, setColorGrams, effectiveTotalGrams,
+    totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode, colorGrams, setColorGrams,
     brandId,
     line,
     manualDeveloperVolume, setManualDeveloperVolume,
@@ -90,14 +91,16 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     additionalShade,
     additionalShade2,
     grams,
-    effectiveResult,
     processingMinutes,
 
     handleBrandIdChange,
     handleLineChange,
     handleTargetShadeCodeChange,
     handleAdditionalShadeCodeChange,
-  } = useShadeFormulaState({ brands, initialCanvas: seed?.canvas ?? inheritedOnMount?.canvas, initial: seed });
+  } = formula;
+  const { prePigmentationNeed, prePigmentationResult } = useColorStepReport({
+    brands, formula, strandZone, startingBase, pricePerGram, prePigmentationEnabled, onChange,
+  });
 
   // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
   // -- an imperative one-shot default, not an ongoing sync, so it never overwrites values
@@ -110,59 +113,6 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
       applyInheritedZoneState(inherited, { setStartingBase, setPorosity, setThickness, setChemicalHistory });
     }
   };
-
-  // Reevaluated from startLevel/targetShade every render, matched against this step's
-  // own selected line (lineShades) -- same derivation as FormulaCalculator's
-  // useFormulaCalculatorState, just inlined here since ColorStepCard doesn't otherwise
-  // use that hook. Gated on prePigmentationEnabled so toggling the checkbox off drops
-  // the filler step from both this card and the combined session text/save payload.
-  // Memoized (unlike useFormulaCalculatorState's own unmemoized version, which has no
-  // reporting effect depending on it): calculatePrePigmentation builds a fresh object
-  // literal every call, and this result sits in the "report computed step up" effect's
-  // dependency array below (see useComputedFullFormula's own identical comment) -- an
-  // unmemoized new object every render would fire that effect every render, which calls
-  // the parent's setState, which re-renders this card, which produces yet another new
-  // object: infinite "Maximum update depth exceeded" the moment prePigmentation turns on.
-  const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
-  const prePigmentationResult = useMemo(
-    () => (prePigmentationEnabled && prePigmentationNeed !== "none"
-      ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
-      : null),
-    [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, effectiveTotalGrams, lineShades]
-  );
-
-  // Report the computed step up on every change — the parent aggregates all steps'
-  // totals (time, cost) and builds the combined recipe text/save payload from them.
-  useEffect(() => {
-    const stepData: ColorHistoryStep = {
-      kind: "color",
-      brandId,
-      brandName: brands[brandId].name,
-      line,
-      targetShade,
-      startLevel,
-      grayPercent,
-      canvas: { porosity, thickness, chemicalHistory },
-      applicationZone,
-      strandZone,
-      startingBase,
-      result: effectiveResult,
-      additionalShade,
-      additionalShadeGrams: additionalShade !== null ? additionalShadeGrams : null,
-      additionalShade2,
-      additionalShade2Grams: additionalShade2 !== null ? additionalShade2Grams : null,
-      blend: null,
-      prePigmentation: prePigmentationResult,
-      neutralizationApplied,
-      processingMinutes,
-      pricePerGram,
-    };
-    onChange(stepData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    brandId, applicationZone, strandZone, startingBase, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
-    porosity, thickness, chemicalHistory, prePigmentationResult
-  ]);
 
   return (
     <div className="step-card">

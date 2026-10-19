@@ -18,8 +18,8 @@ afterEach(cleanup);
 
 describe("ComplexColoringCalculator", () => {
   // Regression: useShadeFormulaState's `result`/`effectiveResult` used to be plain
-  // (unmemoized) object literals rebuilt on every render. ColorStepCard's "report the
-  // computed step up" effect depends on `effectiveResult`'s identity, so a brand-new
+  // (unmemoized) object literals rebuilt on every render. useColorStepReport's "report
+  // the computed step up" effect depends on `effectiveResult`'s identity, so a brand-new
   // object every render fired that effect every render -- which calls this component's
   // setComputedSteps, which re-renders every ColorStepCard, which rebuilds another new
   // object, forever: "Maximum update depth exceeded" the instant a color step mounted.
@@ -47,7 +47,7 @@ describe("ComplexColoringCalculator", () => {
   });
 
   // Regression: calculatePrePigmentation built a fresh object literal every render, fed
-  // straight into ColorStepCard's own "report the computed step up" effect deps
+  // straight into useColorStepReport's "report the computed step up" effect deps
   // unmemoized -- same "Maximum update depth exceeded" failure mode as the
   // effectiveResult regression above, triggered specifically by opting into the
   // pre-pigmentation checkbox (calculatePrePigmentation only runs once enabled).
