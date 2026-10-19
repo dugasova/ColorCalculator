@@ -50,3 +50,7 @@ export function useActualGramsEditor(setEntries: Dispatch<SetStateAction<Formula
 
   return { gramsDrafts, savingGramsKey, gramsError, handleActualGramsChange, handleActualGramsBlur };
 }
+
+// Everything useActualGramsEditor returns -- passed down as one prop to the visit cards
+// that render the actual-grams inputs (see HistoryEntryCard).
+export type ActualGramsEditor = ReturnType<typeof useActualGramsEditor>;
