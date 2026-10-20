@@ -61,6 +61,10 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       sourcemap: uploadSourceMaps ? 'hidden' : false,
+      // The only chunk over Vite's 500 kB default is vendor-firebase-firestore (~545 kB,
+      // ~160 kB gzip) -- the Firestore SDK itself, already isolated in its own chunk and not
+      // splittable further. firestore/lite would be smaller but has no onSnapshot/offline cache.
+      chunkSizeWarningLimit: 600,
       rolldownOptions: {
         output: {
           codeSplitting: {
