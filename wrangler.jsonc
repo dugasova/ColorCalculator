@@ -1,0 +1,10 @@
+{
+  "name": "huemix",
+  "compatibility_date": "2026-10-01",
+  // Static SPA: serve the Vite build as-is. Unknown paths fall back to index.html so
+  // bookmarkable client-side routes survive a reload -- same as firebase.json's rewrite.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
