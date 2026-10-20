@@ -38,6 +38,8 @@ export interface FormulaFormValues {
   blendPrimaryPercent: number;
   neutralizationApplied: boolean;
   prePigmentationEnabled: boolean;
+  grayNaturalApplied: boolean;
+  naturalBaseShadeCode: string | null;
 }
 
 export type FormulaFormSetters = { [K in keyof FormulaFormValues]: (value: FormulaFormValues[K]) => void };
@@ -76,12 +78,15 @@ export function repeatRequestToFormValues(request: RepeatFormulaRequest): Formul
     blendPrimaryPercent: request.blendPrimaryPercent,
     neutralizationApplied: false,
     prePigmentationEnabled: request.prePigmentationEnabled,
+    grayNaturalApplied: request.grayNaturalApplied ?? false,
+    naturalBaseShadeCode: request.naturalBaseShadeCode ?? null,
   };
 }
 
 // A saved favorite's recipe (src/favoriteFormulas.ts). Deliberately never touches
-// startLevel/grayPercent/canvas/markup/pre-pigmentation: a favorite is a shade+mix recipe
-// to reuse for the client *already* on screen, not a whole past session to restore. Resets
+// startLevel/grayPercent/canvas/markup/pre-pigmentation/gray natural base (it follows the
+// client's gray %): a favorite is a shade+mix recipe to reuse for the client *already* on
+// screen, not a whole past session to restore. Resets
 // the manual price/service-price overrides exactly like handleBrandIdChange does, so price
 // re-derives from the (possibly new) brand -- those two keys are present with `undefined`
 // on purpose, see applyFormValues.

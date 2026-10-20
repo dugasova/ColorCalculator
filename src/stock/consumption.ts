@@ -15,11 +15,12 @@ import { stockById } from "./reorder";
 //    real component shades; the target shade itself is never charged -- it isn't a
 //    physical product in that case (see ColorBlend's own comment in history/types.ts).
 //  - Otherwise the primary target shade is charged `colorGrams` minus whatever discretionary
-//    additional shade(s) were blended on top of it (those are charged separately to their
-//    own shade ids) -- the same subtraction buildMixSummary does to report the primary
-//    shade's own share.
-//  - The gray-coverage natural-base share of colorGrams and any corrector grams are never
-//    charged: neither is tied to a specific product code in the saved data.
+//    additional shade(s) were blended on top of it and any gray-coverage natural base
+//    carved out of it (those are charged separately to their own shade ids) -- the same
+//    subtraction buildMixSummary does to report the primary shade's own share.
+//  - A gray-coverage natural base the colorist opted into (`naturalBase`) is charged to its
+//    own natural shade, with or without a blend. Corrector grams are never charged: they
+//    aren't tied to a specific product code in the saved data.
 //  - Developer is charged by (brandId, line, developerVolume) whenever a developer volume
 //    was actually used -- `line` only changes the resulting bucket for the handful of
 //    chemically-distinct-developer lines in products.ts's SEPARATE_DEVELOPER_LINES (INOA,
@@ -53,7 +54,11 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
     const { brandId, line, targetShade, blend, additionalShade, additionalShade2, result } = step;
     const additionalShadeGrams = step.additionalShadeGrams ?? 0;
     const additionalShade2Grams = step.additionalShade2Grams ?? 0;
+    const naturalBase = step.naturalBase ?? null;
 
+    if (naturalBase !== null) {
+      addScaled(shadeStockId(brandId, naturalBase.shade.line ?? null, naturalBase.shade.code), "shade", naturalBase.shade.code, naturalBase.grams);
+    }
     if (blend !== null) {
       addScaled(shadeStockId(brandId, blend.shadeA.line ?? null, blend.shadeA.code), "shade", blend.shadeA.code, blend.shadeAGrams);
       addScaled(shadeStockId(brandId, blend.shadeB.line ?? null, blend.shadeB.code), "shade", blend.shadeB.code, blend.shadeBGrams);
@@ -61,6 +66,7 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
       const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
       const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && additionalShade2Grams > 0;
       const primaryGrams = grams.colorGrams
+        - (naturalBase?.grams ?? 0)
         - (hasAdditional ? additionalShadeGrams : 0)
         - (hasAdditional2 ? additionalShade2Grams : 0);
       addScaled(shadeStockId(brandId, targetShade.line ?? null, targetShade.code), "shade", targetShade.code, primaryGrams);

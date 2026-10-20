@@ -63,6 +63,7 @@ export type ShadeFormulaSeed = Pick<ColorStepSeed,
   | "brandId" | "line" | "targetShadeCode" | "startLevel" | "grayPercent" | "totalGrams" | "colorGrams"
   | "manualDeveloperVolume" | "manualMixingRatio" | "processingMinutes"
   | "additionalShadeCode" | "additionalShadeGrams" | "additionalShade2Code" | "additionalShade2Grams"
+  | "grayNaturalApplied" | "naturalBaseShadeCode"
 >;
 
 // The brand/line/shade selection, developer/application/gram overrides, additional-shade
@@ -102,8 +103,8 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
   // Gray-coverage natural base (see GrayNaturalField): whether to dose it in, and the
   // colorist's own pick among the candidates -- null means "use the default candidate".
-  const [grayNaturalApplied, setGrayNaturalApplied] = useState(false);
-  const [naturalBaseShadeCode, setNaturalBaseShadeCode] = useState<string | null>(null);
+  const [grayNaturalApplied, setGrayNaturalApplied] = useState(initial?.grayNaturalApplied ?? false);
+  const [naturalBaseShadeCode, setNaturalBaseShadeCode] = useState<string | null>(initial?.naturalBaseShadeCode ?? null);
 
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
   // Memoized: `brands[brandId].shades` is a stable array reference from context (only a

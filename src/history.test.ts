@@ -121,6 +121,14 @@ describe("normalizeHistoryEntry", () => {
 });
 
 describe("buildRepeatFormulaRequest", () => {
+  it("restores the gray-coverage natural base choice (on/off and picked shade), not its grams", () => {
+    const natural = { code: "7.0", level: 7 as const, tone: "natural" as const };
+    const withNatural = buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [makeColorStep({ naturalBase: { shade: natural, grams: 10 } })] }), BRANDS);
+    expect(withNatural).toMatchObject({ grayNaturalApplied: true, naturalBaseShadeCode: "7.0" });
+    const legacy = buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [makeColorStep()] }), BRANDS);
+    expect(legacy).toMatchObject({ grayNaturalApplied: false, naturalBaseShadeCode: null });
+  });
+
   it("reconstructs calculator state for a single-color-step entry", () => {
     const entry = makeEntry({ clientName: "Anna", steps: [makeColorStep()] });
     const request = buildRepeatFormulaRequest(entry, BRANDS);

@@ -1,7 +1,7 @@
 import type { Timestamp } from "firebase/firestore";
 import type { Shade } from "../engine/shades";
 import type { Level } from "../engine/levels";
-import type { FullFormula } from "../engine/formula";
+import type { FullFormula, NaturalBase } from "../engine/formula";
 import type { BleachFormula } from "../engine/bleach";
 import type { PrePigmentationResult } from "../engine/prePigmentation";
 import type { ApplicationZone } from "../engine/applicationZone";
@@ -55,6 +55,11 @@ export interface ColorHistoryStep {
   // drop didn't warrant it.
   prePigmentation: PrePigmentationResult | null;
   neutralizationApplied: boolean;
+  // The gray-coverage natural shade the colorist opted to dose in (see GrayNaturalField),
+  // carved out of the base color weight rather than added on top -- `result.grams` is
+  // unchanged by it. Absent on every step saved before this option existed and null when
+  // it was off: both mean "no natural base", exactly as the formula was before.
+  naturalBase?: NaturalBase | null;
   processingMinutes: number;
   pricePerGram: number;
   // What the colorist actually weighed out of dye for this step, entered in History after

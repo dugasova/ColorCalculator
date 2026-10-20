@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { renderHook, cleanup } from "@testing-library/react";
+import { renderHook, cleanup, act } from "@testing-library/react";
 import { BRANDS } from "../../engine/brands";
 import type { StartingBase } from "../../engine/startingBase";
 import type { ColorHistoryStep } from "../../history";
@@ -63,5 +63,30 @@ describe("useColorStepReport", () => {
     const { rerender } = renderReport({ pricePerGram: 0.18, prePigmentationEnabled: false, onChange });
     rerender({ pricePerGram: 0.25, prePigmentationEnabled: false, onChange });
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ pricePerGram: 0.25 }));
+  });
+
+  it("reports the gray-coverage natural base once opted in, without re-reporting on an unchanged re-render", () => {
+    const onChange = vi.fn();
+    const { result, rerender } = renderHook(({ onChange: report }: { onChange: (step: ColorHistoryStep) => void }) => {
+      const formula = useShadeFormulaState({ brands: BRANDS });
+      useColorStepReport({
+        brands: BRANDS, formula, strandZone: "full-head", startingBase: STARTING_BASE,
+        pricePerGram: 0.18, prePigmentationEnabled: false, onChange: report,
+      });
+      return formula;
+    }, { initialProps: { onChange } });
+
+    act(() => {
+      result.current.handleTargetShadeCodeChange("7.1");
+      result.current.setGrayPercent(40);
+      result.current.setGrayNaturalApplied(true);
+    });
+    const lastStep = onChange.mock.lastCall![0] as ColorHistoryStep;
+    expect(lastStep.naturalBase?.shade.code).toBe("7.0");
+    expect(lastStep.naturalBase?.grams).toBeCloseTo(lastStep.result.grams!.colorGrams / 3);
+
+    const callsBefore = onChange.mock.calls.length;
+    rerender({ onChange });
+    expect(onChange).toHaveBeenCalledTimes(callsBefore);
   });
 });

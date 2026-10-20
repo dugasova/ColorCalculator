@@ -1,4 +1,4 @@
-import type { FullFormula } from "../../engine/formula";
+import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
@@ -30,6 +30,7 @@ export interface FormulaSaveParams {
   additionalShade2?: Shade | null;
   additionalShade2Grams?: number;
   blend: BlendSummary | null;
+  naturalBase: NaturalBase | null;
   prePigmentationResult: PrePigmentationResult | null;
   neutralizationApplied: boolean;
   appliedBy: string;
@@ -57,7 +58,7 @@ export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
   const {
     brandId, brandName, line, targetShade, startLevel, grayPercent, applicationZone,
     porosity, thickness, chemicalHistory, result, additionalShade, additionalShadeGrams,
-    additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied,
+    additionalShade2, additionalShade2Grams, blend, naturalBase, prePigmentationResult, neutralizationApplied,
     appliedBy, processingMinutes, pricePerGram, markupMultiplier, productCost, servicePrice,
   } = params;
 
@@ -79,6 +80,7 @@ export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
     blend,
     prePigmentation: prePigmentationResult,
     neutralizationApplied,
+    naturalBase,
     processingMinutes,
     pricePerGram,
   };

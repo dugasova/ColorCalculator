@@ -69,6 +69,7 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     blendModeEnabled: setBlendModeEnabled, blendShadeACode: setBlendShadeACode, blendShadeBCode: setBlendShadeBCode,
     blendPrimaryPercent: setBlendPrimaryPercent,
     neutralizationApplied: setNeutralizationApplied, prePigmentationEnabled: setPrePigmentationEnabled,
+    grayNaturalApplied: setGrayNaturalApplied, naturalBaseShadeCode: setNaturalBaseShadeCode,
   };
 
   // Replay a "Repeat formula" request from history right during render — this is React's

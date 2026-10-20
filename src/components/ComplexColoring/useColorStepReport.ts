@@ -29,7 +29,7 @@ export function useColorStepReport({
     brandId, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory,
     applicationZone, effectiveTotalGrams, lineShades, effectiveResult,
     additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams,
-    neutralizationApplied, processingMinutes,
+    neutralizationApplied, processingMinutes, naturalBase,
   } = formula;
 
   // Reevaluated from startLevel/targetShade every render, matched against this step's
@@ -82,6 +82,7 @@ export function useColorStepReport({
       blend: null,
       prePigmentation: prePigmentationResult,
       neutralizationApplied,
+      naturalBase,
       processingMinutes,
       pricePerGram,
     };
@@ -89,7 +90,7 @@ export function useColorStepReport({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     brandId, applicationZone, strandZone, startingBase, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
-    porosity, thickness, chemicalHistory, prePigmentationResult
+    porosity, thickness, chemicalHistory, prePigmentationResult, naturalBase
   ]);
 
   return { prePigmentationNeed, prePigmentationResult };

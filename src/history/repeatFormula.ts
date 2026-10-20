@@ -44,6 +44,11 @@ export interface RepeatFormulaRequest {
   // (see useFormulaCalculatorState), the same way every other field here is a raw input
   // rather than a frozen calculation.
   prePigmentationEnabled: boolean;
+  // Same contract for the gray-coverage natural base: only the choice (on/off plus the
+  // colorist's picked shade) is restored, its grams are recomputed live. Optional so a
+  // request built before this option existed still type-checks; absent means off.
+  grayNaturalApplied?: boolean;
+  naturalBaseShadeCode?: string | null;
 }
 
 // True for a plain single-color-step entry (FormulaCalculator never writes `strandZone`
@@ -131,6 +136,9 @@ export interface ColorStepSeed {
   processingMinutes: number;
   pricePerGram: number;
   prePigmentationEnabled: boolean;
+  // See RepeatFormulaRequest's own identical fields.
+  grayNaturalApplied?: boolean;
+  naturalBaseShadeCode?: string | null;
   canvas?: HairCanvas;
   strandZone?: StrandZone;
   startingBase?: StartingBase;
@@ -214,6 +222,8 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
     // `normalizeHistoryEntry` coerces this to `null` on the Firestore read path; kept
     // defensive here too since this reads whatever `entry.steps` the caller passed in.
     prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
+    grayNaturalApplied: (step.naturalBase ?? null) !== null,
+    naturalBaseShadeCode: step.naturalBase?.shade.code ?? null,
     processingMinutes: step.processingMinutes,
     applicationZone,
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,
@@ -260,6 +270,8 @@ export function buildRepeatSessionRequest(entry: FormulaHistoryEntry, brands: Re
         processingMinutes: step.processingMinutes,
         pricePerGram: step.pricePerGram ?? brand.pricePerGram,
         prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
+        grayNaturalApplied: (step.naturalBase ?? null) !== null,
+        naturalBaseShadeCode: step.naturalBase?.shade.code ?? null,
         canvas: step.canvas,
         strandZone: step.strandZone,
         startingBase: step.startingBase,

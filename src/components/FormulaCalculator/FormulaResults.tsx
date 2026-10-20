@@ -100,7 +100,7 @@ export function FormulaResults({
   const { shortages, handleSave } = useFormulaSave({
     brandId, brandName, line, targetShade, startLevel, grayPercent, applicationZone,
     porosity, thickness, chemicalHistory, result, additionalShade, additionalShadeGrams,
-    additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied,
+    additionalShade2, additionalShade2Grams, blend, naturalBase, prePigmentationResult, neutralizationApplied,
     appliedBy, processingMinutes, pricePerGram, markupMultiplier, productCost, servicePrice,
   });
 

@@ -111,6 +111,7 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
     additionalShade2Grams: step.additionalShade2Grams ?? 0,
     blend: step.blend ?? null,
     neutralizationApplied: step.neutralizationApplied,
+    naturalBase: step.naturalBase ?? null,
   });
 
   // `normalizeHistoryEntry` coerces this to `null` on the Firestore read path, but this

@@ -109,3 +109,25 @@ describe("findStockShortages", () => {
     expect(findStockShortages([makeColorStep()], [])).toEqual([]);
   });
 });
+
+describe("computeStockConsumption with a gray-coverage natural base", () => {
+  const natural: Shade = { code: "7/0", level: 7, tone: "natural", line: "Koleston Perfect" };
+
+  it("charges the natural base to its own shade and takes it out of the primary, keeping the total", () => {
+    const consumptions = computeStockConsumption([makeColorStep({ naturalBase: { shade: natural, grams: 10 } })]);
+    const byId = new Map(consumptions.map(c => [c.id, c]));
+    expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/1"))?.grams).toBe(20);
+    expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/0"))?.grams).toBe(10);
+  });
+
+  it("scales the natural base by a recorded actual figure like every other share", () => {
+    const consumptions = computeStockConsumption([makeColorStep({ naturalBase: { shade: natural, grams: 10 }, actualColorGrams: 45 })]);
+    const byId = new Map(consumptions.map(c => [c.id, c]));
+    expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/1"))?.grams).toBe(30);
+    expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/0"))?.grams).toBe(15);
+  });
+
+  it("charges nothing extra for a step saved before the option existed", () => {
+    expect(computeStockConsumption([makeColorStep({ naturalBase: undefined })])).toHaveLength(2);
+  });
+});

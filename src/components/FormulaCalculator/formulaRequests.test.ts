@@ -77,6 +77,12 @@ describe("repeatRequestToFormValues", () => {
     expect(repeatRequestToFormValues({ ...REPEAT, blendShadeACode: "7/0", blendShadeBCode: "7/11" }).blendModeEnabled).toBe(true);
   });
 
+  it("restores the gray-coverage natural base choice, defaulting a pre-existing request to off", () => {
+    expect(repeatRequestToFormValues({ ...REPEAT, grayNaturalApplied: true, naturalBaseShadeCode: "7/0" }))
+      .toMatchObject({ grayNaturalApplied: true, naturalBaseShadeCode: "7/0" });
+    expect(repeatRequestToFormValues(REPEAT)).toMatchObject({ grayNaturalApplied: false, naturalBaseShadeCode: null });
+  });
+
   it("restores pricing and processing time as manual overrides, and never re-applies neutralization", () => {
     expect(repeatRequestToFormValues(REPEAT)).toMatchObject({
       manualPricePerGram: 0.25, manualMarkupMultiplier: 3, manualServicePrice: 1200,
@@ -88,7 +94,10 @@ describe("repeatRequestToFormValues", () => {
 describe("applyFavoriteRecipe", () => {
   it("never touches the on-screen client's diagnostics, markup or pre-pigmentation", () => {
     const values = applyFavoriteRecipe(RECIPE);
-    for (const key of ["startLevel", "grayPercent", "porosity", "thickness", "chemicalHistory", "manualMarkupMultiplier", "prePigmentationEnabled"]) {
+    for (const key of [
+      "startLevel", "grayPercent", "porosity", "thickness", "chemicalHistory", "manualMarkupMultiplier", "prePigmentationEnabled",
+      "grayNaturalApplied", "naturalBaseShadeCode",
+    ]) {
       expect(values).not.toHaveProperty(key);
     }
   });
