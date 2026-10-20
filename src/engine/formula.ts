@@ -165,6 +165,51 @@ export function splitShadeBlend(colorGrams: number, primaryPercent: number): Sha
   };
 }
 
+// The natural shade actually dosed into a formula for gray coverage, and its grams --
+// already carved out of the base color weight (see splitNaturalBase), never on top of it.
+export interface NaturalBase {
+  shade: Shade;
+  grams: number;
+}
+
+export interface NaturalBaseSplit {
+  fashionGrams: number;
+  naturalGrams: number;
+}
+
+// Carves the gray-coverage natural-base dose (see getGrayCoverageStrategy) out of the
+// already-calculated base color weight -- Wella's Pure Naturals guide doses the natural
+// shade as a share *of* the color, so the total (and with it developer and cost) stays
+// exactly what calculateFullFormula produced, same as splitShadeBlend above. Any
+// discretionary additional shade is applied on top afterwards, never split here.
+export function splitNaturalBase(baseColorGrams: number, naturalRatio: number): NaturalBaseSplit {
+  const ratio = Math.min(1, Math.max(0, naturalRatio));
+  return {
+    fashionGrams: baseColorGrams * (1 - ratio),
+    naturalGrams: baseColorGrams * ratio,
+  };
+}
+
+// A plain or double natural (7/0, 7/00, 7N, 7NN) -- not a natural with a fashion
+// reflect on top (7/01). Such a target already is its own natural base.
+export function isPureNatural(shade: Shade): boolean {
+  return shade.tone === "natural" && (shade.secondaryTone === undefined || shade.secondaryTone === "natural");
+}
+
+// The natural shades a colorist can dose into `targetShade` for gray coverage: same line
+// (`lineShades`), same level as the target. Double-natural shades (Wella /00, Redken NN --
+// the "Pure Naturals" the gray-coverage guide is built around) come first, so the first
+// entry is the default pick; plain naturals (/0, N) follow. Empty when the target is
+// itself natural (nothing to split) or the line has no natural at that level.
+export function findNaturalBaseCandidates(targetShade: Shade, lineShades: Shade[]): Shade[] {
+  if (isPureNatural(targetShade)) return [];
+  const naturals = lineShades.filter(s => s.level === targetShade.level && isPureNatural(s));
+  return [
+    ...naturals.filter(s => s.secondaryTone === "natural"),
+    ...naturals.filter(s => s.secondaryTone === undefined),
+  ];
+}
+
 // Step 1 of calculateFullFormula: the developer volume before any partial-lift fallback.
 // A shade with its own developerVolumeChoices (demi-permanent lines) always defers to
 // the colorist's manual pick instead of the auto-picked ladder -- including when the

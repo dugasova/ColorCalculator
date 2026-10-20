@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, calculateFormulaGramsFromColorGrams, applyAdditionalShade, splitShadeBlend, getRecommendedProcessingMinutes } from "./formula";
+import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, calculateFormulaGramsFromColorGrams, applyAdditionalShade, splitShadeBlend, splitNaturalBase, findNaturalBaseCandidates, getRecommendedProcessingMinutes } from "./formula";
 import type { Shade } from "./shades";
+import { BRANDS } from "./brands";
 
 describe("getGrayCoverageStrategy", () => {
   it("returns pure fashion tone below 30% gray", () => {
@@ -160,5 +161,45 @@ describe("getRecommendedProcessingMinutes", () => {
   it("recommends 45 minutes for permanent color at 50% gray or above", () => {
     expect(getRecommendedProcessingMinutes(permanentShade, 50)).toBe(45);
     expect(getRecommendedProcessingMinutes(permanentShade, 100)).toBe(45);
+  });
+});
+
+describe("splitNaturalBase", () => {
+  it("carves the natural share out of the base weight without changing the total", () => {
+    const third = splitNaturalBase(30, 1 / 3);
+    expect(third.fashionGrams).toBeCloseTo(20);
+    expect(third.naturalGrams).toBeCloseTo(10);
+    expect(third.fashionGrams + third.naturalGrams).toBeCloseTo(30);
+    expect(splitNaturalBase(30, 0.5)).toEqual({ fashionGrams: 15, naturalGrams: 15 });
+  });
+
+  it("leaves everything fashion when no natural dose is called for", () => {
+    expect(splitNaturalBase(30, 0)).toEqual({ fashionGrams: 30, naturalGrams: 0 });
+  });
+});
+
+describe("findNaturalBaseCandidates", () => {
+  const koleston = BRANDS.wella.shades.filter(s => s.line === "koleston-perfect");
+  const ash7 = koleston.find(s => s.code === "7/1")!;
+
+  it("offers the target level's naturals from the same line, double-natural (Pure Naturals) first", () => {
+    const codes = findNaturalBaseCandidates(ash7, koleston).map(s => s.code);
+    expect(codes[0]).toBe("7/00");
+    expect(codes).toEqual(expect.arrayContaining(["7/0", "77/0"]));
+  });
+
+  it("never offers a natural with a secondary fashion reflect (e.g. 7/01) as the base", () => {
+    expect(findNaturalBaseCandidates(ash7, koleston).map(s => s.code)).not.toContain("7/01");
+  });
+
+  it("falls back to the plain natural when the line has no double natural", () => {
+    const generic = BRANDS.generic.shades;
+    const target: Shade = { code: "7.1", level: 7, tone: "ash" };
+    expect(findNaturalBaseCandidates(target, generic).map(s => s.code)).toEqual(["7.0"]);
+  });
+
+  it("offers nothing when the target is itself natural, or the line has no natural at that level", () => {
+    expect(findNaturalBaseCandidates(koleston.find(s => s.code === "7/0")!, koleston)).toEqual([]);
+    expect(findNaturalBaseCandidates(ash7, [ash7])).toEqual([]);
   });
 });
