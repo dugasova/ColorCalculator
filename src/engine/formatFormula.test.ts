@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatFormulaText } from "./formatFormula";
+import { formatFormulaText, buildMixSummary } from "./formatFormula";
 import { calculateFullFormula, applyAdditionalShade } from "./formula";
 import type { Shade } from "./shades";
 
@@ -306,5 +306,27 @@ describe("formatFormulaText", () => {
     });
 
     expect(text).not.toContain("Achievable level");
+  });
+});
+
+describe("buildMixSummary with a gray-coverage natural base", () => {
+  const target: Shade = { code: "7/1", level: 7, tone: "ash" };
+  const natural: Shade = { code: "7/0", level: 7, tone: "natural" };
+  const additional: Shade = { code: "0/11", level: 1, tone: "ash" };
+
+  it("carves the natural base out of the primary shade without changing the total or developer", () => {
+    const summary = buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, { shade: natural, grams: 10 });
+    expect(summary).toBe("7/1- 20.0 g 7/0- 10.0 g developer 30.0 g");
+  });
+
+  it("lists an additional shade after the natural base -- it sits on top of the split base weight", () => {
+    // 30 g base split 20/10, plus 5 g additional on top: colorGrams 35 (see applyAdditionalShade).
+    const summary = buildMixSummary(target, { colorGrams: 35, developerGrams: 35 }, additional, 5, null, 0, { shade: natural, grams: 10 });
+    expect(summary).toBe("7/1- 20.0 g 7/0- 10.0 g 0/11- 5.0 g developer 35.0 g");
+  });
+
+  it("is unchanged when no natural base is applied", () => {
+    expect(buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, null))
+      .toBe("7/1- 30.0 g developer 30.0 g");
   });
 });

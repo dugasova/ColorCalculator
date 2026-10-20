@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { compareShadesForDisplay } from "../../engine/shades";
 import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
-import { applyAdditionalShade, calculateFullFormula, calculateFormulaGramsFromColorGrams } from "../../engine/formula";
+import { applyAdditionalShade, calculateFullFormula, calculateFormulaGramsFromColorGrams, findNaturalBaseCandidates, splitNaturalBase, type NaturalBase } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_GRAMS, APPLICATION_ZONE_DEFAULT_COLOR_GRAMS, APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE, type ApplicationZone, type GramsInputMode } from "../../engine/applicationZone";
 import type { Brand, BrandId } from "../../engine/brands";
@@ -100,6 +100,10 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   const [additionalShade2Code, setAdditionalShade2Code] = useState<string | null>(initial?.additionalShade2Code ?? null);
   const [additionalShade2Grams, setAdditionalShade2Grams] = useState(initial?.additionalShade2Grams ?? 0);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
+  // Gray-coverage natural base (see GrayNaturalField): whether to dose it in, and the
+  // colorist's own pick among the candidates -- null means "use the default candidate".
+  const [grayNaturalApplied, setGrayNaturalApplied] = useState(false);
+  const [naturalBaseShadeCode, setNaturalBaseShadeCode] = useState<string | null>(null);
 
   const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
   // Memoized: `brands[brandId].shades` is a stable array reference from context (only a
@@ -123,6 +127,9 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     setManualMixingRatio(undefined);
     setManualProcessingMinutes(undefined);
     setNeutralizationApplied(false);
+    // Only the picked natural shade is shade-dependent; whether to dose a natural base at
+    // all follows the client's gray %, not the target, so grayNaturalApplied carries over.
+    setNaturalBaseShadeCode(null);
   }
 
   // Additionally used whenever the whole available-shade pool changes (new brand or
@@ -215,6 +222,23 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   const effectiveTotalGrams = colorModeGrams !== null ? colorModeGrams.colorGrams + colorModeGrams.developerGrams : totalGrams;
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
+  // The gray-coverage natural base, carved out of the base color weight (result.grams,
+  // i.e. before any additional shade is added on top) -- see splitNaturalBase. Null
+  // unless opted in AND the gray % calls for a natural dose AND the line has a natural
+  // at the target's level. Both memoized for the same reason as lineShades above:
+  // useColorStepReport's "report the computed step up" effect depends on naturalBase's
+  // identity, and a fresh object every render would loop that effect forever.
+  const naturalBaseCandidates = useMemo(
+    () => findNaturalBaseCandidates(targetShade, lineShades),
+    [targetShade, lineShades]
+  );
+  const naturalBase = useMemo((): NaturalBase | null => {
+    const naturalRatio = result.grayCoverage.naturalRatio;
+    if (!grayNaturalApplied || naturalRatio === 0 || naturalBaseCandidates.length === 0 || result.grams === null) return null;
+    const shade = naturalBaseCandidates.find(s => s.code === naturalBaseShadeCode) ?? naturalBaseCandidates[0];
+    return { shade, grams: splitNaturalBase(result.grams.colorGrams, naturalRatio).naturalGrams };
+  }, [grayNaturalApplied, naturalBaseShadeCode, naturalBaseCandidates, result]);
+
   return {
     startLevel, setStartLevel,
     grayPercent, setGrayPercent,
@@ -237,6 +261,8 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     additionalShade2Code, setAdditionalShade2Code,
     additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
+    grayNaturalApplied, setGrayNaturalApplied,
+    naturalBaseShadeCode, setNaturalBaseShadeCode,
 
     availableLines,
     lineShades,
@@ -247,6 +273,8 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     grams,
     effectiveResult,
     processingMinutes,
+    naturalBaseCandidates,
+    naturalBase,
 
     resetShadePoolOverrides,
     handleBrandIdChange,

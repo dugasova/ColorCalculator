@@ -9,6 +9,7 @@ import { GrayPercentField } from "../FormulaCalculator/fields/GrayPercentField";
 import { ShadeField } from "../FormulaCalculator/fields/ShadeField";
 import { AdditionalShadeField } from "../FormulaCalculator/fields/AdditionalShadeField";
 import { PrePigmentationField } from "../FormulaCalculator/fields/PrePigmentationField";
+import { GrayNaturalField } from "../FormulaCalculator/fields/GrayNaturalField";
 import { DeveloperVolumeField } from "../FormulaCalculator/fields/DeveloperVolumeField";
 import { MixingRatioField } from "../FormulaCalculator/fields/MixingRatioField";
 import { GramsInputField } from "../FormulaCalculator/fields/GramsInputField";
@@ -83,6 +84,8 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     additionalShade2Code, setAdditionalShade2Code,
     additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
+    grayNaturalApplied, setGrayNaturalApplied,
+    naturalBaseShadeCode, setNaturalBaseShadeCode,
 
     availableLines,
     lineShades,
@@ -92,6 +95,8 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     additionalShade2,
     grams,
     processingMinutes,
+    naturalBaseCandidates,
+    naturalBase,
 
     handleBrandIdChange,
     handleLineChange,
@@ -142,6 +147,16 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}
           onTargetShadeCodeChange={handleTargetShadeCodeChange}
+          idSuffix={idSuffix}
+        />
+        <GrayNaturalField
+          naturalRatio={result.grayCoverage.naturalRatio}
+          targetShade={targetShade}
+          candidates={naturalBaseCandidates}
+          enabled={grayNaturalApplied}
+          onEnabledChange={setGrayNaturalApplied}
+          shadeCode={naturalBaseShadeCode}
+          onShadeCodeChange={setNaturalBaseShadeCode}
           idSuffix={idSuffix}
         />
         <PrePigmentationField
@@ -240,7 +255,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
       {grams !== null && (
         <div className="results__row">
           <span className="results__row-label">{t("results.mix")}</span>
-          <span>{buildMixSummary(targetShade, grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
+          <span>{buildMixSummary(targetShade, grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase)}</span>
         </div>
       )}
 

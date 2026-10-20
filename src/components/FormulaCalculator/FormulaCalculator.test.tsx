@@ -155,6 +155,34 @@ describe("FormulaCalculator", () => {
   });
 });
 
+describe("FormulaCalculator gray-coverage natural base", () => {
+  function setGrayPercent(value: string) {
+    const input = screen.getByLabelText("Gray percentage");
+    fireEvent.change(input, { target: { value } });
+    fireEvent.blur(input);
+  }
+
+  it("offers the natural base only once gray coverage calls for it, and carves it out of the primary shade", () => {
+    render(<FormulaCalculator appliedBy="stylist@example.com" />);
+    chooseOption("Shade", "7.1");
+
+    setGrayPercent("20");
+    expect(screen.queryByLabelText(/Add natural base/)).toBeNull();
+
+    setGrayPercent("40");
+    const checkbox = screen.getByLabelText("Add natural base for gray coverage (33% of the color)");
+    const mixBefore = document.querySelector(".results__mix-value")!.textContent!;
+    expect(mixBefore).not.toContain("7.0-");
+
+    fireEvent.click(checkbox);
+    const mixAfter = document.querySelector(".results__mix-value")!.textContent!;
+    expect(mixAfter).toMatch(/^7\.1- [\d.]+ g 7\.0- [\d.]+ g developer/);
+    // Same developer as before: the natural base splits the base weight, never grows it.
+    expect(mixAfter.split("developer")[1]).toBe(mixBefore.split("developer")[1]);
+    expect(screen.getByText(/7\.0 natural base blended in/)).toBeInTheDocument();
+  });
+});
+
 describe("FormulaResults pre-pigmentation step", () => {
   const targetShade: Shade = { code: "5.4", level: 5, tone: "copper" };
   // 4-level drop (9 -> 5): 1:1 no-lift ratio, 30g total -> 15g color : 15g developer.

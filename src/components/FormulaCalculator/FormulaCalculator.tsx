@@ -15,6 +15,7 @@ import { ShadeField } from "./fields/ShadeField";
 import { CanvasFields } from "./fields/CanvasFields";
 import { AdditionalShadeField } from "./fields/AdditionalShadeField";
 import { PrePigmentationField } from "./fields/PrePigmentationField";
+import { GrayNaturalField } from "./fields/GrayNaturalField";
 import { BlendModeField } from "./fields/BlendModeField";
 import { BlendComponentField } from "./fields/BlendComponentField";
 import { BlendRatioField } from "./fields/BlendRatioField";
@@ -62,6 +63,8 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
     setBlendShadeACode, setBlendShadeBCode,
     blendPrimaryPercent, setBlendPrimaryPercent,
     neutralizationApplied, setNeutralizationApplied,
+    grayNaturalApplied, setGrayNaturalApplied,
+    naturalBaseShadeCode, setNaturalBaseShadeCode,
     prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
     setManualProcessingMinutes,
 
@@ -78,6 +81,9 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
     blendShadeA,
     blendShadeB,
     blend,
+    blendColorGrams,
+    naturalBaseCandidates,
+    naturalBase,
     favoriteRecipe,
     processingMinutes,
     pricePerGram,
@@ -127,6 +133,15 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
           targetShadeCode={targetShadeCode}
           targetShade={targetShade}
           onTargetShadeCodeChange={handleTargetShadeCodeChange}
+        />
+        <GrayNaturalField
+          naturalRatio={result.grayCoverage.naturalRatio}
+          targetShade={targetShade}
+          candidates={naturalBaseCandidates}
+          enabled={grayNaturalApplied}
+          onEnabledChange={setGrayNaturalApplied}
+          shadeCode={naturalBaseShadeCode}
+          onShadeCodeChange={setNaturalBaseShadeCode}
         />
         <PrePigmentationField
           need={prePigmentationNeed}
@@ -209,11 +224,11 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
                     onShadeCodeChange={setBlendShadeBCode}
                   />
                 </div>
-                {blendShadeA !== null && blendShadeB !== null && result.grams !== null && (
+                {blendShadeA !== null && blendShadeB !== null && blendColorGrams !== null && (
                   <BlendRatioField
                     shadeA={blendShadeA}
                     shadeB={blendShadeB}
-                    colorGrams={result.grams.colorGrams}
+                    colorGrams={blendColorGrams}
                     primaryPercent={blendPrimaryPercent}
                     onPrimaryPercentChange={setBlendPrimaryPercent}
                   />
@@ -240,6 +255,7 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
         additionalShade2={additionalShade2}
         additionalShade2Grams={additionalShade2Grams}
         blend={blend}
+        naturalBase={naturalBase}
         prePigmentationResult={prePigmentationResult}
         neutralizationApplied={neutralizationApplied}
         onNeutralizationAppliedChange={setNeutralizationApplied}

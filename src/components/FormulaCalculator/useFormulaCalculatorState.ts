@@ -46,7 +46,9 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
     additionalShade2Code, setAdditionalShade2Code, additionalShade2Grams, setAdditionalShade2Grams,
     neutralizationApplied, setNeutralizationApplied,
+    grayNaturalApplied, setGrayNaturalApplied, naturalBaseShadeCode, setNaturalBaseShadeCode,
     availableLines, lineShades, targetShade, result, additionalShade, additionalShade2, effectiveResult, processingMinutes,
+    naturalBaseCandidates, naturalBase,
     handleAdditionalShadeCodeChange,
     handleApplicationZoneChange,
     resetShadePoolOverrides,
@@ -158,12 +160,15 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   const blendShadeBCodeEffective = blendShadeBCode ?? blendSuggestion.secondary?.code ?? null;
   const blendShadeA = blendShadeACodeEffective !== null ? blendCandidates.find(s => s.code === blendShadeACodeEffective) ?? null : null;
   const blendShadeB = blendShadeBCodeEffective !== null ? blendCandidates.find(s => s.code === blendShadeBCodeEffective) ?? null : null;
-  const blend = blendModeEnabled && blendShadeA !== null && blendShadeB !== null && result.grams !== null
+  // The blend stands in for the missing fashion shade only, so it splits the base color
+  // weight minus any gray-coverage natural base carved out of it (see naturalBase).
+  const blendColorGrams = result.grams !== null ? result.grams.colorGrams - (naturalBase?.grams ?? 0) : null;
+  const blend = blendModeEnabled && blendShadeA !== null && blendShadeB !== null && blendColorGrams !== null
     ? {
         shadeA: blendShadeA,
-        shadeAGrams: splitShadeBlend(result.grams.colorGrams, blendPrimaryPercent).primaryGrams,
+        shadeAGrams: splitShadeBlend(blendColorGrams, blendPrimaryPercent).primaryGrams,
         shadeB: blendShadeB,
-        shadeBGrams: splitShadeBlend(result.grams.colorGrams, blendPrimaryPercent).secondaryGrams,
+        shadeBGrams: splitShadeBlend(blendColorGrams, blendPrimaryPercent).secondaryGrams,
       }
     : null;
 
@@ -235,6 +240,8 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     setBlendShadeACode, setBlendShadeBCode,
     blendPrimaryPercent, setBlendPrimaryPercent,
     neutralizationApplied, setNeutralizationApplied,
+    grayNaturalApplied, setGrayNaturalApplied,
+    naturalBaseShadeCode, setNaturalBaseShadeCode,
     prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
     manualProcessingMinutes, setManualProcessingMinutes,
 
@@ -251,6 +258,9 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
     blendShadeA,
     blendShadeB,
     blend,
+    blendColorGrams,
+    naturalBaseCandidates,
+    naturalBase,
     favoriteRecipe,
     processingMinutes,
     pricePerGram,

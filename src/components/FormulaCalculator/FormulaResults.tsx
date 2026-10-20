@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { getGrayCoverageNote } from "../../engine/formula";
-import type { FullFormula } from "../../engine/formula";
+import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
@@ -35,6 +35,9 @@ export interface FormulaResultsProps {
   additionalShade2?: Shade | null;
   additionalShade2Grams?: number;
   blend: BlendSummary | null;
+  // The gray-coverage natural base, if opted in (see GrayNaturalField) -- already carved
+  // out of `result.grams`, so it only changes the per-shade breakdown, not the totals.
+  naturalBase?: NaturalBase | null;
   // Recommended (or colorist-opted-in) filler step ahead of this target-color formula --
   // see PrePigmentationField/PrePigmentationStep. Null whenever the checkbox is off or
   // the level drop doesn't warrant it (getPrePigmentationNeed returns 'none').
@@ -66,7 +69,7 @@ const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
   brandId, brandName, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory, applicationZone, result,
-  additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
+  additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, naturalBase = null, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
   processingMinutes, onProcessingMinutesChange,
   pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
   productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved, repeatRequest,
@@ -78,7 +81,7 @@ export function FormulaResults({
 
   const targetColorFormulaText = formatFormulaText({
     brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
+    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied, naturalBase,
   });
   // Same brand+line display convention as the target-color title above (formatFormulaText),
   // reused for the filler worked example so both steps of a two-part formula name the
@@ -142,7 +145,7 @@ export function FormulaResults({
       {result.grams !== null && (
         <div className="results__row results__row--mix">
           <span className="results__row-label">{t("results.mix")}</span>
-          <span className="results__mix-value">{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)}</span>
+          <span className="results__mix-value">{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase)}</span>
         </div>
       )}
 
@@ -155,11 +158,17 @@ export function FormulaResults({
 
       <div className="results__row">
         <span className="results__row-label">{t("results.grayCoverage")}</span>
-        <span>{t("results.grayCoverageValue", {
-          note: getGrayCoverageNote(result.grayCoverage),
-          natural: Math.round(result.grayCoverage.naturalRatio * 100),
-          fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-        })}</span>
+        <span>{naturalBase !== null
+          ? t("results.grayCoverageAppliedValue", {
+            code: naturalBase.shade.code,
+            natural: Math.round(result.grayCoverage.naturalRatio * 100),
+            fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+          })
+          : t("results.grayCoverageValue", {
+            note: getGrayCoverageNote(result.grayCoverage),
+            natural: Math.round(result.grayCoverage.naturalRatio * 100),
+            fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+          })}</span>
       </div>
 
       <div className="results__row">

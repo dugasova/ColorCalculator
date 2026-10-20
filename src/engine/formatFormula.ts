@@ -1,7 +1,7 @@
 import i18n from "../i18n";
 import type { Level } from "./levels";
 import type { Shade } from "./shades";
-import type { FullFormula, FormulaGrams } from "./formula";
+import type { FullFormula, FormulaGrams, NaturalBase } from "./formula";
 import { getGrayCoverageNote } from "./formula";
 import type { ApplicationZone } from "./applicationZone";
 import { formatBrandLineLabel } from "./formatLineLabel";
@@ -30,6 +30,9 @@ export interface FormatFormulaParams {
   // on top of that blend.
   blend: BlendSummary | null;
   neutralizationApplied: boolean;
+  // The gray-coverage natural base, if the colorist opted in -- see NaturalBase. Optional
+  // so callers formatting a step saved before this option existed can omit it.
+  naturalBase?: NaturalBase | null;
 }
 
 export interface BlendSummary {
@@ -51,6 +54,7 @@ export function buildBlendMixSummary(
   additionalShadeGrams?: number,
   additionalShade2?: Shade | null,
   additionalShade2Grams?: number,
+  naturalBase?: NaturalBase | null,
 ): string {
   const hasAdditional = additionalShade != null && (additionalShadeGrams ?? 0) > 0;
   const hasAdditional2 = additionalShade2 != null && (additionalShade2Grams ?? 0) > 0;
@@ -58,6 +62,11 @@ export function buildBlendMixSummary(
     i18n.t("format.mixShade", { code: blend.shadeA.code, grams: blend.shadeAGrams.toFixed(1) }),
     i18n.t("format.mixShade", { code: blend.shadeB.code, grams: blend.shadeBGrams.toFixed(1) }),
   ];
+  // The blend components already split only the fashion share (see
+  // useFormulaCalculatorState's `blend`), so the natural base sits alongside them.
+  if (naturalBase != null) {
+    parts.push(i18n.t("format.mixShade", { code: naturalBase.shade.code, grams: naturalBase.grams.toFixed(1) }));
+  }
   if (hasAdditional) {
     parts.push(i18n.t("format.mixShade", { code: additionalShade.code, grams: (additionalShadeGrams ?? 0).toFixed(1) }));
   }
@@ -72,7 +81,10 @@ export function buildBlendMixSummary(
 // rather than a generic "color vs developer" split, so the colorist can read exactly how
 // much of each shade — including any additional shade blended in at their discretion — to
 // weigh out. `grams.colorGrams` already includes the additional shade's grams (see
-// applyAdditionalShade), so it's subtracted back out here to get the primary shade's share.
+// applyAdditionalShade), so it's subtracted back out here to get the primary shade's share
+// -- as is any gray-coverage natural base, which was carved out of that same base weight
+// (see splitNaturalBase). Order follows how the colorist builds the bowl: fashion shade,
+// natural base, then any additional shade(s) on top, developer last.
 export function buildMixSummary(
   targetShade: Shade,
   grams: FormulaGrams,
@@ -80,12 +92,18 @@ export function buildMixSummary(
   additionalShadeGrams: number,
   additionalShade2?: Shade | null,
   additionalShade2Grams?: number,
+  naturalBase?: NaturalBase | null,
 ): string {
   const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
   const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && (additionalShade2Grams ?? 0) > 0;
-  const primaryGrams = grams.colorGrams - (hasAdditional ? additionalShadeGrams : 0) - (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
+  const naturalGrams = naturalBase?.grams ?? 0;
+  const primaryGrams = grams.colorGrams - naturalGrams
+    - (hasAdditional ? additionalShadeGrams : 0) - (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
 
   const parts = [i18n.t("format.mixShade", { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
+  if (naturalBase != null) {
+    parts.push(i18n.t("format.mixShade", { code: naturalBase.shade.code, grams: naturalGrams.toFixed(1) }));
+  }
   if (hasAdditional) {
     parts.push(i18n.t("format.mixShade", { code: additionalShade.code, grams: additionalShadeGrams.toFixed(1) }));
   }
@@ -101,6 +119,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
   const {
     brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
     additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
+    naturalBase = null,
   } = params;
 
   const title = `${formatBrandLineLabel(brandName, line)} — ${targetShade.code} (${targetShade.tone}${targetShade.secondaryTone ? "/" + targetShade.secondaryTone : ""})`;
@@ -132,16 +151,22 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     result.grams !== null
       ? i18n.t("format.mixValue", {
         value: blend !== null
-          ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams)
-          : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams),
+          ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase)
+          : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase),
       })
       : i18n.t("format.mixFallback", { message: result.liftUnsupportedWarning ?? i18n.t("results.notAchievable") }),
     i18n.t("format.processingTime", { value: processingMinutes }),
-    i18n.t("format.grayCoverage", {
-      note: getGrayCoverageNote(result.grayCoverage),
-      natural: Math.round(result.grayCoverage.naturalRatio * 100),
-      fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-    }),
+    naturalBase !== null
+      ? i18n.t("format.grayCoverageApplied", {
+        code: naturalBase.shade.code,
+        natural: Math.round(result.grayCoverage.naturalRatio * 100),
+        fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+      })
+      : i18n.t("format.grayCoverage", {
+        note: getGrayCoverageNote(result.grayCoverage),
+        natural: Math.round(result.grayCoverage.naturalRatio * 100),
+        fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+      }),
     correctiveToneLine,
   ];
 
