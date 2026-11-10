@@ -5,7 +5,10 @@ import type { Level } from "../../engine/levels";
 import { shadeLabel, type Shade } from "../../engine/shades";
 import { shadeToHexColor } from "../../engine/color";
 import {
-  buildNaturalLevelReferences, calibratedShades, estimateStartLevel, rankShadesByPhotoColor,
+  buildNaturalLevelReferences,
+  calibratedShades,
+  estimateStartLevel,
+  rankShadesByPhotoColor,
   type PhotoColorSample,
 } from "../../engine/photoColor";
 import { describeShadeMatchQuality } from "../../engine/shadeMatch";
@@ -17,7 +20,13 @@ import "../FormulaCalculator/fields/fields.css";
 
 export type PhotoEstimateProps =
   | { mode: "startLevel"; onApplyLevel: (level: Level) => void; idSuffix?: string }
-  | { mode: "targetShade"; brandId: BrandId; lineShades: Shade[]; onApplyShade: (code: string) => void; idSuffix?: string };
+  | {
+      mode: "targetShade";
+      brandId: BrandId;
+      lineShades: Shade[];
+      onApplyShade: (code: string) => void;
+      idSuffix?: string;
+    };
 
 // Stable identity for the non-targetShade branch below -- a fresh [] literal there would
 // change on every render and defeat candidates' own useMemo.
@@ -74,50 +83,70 @@ function PhotoEstimateDialog(props: PhotoEstimateDialogProps) {
 
   const references = useMemo(() => buildNaturalLevelReferences(brands, calibrationIndex), [brands, calibrationIndex]);
   const candidates = useMemo(
-    () => brandId === null ? [] : calibratedShades(brandId, lineShades, calibrationIndex),
-    [brandId, lineShades, calibrationIndex]
+    () => (brandId === null ? [] : calibratedShades(brandId, lineShades, calibrationIndex)),
+    [brandId, lineShades, calibrationIndex],
   );
 
   const levelEstimate = onApplyLevel !== null && sample !== null ? estimateStartLevel(sample.lab, references) : null;
-  const shadeMatches = onApplyShade !== null && sample !== null ? rankShadesByPhotoColor(sample.lab, candidates, 3) : null;
+  const shadeMatches =
+    onApplyShade !== null && sample !== null ? rankShadesByPhotoColor(sample.lab, candidates, 3) : null;
   const bestDistance = levelEstimate?.distance ?? shadeMatches?.[0]?.distance ?? null;
   const showPoorWarning = bestDistance !== null && describeShadeMatchQuality(bestDistance) === "poor";
 
   return (
-    <Modal title={t(props.mode === "startLevel" ? "photoAnalysis.titleLevel" : "photoAnalysis.titleShade")} onClose={onClose}>
+    <Modal
+      title={t(props.mode === "startLevel" ? "photoAnalysis.titleLevel" : "photoAnalysis.titleShade")}
+      onClose={onClose}
+    >
       {onApplyLevel !== null ? (
         references.length === 0 ? (
           <p className="field__hint">{t("photoAnalysis.noLevelReferences")}</p>
         ) : (
           <>
-            <p className="field__hint">{t("photoAnalysis.calibratedLevels", { levels: references.map(r => r.level).join(", ") })}</p>
+            <p className="field__hint">
+              {t("photoAnalysis.calibratedLevels", { levels: references.map(r => r.level).join(", ") })}
+            </p>
             <PhotoSampler idPrefix={`photoEstimate-startLevel${idSuffix}`} onSampleChange={setSample} />
           </>
         )
+      ) : candidates.length === 0 ? (
+        <p className="cross-brand-match-empty">{t("photoAnalysis.noCalibratedShades")}</p>
       ) : (
-        candidates.length === 0 ? (
-          <p className="cross-brand-match-empty">{t("photoAnalysis.noCalibratedShades")}</p>
-        ) : (
-          <PhotoSampler idPrefix={`photoEstimate-targetShade${idSuffix}`} onSampleChange={setSample} />
-        )
+        <PhotoSampler idPrefix={`photoEstimate-targetShade${idSuffix}`} onSampleChange={setSample} />
       )}
 
       {levelEstimate !== null && onApplyLevel !== null && (
         <div className="photo-estimate__result">
           <span
             className="shade-swatch"
-            style={{ backgroundColor: shadeToHexColor({ code: String(levelEstimate.level), level: levelEstimate.level, tone: "natural" }) }}
+            style={{
+              backgroundColor: shadeToHexColor({
+                code: String(levelEstimate.level),
+                level: levelEstimate.level,
+                tone: "natural",
+              }),
+            }}
           />
           <div className="cross-brand-match__info">
-            <span>{t("photoAnalysis.levelResult", { level: levelEstimate.level, direction: t(`photoAnalysis.direction.${levelEstimate.direction}`) })}</span>
-            <span className={`cross-brand-match__quality cross-brand-match__quality--${qualityLabel(levelEstimate.distance, t).quality}`}>
+            <span>
+              {t("photoAnalysis.levelResult", {
+                level: levelEstimate.level,
+                direction: t(`photoAnalysis.direction.${levelEstimate.direction}`),
+              })}
+            </span>
+            <span
+              className={`cross-brand-match__quality cross-brand-match__quality--${qualityLabel(levelEstimate.distance, t).quality}`}
+            >
               {qualityLabel(levelEstimate.distance, t).label}
             </span>
           </div>
           <button
             type="button"
             className="button button--secondary"
-            onClick={() => { onApplyLevel(levelEstimate.level); onClose(); }}
+            onClick={() => {
+              onApplyLevel(levelEstimate.level);
+              onClose();
+            }}
           >
             {t("photoAnalysis.apply", { level: levelEstimate.level })}
           </button>
@@ -130,7 +159,11 @@ function PhotoEstimateDialog(props: PhotoEstimateDialogProps) {
             const { quality, label } = qualityLabel(match.distance, t);
             return (
               <li key={match.shade.code} className="cross-brand-match">
-                <span className="shade-swatch" style={{ backgroundColor: shadeToHexColor(match.shade) }} title={shadeLabel(match.shade)} />
+                <span
+                  className="shade-swatch"
+                  style={{ backgroundColor: shadeToHexColor(match.shade) }}
+                  title={shadeLabel(match.shade)}
+                />
                 <div className="cross-brand-match__info">
                   <span className="cross-brand-match__shade">{shadeLabel(match.shade)}</span>
                   <span className={`cross-brand-match__quality cross-brand-match__quality--${quality}`}>{label}</span>
@@ -138,7 +171,10 @@ function PhotoEstimateDialog(props: PhotoEstimateDialogProps) {
                 <button
                   type="button"
                   className="button button--secondary"
-                  onClick={() => { onApplyShade(match.shade.code); onClose(); }}
+                  onClick={() => {
+                    onApplyShade(match.shade.code);
+                    onClose();
+                  }}
                 >
                   {t("fields.crossBrandUse")}
                 </button>

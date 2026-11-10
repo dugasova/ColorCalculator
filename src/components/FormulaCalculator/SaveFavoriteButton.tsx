@@ -56,12 +56,18 @@ export function SaveFavoriteButton({ appliedBy, brands, currentRecipe }: SaveFav
               onChange={e => setSaveName(e.target.value)}
             />
           </div>
-          {saveStatus === "error" && <p className="warning" role="alert">{t("favorites.saveError")}</p>}
+          {saveStatus === "error" && (
+            <p className="warning" role="alert">
+              {t("favorites.saveError")}
+            </p>
+          )}
           <button
             type="button"
             className="button"
             disabled={saveName.trim() === "" || saveStatus === "saving"}
-            onClick={() => { void handleSave(); }}
+            onClick={() => {
+              void handleSave();
+            }}
           >
             {saveStatus === "saving" ? t("favorites.saving") : t("favorites.saveButton")}
           </button>

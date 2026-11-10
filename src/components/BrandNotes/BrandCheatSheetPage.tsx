@@ -16,9 +16,13 @@ export function BrandCheatSheetPage() {
   if (brandId === undefined || !hasBrandCheatSheet(brandId)) {
     return (
       <div className="calculator">
-        <p className="warning" role="alert">{t("brandNotes.notFound", { brandId: brandId ?? "" })}</p>
+        <p className="warning" role="alert">
+          {t("brandNotes.notFound", { brandId: brandId ?? "" })}
+        </p>
         <p className="brand-notes__hint">{t("brandNotes.notFoundHint", { ids: BRAND_CHEAT_SHEET_IDS.join(", ") })}</p>
-        <Link className="button button--secondary" to="/">{t("brandNotes.backToApp")}</Link>
+        <Link className="button button--secondary" to="/">
+          {t("brandNotes.backToApp")}
+        </Link>
       </div>
     );
   }
@@ -36,7 +40,9 @@ export function BrandCheatSheetPage() {
           <li key={point}>{point}</li>
         ))}
       </ul>
-      <Link className="button button--secondary" to="/">{t("brandNotes.backToApp")}</Link>
+      <Link className="button button--secondary" to="/">
+        {t("brandNotes.backToApp")}
+      </Link>
     </div>
   );
 }

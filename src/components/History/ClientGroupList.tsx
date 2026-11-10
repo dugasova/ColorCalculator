@@ -27,8 +27,16 @@ export function ClientGroupList({ groups, onOpenGroup }: ClientGroupListProps) {
               </span>
               {group.profile !== null && (group.profile.phone !== "" || group.profile.allergyNotes !== "") && (
                 <span className="history__client-group-contact">
-                  {group.profile.phone !== "" && <span>{t("results.clientPhoneLabel")}: {group.profile.phone}</span>}
-                  {group.profile.allergyNotes !== "" && <span>{t("results.allergyNotesLabel")}: {group.profile.allergyNotes}</span>}
+                  {group.profile.phone !== "" && (
+                    <span>
+                      {t("results.clientPhoneLabel")}: {group.profile.phone}
+                    </span>
+                  )}
+                  {group.profile.allergyNotes !== "" && (
+                    <span>
+                      {t("results.allergyNotesLabel")}: {group.profile.allergyNotes}
+                    </span>
+                  )}
                 </span>
               )}
             </button>

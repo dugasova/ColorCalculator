@@ -11,7 +11,14 @@ import { developerVolumeSchema } from "../engine/shades";
 // (brandId, volume), with `line: null`.
 export type StockRecord =
   | { id: string; kind: "shade"; brandId: BrandId; line: string | null; code: string; remainingGrams: number }
-  | { id: string; kind: "developer"; brandId: BrandId; line: string | null; volume: DeveloperVolume; remainingGrams: number };
+  | {
+      id: string;
+      kind: "developer";
+      brandId: BrandId;
+      line: string | null;
+      volume: DeveloperVolume;
+      remainingGrams: number;
+    };
 
 // Validates a dyeStock Firestore document's payload -- everything but `id`, which comes
 // from the document id itself (see firestore.ts's subscribeToStock), same pattern as
@@ -23,13 +30,32 @@ export type StockRecord =
 // silently dropped by parseSnapshotDocs, making an admin's already-tracked developer
 // stock vanish from the app the moment this feature ships.
 export const stockRecordSchema: z.ZodType<Omit<StockRecord, "id">> = z.union([
-  z.object({ kind: z.literal("shade"), brandId: z.string(), line: z.string().nullable(), code: z.string(), remainingGrams: z.number() }),
-  z.object({ kind: z.literal("developer"), brandId: z.string(), line: z.string().nullable().default(null), volume: developerVolumeSchema, remainingGrams: z.number() }),
+  z.object({
+    kind: z.literal("shade"),
+    brandId: z.string(),
+    line: z.string().nullable(),
+    code: z.string(),
+    remainingGrams: z.number(),
+  }),
+  z.object({
+    kind: z.literal("developer"),
+    brandId: z.string(),
+    line: z.string().nullable().default(null),
+    volume: developerVolumeSchema,
+    remainingGrams: z.number(),
+  }),
 ]);
 
 export type StockStatus = "out" | "low" | "ok";
 
-interface ReorderItemBase { id: string; brandId: BrandId; remainingGrams: number; status: "low" | "out"; packGrams: number; suggestedPacks: number }
+interface ReorderItemBase {
+  id: string;
+  brandId: BrandId;
+  remainingGrams: number;
+  status: "low" | "out";
+  packGrams: number;
+  suggestedPacks: number;
+}
 export type ReorderItem =
   | (ReorderItemBase & { kind: "shade"; line: string | null; code: string; unit: "tube" })
   | (ReorderItemBase & { kind: "developer"; line: string | null; volume: DeveloperVolume; unit: "bottle" });

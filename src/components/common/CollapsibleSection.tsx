@@ -30,7 +30,14 @@ function storageKey(id: string): string {
 // back" courtesy as theme.ts's hasLocalStorage guard. Renders with `hidden` rather than
 // unmounting: callers hold unsaved local state (drafts, pending ids, form fields) that
 // must survive a collapse/expand round trip.
-export function CollapsibleSection({ id, title, defaultOpen, children, className, forceOpen }: CollapsibleSectionProps) {
+export function CollapsibleSection({
+  id,
+  title,
+  defaultOpen,
+  children,
+  className,
+  forceOpen,
+}: CollapsibleSectionProps) {
   const [open, setOpen] = useState(() => {
     const stored = hasLocalStorage ? localStorage.getItem(storageKey(id)) : null;
     if (stored === "open") return true;
@@ -63,11 +70,19 @@ export function CollapsibleSection({ id, title, defaultOpen, children, className
         >
           <span>{title}</span>
           <svg className="collapsible-section__chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true">
-            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M1 1.5L6 6.5L11 1.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </h2>
-      <div id={panelId} hidden={!isOpen}>{children}</div>
+      <div id={panelId} hidden={!isOpen}>
+        {children}
+      </div>
     </section>
   );
 }

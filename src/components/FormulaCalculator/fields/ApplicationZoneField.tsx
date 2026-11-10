@@ -8,7 +8,11 @@ export interface ApplicationZoneFieldProps {
   idSuffix?: string;
 }
 
-export function ApplicationZoneField({ applicationZone, onApplicationZoneChange, idSuffix = "" }: ApplicationZoneFieldProps) {
+export function ApplicationZoneField({
+  applicationZone,
+  onApplicationZoneChange,
+  idSuffix = "",
+}: ApplicationZoneFieldProps) {
   const { t } = useTranslation();
   return (
     <div className="field">

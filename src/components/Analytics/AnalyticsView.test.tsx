@@ -98,8 +98,16 @@ describe("AnalyticsView period filter", () => {
   it("filters salon KPIs to the selected period", () => {
     const today = new Date();
     mockHistory([
-      makeEntry({ id: "1", clientName: "Old", appliedAt: { toDate: () => new Date("2024-03-01") } as unknown as FormulaHistoryEntry["appliedAt"] }),
-      makeEntry({ id: "2", clientName: "Recent", appliedAt: { toDate: () => today } as unknown as FormulaHistoryEntry["appliedAt"] }),
+      makeEntry({
+        id: "1",
+        clientName: "Old",
+        appliedAt: { toDate: () => new Date("2024-03-01") } as unknown as FormulaHistoryEntry["appliedAt"],
+      }),
+      makeEntry({
+        id: "2",
+        clientName: "Recent",
+        appliedAt: { toDate: () => today } as unknown as FormulaHistoryEntry["appliedAt"],
+      }),
     ]);
 
     renderAnalyticsView({ isAdmin: true });
@@ -111,7 +119,11 @@ describe("AnalyticsView period filter", () => {
 
   it("shows the empty-period message when every entry falls outside the selected period", () => {
     mockHistory([
-      makeEntry({ id: "1", clientName: "Old", appliedAt: { toDate: () => new Date("2024-03-01") } as unknown as FormulaHistoryEntry["appliedAt"] }),
+      makeEntry({
+        id: "1",
+        clientName: "Old",
+        appliedAt: { toDate: () => new Date("2024-03-01") } as unknown as FormulaHistoryEntry["appliedAt"],
+      }),
     ]);
 
     renderAnalyticsView({ isAdmin: true });

@@ -30,7 +30,9 @@ export function PaletteAdminView() {
 
   return (
     <div className="calculator calculator--wide">
-      <h1 className="calculator__title">{t("palette.titlePrefix")} <span className="calculator__title-accent">{t("palette.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        {t("palette.titlePrefix")} <span className="calculator__title-accent">{t("palette.titleAccent")}</span>
+      </h1>
 
       <div className="palette-admin__admin-actions">
         <AddBrandForm brands={brands} onBrandAdded={setSelectedBrandId} />

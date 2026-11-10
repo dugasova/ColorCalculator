@@ -9,9 +9,19 @@ import { ALL_DEVELOPER_VOLUMES } from "../../engine/levels";
 import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import { useStock } from "../../palette";
 import {
-  developerStockId, DEVELOPER_BOTTLE_SIZE_GRAMS, getBrandScopedDeveloperLines, getScopedDeveloperVolumes,
-  getShadeTubeSizeGrams, getStockStatus, restockOneTube, setDeveloperStockGrams, setShadeStockGrams, shadeStockId,
-  stockById, stopTrackingStock, LOW_STOCK_THRESHOLD_GRAMS,
+  developerStockId,
+  DEVELOPER_BOTTLE_SIZE_GRAMS,
+  getBrandScopedDeveloperLines,
+  getScopedDeveloperVolumes,
+  getShadeTubeSizeGrams,
+  getStockStatus,
+  restockOneTube,
+  setDeveloperStockGrams,
+  setShadeStockGrams,
+  shadeStockId,
+  stockById,
+  stopTrackingStock,
+  LOW_STOCK_THRESHOLD_GRAMS,
 } from "../../stock";
 import { CollapsibleSection } from "../common/CollapsibleSection";
 
@@ -41,7 +51,11 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
   // developer's 1000 g/ml bottle. The two differ for developer: a bottle is drawn down
   // gradually, so it still goes "low" at 60 g left even though restocking adds 1000 g back.
   const rows: {
-    id: string; label: string; thresholdGrams: number; restockGrams: number; unit: "tube" | "bottle";
+    id: string;
+    label: string;
+    thresholdGrams: number;
+    restockGrams: number;
+    unit: "tube" | "bottle";
     commit: (grams: number) => Promise<void>;
   }[] = [
     ...activeShades.map(shade => {
@@ -67,23 +81,20 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
     ...[null, ...getBrandScopedDeveloperLines(brandId)].flatMap(line =>
       (line === null ? ALL_DEVELOPER_VOLUMES : getScopedDeveloperVolumes(brandId, line)).map(volume => ({
         id: developerStockId(brandId, line, volume),
-        label: line === null
-          ? formatDeveloperVolume(volume)
-          : `${formatDeveloperVolume(volume)} · ${formatLineLabel(line)}`,
+        label:
+          line === null ? formatDeveloperVolume(volume) : `${formatDeveloperVolume(volume)} · ${formatLineLabel(line)}`,
         thresholdGrams: LOW_STOCK_THRESHOLD_GRAMS,
         restockGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
         unit: "bottle" as const,
         commit: (grams: number) => setDeveloperStockGrams(brandId, line, volume, grams),
-      }))
+      })),
     ),
   ];
 
-  const lowOrOutCount = rows
-    .filter(row => {
-      const record = stockMap.get(row.id);
-      return record !== undefined && getStockStatus(record.remainingGrams, row.thresholdGrams) !== "ok";
-    })
-    .length;
+  const lowOrOutCount = rows.filter(row => {
+    const record = stockMap.get(row.id);
+    return record !== undefined && getStockStatus(record.remainingGrams, row.thresholdGrams) !== "ok";
+  }).length;
 
   const handleBlur = async (id: string, commit: (grams: number) => Promise<void>) => {
     const raw = drafts[id];
@@ -139,7 +150,11 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
   };
 
   const renderRow = (row: {
-    id: string; label: string; thresholdGrams: number; restockGrams: number; unit: "tube" | "bottle";
+    id: string;
+    label: string;
+    thresholdGrams: number;
+    restockGrams: number;
+    unit: "tube" | "bottle";
     commit: (grams: number) => Promise<void>;
   }) => {
     const record = stockMap.get(row.id);
@@ -147,7 +162,10 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
     const value = drafts[row.id] ?? (record !== undefined ? String(record.remainingGrams) : "");
     const isPending = pendingIds.has(row.id);
     return (
-      <li key={row.id} className={clsx("palette-admin__stock-row", status === "out" && "palette-admin__stock-row--out")}>
+      <li
+        key={row.id}
+        className={clsx("palette-admin__stock-row", status === "out" && "palette-admin__stock-row--out")}
+      >
         <span className="palette-admin__stock-label">{row.label}</span>
         <input
           type="number"
@@ -165,7 +183,9 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
           disabled={record === undefined || isPending}
           onClick={() => handleRestock(row.id, row.restockGrams)}
         >
-          {t(row.unit === "bottle" ? "palette.restockOneBottle" : "palette.restockOneTube", { grams: row.restockGrams })}
+          {t(row.unit === "bottle" ? "palette.restockOneBottle" : "palette.restockOneTube", {
+            grams: row.restockGrams,
+          })}
         </button>
         {status !== "ok" && (
           <span className="palette-admin__stock-badge">
@@ -179,21 +199,26 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
   return (
     <CollapsibleSection
       id="stock"
-      title={<>{t("palette.stockTitle")}{lowOrOutCount > 0 && ` — ${t("palette.stockLowSummary", { count: lowOrOutCount })}`}</>}
+      title={
+        <>
+          {t("palette.stockTitle")}
+          {lowOrOutCount > 0 && ` — ${t("palette.stockLowSummary", { count: lowOrOutCount })}`}
+        </>
+      }
       defaultOpen={true}
       className="palette-admin__section"
     >
       <p className="palette-admin__hint">{t("palette.stockHint")}</p>
-      {error !== null && <p className="warning" role="alert">{error}</p>}
+      {error !== null && (
+        <p className="warning" role="alert">
+          {error}
+        </p>
+      )}
 
-      <ul className="palette-admin__stock-list">
-        {rows.slice(0, activeShades.length).map(renderRow)}
-      </ul>
+      <ul className="palette-admin__stock-list">{rows.slice(0, activeShades.length).map(renderRow)}</ul>
 
       <h3 className="palette-admin__stock-subheading">{t("palette.stockDevelopersTitle")}</h3>
-      <ul className="palette-admin__stock-list">
-        {rows.slice(activeShades.length).map(renderRow)}
-      </ul>
+      <ul className="palette-admin__stock-list">{rows.slice(activeShades.length).map(renderRow)}</ul>
     </CollapsibleSection>
   );
 }

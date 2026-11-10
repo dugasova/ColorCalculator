@@ -7,7 +7,10 @@ import { SessionDetailsPanel } from "./SessionDetailsPanel";
 // Keeps this a pure component-interaction test: no real Firestore/network reachable from
 // jsdom, and no bearing on what's under test here (the bowl-card open/close behavior).
 vi.mock("../../clients", () => ({
-  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => { onChange([]); return () => {}; }),
+  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => {
+    onChange([]);
+    return () => {};
+  }),
   createClient: vi.fn().mockResolvedValue("new-client-id"),
   updateClient: vi.fn().mockResolvedValue(undefined),
 }));
@@ -28,7 +31,9 @@ function typeClientName(name: string) {
 
 describe("SessionDetailsPanel bowl card", () => {
   it("shows no clickable client name until one has been typed", () => {
-    render(<SessionDetailsPanel formulaText="Formula text" processingMinutes={40} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Formula text" processingMinutes={40} onSave={vi.fn()} appliedBy={APPLIED_BY} />,
+    );
     expect(screen.queryByRole("button", { name: /Show a large formula card/ })).not.toBeInTheDocument();
   });
 
@@ -39,11 +44,13 @@ describe("SessionDetailsPanel bowl card", () => {
         processingMinutes={40}
         onSave={vi.fn()}
         appliedBy={APPLIED_BY}
-      />
+      />,
     );
 
     typeClientName("Anna K.");
-    await waitFor(() => expect(screen.getByRole("button", { name: "Show a large formula card for Anna K." })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Show a large formula card for Anna K." })).toBeInTheDocument(),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Show a large formula card for Anna K." }));
 
     const card = await screen.findByRole("dialog");
@@ -53,10 +60,14 @@ describe("SessionDetailsPanel bowl card", () => {
   });
 
   it("closes the bowl card on Escape, returning to the plain results panel", async () => {
-    render(<SessionDetailsPanel formulaText="Formula text" processingMinutes={40} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Formula text" processingMinutes={40} onSave={vi.fn()} appliedBy={APPLIED_BY} />,
+    );
 
     typeClientName("Anna K.");
-    await waitFor(() => expect(screen.getByRole("button", { name: "Show a large formula card for Anna K." })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Show a large formula card for Anna K." })).toBeInTheDocument(),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Show a large formula card for Anna K." }));
     await screen.findByRole("dialog");
 

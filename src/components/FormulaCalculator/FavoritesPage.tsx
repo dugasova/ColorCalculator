@@ -37,13 +37,21 @@ export function FavoritesPage({ appliedBy, brands, onApply }: FavoritesPageProps
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [manageError, setManageError] = useState(false);
 
-  useEffect(() => subscribeToFavoriteFormulas(appliedBy, list => {
-    setFavorites(list);
-    setLoadError(false);
-  }, err => {
-    console.error("Failed to load favorite formulas:", err);
-    setLoadError(true);
-  }), [appliedBy]);
+  useEffect(
+    () =>
+      subscribeToFavoriteFormulas(
+        appliedBy,
+        list => {
+          setFavorites(list);
+          setLoadError(false);
+        },
+        err => {
+          console.error("Failed to load favorite formulas:", err);
+          setLoadError(true);
+        },
+      ),
+    [appliedBy],
+  );
 
   function handleApply(favorite: FavoriteFormula) {
     const availability = checkFavoriteAvailability(favorite.recipe, brands);
@@ -89,9 +97,15 @@ export function FavoritesPage({ appliedBy, brands, onApply }: FavoritesPageProps
 
   return (
     <section className="calculator" aria-labelledby="favorites-title">
-      <h1 id="favorites-title" className="calculator__title">{t("favorites.title")}</h1>
+      <h1 id="favorites-title" className="calculator__title">
+        {t("favorites.title")}
+      </h1>
 
-      {loadError && <p className="warning" role="alert">{t("favorites.loadError")}</p>}
+      {loadError && (
+        <p className="warning" role="alert">
+          {t("favorites.loadError")}
+        </p>
+      )}
 
       {favorites.length === 0 && !loadError ? (
         <p className="favorites__empty">{t("favorites.empty")}</p>
@@ -107,7 +121,11 @@ export function FavoritesPage({ appliedBy, brands, onApply }: FavoritesPageProps
         </ul>
       )}
 
-      {applyError !== null && <p className="warning" role="alert">{applyError}</p>}
+      {applyError !== null && (
+        <p className="warning" role="alert">
+          {applyError}
+        </p>
+      )}
 
       {favorites.length > 0 && (
         <div className="favorites__actions">
@@ -119,7 +137,11 @@ export function FavoritesPage({ appliedBy, brands, onApply }: FavoritesPageProps
 
       {isManageOpen && (
         <Modal title={t("favorites.manageTitle")} onClose={() => setIsManageOpen(false)}>
-          {manageError && <p className="warning" role="alert">{t("favorites.writeError")}</p>}
+          {manageError && (
+            <p className="warning" role="alert">
+              {t("favorites.writeError")}
+            </p>
+          )}
           <ul className="favorites__manage-list">
             {favorites.map(favorite => {
               const draft = renameDrafts[favorite.id] ?? favorite.name;
@@ -136,7 +158,9 @@ export function FavoritesPage({ appliedBy, brands, onApply }: FavoritesPageProps
                     type="button"
                     className="button button--secondary"
                     disabled={draft.trim() === "" || draft === favorite.name}
-                    onClick={() => { void handleRename(favorite.id); }}
+                    onClick={() => {
+                      void handleRename(favorite.id);
+                    }}
                   >
                     {t("favorites.renameButton")}
                   </button>
@@ -152,7 +176,9 @@ export function FavoritesPage({ appliedBy, brands, onApply }: FavoritesPageProps
                     <button
                       type="button"
                       className="button button--danger"
-                      onClick={() => { void handleDelete(favorite.id); }}
+                      onClick={() => {
+                        void handleDelete(favorite.id);
+                      }}
                     >
                       {t("favorites.deleteConfirmButton")}
                     </button>

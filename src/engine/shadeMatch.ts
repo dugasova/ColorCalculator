@@ -36,7 +36,7 @@ const LINE_PERMANENCE: Record<string, PermanenceCategory> = {
 };
 
 export function getLinePermanence(line: string | undefined): PermanenceCategory | null {
-  return line !== undefined ? LINE_PERMANENCE[line] ?? null : null;
+  return line !== undefined ? (LINE_PERMANENCE[line] ?? null) : null;
 }
 
 // Perceptual "closest equivalent" lookup for when a colorist's usual brand/shade is out of

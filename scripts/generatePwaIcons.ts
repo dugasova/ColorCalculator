@@ -22,10 +22,7 @@ const svg = readFileSync(SVG_SOURCE);
 const RASTER_DENSITY = 5336;
 
 async function generateAnyIcon(size: number, filename: string): Promise<void> {
-  await sharp(svg, { density: RASTER_DENSITY })
-    .resize(size, size)
-    .png()
-    .toFile(`public/${filename}`);
+  await sharp(svg, { density: RASTER_DENSITY }).resize(size, size).png().toFile(`public/${filename}`);
 }
 
 // Composites the mark, scaled to `markFraction` of `size` and centered, onto a `size`x`size`
@@ -33,7 +30,12 @@ async function generateAnyIcon(size: number, filename: string): Promise<void> {
 // the maskable/apple-touch PWA icons (markFraction = 1 - 2*safeZonePadding) and the
 // Capacitor asset sources in assets/ -- the Android launcher icon (same safe-zone framing)
 // and the splash screens (a much smaller, purely decorative markFraction).
-async function generateFilledIcon(size: number, outputPath: string, markFraction: number, background: string): Promise<void> {
+async function generateFilledIcon(
+  size: number,
+  outputPath: string,
+  markFraction: number,
+  background: string,
+): Promise<void> {
   const markSize = Math.round(size * markFraction);
   const mark = await sharp(svg, { density: RASTER_DENSITY }).resize(markSize, markSize).png().toBuffer();
   await sharp({
@@ -61,5 +63,7 @@ await generateFilledIcon(2732, "assets/splash.png", 0.3, "#ffffff");
 // screen doesn't flash light before the app's own dark theme takes over.
 await generateFilledIcon(2732, "assets/splash-dark.png", 0.3, "#15121e");
 
-console.log("Generated PWA icons in public/: pwa-192x192.png, pwa-512x512.png, maskable-icon-512x512.png, apple-touch-icon-180x180.png");
+console.log(
+  "Generated PWA icons in public/: pwa-192x192.png, pwa-512x512.png, maskable-icon-512x512.png, apple-touch-icon-180x180.png",
+);
 console.log("Generated Capacitor asset sources in assets/: icon.png, splash.png, splash-dark.png");

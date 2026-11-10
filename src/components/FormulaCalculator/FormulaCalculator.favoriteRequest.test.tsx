@@ -8,7 +8,10 @@ import FormulaCalculator from "./FormulaCalculator";
 // Keeps this a pure component-interaction test: no real Firestore/network reachable from
 // jsdom (see SessionDetailsPanel.bowlCard.test.tsx for the same stubs).
 vi.mock("../../clients", () => ({
-  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => { onChange([]); return () => {}; }),
+  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => {
+    onChange([]);
+    return () => {};
+  }),
   createClient: vi.fn().mockResolvedValue("new-client-id"),
   updateClient: vi.fn().mockResolvedValue(undefined),
 }));

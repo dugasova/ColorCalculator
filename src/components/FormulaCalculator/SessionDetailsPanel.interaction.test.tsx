@@ -7,7 +7,10 @@ import { SessionDetailsPanel } from "./SessionDetailsPanel";
 // Keeps this a pure component-interaction test: no real Firestore/network reachable from
 // jsdom, and no bearing on what's under test here (the save/onSaved timing below).
 vi.mock("../../clients", () => ({
-  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => { onChange([]); return () => {}; }),
+  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => {
+    onChange([]);
+    return () => {};
+  }),
   createClient: vi.fn().mockResolvedValue("new-client-id"),
   updateClient: vi.fn().mockResolvedValue(undefined),
 }));
@@ -26,7 +29,7 @@ function fillRequiredFieldsAndSave() {
 }
 
 describe("SessionDetailsPanel onSaved", () => {
-  it("calls onSaved once the \"Saved!\" confirmation finishes -- not synchronously with onSave", async () => {
+  it('calls onSaved once the "Saved!" confirmation finishes -- not synchronously with onSave', async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const onSaved = vi.fn();
     render(
@@ -36,7 +39,7 @@ describe("SessionDetailsPanel onSaved", () => {
         onSave={onSave}
         onSaved={onSaved}
         appliedBy={APPLIED_BY}
-      />
+      />,
     );
 
     fillRequiredFieldsAndSave();
@@ -51,7 +54,9 @@ describe("SessionDetailsPanel onSaved", () => {
 
   it("never throws when onSaved is omitted -- ColorStepCard has no reason to reset a step this way", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />,
+    );
 
     fillRequiredFieldsAndSave();
 
@@ -59,12 +64,15 @@ describe("SessionDetailsPanel onSaved", () => {
     // The details modal closes itself once the "Saved!" confirmation has run its course --
     // asserting that (rather than re-querying the now-unmounted Save button) is what
     // actually proves the omitted-onSaved codepath ran to completion without throwing.
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    }, { timeout: 2500 });
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      },
+      { timeout: 2500 },
+    );
   });
 
-  it("cancels the pending \"Saved!\" feedback timer on unmount -- it must not fire onSaved or warn about updating state on a gone component", async () => {
+  it('cancels the pending "Saved!" feedback timer on unmount -- it must not fire onSaved or warn about updating state on a gone component', async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const onSaved = vi.fn();
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -75,7 +83,7 @@ describe("SessionDetailsPanel onSaved", () => {
         onSave={onSave}
         onSaved={onSaved}
         appliedBy={APPLIED_BY}
-      />
+      />,
     );
 
     fillRequiredFieldsAndSave();
@@ -95,12 +103,16 @@ describe("SessionDetailsPanel onSaved", () => {
 });
 
 describe("SessionDetailsPanel offline save", () => {
-  it("shows \"Saved on device\" instead of \"Saved\" when onSave resolves a queued write", async () => {
+  it('shows "Saved on device" instead of "Saved" when onSave resolves a queued write', async () => {
     const onSave = vi.fn().mockResolvedValue("queued");
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />,
+    );
 
     fillRequiredFieldsAndSave();
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Saved on device — will sync" })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Saved on device — will sync" })).toBeInTheDocument(),
+    );
   });
 });

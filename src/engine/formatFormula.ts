@@ -68,10 +68,14 @@ export function buildBlendMixSummary(
     parts.push(i18n.t("format.mixShade", { code: naturalBase.shade.code, grams: naturalBase.grams.toFixed(1) }));
   }
   if (hasAdditional) {
-    parts.push(i18n.t("format.mixShade", { code: additionalShade.code, grams: (additionalShadeGrams ?? 0).toFixed(1) }));
+    parts.push(
+      i18n.t("format.mixShade", { code: additionalShade.code, grams: (additionalShadeGrams ?? 0).toFixed(1) }),
+    );
   }
   if (hasAdditional2) {
-    parts.push(i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }));
+    parts.push(
+      i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }),
+    );
   }
   parts.push(i18n.t("format.mixDeveloper", { grams: developerGrams.toFixed(1) }));
   return parts.join(" ");
@@ -95,10 +99,14 @@ export function buildMixSummary(
   naturalBase?: NaturalBase | null,
 ): string {
   const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
-  const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && (additionalShade2Grams ?? 0) > 0;
+  const hasAdditional2 =
+    additionalShade2 !== null && additionalShade2 !== undefined && (additionalShade2Grams ?? 0) > 0;
   const naturalGrams = naturalBase?.grams ?? 0;
-  const primaryGrams = grams.colorGrams - naturalGrams
-    - (hasAdditional ? additionalShadeGrams : 0) - (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
+  const primaryGrams =
+    grams.colorGrams -
+    naturalGrams -
+    (hasAdditional ? additionalShadeGrams : 0) -
+    (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
 
   const parts = [i18n.t("format.mixShade", { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
   if (naturalBase != null) {
@@ -108,7 +116,9 @@ export function buildMixSummary(
     parts.push(i18n.t("format.mixShade", { code: additionalShade.code, grams: additionalShadeGrams.toFixed(1) }));
   }
   if (hasAdditional2) {
-    parts.push(i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }));
+    parts.push(
+      i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }),
+    );
   }
   parts.push(i18n.t("format.mixDeveloper", { grams: grams.developerGrams.toFixed(1) }));
 
@@ -117,8 +127,19 @@ export function buildMixSummary(
 
 export function formatFormulaText(params: FormatFormulaParams): string {
   const {
-    brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied,
+    brandName,
+    line,
+    targetShade,
+    startLevel,
+    result,
+    processingMinutes,
+    applicationZone,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    blend,
+    neutralizationApplied,
     naturalBase = null,
   } = params;
 
@@ -130,10 +151,14 @@ export function formatFormulaText(params: FormatFormulaParams): string {
   const correctiveToneLine = applyNeutralization
     ? i18n.t("format.neutralizationApplied", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
     : i18n.t("format.recommendedTone", {
-      value: result.recommendedCorrectiveTone !== null
-        ? i18n.t("results.recommendedToneValue", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
-        : i18n.t("results.none"),
-    });
+        value:
+          result.recommendedCorrectiveTone !== null
+            ? i18n.t("results.recommendedToneValue", {
+                grams: result.correctorGrams,
+                tone: result.recommendedCorrectiveTone,
+              })
+            : i18n.t("results.none"),
+      });
 
   const lines = [
     title,
@@ -142,31 +167,53 @@ export function formatFormulaText(params: FormatFormulaParams): string {
       ? [i18n.t("format.achievedLevel", { level: result.achievedLevel, target: targetShade.level })]
       : []),
     ...(applicationZone !== null
-      ? [i18n.t("format.applicationZone", {
-        value: applicationZone === "full-head" ? i18n.t("fields.applicationZoneFullHead") : i18n.t("fields.applicationZoneRootTouchUp"),
-      })]
+      ? [
+          i18n.t("format.applicationZone", {
+            value:
+              applicationZone === "full-head"
+                ? i18n.t("fields.applicationZoneFullHead")
+                : i18n.t("fields.applicationZoneRootTouchUp"),
+          }),
+        ]
       : []),
     i18n.t("format.developer", { value: developer }),
     i18n.t("format.ratio", { color: result.mixingRatio.colorParts, developer: result.mixingRatio.developerParts }),
     result.grams !== null
       ? i18n.t("format.mixValue", {
-        value: blend !== null
-          ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase)
-          : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase),
-      })
+          value:
+            blend !== null
+              ? buildBlendMixSummary(
+                  blend,
+                  result.grams.developerGrams,
+                  additionalShade,
+                  additionalShadeGrams,
+                  additionalShade2,
+                  additionalShade2Grams,
+                  naturalBase,
+                )
+              : buildMixSummary(
+                  targetShade,
+                  result.grams,
+                  additionalShade,
+                  additionalShadeGrams,
+                  additionalShade2,
+                  additionalShade2Grams,
+                  naturalBase,
+                ),
+        })
       : i18n.t("format.mixFallback", { message: result.liftUnsupportedWarning ?? i18n.t("results.notAchievable") }),
     i18n.t("format.processingTime", { value: processingMinutes }),
     naturalBase !== null
       ? i18n.t("format.grayCoverageApplied", {
-        code: naturalBase.shade.code,
-        natural: Math.round(result.grayCoverage.naturalRatio * 100),
-        fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-      })
+          code: naturalBase.shade.code,
+          natural: Math.round(result.grayCoverage.naturalRatio * 100),
+          fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+        })
       : i18n.t("format.grayCoverage", {
-        note: getGrayCoverageNote(result.grayCoverage),
-        natural: Math.round(result.grayCoverage.naturalRatio * 100),
-        fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-      }),
+          note: getGrayCoverageNote(result.grayCoverage),
+          natural: Math.round(result.grayCoverage.naturalRatio * 100),
+          fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+        }),
     correctiveToneLine,
   ];
 

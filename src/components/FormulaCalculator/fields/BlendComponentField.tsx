@@ -17,7 +17,14 @@ export interface BlendComponentFieldProps {
 // `candidates` pre-filtered by the caller to shades `canBlendShades` accepts against the
 // target (within one level, same line/mixing chemistry -- see BLEND_LEVEL_TOLERANCE in
 // useFormulaCalculatorState), so any pairing here is physically valid.
-export function BlendComponentField({ label, placeholder, candidates, shadeCode, onShadeCodeChange, id }: BlendComponentFieldProps) {
+export function BlendComponentField({
+  label,
+  placeholder,
+  candidates,
+  shadeCode,
+  onShadeCodeChange,
+  id,
+}: BlendComponentFieldProps) {
   const shade = candidates.find(s => s.code === shadeCode) ?? null;
 
   return (

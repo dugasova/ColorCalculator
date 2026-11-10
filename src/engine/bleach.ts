@@ -82,8 +82,8 @@ export function calculateBleachGrams(totalGrams: number, ratio: BleachMixingRati
   const { powderParts, developerParts } = ratio;
   const totalParts = powderParts + developerParts;
   return {
-    powderGrams: totalGrams * powderParts / totalParts,
-    developerGrams: totalGrams * developerParts / totalParts,
+    powderGrams: (totalGrams * powderParts) / totalParts,
+    developerGrams: (totalGrams * developerParts) / totalParts,
   };
 }
 

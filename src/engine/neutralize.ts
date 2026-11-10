@@ -15,6 +15,5 @@ export function suggestNeutralizingTone(pigment: UnderlyingPigment): ToneFamily 
       return "matt";
     case "very-light-yellow":
       return "violet";
-
   }
 }

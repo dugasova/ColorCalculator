@@ -8,7 +8,12 @@ import { useSalonMarkupMultiplier } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 import { useShadeFormulaState } from "./useShadeFormulaState";
-import { applyFavoriteRecipe, applyFormValues, repeatRequestToFormValues, type FormulaFormSetters } from "./formulaRequests";
+import {
+  applyFavoriteRecipe,
+  applyFormValues,
+  repeatRequestToFormValues,
+  type FormulaFormSetters,
+} from "./formulaRequests";
 
 const DEFAULT_BLEND_PRIMARY_PERCENT = 70;
 // How far a blend component's own level may sit from the target's for it to be offered
@@ -20,7 +25,11 @@ const BLEND_LEVEL_TOLERANCE = 1;
 // cross-brand match, markup/service price -- on top of the brand/line/shade/formula state
 // shared with ColorStepCard (see useShadeFormulaState). The component itself stays a thin
 // render of already-computed values.
-export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeatRequest?: RepeatFormulaRequest | null, favoriteRequest?: FavoriteFormulaRecipe | null) {
+export function useFormulaCalculatorState(
+  brands: Record<BrandId, Brand>,
+  repeatRequest?: RepeatFormulaRequest | null,
+  favoriteRequest?: FavoriteFormulaRecipe | null,
+) {
   const [manualPricePerGram, setManualPricePerGram] = useState<number | undefined>(undefined);
   const salonMarkupMultiplier = useSalonMarkupMultiplier();
   const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
@@ -36,19 +45,61 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
 
   const base = useShadeFormulaState({ brands });
   const {
-    startLevel, setStartLevel, grayPercent, setGrayPercent,
-    porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory,
-    targetShadeCode, setTargetShadeCode,
-    applicationZone, setApplicationZone, totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode,
-    colorGrams, setColorGrams, effectiveTotalGrams, brandId, setBrandId, line, setLine,
-    manualDeveloperVolume, setManualDeveloperVolume, manualMixingRatio, setManualMixingRatio,
-    manualProcessingMinutes, setManualProcessingMinutes,
-    additionalShadeCode, setAdditionalShadeCode, additionalShadeGrams, setAdditionalShadeGrams,
-    additionalShade2Code, setAdditionalShade2Code, additionalShade2Grams, setAdditionalShade2Grams,
-    neutralizationApplied, setNeutralizationApplied,
-    grayNaturalApplied, setGrayNaturalApplied, naturalBaseShadeCode, setNaturalBaseShadeCode,
-    availableLines, lineShades, targetShade, result, additionalShade, additionalShade2, effectiveResult, processingMinutes,
-    naturalBaseCandidates, naturalBase,
+    startLevel,
+    setStartLevel,
+    grayPercent,
+    setGrayPercent,
+    porosity,
+    setPorosity,
+    thickness,
+    setThickness,
+    chemicalHistory,
+    setChemicalHistory,
+    targetShadeCode,
+    setTargetShadeCode,
+    applicationZone,
+    setApplicationZone,
+    totalGrams,
+    setTotalGrams,
+    gramsInputMode,
+    setGramsInputMode,
+    colorGrams,
+    setColorGrams,
+    effectiveTotalGrams,
+    brandId,
+    setBrandId,
+    line,
+    setLine,
+    manualDeveloperVolume,
+    setManualDeveloperVolume,
+    manualMixingRatio,
+    setManualMixingRatio,
+    manualProcessingMinutes,
+    setManualProcessingMinutes,
+    additionalShadeCode,
+    setAdditionalShadeCode,
+    additionalShadeGrams,
+    setAdditionalShadeGrams,
+    additionalShade2Code,
+    setAdditionalShade2Code,
+    additionalShade2Grams,
+    setAdditionalShade2Grams,
+    neutralizationApplied,
+    setNeutralizationApplied,
+    grayNaturalApplied,
+    setGrayNaturalApplied,
+    naturalBaseShadeCode,
+    setNaturalBaseShadeCode,
+    availableLines,
+    lineShades,
+    targetShade,
+    result,
+    additionalShade,
+    additionalShade2,
+    effectiveResult,
+    processingMinutes,
+    naturalBaseCandidates,
+    naturalBase,
     handleAdditionalShadeCodeChange,
     handleApplicationZoneChange,
     resetShadePoolOverrides,
@@ -57,19 +108,36 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   // Which field each request restores lives in formulaRequests.ts; this only routes the
   // resulting values to their setters.
   const formSetters: FormulaFormSetters = {
-    porosity: setPorosity, thickness: setThickness, chemicalHistory: setChemicalHistory,
-    brandId: setBrandId, line: setLine, targetShadeCode: setTargetShadeCode,
-    startLevel: setStartLevel, grayPercent: setGrayPercent,
-    applicationZone: setApplicationZone, gramsInputMode: setGramsInputMode, totalGrams: setTotalGrams, colorGrams: setColorGrams,
-    manualDeveloperVolume: setManualDeveloperVolume, manualMixingRatio: setManualMixingRatio,
+    porosity: setPorosity,
+    thickness: setThickness,
+    chemicalHistory: setChemicalHistory,
+    brandId: setBrandId,
+    line: setLine,
+    targetShadeCode: setTargetShadeCode,
+    startLevel: setStartLevel,
+    grayPercent: setGrayPercent,
+    applicationZone: setApplicationZone,
+    gramsInputMode: setGramsInputMode,
+    totalGrams: setTotalGrams,
+    colorGrams: setColorGrams,
+    manualDeveloperVolume: setManualDeveloperVolume,
+    manualMixingRatio: setManualMixingRatio,
     manualProcessingMinutes: setManualProcessingMinutes,
-    manualPricePerGram: setManualPricePerGram, manualMarkupMultiplier: setManualMarkupMultiplier, manualServicePrice: setManualServicePrice,
-    additionalShadeCode: setAdditionalShadeCode, additionalShadeGrams: setAdditionalShadeGrams,
-    additionalShade2Code: setAdditionalShade2Code, additionalShade2Grams: setAdditionalShade2Grams,
-    blendModeEnabled: setBlendModeEnabled, blendShadeACode: setBlendShadeACode, blendShadeBCode: setBlendShadeBCode,
+    manualPricePerGram: setManualPricePerGram,
+    manualMarkupMultiplier: setManualMarkupMultiplier,
+    manualServicePrice: setManualServicePrice,
+    additionalShadeCode: setAdditionalShadeCode,
+    additionalShadeGrams: setAdditionalShadeGrams,
+    additionalShade2Code: setAdditionalShade2Code,
+    additionalShade2Grams: setAdditionalShade2Grams,
+    blendModeEnabled: setBlendModeEnabled,
+    blendShadeACode: setBlendShadeACode,
+    blendShadeBCode: setBlendShadeBCode,
     blendPrimaryPercent: setBlendPrimaryPercent,
-    neutralizationApplied: setNeutralizationApplied, prePigmentationEnabled: setPrePigmentationEnabled,
-    grayNaturalApplied: setGrayNaturalApplied, naturalBaseShadeCode: setNaturalBaseShadeCode,
+    neutralizationApplied: setNeutralizationApplied,
+    prePigmentationEnabled: setPrePigmentationEnabled,
+    grayNaturalApplied: setGrayNaturalApplied,
+    naturalBaseShadeCode: setNaturalBaseShadeCode,
   };
 
   // Replay a "Repeat formula" request from history right during render — this is React's
@@ -155,38 +223,51 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   // two selects. Candidates span target.level +/- BLEND_LEVEL_TOLERANCE (see
   // canBlendShades) -- colorists routinely blend one level above/below a missing shade
   // to approximate it, not just other reflects at the exact same level.
-  const blendCandidates = lineShades.filter(s => s.code !== targetShade.code && canBlendShades(targetShade, s, BLEND_LEVEL_TOLERANCE));
+  const blendCandidates = lineShades.filter(
+    s => s.code !== targetShade.code && canBlendShades(targetShade, s, BLEND_LEVEL_TOLERANCE),
+  );
   const blendSuggestion = suggestBlendComponents(targetShade, lineShades);
   const blendShadeACodeEffective = blendShadeACode ?? blendSuggestion.primary?.code ?? null;
   const blendShadeBCodeEffective = blendShadeBCode ?? blendSuggestion.secondary?.code ?? null;
-  const blendShadeA = blendShadeACodeEffective !== null ? blendCandidates.find(s => s.code === blendShadeACodeEffective) ?? null : null;
-  const blendShadeB = blendShadeBCodeEffective !== null ? blendCandidates.find(s => s.code === blendShadeBCodeEffective) ?? null : null;
+  const blendShadeA =
+    blendShadeACodeEffective !== null ? (blendCandidates.find(s => s.code === blendShadeACodeEffective) ?? null) : null;
+  const blendShadeB =
+    blendShadeBCodeEffective !== null ? (blendCandidates.find(s => s.code === blendShadeBCodeEffective) ?? null) : null;
   // The blend stands in for the missing fashion shade only, so it splits the base color
   // weight minus any gray-coverage natural base carved out of it (see naturalBase).
   const blendColorGrams = result.grams !== null ? result.grams.colorGrams - (naturalBase?.grams ?? 0) : null;
-  const blend = blendModeEnabled && blendShadeA !== null && blendShadeB !== null && blendColorGrams !== null
-    ? {
-        shadeA: blendShadeA,
-        shadeAGrams: splitShadeBlend(blendColorGrams, blendPrimaryPercent).primaryGrams,
-        shadeB: blendShadeB,
-        shadeBGrams: splitShadeBlend(blendColorGrams, blendPrimaryPercent).secondaryGrams,
-      }
-    : null;
+  const blend =
+    blendModeEnabled && blendShadeA !== null && blendShadeB !== null && blendColorGrams !== null
+      ? {
+          shadeA: blendShadeA,
+          shadeAGrams: splitShadeBlend(blendColorGrams, blendPrimaryPercent).primaryGrams,
+          shadeB: blendShadeB,
+          shadeBGrams: splitShadeBlend(blendColorGrams, blendPrimaryPercent).secondaryGrams,
+        }
+      : null;
 
   // The current recipe in "save as favorite" shape (src/favoriteFormulas.ts) --
   // deliberately excludes startLevel/grayPercent/canvas/pricing, the same fields
   // applyFavoriteRecipe (formulaRequests.ts) never touches, since a favorite is a shade/mix recipe to
   // reuse across clients, not a snapshot of this one visit.
   const favoriteRecipe: FavoriteFormulaRecipe = {
-    brandId, line: targetShade.line ?? null, targetShadeCode: targetShade.code,
-    additionalShadeCode, additionalShadeGrams, additionalShade2Code, additionalShade2Grams,
+    brandId,
+    line: targetShade.line ?? null,
+    targetShadeCode: targetShade.code,
+    additionalShadeCode,
+    additionalShadeGrams,
+    additionalShade2Code,
+    additionalShade2Grams,
     blendShadeACode: blendModeEnabled ? blendShadeACodeEffective : null,
     blendShadeBCode: blendModeEnabled ? blendShadeBCodeEffective : null,
     blendPrimaryPercent,
     manualDeveloperVolume: manualDeveloperVolume ?? null,
     manualMixingRatio: manualMixingRatio ?? null,
     manualProcessingMinutes: manualProcessingMinutes ?? null,
-    applicationZone, gramsInputMode, totalGrams, colorGrams,
+    applicationZone,
+    gramsInputMode,
+    totalGrams,
+    colorGrams,
   };
 
   const pricePerGram = manualPricePerGram ?? brands[brandId].pricePerGram;
@@ -201,50 +282,77 @@ export function useFormulaCalculatorState(brands: Record<BrandId, Brand>, repeat
   // that level/tone (e.g. an underrepresented line) resolves to null exactly like the
   // Generic case, and the UI already renders the "no dedicated shade" fallback text.
   const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
-  const prePigmentationResult = prePigmentationEnabled && prePigmentationNeed !== "none"
-    ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
-    : null;
+  const prePigmentationResult =
+    prePigmentationEnabled && prePigmentationNeed !== "none"
+      ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
+      : null;
 
   // Priced product weight: the dye actually mixed (never its developer -- a salon buys
   // and prices developer completely separately, see sessionCost.ts's stepTotalGrams),
   // plus any pre-pigmentation filler mixed on top (also never its diluent).
-  const totalProductGrams = effectiveResult.grams !== null
-    ? effectiveResult.grams.colorGrams + (prePigmentationResult?.grams?.fillerGrams ?? 0)
-    : null;
+  const totalProductGrams =
+    effectiveResult.grams !== null
+      ? effectiveResult.grams.colorGrams + (prePigmentationResult?.grams?.fillerGrams ?? 0)
+      : null;
   const productCost = totalProductGrams !== null ? calculateProductCost(totalProductGrams, pricePerGram) : null;
-  const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
+  const recommendedServicePrice =
+    productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
   const servicePrice = manualServicePrice ?? recommendedServicePrice;
 
   return {
-    startLevel, setStartLevel,
-    grayPercent, setGrayPercent,
-    porosity, setPorosity,
-    thickness, setThickness,
-    chemicalHistory, setChemicalHistory,
+    startLevel,
+    setStartLevel,
+    grayPercent,
+    setGrayPercent,
+    porosity,
+    setPorosity,
+    thickness,
+    setThickness,
+    chemicalHistory,
+    setChemicalHistory,
     targetShadeCode,
     applicationZone,
-    totalGrams, setTotalGrams,
-    gramsInputMode, setGramsInputMode,
-    colorGrams, setColorGrams,
+    totalGrams,
+    setTotalGrams,
+    gramsInputMode,
+    setGramsInputMode,
+    colorGrams,
+    setColorGrams,
     brandId,
     line,
-    manualDeveloperVolume, setManualDeveloperVolume,
-    manualMixingRatio, setManualMixingRatio,
-    manualPricePerGram, setManualPricePerGram,
-    markupMultiplier, setMarkupMultiplier: setManualMarkupMultiplier,
-    manualServicePrice, setManualServicePrice,
+    manualDeveloperVolume,
+    setManualDeveloperVolume,
+    manualMixingRatio,
+    setManualMixingRatio,
+    manualPricePerGram,
+    setManualPricePerGram,
+    markupMultiplier,
+    setMarkupMultiplier: setManualMarkupMultiplier,
+    manualServicePrice,
+    setManualServicePrice,
     additionalShadeCode,
-    additionalShadeGrams, setAdditionalShadeGrams,
-    additionalShade2Code, setAdditionalShade2Code,
-    additionalShade2Grams, setAdditionalShade2Grams,
+    additionalShadeGrams,
+    setAdditionalShadeGrams,
+    additionalShade2Code,
+    setAdditionalShade2Code,
+    additionalShade2Grams,
+    setAdditionalShade2Grams,
     blendModeEnabled,
-    setBlendShadeACode, setBlendShadeBCode,
-    blendPrimaryPercent, setBlendPrimaryPercent,
-    neutralizationApplied, setNeutralizationApplied,
-    grayNaturalApplied, setGrayNaturalApplied,
-    naturalBaseShadeCode, setNaturalBaseShadeCode,
-    prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
-    manualProcessingMinutes, setManualProcessingMinutes,
+    setBlendShadeACode,
+    setBlendShadeBCode,
+    blendPrimaryPercent,
+    setBlendPrimaryPercent,
+    neutralizationApplied,
+    setNeutralizationApplied,
+    grayNaturalApplied,
+    setGrayNaturalApplied,
+    naturalBaseShadeCode,
+    setNaturalBaseShadeCode,
+    prePigmentationNeed,
+    prePigmentationEnabled,
+    setPrePigmentationEnabled,
+    manualProcessingMinutes,
+    setManualProcessingMinutes,
 
     availableLines,
     lineShades,

@@ -21,8 +21,9 @@ if (Capacitor.isNativePlatform()) {
   // stale cache layer on top of them. IndexedDB persistence instead of the web default
   // (localStorage): a WebView's localStorage is the first thing Android/iOS reclaim under
   // storage pressure, which would silently sign the colorist out mid-shift.
-  setPersistence(auth, indexedDBLocalPersistence)
-    .catch(err => console.error("Failed to set native auth persistence:", err));
+  setPersistence(auth, indexedDBLocalPersistence).catch(err =>
+    console.error("Failed to set native auth persistence:", err),
+  );
 } else {
   // registerType: 'autoUpdate' (vite.config.ts) means a new service worker takes over and
   // reloads open tabs automatically once it finishes installing -- no user-facing "update

@@ -30,7 +30,9 @@ export function RevisitReminders({ revisitPlans, profilesByClientKey, nowMs }: R
 
   const now = new Date(nowMs);
   const rows = revisitPlans.map(plan => ({ plan, status: getRevisitStatus(plan.recommendedDate, now) }));
-  const counts = STATUS_ORDER.map(status => ({ status, count: rows.filter(r => r.status === status).length })).filter(c => c.count > 0);
+  const counts = STATUS_ORDER.map(status => ({ status, count: rows.filter(r => r.status === status).length })).filter(
+    c => c.count > 0,
+  );
   const isCollapsible = rows.length > COLLAPSED_LIMIT;
   const visibleRows = showAll || !isCollapsible ? rows : rows.slice(0, COLLAPSED_LIMIT);
 
@@ -51,17 +53,18 @@ export function RevisitReminders({ revisitPlans, profilesByClientKey, nowMs }: R
           const weeks = Math.round(plan.intervalDays / 7);
           const phone = profilesByClientKey.get(plan.clientKey)?.phone ?? null;
           const reminderText = buildRevisitReminderText(plan);
-          const reason = plan.intervalBasis === "history"
-            ? t("history.reminderReasonHistory")
-            : t(`history.reminderReason.${plan.driver}`);
+          const reason =
+            plan.intervalBasis === "history"
+              ? t("history.reminderReasonHistory")
+              : t(`history.reminderReason.${plan.driver}`);
           // drivers are ascending, so the first one further out than the chosen interval is
           // the next service due after this one (e.g. toner refresh now, full balayage later).
-          const nextDriver = plan.intervalBasis === "service"
-            ? plan.drivers.find(d => d.intervalDays > plan.intervalDays)
-            : undefined;
-          const reasonText = nextDriver === undefined
-            ? reason
-            : `${reason} · ${t("history.reminderNextService", { reason: t(`history.reminderReason.${nextDriver.kind}`), weeks: Math.round(nextDriver.intervalDays / 7) })}`;
+          const nextDriver =
+            plan.intervalBasis === "service" ? plan.drivers.find(d => d.intervalDays > plan.intervalDays) : undefined;
+          const reasonText =
+            nextDriver === undefined
+              ? reason
+              : `${reason} · ${t("history.reminderNextService", { reason: t(`history.reminderReason.${nextDriver.kind}`), weeks: Math.round(nextDriver.intervalDays / 7) })}`;
           return (
             <li key={plan.clientKey} className={`history__reminder history__reminder--${status}`}>
               <span className="history__reminder-client">{plan.clientName}</span>
@@ -74,7 +77,9 @@ export function RevisitReminders({ revisitPlans, profilesByClientKey, nowMs }: R
                 <button
                   type="button"
                   className="button button--share button--whatsapp history__reminder-remind"
-                  onClick={() => window.open(buildWhatsAppReminderUrl(phone, reminderText), "_blank", "noopener,noreferrer")}
+                  onClick={() =>
+                    window.open(buildWhatsAppReminderUrl(phone, reminderText), "_blank", "noopener,noreferrer")
+                  }
                 >
                   {t("history.remindWhatsApp")}
                 </button>

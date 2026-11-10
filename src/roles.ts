@@ -21,7 +21,10 @@ const USERS_COLLECTION = "users";
 // failure — see firestore.rules' `users` and `accessRequests` blocks. We only report
 // "pending" once we're sure the doc is really missing server-side; a cache miss while
 // offline would otherwise flash that screen.
-export function subscribeToMembership(uid: string, onChange: (membership: Exclude<Membership, "loading">) => void): Unsubscribe {
+export function subscribeToMembership(
+  uid: string,
+  onChange: (membership: Exclude<Membership, "loading">) => void,
+): Unsubscribe {
   return onSnapshot(
     doc(db, USERS_COLLECTION, uid),
     snapshot => {
@@ -40,7 +43,7 @@ export function subscribeToMembership(uid: string, onChange: (membership: Exclud
       }
       console.error(error);
       onChange("stylist");
-    }
+    },
   );
 }
 

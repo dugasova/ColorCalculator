@@ -11,7 +11,12 @@ export interface DeveloperVolumeFieldProps {
   idSuffix?: string;
 }
 
-export function DeveloperVolumeField({ targetShade, manualDeveloperVolume, onManualDeveloperVolumeChange, idSuffix = "" }: DeveloperVolumeFieldProps) {
+export function DeveloperVolumeField({
+  targetShade,
+  manualDeveloperVolume,
+  onManualDeveloperVolumeChange,
+  idSuffix = "",
+}: DeveloperVolumeFieldProps) {
   const { t } = useTranslation();
   if (!targetShade.developerVolumeChoices) {
     return null;

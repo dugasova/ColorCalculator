@@ -1,6 +1,10 @@
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { DeveloperVolume, Level } from "../../engine/levels";
-import { APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE, type ApplicationZone, type GramsInputMode } from "../../engine/applicationZone";
+import {
+  APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE,
+  type ApplicationZone,
+  type GramsInputMode,
+} from "../../engine/applicationZone";
 import type { BrandId } from "../../engine/brands";
 import type { MixingRatio } from "../../engine/shades";
 import type { RepeatFormulaRequest } from "../../history";

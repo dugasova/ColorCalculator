@@ -57,29 +57,65 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
     const naturalBase = step.naturalBase ?? null;
 
     if (naturalBase !== null) {
-      addScaled(shadeStockId(brandId, naturalBase.shade.line ?? null, naturalBase.shade.code), "shade", naturalBase.shade.code, naturalBase.grams);
+      addScaled(
+        shadeStockId(brandId, naturalBase.shade.line ?? null, naturalBase.shade.code),
+        "shade",
+        naturalBase.shade.code,
+        naturalBase.grams,
+      );
     }
     if (blend !== null) {
-      addScaled(shadeStockId(brandId, blend.shadeA.line ?? null, blend.shadeA.code), "shade", blend.shadeA.code, blend.shadeAGrams);
-      addScaled(shadeStockId(brandId, blend.shadeB.line ?? null, blend.shadeB.code), "shade", blend.shadeB.code, blend.shadeBGrams);
+      addScaled(
+        shadeStockId(brandId, blend.shadeA.line ?? null, blend.shadeA.code),
+        "shade",
+        blend.shadeA.code,
+        blend.shadeAGrams,
+      );
+      addScaled(
+        shadeStockId(brandId, blend.shadeB.line ?? null, blend.shadeB.code),
+        "shade",
+        blend.shadeB.code,
+        blend.shadeBGrams,
+      );
     } else {
       const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
       const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && additionalShade2Grams > 0;
-      const primaryGrams = grams.colorGrams
-        - (naturalBase?.grams ?? 0)
-        - (hasAdditional ? additionalShadeGrams : 0)
-        - (hasAdditional2 ? additionalShade2Grams : 0);
-      addScaled(shadeStockId(brandId, targetShade.line ?? null, targetShade.code), "shade", targetShade.code, primaryGrams);
+      const primaryGrams =
+        grams.colorGrams -
+        (naturalBase?.grams ?? 0) -
+        (hasAdditional ? additionalShadeGrams : 0) -
+        (hasAdditional2 ? additionalShade2Grams : 0);
+      addScaled(
+        shadeStockId(brandId, targetShade.line ?? null, targetShade.code),
+        "shade",
+        targetShade.code,
+        primaryGrams,
+      );
       if (hasAdditional) {
-        addScaled(shadeStockId(brandId, additionalShade.line ?? null, additionalShade.code), "shade", additionalShade.code, additionalShadeGrams);
+        addScaled(
+          shadeStockId(brandId, additionalShade.line ?? null, additionalShade.code),
+          "shade",
+          additionalShade.code,
+          additionalShadeGrams,
+        );
       }
       if (hasAdditional2 && additionalShade2 !== null && additionalShade2 !== undefined) {
-        addScaled(shadeStockId(brandId, additionalShade2.line ?? null, additionalShade2.code), "shade", additionalShade2.code, additionalShade2Grams);
+        addScaled(
+          shadeStockId(brandId, additionalShade2.line ?? null, additionalShade2.code),
+          "shade",
+          additionalShade2.code,
+          additionalShade2Grams,
+        );
       }
     }
 
     if (result.developerVolume !== null) {
-      addScaled(developerStockId(brandId, line, result.developerVolume), "developer", String(result.developerVolume), grams.developerGrams);
+      addScaled(
+        developerStockId(brandId, line, result.developerVolume),
+        "developer",
+        String(result.developerVolume),
+        grams.developerGrams,
+      );
     }
   }
 

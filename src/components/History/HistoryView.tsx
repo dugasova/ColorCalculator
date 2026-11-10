@@ -37,8 +37,16 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
   // stylist can zoom in on a photo without losing their place in the visit list.
   const [photoLightbox, setPhotoLightbox] = useState<{ url: string; label: string } | null>(null);
   const {
-    entries, setEntries, isLoading, error, filtered, groups, profilesByClientKey,
-    deleteClientGroup, deletingClientKey, deleteError,
+    entries,
+    setEntries,
+    isLoading,
+    error,
+    filtered,
+    groups,
+    profilesByClientKey,
+    deleteClientGroup,
+    deletingClientKey,
+    deleteError,
   } = useHistoryData({ isAdmin, currentUserEmail, search });
   const gramsEditor = useActualGramsEditor(setEntries);
   const revisitPlans = useMemo(() => planClientRevisits(entries), [entries]);
@@ -60,7 +68,9 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
 
   return (
     <div className="calculator">
-      <h1 className="calculator__title">{t("history.titlePrefix")} <span className="calculator__title-accent">{t("history.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        {t("history.titlePrefix")} <span className="calculator__title-accent">{t("history.titleAccent")}</span>
+      </h1>
 
       {!isLoading && error === null && (
         <RevisitReminders revisitPlans={revisitPlans} profilesByClientKey={profilesByClientKey} nowMs={nowMs} />
@@ -76,12 +86,30 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
         />
       </div>
 
-      {isLoading && <p className="history__status" aria-live="polite">{t("history.loading")}</p>}
-      {error !== null && <p className="warning" role="alert">{error}</p>}
-      {gramsEditor.gramsError !== null && <p className="warning" role="alert">{gramsEditor.gramsError}</p>}
-      {deleteError !== null && <p className="warning" role="alert">{deleteError}</p>}
+      {isLoading && (
+        <p className="history__status" aria-live="polite">
+          {t("history.loading")}
+        </p>
+      )}
+      {error !== null && (
+        <p className="warning" role="alert">
+          {error}
+        </p>
+      )}
+      {gramsEditor.gramsError !== null && (
+        <p className="warning" role="alert">
+          {gramsEditor.gramsError}
+        </p>
+      )}
+      {deleteError !== null && (
+        <p className="warning" role="alert">
+          {deleteError}
+        </p>
+      )}
       {!isLoading && error === null && filtered.length === 0 && (
-        <p className="history__status" aria-live="polite">{t(entries.length === 0 ? "history.emptyFirstRun" : "history.empty")}</p>
+        <p className="history__status" aria-live="polite">
+          {t(entries.length === 0 ? "history.emptyFirstRun" : "history.empty")}
+        </p>
       )}
 
       <ClientGroupList groups={groups} onOpenGroup={setOpenGroupKey} />
@@ -104,7 +132,8 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
           entry={editingEntry}
           onClose={() => setEditingEntryId(null)}
           onSaved={(entryId, updated) =>
-            setEntries(prev => prev.map(e => (e.id === entryId ? { ...e, ...updated } : e)))}
+            setEntries(prev => prev.map(e => (e.id === entryId ? { ...e, ...updated } : e)))
+          }
         />
       )}
 
@@ -119,7 +148,12 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
           title={t("history.deleteClientConfirmTitle", { name: confirmDeleteGroup.displayName })}
           onClose={() => setConfirmDeleteKey(null)}
         >
-          <p>{t("history.deleteClientConfirmBody", { name: confirmDeleteGroup.displayName, count: confirmDeleteGroup.entries.length })}</p>
+          <p>
+            {t("history.deleteClientConfirmBody", {
+              name: confirmDeleteGroup.displayName,
+              count: confirmDeleteGroup.entries.length,
+            })}
+          </p>
           <div className="history__delete-confirm-actions">
             <button
               type="button"
@@ -132,10 +166,14 @@ export function HistoryView({ onRepeat, isAdmin, currentUserEmail }: HistoryView
             <button
               type="button"
               className="button button--danger"
-              onClick={() => { void handleConfirmDelete(); }}
+              onClick={() => {
+                void handleConfirmDelete();
+              }}
               disabled={deletingClientKey === confirmDeleteGroup.key}
             >
-              {deletingClientKey === confirmDeleteGroup.key ? t("history.deletingClient") : t("history.deleteClientConfirmButton")}
+              {deletingClientKey === confirmDeleteGroup.key
+                ? t("history.deletingClient")
+                : t("history.deleteClientConfirmButton")}
             </button>
           </div>
         </Modal>

@@ -24,12 +24,19 @@ function shadeLabel(shade: Shade): string {
 // pass for the same result -- and a plain-language match quality (describeShadeMatchQuality)
 // instead of a raw delta-E number nobody but a color scientist would recognize. Collapsed by
 // default; computing every brand's closest shade is cheap but pointless until asked for.
-export function CrossBrandMatchField({ targetShade, currentBrandId, brands, onSelectMatch, idSuffix = "" }: CrossBrandMatchFieldProps) {
+export function CrossBrandMatchField({
+  targetShade,
+  currentBrandId,
+  brands,
+  onSelectMatch,
+  idSuffix = "",
+}: CrossBrandMatchFieldProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const panelId = `crossBrandMatchPanel${idSuffix}`;
   const targetPermanence = getLinePermanence(targetShade.line);
-  const matches = expanded && targetPermanence !== null ? findClosestShadeByBrand(targetShade, brands, currentBrandId) : [];
+  const matches =
+    expanded && targetPermanence !== null ? findClosestShadeByBrand(targetShade, brands, currentBrandId) : [];
 
   return (
     <div className="field cross-brand-match-group">

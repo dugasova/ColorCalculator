@@ -42,7 +42,9 @@ describe("consumeStock", () => {
 
   it("treats an offline, uncached lookup the same as untracked instead of throwing", async () => {
     getDocMock.mockRejectedValue({ code: "unavailable" });
-    await expect(consumeStock([{ id: "shade::wella::x::y", kind: "shade", code: "y", grams: 30 }])).resolves.toBeUndefined();
+    await expect(
+      consumeStock([{ id: "shade::wella::x::y", kind: "shade", code: "y", grams: 30 }]),
+    ).resolves.toBeUndefined();
     expect(updateDocMock).not.toHaveBeenCalled();
   });
 });
@@ -69,10 +71,7 @@ describe("reconcileStockConsumption", () => {
     const after = [makeColorStep({ actualColorGrams: 45 })];
     await reconcileStockConsumption(before, after);
     expect(incrementMock).toHaveBeenCalledWith(-15);
-    expect(updateDocMock).toHaveBeenCalledWith(
-      expect.anything(),
-      { remainingGrams: { kind: "increment", n: -15 } }
-    );
+    expect(updateDocMock).toHaveBeenCalledWith(expect.anything(), { remainingGrams: { kind: "increment", n: -15 } });
   });
 
   it("issues no update at all when the two step arrays consume the same grams", async () => {

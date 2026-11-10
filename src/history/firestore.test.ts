@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { subscribeToFormulaHistory, saveFormulaToHistory, deleteHistoryEntry, updateHistoryEntryDetails } from "./firestore";
+import {
+  subscribeToFormulaHistory,
+  saveFormulaToHistory,
+  deleteHistoryEntry,
+  updateHistoryEntryDetails,
+} from "./firestore";
 
 let autoIdCounter = 0;
 const setDocMock = vi.fn();
@@ -9,7 +14,7 @@ const deleteDocMock = vi.fn();
 // (three args) addresses an existing document by the id given -- see clients.test.ts's docMock
 // for the same split. saveFormulaToHistory only ever uses the one-arg form.
 const docMock = vi.fn((...args: unknown[]) =>
-  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args }
+  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args },
 );
 const uploadBytesMock = vi.fn();
 const getDownloadURLMock = vi.fn();
@@ -35,7 +40,7 @@ vi.mock("firebase/firestore", () => ({
   // `z.instanceof` check - any distinct class works here since these tests never
   // construct one. Declared inside the factory since `vi.mock` factories are hoisted
   // above top-level module code.
-  Timestamp: class MockTimestamp { },
+  Timestamp: class MockTimestamp {},
 }));
 vi.mock("firebase/storage", () => ({
   deleteObject: (...args: unknown[]) => deleteObjectMock(...args),
@@ -76,13 +81,15 @@ beforeEach(() => {
 describe("saveFormulaToHistory", () => {
   it("resolves 'synced' even when the photo upload fails, instead of surfacing a false error that would prompt a duplicate-creating retry", async () => {
     uploadBytesMock.mockRejectedValue(new Error("network drop"));
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => { });
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    await expect(saveFormulaToHistory({
-      ...baseParams(),
-      beforePhotoFile: new File(["x"], "before.jpg", { type: "image/jpeg" }),
-      afterPhotoFile: null,
-    })).resolves.toBe("synced");
+    await expect(
+      saveFormulaToHistory({
+        ...baseParams(),
+        beforePhotoFile: new File(["x"], "before.jpg", { type: "image/jpeg" }),
+        afterPhotoFile: null,
+      }),
+    ).resolves.toBe("synced");
 
     // The history entry itself (client, formula, pricing, patch-test info) was already
     // durably saved via setDoc before the photo upload ran - exactly once, no retry loop.
@@ -111,7 +118,7 @@ describe("saveFormulaToHistory", () => {
     expect(updateDocMock).toHaveBeenCalledTimes(1);
     expect(updateDocMock).toHaveBeenCalledWith(
       { kind: "doc", id: "auto-1" },
-      { beforePhotoUrl: "https://example.test/photo.jpg" }
+      { beforePhotoUrl: "https://example.test/photo.jpg" },
     );
   });
 
@@ -137,7 +144,11 @@ describe("saveFormulaToHistory", () => {
 describe("subscribeToFormulaHistory", () => {
   it("queries every entry, unfiltered by owner, for an admin", () => {
     onSnapshotMock.mockImplementation(() => () => {});
-    subscribeToFormulaHistory({ isAdmin: true, currentUserEmail: "admin@salon.test" }, () => {}, () => {});
+    subscribeToFormulaHistory(
+      { isAdmin: true, currentUserEmail: "admin@salon.test" },
+      () => {},
+      () => {},
+    );
 
     expect(whereMock).not.toHaveBeenCalled();
     expect(orderByMock).toHaveBeenCalledWith("appliedAt", "desc");
@@ -146,13 +157,17 @@ describe("subscribeToFormulaHistory", () => {
 
   it("scopes the query to the signed-in stylist's own entries for a non-admin (Firestore rules reject an unscoped list request for them)", () => {
     onSnapshotMock.mockImplementation(() => () => {});
-    subscribeToFormulaHistory({ isAdmin: false, currentUserEmail: "stylist@salon.test" }, () => {}, () => {});
+    subscribeToFormulaHistory(
+      { isAdmin: false, currentUserEmail: "stylist@salon.test" },
+      () => {},
+      () => {},
+    );
 
     expect(whereMock).toHaveBeenCalledWith("appliedBy", "==", "stylist@salon.test");
     expect(queryMock).toHaveBeenCalledWith(
       "collection-ref",
       { kind: "where", field: "appliedBy", op: "==", value: "stylist@salon.test" },
-      { kind: "orderBy", field: "appliedAt" }
+      { kind: "orderBy", field: "appliedAt" },
     );
   });
 
@@ -164,9 +179,20 @@ describe("subscribeToFormulaHistory", () => {
           {
             id: "good",
             data: () => ({
-              clientName: "Anna", clientId: null, note: "", appliedBy: "s@t", steps: [], markupMultiplier: 1,
-              productCost: null, servicePrice: null, patchTestDate: "", allergyNotes: "", patchTestOverride: false,
-              beforePhotoUrl: null, afterPhotoUrl: null, appliedAt: null,
+              clientName: "Anna",
+              clientId: null,
+              note: "",
+              appliedBy: "s@t",
+              steps: [],
+              markupMultiplier: 1,
+              productCost: null,
+              servicePrice: null,
+              patchTestDate: "",
+              allergyNotes: "",
+              patchTestOverride: false,
+              beforePhotoUrl: null,
+              afterPhotoUrl: null,
+              appliedAt: null,
             }),
           },
           { id: "bad", data: () => ({ appliedBy: "s@t" }) }, // missing required fields
@@ -188,7 +214,11 @@ describe("subscribeToFormulaHistory", () => {
 
 describe("deleteHistoryEntry", () => {
   it("deletes both photo slots and the document when both photos exist", async () => {
-    await deleteHistoryEntry({ id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: "https://x/after.jpg" });
+    await deleteHistoryEntry({
+      id: "entry-1",
+      beforePhotoUrl: "https://x/before.jpg",
+      afterPhotoUrl: "https://x/after.jpg",
+    });
 
     expect(deleteObjectMock).toHaveBeenCalledTimes(2);
     expect(deleteObjectMock).toHaveBeenCalledWith({ kind: "ref", args: [{}, "formulaHistory/entry-1/before"] });
@@ -208,8 +238,9 @@ describe("deleteHistoryEntry", () => {
     deleteObjectMock.mockRejectedValue({ code: "storage/object-not-found" });
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    await expect(deleteHistoryEntry({ id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null }))
-      .resolves.toBeUndefined();
+    await expect(
+      deleteHistoryEntry({ id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null }),
+    ).resolves.toBeUndefined();
 
     expect(deleteDocMock).toHaveBeenCalledTimes(1);
     expect(consoleError).not.toHaveBeenCalled();
@@ -220,8 +251,9 @@ describe("deleteHistoryEntry", () => {
     deleteObjectMock.mockRejectedValue(new Error("network drop"));
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    await expect(deleteHistoryEntry({ id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null }))
-      .resolves.toBeUndefined();
+    await expect(
+      deleteHistoryEntry({ id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null }),
+    ).resolves.toBeUndefined();
 
     expect(deleteDocMock).toHaveBeenCalledTimes(1);
     expect(consoleError).toHaveBeenCalledTimes(1);
@@ -256,7 +288,14 @@ describe("updateHistoryEntryDetails", () => {
     expect(updateDocMock).toHaveBeenCalledTimes(1);
     expect(updateDocMock).toHaveBeenCalledWith(
       { kind: "doc", args: [{}, "formulaHistory", "entry-1"] },
-      { note: "edited note", patchTestDate: "2024-02-27T10:00", allergyNotes: "none", patchTestOverride: false, beforePhotoUrl: null, afterPhotoUrl: null },
+      {
+        note: "edited note",
+        patchTestDate: "2024-02-27T10:00",
+        allergyNotes: "none",
+        patchTestOverride: false,
+        beforePhotoUrl: null,
+        afterPhotoUrl: null,
+      },
     );
     expect(result.note).toBe("edited note");
     expect(uploadBytesMock).not.toHaveBeenCalled();
@@ -264,9 +303,11 @@ describe("updateHistoryEntryDetails", () => {
   });
 
   it("keeps an existing photo URL untouched on a 'keep' edit", async () => {
-    const result = await updateHistoryEntryDetails(editParams({
-      entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null },
-    }));
+    const result = await updateHistoryEntryDetails(
+      editParams({
+        entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null },
+      }),
+    );
 
     expect(result.beforePhotoUrl).toBe("https://x/before.jpg");
     expect(uploadBytesMock).not.toHaveBeenCalled();
@@ -286,18 +327,24 @@ describe("updateHistoryEntryDetails", () => {
   it("rejects and leaves the document untouched when a photo upload fails, so the colorist sees the failure and can retry", async () => {
     uploadBytesMock.mockRejectedValue(new Error("network drop"));
 
-    await expect(updateHistoryEntryDetails(editParams({
-      beforePhoto: { kind: "replace", file: new File(["x"], "before.jpg") },
-    }))).rejects.toThrow("network drop");
+    await expect(
+      updateHistoryEntryDetails(
+        editParams({
+          beforePhoto: { kind: "replace", file: new File(["x"], "before.jpg") },
+        }),
+      ),
+    ).rejects.toThrow("network drop");
 
     expect(updateDocMock).not.toHaveBeenCalled();
   });
 
   it("clears the URL, then deletes the stored file, when a photo is removed", async () => {
-    const result = await updateHistoryEntryDetails(editParams({
-      entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: "https://x/after.jpg" },
-      beforePhoto: { kind: "remove" },
-    }));
+    const result = await updateHistoryEntryDetails(
+      editParams({
+        entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: "https://x/after.jpg" },
+        beforePhoto: { kind: "remove" },
+      }),
+    );
 
     expect(result.beforePhotoUrl).toBeNull();
     expect(result.afterPhotoUrl).toBe("https://x/after.jpg");
@@ -309,10 +356,14 @@ describe("updateHistoryEntryDetails", () => {
   it("does not delete any file, and does not touch Storage, when the document update fails", async () => {
     updateDocMock.mockRejectedValue(new Error("permission-denied"));
 
-    await expect(updateHistoryEntryDetails(editParams({
-      entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null },
-      beforePhoto: { kind: "remove" },
-    }))).rejects.toThrow("permission-denied");
+    await expect(
+      updateHistoryEntryDetails(
+        editParams({
+          entry: { id: "entry-1", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: null },
+          beforePhoto: { kind: "remove" },
+        }),
+      ),
+    ).rejects.toThrow("permission-denied");
 
     expect(deleteObjectMock).not.toHaveBeenCalled();
   });

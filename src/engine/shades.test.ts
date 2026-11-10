@@ -50,7 +50,13 @@ describe("canBlendShades", () => {
   it("still enforces line/mixing-chemistry agreement within the tolerance", () => {
     const target: Shade = { code: "8/1", level: 8, tone: "ash", line: "koleston-perfect" };
     const wrongLine: Shade = { code: "9/1", level: 9, tone: "ash", line: "color-touch" };
-    const wrongMix: Shade = { code: "9/1", level: 9, tone: "ash", line: "koleston-perfect", fixedMixingRatio: { colorParts: 1, developerParts: 2 } };
+    const wrongMix: Shade = {
+      code: "9/1",
+      level: 9,
+      tone: "ash",
+      line: "koleston-perfect",
+      fixedMixingRatio: { colorParts: 1, developerParts: 2 },
+    };
     expect(canBlendShades(target, wrongLine, 1)).toBe(false);
     expect(canBlendShades(target, wrongMix, 1)).toBe(false);
   });
@@ -99,7 +105,12 @@ describe("compareShadesForDisplay", () => {
       { code: "9/1", level: 9, tone: "ash" },
       { code: "6/0", level: 6, tone: "natural" },
     ];
-    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(["6/0", "9/1"]);
+    expect(
+      shades
+        .slice()
+        .sort(compareShadesForDisplay)
+        .map(s => s.code),
+    ).toEqual(["6/0", "9/1"]);
   });
 
   it("orders same-level reflects ascending by their code suffix, not by transcription order", () => {
@@ -113,7 +124,12 @@ describe("compareShadesForDisplay", () => {
       { code: "8/34", level: 8, tone: "gold", secondaryTone: "red" },
       { code: "8/41", level: 8, tone: "red", secondaryTone: "ash" },
     ];
-    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(["8/34", "8/38", "8/41", "8/96", "8/97"]);
+    expect(
+      shades
+        .slice()
+        .sort(compareShadesForDisplay)
+        .map(s => s.code),
+    ).toEqual(["8/34", "8/38", "8/41", "8/96", "8/97"]);
   });
 
   it("sorts a bare level-only code (no reflect suffix) before any of its reflects", () => {
@@ -121,7 +137,12 @@ describe("compareShadesForDisplay", () => {
       { code: "6.1", level: 6, tone: "ash" },
       { code: "6", level: 6, tone: "natural" },
     ];
-    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(["6", "6.1"]);
+    expect(
+      shades
+        .slice()
+        .sort(compareShadesForDisplay)
+        .map(s => s.code),
+    ).toEqual(["6", "6.1"]);
   });
 
   it("strips both dot and slash separators so L\u2019Or\u00e9al and Wella codes sort the same way", () => {
@@ -130,6 +151,11 @@ describe("compareShadesForDisplay", () => {
       { code: "6/91", level: 6, tone: "slate-grey", secondaryTone: "ash" },
       { code: "6.13", level: 6, tone: "ash", secondaryTone: "gold" },
     ];
-    expect(shades.slice().sort(compareShadesForDisplay).map(s => s.code)).toEqual(["6.13", "6.35", "6/91"]);
+    expect(
+      shades
+        .slice()
+        .sort(compareShadesForDisplay)
+        .map(s => s.code),
+    ).toEqual(["6.13", "6.35", "6/91"]);
   });
 });

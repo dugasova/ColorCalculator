@@ -21,11 +21,13 @@ export function StartingBaseField({ startingBase, onStartingBaseChange, idSuffix
         <Select
           id={`startingBaseKind${idSuffix}`}
           value={startingBase.kind}
-          onChange={value => onStartingBaseChange(
-            value === "colored"
-              ? { kind: "colored", tone: startingBase.kind === "colored" ? startingBase.tone : "natural" }
-              : { kind: "natural" }
-          )}
+          onChange={value =>
+            onStartingBaseChange(
+              value === "colored"
+                ? { kind: "colored", tone: startingBase.kind === "colored" ? startingBase.tone : "natural" }
+                : { kind: "natural" },
+            )
+          }
           options={[
             { value: "natural", label: t("fields.startingBase.natural") },
             { value: "colored", label: t("fields.startingBase.colored") },

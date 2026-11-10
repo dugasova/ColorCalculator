@@ -45,9 +45,7 @@ export const CARD_MAX_CLIPPED_FRACTION = 0.05;
 // shadow, or genuinely not a grey card) to derive a trustworthy gain from.
 export const CARD_MIN_LINEAR = 0.01;
 
-export type GreyCardResult =
-  | { ok: true; gains: LinearRgb }
-  | { ok: false; reason: "tooSmall" | "clipped" | "tooDark" };
+export type GreyCardResult = { ok: true; gains: LinearRgb } | { ok: false; reason: "tooSmall" | "clipped" | "tooDark" };
 
 // Reads a cropped photo's grey-card pixel data (see readPhotoPixels) and derives the
 // per-channel linear gain that maps its measured reflectance to GREY_CARD_REFLECTANCE --
@@ -65,18 +63,26 @@ export function measureGreyCard(rgba: Uint8ClampedArray): GreyCardResult {
   if (opaque.length < MIN_SAMPLE_PIXELS) return { ok: false, reason: "tooSmall" };
 
   const clippedCount = opaque.filter(
-    ([r, g, b]) => r >= CARD_CLIP_LEVEL || g >= CARD_CLIP_LEVEL || b >= CARD_CLIP_LEVEL
+    ([r, g, b]) => r >= CARD_CLIP_LEVEL || g >= CARD_CLIP_LEVEL || b >= CARD_CLIP_LEVEL,
   ).length;
   if (clippedCount / opaque.length > CARD_MAX_CLIPPED_FRACTION) return { ok: false, reason: "clipped" };
 
   const linear = opaque.map(([r, g, b]): LinearRgb => [srgbToLinear(r), srgbToLinear(g), srgbToLinear(b)]);
-  linear.sort((a, b) => (0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]) - (0.2126 * b[0] + 0.7152 * b[1] + 0.0722 * b[2]));
+  linear.sort(
+    (a, b) => 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2] - (0.2126 * b[0] + 0.7152 * b[1] + 0.0722 * b[2]),
+  );
   const trim = Math.floor(linear.length * TRIM_FRACTION);
   const kept = linear.slice(trim, linear.length - trim);
 
   const mean: LinearRgb = [0, 0, 0];
-  for (const [r, g, b] of kept) { mean[0] += r; mean[1] += g; mean[2] += b; }
-  mean[0] /= kept.length; mean[1] /= kept.length; mean[2] /= kept.length;
+  for (const [r, g, b] of kept) {
+    mean[0] += r;
+    mean[1] += g;
+    mean[2] += b;
+  }
+  mean[0] /= kept.length;
+  mean[1] /= kept.length;
+  mean[2] /= kept.length;
 
   if (mean[0] < CARD_MIN_LINEAR || mean[1] < CARD_MIN_LINEAR || mean[2] < CARD_MIN_LINEAR) {
     return { ok: false, reason: "tooDark" };
@@ -114,8 +120,12 @@ export function measureHairColor(rgba: Uint8ClampedArray, gains: LinearRgb): Pho
 
   const sum = kept.reduce(
     (acc, s) => {
-      acc.lab[0] += s.lab[0]; acc.lab[1] += s.lab[1]; acc.lab[2] += s.lab[2];
-      acc.corrected[0] += s.corrected[0]; acc.corrected[1] += s.corrected[1]; acc.corrected[2] += s.corrected[2];
+      acc.lab[0] += s.lab[0];
+      acc.lab[1] += s.lab[1];
+      acc.lab[2] += s.lab[2];
+      acc.corrected[0] += s.corrected[0];
+      acc.corrected[1] += s.corrected[1];
+      acc.corrected[2] += s.corrected[2];
       return acc;
     },
     { lab: [0, 0, 0] as Lab, corrected: [0, 0, 0] as LinearRgb },
@@ -197,7 +207,11 @@ export function buildNaturalLevelReferences(brands: Record<BrandId, Brand>, inde
     }
   }
   return [...byLevel.entries()]
-    .map(([level, { sum, count }]): LevelReference => ({ level, lab: [sum[0] / count, sum[1] / count, sum[2] / count], sampleCount: count }))
+    .map(([level, { sum, count }]): LevelReference => ({
+      level,
+      lab: [sum[0] / count, sum[1] / count, sum[2] / count],
+      sampleCount: count,
+    }))
     .sort((a, b) => a.level - b.level);
 }
 

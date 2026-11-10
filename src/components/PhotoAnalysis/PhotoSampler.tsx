@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  measureGreyCard, measureHairColor, type PhotoColorSample,
-} from "../../engine/photoColor";
+import { measureGreyCard, measureHairColor, type PhotoColorSample } from "../../engine/photoColor";
 import { usePhotoUpload } from "../FormulaCalculator/usePhotoUpload";
 import { readPhotoPixels, type PhotoCrop } from "./readPhotoPixels";
 import { PhotoCropSelector, type PhotoRegion } from "./PhotoCropSelector";
@@ -135,7 +133,11 @@ export function PhotoSampler({ idPrefix, onSampleChange }: PhotoSamplerProps) {
         {isAnalyzing ? t("photoAnalysis.analyzing") : t("photoAnalysis.analyze")}
       </button>
 
-      {error !== null && <p className="warning" role="alert">{error}</p>}
+      {error !== null && (
+        <p className="warning" role="alert">
+          {error}
+        </p>
+      )}
 
       {sample !== null && (
         <div className="photo-estimate__result">

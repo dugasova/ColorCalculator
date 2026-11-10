@@ -29,96 +29,170 @@ describe("FormulaCalculator", () => {
   it("renders the additional shade selector but hides its grams input until a shade is chosen", () => {
     const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" />);
 
-    expect(html).toContain("id=\"additionalShadeCode\"");
-    expect(html).not.toContain("id=\"additionalShadeGrams\"");
+    expect(html).toContain('id="additionalShadeCode"');
+    expect(html).not.toContain('id="additionalShadeGrams"');
   });
 
   it("renders the substitute-blend toggle but hides the two component fields until it is enabled", () => {
     const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" />);
 
-    expect(html).toContain("id=\"substituteBlend\"");
-    expect(html).not.toContain("id=\"blendShadeA\"");
-    expect(html).not.toContain("id=\"blendShadeB\"");
+    expect(html).toContain('id="substituteBlend"');
+    expect(html).not.toContain('id="blendShadeA"');
+    expect(html).not.toContain('id="blendShadeB"');
   });
 
   it("renders a collapsed cross-brand match trigger, with the results list absent until expanded", () => {
     const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" />);
-    expect(html).toContain("aria-expanded=\"false\"");
+    expect(html).toContain('aria-expanded="false"');
     expect(html).not.toContain("cross-brand-match-list");
     expect(html).not.toContain("cross-brand-match-empty");
   });
 
   describe("mixing ratio choice", () => {
-    function repeatFor(brandId: RepeatFormulaRequest["brandId"], line: string | null, targetShadeCode: string): RepeatFormulaRequest {
+    function repeatFor(
+      brandId: RepeatFormulaRequest["brandId"],
+      line: string | null,
+      targetShadeCode: string,
+    ): RepeatFormulaRequest {
       return {
-        clientName: "Anna K.", clientId: "anna-1",
-        brandId, line, targetShadeCode, startLevel: 8, grayPercent: 0, totalGrams: 60, colorGrams: 30,
-        manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
-        blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
-        processingMinutes: 20, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
-        servicePrice: undefined, prePigmentationEnabled: false,
+        clientName: "Anna K.",
+        clientId: "anna-1",
+        brandId,
+        line,
+        targetShadeCode,
+        startLevel: 8,
+        grayPercent: 0,
+        totalGrams: 60,
+        colorGrams: 30,
+        manualDeveloperVolume: undefined,
+        manualMixingRatio: undefined,
+        additionalShadeCode: null,
+        additionalShadeGrams: 0,
+        blendShadeACode: null,
+        blendShadeBCode: null,
+        blendPrimaryPercent: 70,
+        processingMinutes: 20,
+        applicationZone: "full-head",
+        pricePerGram: 0.18,
+        markupMultiplier: 4,
+        servicePrice: undefined,
+        prePigmentationEnabled: false,
       };
     }
 
     it("offers the ratio picker for a Wella Color Touch shade, defaulting to 1 : 2", () => {
       const html = renderToStaticMarkup(
-        <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatFor("wella", "color-touch", "8/73")} />
+        <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatFor("wella", "color-touch", "8/73")} />,
       );
 
-      expect(html).toContain("id=\"manualDeveloperVolume\"");
-      expect(html).toContain("id=\"manualMixingRatio\"");
+      expect(html).toContain('id="manualDeveloperVolume"');
+      expect(html).toContain('id="manualMixingRatio"');
       expect(html).toContain("1 : 2");
     });
 
     it("hides the ratio picker for a shade with a single fixed ratio", () => {
       const html = renderToStaticMarkup(
-        <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatFor("igora", "vibrance", "8-0")} />
+        <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatFor("igora", "vibrance", "8-0")} />,
       );
 
-      expect(html).not.toContain("id=\"manualMixingRatio\"");
+      expect(html).not.toContain('id="manualMixingRatio"');
     });
   });
 
   it("hides the pre-pigmentation checkbox when the level drop is under 2 (no lift/no drop)", () => {
     const repeatRequest: RepeatFormulaRequest = {
-      clientName: "Anna K.", clientId: "anna-1",
-      brandId: "generic", line: null, targetShadeCode: "8.1", startLevel: 8, grayPercent: 0, totalGrams: 60, colorGrams: 30,
-      manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
-      blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
-      processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
-      servicePrice: undefined, prePigmentationEnabled: false,
+      clientName: "Anna K.",
+      clientId: "anna-1",
+      brandId: "generic",
+      line: null,
+      targetShadeCode: "8.1",
+      startLevel: 8,
+      grayPercent: 0,
+      totalGrams: 60,
+      colorGrams: 30,
+      manualDeveloperVolume: undefined,
+      manualMixingRatio: undefined,
+      additionalShadeCode: null,
+      additionalShadeGrams: 0,
+      blendShadeACode: null,
+      blendShadeBCode: null,
+      blendPrimaryPercent: 70,
+      processingMinutes: 30,
+      applicationZone: "full-head",
+      pricePerGram: 0.18,
+      markupMultiplier: 4,
+      servicePrice: undefined,
+      prePigmentationEnabled: false,
     };
-    const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatRequest} />);
+    const html = renderToStaticMarkup(
+      <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatRequest} />,
+    );
 
-    expect(html).not.toContain("id=\"prePigmentationEnabled\"");
+    expect(html).not.toContain('id="prePigmentationEnabled"');
   });
 
   it("shows the pre-pigmentation checkbox, unchecked, when the level drop is 2 or more and the repeated entry never opted in", () => {
     const repeatRequest: RepeatFormulaRequest = {
-      clientName: "Anna K.", clientId: "anna-1",
-      brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30, colorGrams: 15,
-      manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
-      blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
-      processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
-      servicePrice: undefined, prePigmentationEnabled: false,
+      clientName: "Anna K.",
+      clientId: "anna-1",
+      brandId: "generic",
+      line: null,
+      targetShadeCode: "5.4",
+      startLevel: 9,
+      grayPercent: 0,
+      totalGrams: 30,
+      colorGrams: 15,
+      manualDeveloperVolume: undefined,
+      manualMixingRatio: undefined,
+      additionalShadeCode: null,
+      additionalShadeGrams: 0,
+      blendShadeACode: null,
+      blendShadeBCode: null,
+      blendPrimaryPercent: 70,
+      processingMinutes: 30,
+      applicationZone: "full-head",
+      pricePerGram: 0.18,
+      markupMultiplier: 4,
+      servicePrice: undefined,
+      prePigmentationEnabled: false,
     };
-    const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatRequest} />);
+    const html = renderToStaticMarkup(
+      <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatRequest} />,
+    );
 
-    expect(html).toContain("id=\"prePigmentationEnabled\"");
+    expect(html).toContain('id="prePigmentationEnabled"');
     expect(html).toContain("Required, same visit");
     expect(html).not.toContain("Step 1");
   });
 
   it("restores an opted-in filler step when repeating an entry that had it checked", () => {
     const repeatRequest: RepeatFormulaRequest = {
-      clientName: "Anna K.", clientId: "anna-1",
-      brandId: "generic", line: null, targetShadeCode: "5.4", startLevel: 9, grayPercent: 0, totalGrams: 30, colorGrams: 15,
-      manualDeveloperVolume: undefined, manualMixingRatio: undefined, additionalShadeCode: null, additionalShadeGrams: 0,
-      blendShadeACode: null, blendShadeBCode: null, blendPrimaryPercent: 70,
-      processingMinutes: 30, applicationZone: "full-head", pricePerGram: 0.18, markupMultiplier: 4,
-      servicePrice: undefined, prePigmentationEnabled: true,
+      clientName: "Anna K.",
+      clientId: "anna-1",
+      brandId: "generic",
+      line: null,
+      targetShadeCode: "5.4",
+      startLevel: 9,
+      grayPercent: 0,
+      totalGrams: 30,
+      colorGrams: 15,
+      manualDeveloperVolume: undefined,
+      manualMixingRatio: undefined,
+      additionalShadeCode: null,
+      additionalShadeGrams: 0,
+      blendShadeACode: null,
+      blendShadeBCode: null,
+      blendPrimaryPercent: 70,
+      processingMinutes: 30,
+      applicationZone: "full-head",
+      pricePerGram: 0.18,
+      markupMultiplier: 4,
+      servicePrice: undefined,
+      prePigmentationEnabled: true,
     };
-    const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatRequest} />);
+    const html = renderToStaticMarkup(
+      <FormulaCalculator appliedBy="stylist@example.com" repeatRequest={repeatRequest} />,
+    );
 
     expect(html).toContain("Step 1");
     expect(html).toContain("Generic 5.4 (Copper)");
@@ -128,16 +202,20 @@ describe("FormulaCalculator", () => {
     const html = renderToStaticMarkup(
       <PaletteReactContext.Provider
         value={{
-          brands: BRANDS, customBrands: [], overrides: [], stock: [],
-          pricingSettings: { markupMultiplier: 2.5 }, calibrationIndex: new Map(),
+          brands: BRANDS,
+          customBrands: [],
+          overrides: [],
+          stock: [],
+          pricingSettings: { markupMultiplier: 2.5 },
+          calibrationIndex: new Map(),
         }}
       >
         <FormulaCalculator appliedBy="stylist@example.com" />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
 
-    expect(html).toContain("id=\"markupMultiplier\"");
-    expect(html).toContain("value=\"2.5\"");
+    expect(html).toContain('id="markupMultiplier"');
+    expect(html).toContain('value="2.5"');
   });
 
   it("offers the Matrix SoColor Pre-Bonded chart and computes a 1:1 ratio once a shade is chosen", () => {
@@ -197,7 +275,7 @@ describe("FormulaResults pre-pigmentation step", () => {
     onNeutralizationAppliedChange: () => {},
   };
 
-  it("renders the filler step ahead of a \"Step 2\" heading once opted in, with the Generic-line example", () => {
+  it('renders the filler step ahead of a "Step 2" heading once opted in, with the Generic-line example', () => {
     const html = renderToStaticMarkup(
       <FormulaResults
         brandId="generic"
@@ -224,7 +302,7 @@ describe("FormulaResults pre-pigmentation step", () => {
         recommendedServicePrice={null}
         servicePrice={null}
         {...noOps}
-      />
+      />,
     );
 
     expect(html).toContain("Step 1");
@@ -262,7 +340,7 @@ describe("FormulaResults pre-pigmentation step", () => {
         recommendedServicePrice={null}
         servicePrice={null}
         {...noOps}
-      />
+      />,
     );
 
     expect(html).not.toContain("Step 1");
@@ -285,9 +363,7 @@ describe("FormulaResults additional shade blending", () => {
   };
 
   it("recalculates developer proportionally when the colorist blends in an additional shade", () => {
-    const grams = baseResult.grams !== null
-      ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 10)
-      : null;
+    const grams = baseResult.grams !== null ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 10) : null;
     const effectiveResult = { ...baseResult, grams };
 
     const html = renderToStaticMarkup(
@@ -316,7 +392,7 @@ describe("FormulaResults additional shade blending", () => {
         recommendedServicePrice={null}
         servicePrice={null}
         {...noOps}
-      />
+      />,
     );
 
     // Primary shade keeps its 30g share; +10g of the additional shade pulls developer
@@ -351,7 +427,7 @@ describe("FormulaResults additional shade blending", () => {
         recommendedServicePrice={null}
         servicePrice={null}
         {...noOps}
-      />
+      />,
     );
 
     expect(html).toContain("8.1- 30.0 g developer 30.0 g");
@@ -359,7 +435,9 @@ describe("FormulaResults additional shade blending", () => {
     // The Mix row is the formula a colorist actually weighs out -- it must stand out
     // visually from the plain label/value rows around it (achieved level, application
     // zone, gray coverage, ...), which stay on the unhighlighted "results__row" style.
-    expect(html).toMatch(/<div class="results__row results__row--mix">[\s\S]*?8\.1- 30\.0 g developer 30\.0 g[\s\S]*?<\/div>/);
+    expect(html).toMatch(
+      /<div class="results__row results__row--mix">[\s\S]*?8\.1- 30\.0 g developer 30\.0 g[\s\S]*?<\/div>/,
+    );
     expect(html).not.toMatch(/<div class="results__row results__row--mix">[\s\S]*?Application zone/);
   });
 });
@@ -383,9 +461,8 @@ describe("FormulaResults substitute blend", () => {
 
   it("lists only the two real components in the Mix line, splitting the single total, never the target shade", () => {
     const split = baseResult.grams !== null ? splitShadeBlend(baseResult.grams.colorGrams, 70) : null;
-    const blend = split !== null
-      ? { shadeA, shadeAGrams: split.primaryGrams, shadeB, shadeBGrams: split.secondaryGrams }
-      : null;
+    const blend =
+      split !== null ? { shadeA, shadeAGrams: split.primaryGrams, shadeB, shadeBGrams: split.secondaryGrams } : null;
 
     const html = renderToStaticMarkup(
       <FormulaResults
@@ -413,7 +490,7 @@ describe("FormulaResults substitute blend", () => {
         recommendedServicePrice={null}
         servicePrice={null}
         {...noOps}
-      />
+      />,
     );
 
     // 70/30 split of the 30g color total: 21g shadeA, 9g shadeB; developer stays 30g --
@@ -425,13 +502,10 @@ describe("FormulaResults substitute blend", () => {
 
   it("also lists an additional shade blended on top of the substitute blend, with developer grown to match", () => {
     const split = baseResult.grams !== null ? splitShadeBlend(baseResult.grams.colorGrams, 70) : null;
-    const blend = split !== null
-      ? { shadeA, shadeAGrams: split.primaryGrams, shadeB, shadeBGrams: split.secondaryGrams }
-      : null;
+    const blend =
+      split !== null ? { shadeA, shadeAGrams: split.primaryGrams, shadeB, shadeBGrams: split.secondaryGrams } : null;
     const additionalShade: Shade = { code: "8/0", level: 8, tone: "natural" };
-    const grams = baseResult.grams !== null
-      ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 10)
-      : null;
+    const grams = baseResult.grams !== null ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 10) : null;
     const effectiveResult = { ...baseResult, grams };
 
     const html = renderToStaticMarkup(
@@ -460,7 +534,7 @@ describe("FormulaResults substitute blend", () => {
         recommendedServicePrice={null}
         servicePrice={null}
         {...noOps}
-      />
+      />,
     );
 
     // Blend components keep their 70/30 split of the un-grown 30g color total (21g/9g);

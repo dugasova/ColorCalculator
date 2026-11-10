@@ -70,8 +70,14 @@ describe("findExampleFillerShade", () => {
 
 describe("calculateFillerGrams", () => {
   it("splits total grams evenly for the standard 1:1 filler:water ratio", () => {
-    expect(calculateFillerGrams(30, { fillerParts: 1, diluentParts: 1 })).toEqual({ fillerGrams: 15, diluentGrams: 15 });
-    expect(calculateFillerGrams(45, { fillerParts: 1, diluentParts: 1 })).toEqual({ fillerGrams: 22.5, diluentGrams: 22.5 });
+    expect(calculateFillerGrams(30, { fillerParts: 1, diluentParts: 1 })).toEqual({
+      fillerGrams: 15,
+      diluentGrams: 15,
+    });
+    expect(calculateFillerGrams(45, { fillerParts: 1, diluentParts: 1 })).toEqual({
+      fillerGrams: 22.5,
+      diluentGrams: 22.5,
+    });
   });
 });
 

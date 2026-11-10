@@ -35,7 +35,9 @@ export function useActualGramsEditor(setEntries: Dispatch<SetStateAction<Formula
     setSavingGramsKey(key);
     try {
       const updated = await setActualColorGrams({ id: entry.id, steps: entry.steps, stepIndex, actualColorGrams });
-      setEntries(prev => prev.map(e => (e.id === entry.id ? { ...e, steps: updated.steps, productCost: updated.productCost } : e)));
+      setEntries(prev =>
+        prev.map(e => (e.id === entry.id ? { ...e, steps: updated.steps, productCost: updated.productCost } : e)),
+      );
       setGramsDrafts(prev => {
         const next = { ...prev };
         delete next[key];

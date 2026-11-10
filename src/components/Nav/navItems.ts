@@ -5,7 +5,17 @@ import type { AppView } from "./Nav";
 // out of Nav.tsx (which otherwise only exports components) so Fast Refresh keeps
 // working there -- react-refresh/only-export-components.
 export function navItems(isAdmin: boolean): AppView[] {
-  const items: AppView[] = ["calculator", "complex", "correction", "bleach", "prepigment", "history", "favorites", "analytics", "reference"];
+  const items: AppView[] = [
+    "calculator",
+    "complex",
+    "correction",
+    "bleach",
+    "prepigment",
+    "history",
+    "favorites",
+    "analytics",
+    "reference",
+  ];
   if (isAdmin) {
     items.push("palette", "orders", "team");
   }

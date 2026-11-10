@@ -23,13 +23,21 @@ const STARTING_BASE: StartingBase = { kind: "natural" };
 // A real useShadeFormulaState feeding the hook, the same way ColorStepCard wires them --
 // defaults are Generic 1.0 from start level 10, a drop that warrants pre-pigmentation.
 function renderReport(initialProps: HarnessProps) {
-  return renderHook(({ pricePerGram, prePigmentationEnabled, onChange }: HarnessProps) => {
-    const formula = useShadeFormulaState({ brands: BRANDS });
-    return useColorStepReport({
-      brands: BRANDS, formula, strandZone: "full-head", startingBase: STARTING_BASE,
-      pricePerGram, prePigmentationEnabled, onChange,
-    });
-  }, { initialProps });
+  return renderHook(
+    ({ pricePerGram, prePigmentationEnabled, onChange }: HarnessProps) => {
+      const formula = useShadeFormulaState({ brands: BRANDS });
+      return useColorStepReport({
+        brands: BRANDS,
+        formula,
+        strandZone: "full-head",
+        startingBase: STARTING_BASE,
+        pricePerGram,
+        prePigmentationEnabled,
+        onChange,
+      });
+    },
+    { initialProps },
+  );
 }
 
 describe("useColorStepReport", () => {
@@ -67,14 +75,22 @@ describe("useColorStepReport", () => {
 
   it("reports the gray-coverage natural base once opted in, without re-reporting on an unchanged re-render", () => {
     const onChange = vi.fn();
-    const { result, rerender } = renderHook(({ onChange: report }: { onChange: (step: ColorHistoryStep) => void }) => {
-      const formula = useShadeFormulaState({ brands: BRANDS });
-      useColorStepReport({
-        brands: BRANDS, formula, strandZone: "full-head", startingBase: STARTING_BASE,
-        pricePerGram: 0.18, prePigmentationEnabled: false, onChange: report,
-      });
-      return formula;
-    }, { initialProps: { onChange } });
+    const { result, rerender } = renderHook(
+      ({ onChange: report }: { onChange: (step: ColorHistoryStep) => void }) => {
+        const formula = useShadeFormulaState({ brands: BRANDS });
+        useColorStepReport({
+          brands: BRANDS,
+          formula,
+          strandZone: "full-head",
+          startingBase: STARTING_BASE,
+          pricePerGram: 0.18,
+          prePigmentationEnabled: false,
+          onChange: report,
+        });
+        return formula;
+      },
+      { initialProps: { onChange } },
+    );
 
     act(() => {
       result.current.handleTargetShadeCodeChange("7.1");

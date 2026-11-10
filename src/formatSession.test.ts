@@ -39,9 +39,17 @@ const bleachStep: BleachHistoryStep = {
   startLevel: 6,
   targetLevel: 9,
   result: {
-    startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-    mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-    recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
+    startLevel: 6,
+    targetLevel: 9,
+    liftNeeded: 3,
+    developerVolume: 30,
+    multiStepRequired: false,
+    mixingRatio: { powderParts: 1, developerParts: 2 },
+    grams: { powderGrams: 20, developerGrams: 40 },
+    recommendedProcessingMinutes: 35,
+    maxScalpProcessingMinutes: 50,
+    checkIntervalMinMinutes: 5,
+    checkIntervalMaxMinutes: 10,
   },
   processingMinutes: 35,
   pricePerGram: 0.1,
@@ -151,7 +159,15 @@ describe("formatSessionText", () => {
 
 describe("formatSessionSummary", () => {
   it("summarizes a single color step as starting level -> brand/line/shade", () => {
-    const summary = formatSessionSummary([{ ...colorStep, line: "koleston-perfect", brandName: "Wella", startLevel: 10, targetShade: { code: "7/17", level: 7, tone: "ash", secondaryTone: "chocolate" } }]);
+    const summary = formatSessionSummary([
+      {
+        ...colorStep,
+        line: "koleston-perfect",
+        brandName: "Wella",
+        startLevel: 10,
+        targetShade: { code: "7/17", level: 7, tone: "ash", secondaryTone: "chocolate" },
+      },
+    ]);
 
     expect(summary).toBe("Starting level: 10 → Target: Wella Koleston Perfect — 7/17");
   });
@@ -179,9 +195,24 @@ describe("formatSessionSummary", () => {
     // Regression: root 6/6.0, mid-lengths 8/8.12, ends 10/10.13 previously collapsed to
     // "Starting level: 6-10 -> Target: Generic - 10.13", implying every zone reached the
     // ends' shade -- neither the roots nor the mid-lengths zone actually did.
-    const roots = { ...colorStep, startLevel: 6 as const, strandZone: "roots" as const, targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const } };
-    const midLengths = { ...colorStep, startLevel: 8 as const, strandZone: "mid-lengths" as const, targetShade: { code: "8.12", level: 8 as const, tone: "ash" as const, secondaryTone: "matt" as const } };
-    const ends = { ...colorStep, startLevel: 10 as const, strandZone: "ends" as const, targetShade: { code: "10.13", level: 10 as const, tone: "ash" as const, secondaryTone: "gold" as const } };
+    const roots = {
+      ...colorStep,
+      startLevel: 6 as const,
+      strandZone: "roots" as const,
+      targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const },
+    };
+    const midLengths = {
+      ...colorStep,
+      startLevel: 8 as const,
+      strandZone: "mid-lengths" as const,
+      targetShade: { code: "8.12", level: 8 as const, tone: "ash" as const, secondaryTone: "matt" as const },
+    };
+    const ends = {
+      ...colorStep,
+      startLevel: 10 as const,
+      strandZone: "ends" as const,
+      targetShade: { code: "10.13", level: 10 as const, tone: "ash" as const, secondaryTone: "gold" as const },
+    };
 
     const summary = formatSessionSummary([roots, midLengths, ends]);
 
@@ -189,8 +220,18 @@ describe("formatSessionSummary", () => {
   });
 
   it("still favors the LAST color step's shade when steps share one zone -- sequential passes on the same hair, not parallel zones", () => {
-    const roots = { ...colorStep, startLevel: 6 as const, strandZone: "roots" as const, targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const } };
-    const rootsCorrected = { ...colorStep, startLevel: 6 as const, strandZone: "roots" as const, targetShade: { code: "6.1", level: 6 as const, tone: "ash" as const } };
+    const roots = {
+      ...colorStep,
+      startLevel: 6 as const,
+      strandZone: "roots" as const,
+      targetShade: { code: "6.0", level: 6 as const, tone: "natural" as const },
+    };
+    const rootsCorrected = {
+      ...colorStep,
+      startLevel: 6 as const,
+      strandZone: "roots" as const,
+      targetShade: { code: "6.1", level: 6 as const, tone: "ash" as const },
+    };
 
     const summary = formatSessionSummary([roots, rootsCorrected]);
 
@@ -198,7 +239,10 @@ describe("formatSessionSummary", () => {
   });
 
   it("keeps the single-value format when every step happens to share the same start level", () => {
-    const summary = formatSessionSummary([colorStep, { ...colorStep, targetShade: { code: "6.1", level: 6 as const, tone: "ash" as const } }]);
+    const summary = formatSessionSummary([
+      colorStep,
+      { ...colorStep, targetShade: { code: "6.1", level: 6 as const, tone: "ash" as const } },
+    ]);
 
     expect(summary).toBe("Starting level: 6 → Target: Generic — 6.1");
   });
@@ -206,7 +250,9 @@ describe("formatSessionSummary", () => {
 
 describe("formatSessionText: zone and starting-base recap", () => {
   it("prepends the zone label and starting-base line ahead of the rest of a step's text when set", () => {
-    const text = formatSessionText([{ ...colorStep, strandZone: "mid-lengths", startingBase: { kind: "colored", tone: "gold" } }]);
+    const text = formatSessionText([
+      { ...colorStep, strandZone: "mid-lengths", startingBase: { kind: "colored", tone: "gold" } },
+    ]);
 
     expect(text).toContain("Zone: Mid-lengths");
     expect(text).toContain("Starting base: Colored (Gold)");
@@ -226,7 +272,6 @@ describe("formatSessionText: zone and starting-base recap", () => {
     expect(text).toContain("Application: Full head");
   });
 
-
   it("shows the natural-base label with no tone when startingBase is natural", () => {
     const text = formatSessionText([{ ...colorStep, startingBase: { kind: "natural" } }]);
     expect(text).toContain("Starting base: Natural (virgin)");
@@ -244,8 +289,18 @@ describe("formatSessionText: zone and starting-base recap", () => {
     // block up (suppressed here, see below), but must still see "which zone is this
     // step?" without scrolling back to Step 1.
     const canvas = { porosity: "normal" as const, thickness: "medium" as const, chemicalHistory: [] };
-    const rootsBleach = { ...bleachStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const }, canvas };
-    const rootsColor = { ...colorStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const }, canvas };
+    const rootsBleach = {
+      ...bleachStep,
+      strandZone: "roots" as const,
+      startingBase: { kind: "natural" as const },
+      canvas,
+    };
+    const rootsColor = {
+      ...colorStep,
+      strandZone: "roots" as const,
+      startingBase: { kind: "natural" as const },
+      canvas,
+    };
 
     const text = formatSessionText([rootsBleach, rootsColor]);
 
@@ -257,11 +312,15 @@ describe("formatSessionText: zone and starting-base recap", () => {
 
   it("still shows its own state recap when the same zone's state actually changed between steps (e.g. porosity after bleaching)", () => {
     const rootsBleach = {
-      ...bleachStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const },
+      ...bleachStep,
+      strandZone: "roots" as const,
+      startingBase: { kind: "natural" as const },
       canvas: { porosity: "normal" as const, thickness: "medium" as const, chemicalHistory: [] },
     };
     const rootsColor = {
-      ...colorStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const },
+      ...colorStep,
+      strandZone: "roots" as const,
+      startingBase: { kind: "natural" as const },
       canvas: { porosity: "high" as const, thickness: "medium" as const, chemicalHistory: [] },
     };
 
@@ -276,7 +335,12 @@ describe("formatSessionText: zone and starting-base recap", () => {
   it("gives a genuinely different zone its own header, even one that coincidentally shares the same state", () => {
     const canvas = { porosity: "normal" as const, thickness: "medium" as const, chemicalHistory: [] };
     const roots = { ...colorStep, strandZone: "roots" as const, startingBase: { kind: "natural" as const }, canvas };
-    const midLengths = { ...colorStep, strandZone: "mid-lengths" as const, startingBase: { kind: "natural" as const }, canvas };
+    const midLengths = {
+      ...colorStep,
+      strandZone: "mid-lengths" as const,
+      startingBase: { kind: "natural" as const },
+      canvas,
+    };
 
     const text = formatSessionText([roots, midLengths]);
 

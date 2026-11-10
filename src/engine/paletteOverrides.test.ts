@@ -1,8 +1,14 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildBrandCatalog, customBrandRecordSchema, getDisabledShadeKeys, getFullBrandShades,
-  paletteOverrideSchema, resolveMixingRatio, shadeKey,
-  type CustomBrandRecord, type PaletteOverride,
+  buildBrandCatalog,
+  customBrandRecordSchema,
+  getDisabledShadeKeys,
+  getFullBrandShades,
+  paletteOverrideSchema,
+  resolveMixingRatio,
+  shadeKey,
+  type CustomBrandRecord,
+  type PaletteOverride,
 } from "./paletteOverrides";
 import type { Brand } from "./brands";
 import { getMixingRatio } from "./formula";
@@ -91,10 +97,16 @@ describe("getFullBrandShades / getDisabledShadeKeys", () => {
   });
 
   it("lets a migrated copy that predates mixingRatioChoices inherit them from the built-in shade it replaces", () => {
-    const choices = [{ colorParts: 1, developerParts: 2 }, { colorParts: 1, developerParts: 1.5 }];
+    const choices = [
+      { colorParts: 1, developerParts: 2 },
+      { colorParts: 1, developerParts: 1.5 },
+    ];
     const brands: Record<string, Brand> = {
       wella: {
-        id: "wella", name: "Wella", mixingRatio: getMixingRatio, pricePerGram: 0.18,
+        id: "wella",
+        name: "Wella",
+        mixingRatio: getMixingRatio,
+        pricePerGram: 0.18,
         shades: [{ code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: choices }],
       },
     };
@@ -108,24 +120,47 @@ describe("getFullBrandShades / getDisabledShadeKeys", () => {
   });
 
   it("keeps a migrated copy's own mixingRatioChoices instead of overwriting them with the built-in's", () => {
-    const own = [{ colorParts: 1, developerParts: 1 }, { colorParts: 1, developerParts: 3 }];
+    const own = [
+      { colorParts: 1, developerParts: 1 },
+      { colorParts: 1, developerParts: 3 },
+    ];
     const brands: Record<string, Brand> = {
       wella: {
-        id: "wella", name: "Wella", mixingRatio: getMixingRatio, pricePerGram: 0.18,
-        shades: [{ code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }] }],
+        id: "wella",
+        name: "Wella",
+        mixingRatio: getMixingRatio,
+        pricePerGram: 0.18,
+        shades: [
+          {
+            code: "8/73",
+            level: 8,
+            tone: "chocolate",
+            line: "color-touch",
+            mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }],
+          },
+        ],
       },
     };
     const overrides: PaletteOverride[] = [
-      { id: "o1", kind: "add", brandId: "wella", shade: { code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: own } },
+      {
+        id: "o1",
+        kind: "add",
+        brandId: "wella",
+        shade: { code: "8/73", level: 8, tone: "chocolate", line: "color-touch", mixingRatioChoices: own },
+      },
     ];
 
     expect(getFullBrandShades(brands, [], overrides, "wella")[0].mixingRatioChoices).toEqual(own);
   });
 
   it("does not invent mixingRatioChoices for an admin-added shade with no built-in counterpart", () => {
-    const overrides: PaletteOverride[] = [{ id: "o1", kind: "add", brandId: "generic", shade: { code: "9.9", level: 9, tone: "ash" } }];
+    const overrides: PaletteOverride[] = [
+      { id: "o1", kind: "add", brandId: "generic", shade: { code: "9.9", level: 9, tone: "ash" } },
+    ];
 
-    expect(getFullBrandShades(baseBrands, [], overrides, "generic").find(s => s.code === "9.9")?.mixingRatioChoices).toBeUndefined();
+    expect(
+      getFullBrandShades(baseBrands, [], overrides, "generic").find(s => s.code === "9.9")?.mixingRatioChoices,
+    ).toBeUndefined();
   });
 
   it("never collapses same-coded shades that belong to different lines", () => {
@@ -164,7 +199,11 @@ describe("buildBrandCatalog", () => {
   });
 
   it("removes a discontinued shade from the calculator-facing catalog", () => {
-    const catalog = buildBrandCatalog(baseBrands, [], [{ id: "o1", kind: "disable", brandId: "generic", line: null, code: "7.3" }]);
+    const catalog = buildBrandCatalog(
+      baseBrands,
+      [],
+      [{ id: "o1", kind: "disable", brandId: "generic", line: null, code: "7.3" }],
+    );
     expect(catalog.generic.shades.map(s => s.code)).toEqual(["7.1"]);
   });
 
@@ -174,18 +213,24 @@ describe("buildBrandCatalog", () => {
   });
 
   it("disabling one line's shade does not remove another line's shade sharing the same code", () => {
-    const catalog = buildBrandCatalog(multiLineBrand, [], [{ id: "d1", kind: "disable", brandId: "loreal", line: "majirel", code: "7.1" }]);
+    const catalog = buildBrandCatalog(
+      multiLineBrand,
+      [],
+      [{ id: "d1", kind: "disable", brandId: "loreal", line: "majirel", code: "7.1" }],
+    );
     expect(catalog.loreal.shades).toHaveLength(1);
     expect(catalog.loreal.shades[0].line).toBe("inoa");
   });
 
   it("materializes a brand-new custom line with a fixed mixing ratio and its own shades", () => {
-    const customBrands: CustomBrandRecord[] = [{
-      id: "my-salon-line",
-      name: "Salon Exclusive",
-      pricePerGram: 0.25,
-      mixingRatioConfig: { kind: "fixed", fixedRatio: { colorParts: 1, developerParts: 1.5 } },
-    }];
+    const customBrands: CustomBrandRecord[] = [
+      {
+        id: "my-salon-line",
+        name: "Salon Exclusive",
+        pricePerGram: 0.25,
+        mixingRatioConfig: { kind: "fixed", fixedRatio: { colorParts: 1, developerParts: 1.5 } },
+      },
+    ];
     const overrides: PaletteOverride[] = [
       { id: "o1", kind: "add", brandId: "my-salon-line", shade: { code: "SE-1", level: 6, tone: "natural" } },
     ];
@@ -198,12 +243,14 @@ describe("buildBrandCatalog", () => {
   });
 
   it("leaves a custom brand with no add overrides yet with an empty shade list", () => {
-    const customBrands: CustomBrandRecord[] = [{
-      id: "empty-line",
-      name: "Not Populated Yet",
-      pricePerGram: 0.15,
-      mixingRatioConfig: { kind: "generic" },
-    }];
+    const customBrands: CustomBrandRecord[] = [
+      {
+        id: "empty-line",
+        name: "Not Populated Yet",
+        pricePerGram: 0.15,
+        mixingRatioConfig: { kind: "generic" },
+      },
+    ];
     const catalog = buildBrandCatalog(baseBrands, customBrands, []);
     expect(catalog["empty-line"].shades).toEqual([]);
   });
@@ -216,7 +263,9 @@ describe("buildBrandCatalog", () => {
 describe("customBrandRecordSchema", () => {
   it("accepts a well-formed customBrands document payload", () => {
     const result = customBrandRecordSchema.safeParse({
-      name: "Acme Color", pricePerGram: 0.22, mixingRatioConfig: { kind: "fixed", fixedRatio: { colorParts: 1, developerParts: 1.5 } },
+      name: "Acme Color",
+      pricePerGram: 0.22,
+      mixingRatioConfig: { kind: "fixed", fixedRatio: { colorParts: 1, developerParts: 1.5 } },
     });
     expect(result.success).toBe(true);
   });
@@ -227,27 +276,35 @@ describe("customBrandRecordSchema", () => {
   });
 
   it("rejects a document whose field has the wrong type", () => {
-    const result = customBrandRecordSchema.safeParse({ name: "Acme Color", pricePerGram: "0.22", mixingRatioConfig: { kind: "generic" } });
+    const result = customBrandRecordSchema.safeParse({
+      name: "Acme Color",
+      pricePerGram: "0.22",
+      mixingRatioConfig: { kind: "generic" },
+    });
     expect(result.success).toBe(false);
   });
 });
 
 describe("paletteOverrideSchema", () => {
-  it("accepts a well-formed \"add\" override, including its nested shade", () => {
+  it('accepts a well-formed "add" override, including its nested shade', () => {
     const result = paletteOverrideSchema.safeParse({
-      kind: "add", brandId: "wella", shade: { code: "8/38", level: 8, tone: "gold", secondaryTone: "pearl", line: "koleston-perfect" },
+      kind: "add",
+      brandId: "wella",
+      shade: { code: "8/38", level: 8, tone: "gold", secondaryTone: "pearl", line: "koleston-perfect" },
     });
     expect(result.success).toBe(true);
   });
 
-  it("accepts a well-formed \"disable\" override with a null line", () => {
+  it('accepts a well-formed "disable" override with a null line', () => {
     const result = paletteOverrideSchema.safeParse({ kind: "disable", brandId: "generic", line: null, code: "7.1" });
     expect(result.success).toBe(true);
   });
 
-  it("rejects an \"add\" override whose nested shade has an out-of-range level", () => {
+  it('rejects an "add" override whose nested shade has an out-of-range level', () => {
     const result = paletteOverrideSchema.safeParse({
-      kind: "add", brandId: "wella", shade: { code: "13/0", level: 13, tone: "natural" },
+      kind: "add",
+      brandId: "wella",
+      shade: { code: "13/0", level: 13, tone: "natural" },
     });
     expect(result.success).toBe(false);
   });

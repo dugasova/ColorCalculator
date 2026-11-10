@@ -22,10 +22,14 @@ export function TeamView() {
   const [busyUid, setBusyUid] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  useEffect(() => subscribeToPendingAccessRequests(setRequests, err => {
-    console.error(err);
-    setLoadError(true);
-  }), []);
+  useEffect(
+    () =>
+      subscribeToPendingAccessRequests(setRequests, err => {
+        console.error(err);
+        setLoadError(true);
+      }),
+    [],
+  );
 
   const handleDecide = async (uid: string, decision: "approve" | "reject") => {
     setBusyUid(uid);
@@ -46,8 +50,16 @@ export function TeamView() {
       <h1 className="calculator__title">{t("team.title")}</h1>
       <p className="calculator__subtitle">{t("team.subtitle")}</p>
 
-      {loadError && <p className="warning" role="alert">{t("team.loadError")}</p>}
-      {actionError && <p className="warning" role="alert">{actionError}</p>}
+      {loadError && (
+        <p className="warning" role="alert">
+          {t("team.loadError")}
+        </p>
+      )}
+      {actionError && (
+        <p className="warning" role="alert">
+          {actionError}
+        </p>
+      )}
 
       {!loadError && requests.length === 0 && <p>{t("team.empty")}</p>}
 

@@ -33,7 +33,9 @@ const baseBleachResult: BleachHistoryStep["result"] = {
   checkIntervalMaxMinutes: 10,
 };
 
-function colorStep(overrides: Partial<ColorHistoryStep> & { targetShade: Shade; startLevel: number }): ColorHistoryStep {
+function colorStep(
+  overrides: Partial<ColorHistoryStep> & { targetShade: Shade; startLevel: number },
+): ColorHistoryStep {
   return {
     kind: "color",
     brandName: "Generic",
@@ -52,7 +54,9 @@ function colorStep(overrides: Partial<ColorHistoryStep> & { targetShade: Shade; 
   } as ColorHistoryStep;
 }
 
-function bleachStep(overrides: Partial<BleachHistoryStep> & { startLevel: number; targetLevel: number }): BleachHistoryStep {
+function bleachStep(
+  overrides: Partial<BleachHistoryStep> & { startLevel: number; targetLevel: number },
+): BleachHistoryStep {
   return {
     kind: "bleach",
     result: baseBleachResult,
@@ -64,9 +68,21 @@ function bleachStep(overrides: Partial<BleachHistoryStep> & { startLevel: number
 
 describe("buildZonePreview", () => {
   it("returns one row per zone, ordered by first appearance, with a start swatch plus one per step", () => {
-    const roots = colorStep({ strandZone: "roots", startLevel: 6, targetShade: { code: "6/97", level: 6, tone: "copper" } });
-    const midLengths = colorStep({ strandZone: "mid-lengths", startLevel: 6, targetShade: { code: "8.7", level: 8, tone: "gold" } });
-    const ends = colorStep({ strandZone: "ends", startLevel: 8, targetShade: { code: "8/73", level: 8, tone: "gold" } });
+    const roots = colorStep({
+      strandZone: "roots",
+      startLevel: 6,
+      targetShade: { code: "6/97", level: 6, tone: "copper" },
+    });
+    const midLengths = colorStep({
+      strandZone: "mid-lengths",
+      startLevel: 6,
+      targetShade: { code: "8.7", level: 8, tone: "gold" },
+    });
+    const ends = colorStep({
+      strandZone: "ends",
+      startLevel: 8,
+      targetShade: { code: "8/73", level: 8, tone: "gold" },
+    });
 
     const rows = buildZonePreview([roots, midLengths, ends]);
 
@@ -82,7 +98,11 @@ describe("buildZonePreview", () => {
 
   it("chains a bleach step and a following color step on the same zone into one row", () => {
     const bleach = bleachStep({ strandZone: "roots", startLevel: 6, targetLevel: 9 });
-    const color = colorStep({ strandZone: "roots", startLevel: 9, targetShade: { code: "9.1", level: 9, tone: "ash" } });
+    const color = colorStep({
+      strandZone: "roots",
+      startLevel: 9,
+      targetShade: { code: "9.1", level: 9, tone: "ash" },
+    });
 
     const rows = buildZonePreview([bleach, color]);
 

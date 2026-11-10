@@ -7,10 +7,10 @@ import { setMonitoringUser } from "./monitoring";
 
 const LoginForm = lazy(() => import("./components/LoginForm/LoginForm"));
 const VerifyEmailScreen = lazy(() =>
-  import("./components/VerifyEmail/VerifyEmailScreen").then(m => ({ default: m.VerifyEmailScreen }))
+  import("./components/VerifyEmail/VerifyEmailScreen").then(m => ({ default: m.VerifyEmailScreen })),
 );
 const PrivacyPolicyPage = lazy(() =>
-  import("./components/Privacy/PrivacyPolicyPage").then(m => ({ default: m.PrivacyPolicyPage }))
+  import("./components/Privacy/PrivacyPolicyPage").then(m => ({ default: m.PrivacyPolicyPage })),
 );
 
 export default function App() {

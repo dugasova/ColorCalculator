@@ -31,7 +31,10 @@ export function formatPrePigmentationText(params: FormatPrePigmentationParams): 
   lines.push(
     i18n.t("prePigmentation.finalStepLabel"),
     i18n.t("format.developer", { value: finalDeveloper }),
-    i18n.t("format.ratio", { color: result.finalStepMixingRatio.colorParts, developer: result.finalStepMixingRatio.developerParts }),
+    i18n.t("format.ratio", {
+      color: result.finalStepMixingRatio.colorParts,
+      developer: result.finalStepMixingRatio.developerParts,
+    }),
     i18n.t("prePigmentation.finalStepNote", { start: startLevel }),
     i18n.t("prePigmentation.disclaimer"),
   );
@@ -46,8 +49,13 @@ export function formatPrePigmentationText(params: FormatPrePigmentationParams): 
 // formatFormulaText output as step 2 instead of prePigmentation's generic final-step
 // lines) -- both need the identical breakdown once `need` isn't 'none'.
 function buildFillerLines(targetLevel: Level, result: PrePigmentationResult, brandName: string = "Generic"): string[] {
-  if (result.underlyingPigment === null || result.fillerTone === null
-    || result.mixingRatio === null || result.grams === null || result.fillerProcessingMinutes === null) {
+  if (
+    result.underlyingPigment === null ||
+    result.fillerTone === null ||
+    result.mixingRatio === null ||
+    result.grams === null ||
+    result.fillerProcessingMinutes === null
+  ) {
     return [];
   }
 
@@ -57,7 +65,11 @@ function buildFillerLines(targetLevel: Level, result: PrePigmentationResult, bra
     i18n.t("prePigmentation.underlyingPigmentValue", { value: result.underlyingPigment }),
     i18n.t("prePigmentation.fillerToneValue", { value: fillerToneName }),
     result.exampleFillerShade !== null
-      ? i18n.t("prePigmentation.exampleFillerShadeValue", { brandName, code: result.exampleFillerShade.code, tone: fillerToneName })
+      ? i18n.t("prePigmentation.exampleFillerShadeValue", {
+          brandName,
+          code: result.exampleFillerShade.code,
+          tone: fillerToneName,
+        })
       : i18n.t("prePigmentation.noExampleFillerShade", { tone: fillerToneName, level: targetLevel }),
     i18n.t("format.ratio", { color: result.mixingRatio.fillerParts, developer: result.mixingRatio.diluentParts }),
     i18n.t("format.mixValue", {
@@ -69,7 +81,12 @@ function buildFillerLines(targetLevel: Level, result: PrePigmentationResult, bra
     i18n.t("format.processingTime", { value: result.fillerProcessingMinutes }),
   ];
   if (result.multiVisitGapDays !== null) {
-    lines.push(i18n.t("prePigmentation.multiVisitNote", { min: result.multiVisitGapDays.min, max: result.multiVisitGapDays.max }));
+    lines.push(
+      i18n.t("prePigmentation.multiVisitNote", {
+        min: result.multiVisitGapDays.min,
+        max: result.multiVisitGapDays.max,
+      }),
+    );
   }
   return lines;
 }
@@ -85,7 +102,11 @@ function buildFillerLines(targetLevel: Level, result: PrePigmentationResult, bra
 // fillerSectionLabel ("Step 1 — Filler") without a leading needValue line -- unlike the
 // standalone calculator, FormulaCalculator already showed that recommendation once, on
 // the checkbox itself (PrePigmentationField), before the colorist ever opted in.
-export function formatFillerStepText(targetLevel: Level, result: PrePigmentationResult, brandName: string = "Generic"): string | null {
+export function formatFillerStepText(
+  targetLevel: Level,
+  result: PrePigmentationResult,
+  brandName: string = "Generic",
+): string | null {
   const fillerLines = buildFillerLines(targetLevel, result, brandName);
   return fillerLines.length === 0 ? null : fillerLines.join("\n");
 }

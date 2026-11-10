@@ -4,7 +4,12 @@ import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
-import { formatFormulaText, buildMixSummary, buildBlendMixSummary, type BlendSummary } from "../../engine/formatFormula";
+import {
+  formatFormulaText,
+  buildMixSummary,
+  buildBlendMixSummary,
+  type BlendSummary,
+} from "../../engine/formatFormula";
 import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
@@ -68,20 +73,62 @@ export interface FormulaResultsProps {
 const MAX_PROCESSING_MINUTES = 180;
 
 export function FormulaResults({
-  brandId, brandName, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory, applicationZone, result,
-  additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, naturalBase = null, prePigmentationResult, neutralizationApplied, onNeutralizationAppliedChange, appliedBy,
-  processingMinutes, onProcessingMinutesChange,
-  pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
-  productCost, recommendedServicePrice, servicePrice, onServicePriceChange, onSaved, repeatRequest,
+  brandId,
+  brandName,
+  line,
+  targetShade,
+  startLevel,
+  grayPercent,
+  porosity,
+  thickness,
+  chemicalHistory,
+  applicationZone,
+  result,
+  additionalShade,
+  additionalShadeGrams,
+  additionalShade2,
+  additionalShade2Grams,
+  blend,
+  naturalBase = null,
+  prePigmentationResult,
+  neutralizationApplied,
+  onNeutralizationAppliedChange,
+  appliedBy,
+  processingMinutes,
+  onProcessingMinutesChange,
+  pricePerGram,
+  onPricePerGramChange,
+  markupMultiplier,
+  onMarkupMultiplierChange,
+  productCost,
+  recommendedServicePrice,
+  servicePrice,
+  onServicePriceChange,
+  onSaved,
+  repeatRequest,
 }: FormulaResultsProps) {
   const { t } = useTranslation();
   const { inputProps: processingMinutesInputProps } = useClampedNumberText(
-    processingMinutes, onProcessingMinutesChange, { min: 1, max: MAX_PROCESSING_MINUTES }
+    processingMinutes,
+    onProcessingMinutesChange,
+    { min: 1, max: MAX_PROCESSING_MINUTES },
   );
 
   const targetColorFormulaText = formatFormulaText({
-    brandName, line, targetShade, startLevel, result, processingMinutes, applicationZone,
-    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, blend, neutralizationApplied, naturalBase,
+    brandName,
+    line,
+    targetShade,
+    startLevel,
+    result,
+    processingMinutes,
+    applicationZone,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    blend,
+    neutralizationApplied,
+    naturalBase,
   });
   // Same brand+line display convention as the target-color title above (formatFormulaText),
   // reused for the filler worked example so both steps of a two-part formula name the
@@ -90,25 +137,52 @@ export function FormulaResults({
   // the colorist has opted into the pre-pigmentation step -- see PrePigmentationField.
   // fillerStepText is null whenever prePigmentationResult is null (checkbox off, or the
   // level drop doesn't warrant it), so the plain single-step text is used unchanged.
-  const fillerStepText = prePigmentationResult !== null
-    ? formatFillerStepText(targetShade.level, prePigmentationResult, fullBrandLabel)
-    : null;
-  const formulaText = fillerStepText !== null
-    ? `${fillerStepText}\n\n${t("prePigmentation.finalStepLabel")}\n${targetColorFormulaText}`
-    : targetColorFormulaText;
+  const fillerStepText =
+    prePigmentationResult !== null
+      ? formatFillerStepText(targetShade.level, prePigmentationResult, fullBrandLabel)
+      : null;
+  const formulaText =
+    fillerStepText !== null
+      ? `${fillerStepText}\n\n${t("prePigmentation.finalStepLabel")}\n${targetColorFormulaText}`
+      : targetColorFormulaText;
 
   const { shortages, handleSave } = useFormulaSave({
-    brandId, brandName, line, targetShade, startLevel, grayPercent, applicationZone,
-    porosity, thickness, chemicalHistory, result, additionalShade, additionalShadeGrams,
-    additionalShade2, additionalShade2Grams, blend, naturalBase, prePigmentationResult, neutralizationApplied,
-    appliedBy, processingMinutes, pricePerGram, markupMultiplier, productCost, servicePrice,
+    brandId,
+    brandName,
+    line,
+    targetShade,
+    startLevel,
+    grayPercent,
+    applicationZone,
+    porosity,
+    thickness,
+    chemicalHistory,
+    result,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    blend,
+    naturalBase,
+    prePigmentationResult,
+    neutralizationApplied,
+    appliedBy,
+    processingMinutes,
+    pricePerGram,
+    markupMultiplier,
+    productCost,
+    servicePrice,
   });
 
   return (
     <div className="results">
       {prePigmentationResult !== null && (
         <>
-          <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} brandName={fullBrandLabel} />
+          <PrePigmentationStep
+            targetLevel={targetShade.level}
+            result={prePigmentationResult}
+            brandName={fullBrandLabel}
+          />
           <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
         </>
       )}
@@ -116,7 +190,9 @@ export function FormulaResults({
         <div className="stat">
           <span className="stat__label">{t("results.developer")}</span>
           <span className="stat__value">
-            {result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume, targetShade.developerPercentOverride) : "—"}
+            {result.developerVolume !== null
+              ? formatDeveloperVolume(result.developerVolume, targetShade.developerPercentOverride)
+              : "—"}
           </span>
         </div>
         <div className="stat">
@@ -128,10 +204,14 @@ export function FormulaResults({
       </div>
 
       {result.liftUnsupportedWarning !== null && (
-        <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>
+        <p className="warning" role="alert">
+          {result.liftUnsupportedWarning}
+        </p>
       )}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning" role="alert">{t("results.notAchievable")}</p>
+        <p className="warning" role="alert">
+          {t("results.notAchievable")}
+        </p>
       )}
       {result.achievedLevel !== null && result.achievedLevel !== targetShade.level && (
         <div className="results__row">
@@ -140,12 +220,34 @@ export function FormulaResults({
         </div>
       )}
       {porosity === "high" && (
-        <p className="warning" role="alert">{t("results.porousWarning")}</p>
+        <p className="warning" role="alert">
+          {t("results.porousWarning")}
+        </p>
       )}
       {result.grams !== null && (
         <div className="results__row results__row--mix">
           <span className="results__row-label">{t("results.mix")}</span>
-          <span className="results__mix-value">{blend !== null ? buildBlendMixSummary(blend, result.grams.developerGrams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase) : buildMixSummary(targetShade, result.grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase)}</span>
+          <span className="results__mix-value">
+            {blend !== null
+              ? buildBlendMixSummary(
+                  blend,
+                  result.grams.developerGrams,
+                  additionalShade,
+                  additionalShadeGrams,
+                  additionalShade2,
+                  additionalShade2Grams,
+                  naturalBase,
+                )
+              : buildMixSummary(
+                  targetShade,
+                  result.grams,
+                  additionalShade,
+                  additionalShadeGrams,
+                  additionalShade2,
+                  additionalShade2Grams,
+                  naturalBase,
+                )}
+          </span>
         </div>
       )}
 
@@ -153,29 +255,38 @@ export function FormulaResults({
 
       <div className="results__row">
         <span className="results__row-label">{t("results.applicationZone")}</span>
-        <span>{t(applicationZone === "full-head" ? "fields.applicationZoneFullHead" : "fields.applicationZoneRootTouchUp")}</span>
+        <span>
+          {t(applicationZone === "full-head" ? "fields.applicationZoneFullHead" : "fields.applicationZoneRootTouchUp")}
+        </span>
       </div>
 
       <div className="results__row">
         <span className="results__row-label">{t("results.grayCoverage")}</span>
-        <span>{naturalBase !== null
-          ? t("results.grayCoverageAppliedValue", {
-            code: naturalBase.shade.code,
-            natural: Math.round(result.grayCoverage.naturalRatio * 100),
-            fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-          })
-          : t("results.grayCoverageValue", {
-            note: getGrayCoverageNote(result.grayCoverage),
-            natural: Math.round(result.grayCoverage.naturalRatio * 100),
-            fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-          })}</span>
+        <span>
+          {naturalBase !== null
+            ? t("results.grayCoverageAppliedValue", {
+                code: naturalBase.shade.code,
+                natural: Math.round(result.grayCoverage.naturalRatio * 100),
+                fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+              })
+            : t("results.grayCoverageValue", {
+                note: getGrayCoverageNote(result.grayCoverage),
+                natural: Math.round(result.grayCoverage.naturalRatio * 100),
+                fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+              })}
+        </span>
       </div>
 
       <div className="results__row">
         <span className="results__row-label">{t("results.recommendedTone")}</span>
-        <span>{result.recommendedCorrectiveTone !== null
-          ? t("results.recommendedToneValue", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
-          : t("results.none")}</span>
+        <span>
+          {result.recommendedCorrectiveTone !== null
+            ? t("results.recommendedToneValue", {
+                grams: result.correctorGrams,
+                tone: result.recommendedCorrectiveTone,
+              })
+            : t("results.none")}
+        </span>
       </div>
 
       {result.recommendedCorrectiveTone !== null && (
@@ -189,8 +300,16 @@ export function FormulaResults({
         </label>
       )}
 
-      {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
-      {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
+      {result.toneWarning !== null && !neutralizationApplied && (
+        <p className="warning" role="alert">
+          {result.toneWarning}
+        </p>
+      )}
+      {result.eligibilityWarning !== null && (
+        <p className="warning" role="alert">
+          {result.eligibilityWarning}
+        </p>
+      )}
 
       <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>
 

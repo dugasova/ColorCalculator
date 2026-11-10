@@ -2,7 +2,12 @@ import { describe, it, expect } from "vitest";
 import { Timestamp } from "firebase/firestore";
 import { computeSalonAnalytics, computeStylistStats, filterEntriesByPeriod } from "./analytics";
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
-import { COLOR_FULL_FORMULA, makeColorStep as makeSharedColorStep, makeBleachStep, makeEntry as makeSharedEntry } from "./testFixtures";
+import {
+  COLOR_FULL_FORMULA,
+  makeColorStep as makeSharedColorStep,
+  makeBleachStep,
+  makeEntry as makeSharedEntry,
+} from "./testFixtures";
 
 function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorHistoryStep {
   return makeSharedColorStep({
@@ -19,9 +24,18 @@ function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName: strin
 describe("computeSalonAnalytics", () => {
   it("counts shade popularity per brand+line+code, sorted by count desc", () => {
     const entries = [
-      makeEntry({ clientName: "A", steps: [makeColorStep({ brandName: "Wella", targetShade: { code: "7.1", level: 7, tone: "ash" } })] }),
-      makeEntry({ clientName: "B", steps: [makeColorStep({ brandName: "Wella", targetShade: { code: "7.1", level: 7, tone: "ash" } })] }),
-      makeEntry({ clientName: "C", steps: [makeColorStep({ brandName: "L'Oréal", targetShade: { code: "7.1", level: 7, tone: "ash" } })] }),
+      makeEntry({
+        clientName: "A",
+        steps: [makeColorStep({ brandName: "Wella", targetShade: { code: "7.1", level: 7, tone: "ash" } })],
+      }),
+      makeEntry({
+        clientName: "B",
+        steps: [makeColorStep({ brandName: "Wella", targetShade: { code: "7.1", level: 7, tone: "ash" } })],
+      }),
+      makeEntry({
+        clientName: "C",
+        steps: [makeColorStep({ brandName: "L'Oréal", targetShade: { code: "7.1", level: 7, tone: "ash" } })],
+      }),
     ];
 
     const stats = computeSalonAnalytics(entries);
@@ -36,26 +50,49 @@ describe("computeSalonAnalytics", () => {
       makeEntry({
         clientName: "A",
         steps: [
-          { kind: "bleach", startLevel: 6, targetLevel: 9, result: {
-            startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-            mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-            recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
-          }, processingMinutes: 35, pricePerGram: 0.1 },
+          {
+            kind: "bleach",
+            startLevel: 6,
+            targetLevel: 9,
+            result: {
+              startLevel: 6,
+              targetLevel: 9,
+              liftNeeded: 3,
+              developerVolume: 30,
+              multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 },
+              grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35,
+              maxScalpProcessingMinutes: 50,
+              checkIntervalMinMinutes: 5,
+              checkIntervalMaxMinutes: 10,
+            },
+            processingMinutes: 35,
+            pricePerGram: 0.1,
+          },
           makeColorStep({ targetShade: { code: "9.1", level: 9, tone: "ash" } }),
         ],
       }),
     ];
 
     const stats = computeSalonAnalytics(entries);
-    expect(stats.popularShades).toEqual([
-      { brandName: "Wella", line: null, shadeCode: "9.1", count: 1 },
-    ]);
+    expect(stats.popularShades).toEqual([{ brandName: "Wella", line: null, shadeCode: "9.1", count: 1 }]);
   });
 
   it("averages colorGrams, excluding developer grams and null formulas", () => {
     const entries = [
-      makeEntry({ clientName: "A", steps: [makeColorStep({ result: { ...makeColorStep().result, grams: { colorGrams: 20, developerGrams: 40 } } })] }),
-      makeEntry({ clientName: "B", steps: [makeColorStep({ result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } } })] }),
+      makeEntry({
+        clientName: "A",
+        steps: [
+          makeColorStep({ result: { ...makeColorStep().result, grams: { colorGrams: 20, developerGrams: 40 } } }),
+        ],
+      }),
+      makeEntry({
+        clientName: "B",
+        steps: [
+          makeColorStep({ result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } } }),
+        ],
+      }),
       makeEntry({ clientName: "C", steps: [makeColorStep({ result: { ...makeColorStep().result, grams: null } })] }),
     ];
 
@@ -73,8 +110,16 @@ describe("computeSalonAnalytics", () => {
     const stepWithoutGrams: Partial<ColorHistoryStep["result"]> = { ...makeColorStep().result };
     delete stepWithoutGrams.grams;
     const entries = [
-      makeEntry({ clientName: "A", steps: [{ ...makeColorStep(), result: stepWithoutGrams as ColorHistoryStep["result"] }] }),
-      makeEntry({ clientName: "B", steps: [makeColorStep({ result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } } })] }),
+      makeEntry({
+        clientName: "A",
+        steps: [{ ...makeColorStep(), result: stepWithoutGrams as ColorHistoryStep["result"] }],
+      }),
+      makeEntry({
+        clientName: "B",
+        steps: [
+          makeColorStep({ result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } } }),
+        ],
+      }),
     ];
 
     expect(computeSalonAnalytics(entries).averageColorGrams).toBe(10);
@@ -84,11 +129,21 @@ describe("computeSalonAnalytics", () => {
     const entries = [
       makeEntry({
         clientName: "A",
-        steps: [makeColorStep({ actualColorGrams: 45, result: { ...makeColorStep().result, grams: { colorGrams: 30, developerGrams: 30 } } })],
+        steps: [
+          makeColorStep({
+            actualColorGrams: 45,
+            result: { ...makeColorStep().result, grams: { colorGrams: 30, developerGrams: 30 } },
+          }),
+        ],
       }),
       makeEntry({
         clientName: "B",
-        steps: [makeColorStep({ actualColorGrams: 15, result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } } })],
+        steps: [
+          makeColorStep({
+            actualColorGrams: 15,
+            result: { ...makeColorStep().result, grams: { colorGrams: 10, developerGrams: 10 } },
+          }),
+        ],
       }),
     ];
 
@@ -125,10 +180,7 @@ describe("computeSalonAnalytics", () => {
     const legacy = makeEntry({ clientName: "A" });
     const legacyWithoutProductCost: Partial<FormulaHistoryEntry> = { ...legacy };
     delete legacyWithoutProductCost.productCost;
-    const entries = [
-      legacyWithoutProductCost as FormulaHistoryEntry,
-      makeEntry({ clientName: "B", productCost: 20 }),
-    ];
+    const entries = [legacyWithoutProductCost as FormulaHistoryEntry, makeEntry({ clientName: "B", productCost: 20 })];
 
     expect(computeSalonAnalytics(entries).averageProductCost).toBe(20);
   });
@@ -162,7 +214,13 @@ describe("computeStylistStats", () => {
     const entries = [
       makeEntry({ appliedBy: "a@salon.test", clientName: "Anna", servicePrice: 100, productCost: 10, steps: [color] }),
       makeEntry({ appliedBy: "a@salon.test", clientName: "Anna", servicePrice: null, productCost: 5, steps: [color] }),
-      makeEntry({ appliedBy: "a@salon.test", clientName: "Boris", servicePrice: 50, productCost: null, steps: [makeBleachStep(), color] }),
+      makeEntry({
+        appliedBy: "a@salon.test",
+        clientName: "Boris",
+        servicePrice: 50,
+        productCost: null,
+        steps: [makeBleachStep(), color],
+      }),
       makeEntry({ appliedBy: "b@salon.test", clientName: "Clara", servicePrice: 200, productCost: 20, steps: [color] }),
     ];
 

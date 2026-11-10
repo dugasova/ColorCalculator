@@ -16,7 +16,7 @@ describe("computeStockConsumption", () => {
       expect.arrayContaining([
         { id: shadeStockId("wella", "Koleston Perfect", "7/1"), kind: "shade", code: "7/1", grams: 30 },
         { id: developerStockId("wella", null, 20), kind: "developer", code: "20", grams: 60 },
-      ])
+      ]),
     );
     expect(consumptions).toHaveLength(2);
   });
@@ -70,11 +70,13 @@ describe("computeStockConsumption", () => {
 
   it("charges a scoped line's developer separately from the rest of its brand -- INOA vs Majirel/Dia", () => {
     const inoaStep = makeColorStep({
-      brandId: "loreal", line: "inoa",
+      brandId: "loreal",
+      line: "inoa",
       result: { ...COLOR_FULL_FORMULA, developerVolume: 20, grams: { colorGrams: 30, developerGrams: 30 } },
     });
     const majirelStep = makeColorStep({
-      brandId: "loreal", line: "majirel",
+      brandId: "loreal",
+      line: "majirel",
       result: { ...COLOR_FULL_FORMULA, developerVolume: 20, grams: { colorGrams: 30, developerGrams: 45 } },
     });
     const consumptions = computeStockConsumption([inoaStep, majirelStep]);
@@ -121,7 +123,9 @@ describe("computeStockConsumption with a gray-coverage natural base", () => {
   });
 
   it("scales the natural base by a recorded actual figure like every other share", () => {
-    const consumptions = computeStockConsumption([makeColorStep({ naturalBase: { shade: natural, grams: 10 }, actualColorGrams: 45 })]);
+    const consumptions = computeStockConsumption([
+      makeColorStep({ naturalBase: { shade: natural, grams: 10 }, actualColorGrams: 45 }),
+    ]);
     const byId = new Map(consumptions.map(c => [c.id, c]));
     expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/1"))?.grams).toBe(30);
     expect(byId.get(shadeStockId("wella", "Koleston Perfect", "7/0"))?.grams).toBe(15);

@@ -1,4 +1,10 @@
-import { pickDeveloperVolume, DEVELOPER_VOLUME_PERCENT, type DeveloperVolume, type Level, type LiftTable } from "./levels";
+import {
+  pickDeveloperVolume,
+  DEVELOPER_VOLUME_PERCENT,
+  type DeveloperVolume,
+  type Level,
+  type LiftTable,
+} from "./levels";
 
 export type UnwantedTone = "red" | "orange" | "yellow" | "green" | "blue" | "violet";
 
@@ -41,12 +47,18 @@ export interface CorrectionDeveloper {
 // BLEACH_LIFT_TABLE) so the difference reads as a decision, not as drift.
 const CORRECTION_LIFT_TABLE: LiftTable = volume => {
   switch (volume) {
-    case 6: return 0;
-    case 10: return 0;
-    case 13: return 0;
-    case 20: return 2;
-    case 30: return 3;
-    case 40: return 4;
+    case 6:
+      return 0;
+    case 10:
+      return 0;
+    case 13:
+      return 0;
+    case 20:
+      return 2;
+    case 30:
+      return 3;
+    case 40:
+      return 4;
   }
 };
 
@@ -74,7 +86,11 @@ export interface ColorCorrectionResult {
   technique: CorrectionTechnique;
 }
 
-export function calculateColorCorrection(startLevel: Level, targetLevel: Level, unwantedTone: UnwantedTone): ColorCorrectionResult {
+export function calculateColorCorrection(
+  startLevel: Level,
+  targetLevel: Level,
+  unwantedTone: UnwantedTone,
+): ColorCorrectionResult {
   return {
     unwantedTone,
     corrector: getComplementaryCorrector(unwantedTone),
@@ -102,8 +118,7 @@ const RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G = 0.5;
 // squeezed from the tube; measured out on a scale instead, the standard colorist
 // convention treats 1cm of tube as ~1g, so the same number of grams is used directly.
 export function calculateCorrectorGrams(level: Level, baseGrams: number): number {
-  const gramsPer30g = level >= RULE_OF_TEN_BASE_LEVEL
-    ? RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G
-    : RULE_OF_TEN_BASE_LEVEL - level;
+  const gramsPer30g =
+    level >= RULE_OF_TEN_BASE_LEVEL ? RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G : RULE_OF_TEN_BASE_LEVEL - level;
   return Math.round(gramsPer30g * (baseGrams / RULE_OF_TEN_BASE_GRAMS) * 10) / 10;
 }

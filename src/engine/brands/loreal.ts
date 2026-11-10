@@ -8,11 +8,14 @@ import type { LiftTable } from "../levels";
 // documented "4 to 4½" - rounded up to 5 since Level has no fractional values, matching
 // how Igora Highlifts/Wella Special Blonde (igora.ts, wella.ts) already round their own
 // developer ladders to whole levels and rely on visual confirmation near the ceiling.
-const majiblondUltraLiftTable: LiftTable = (volume) => {
+const majiblondUltraLiftTable: LiftTable = volume => {
   switch (volume) {
-    case 30: return 4;
-    case 40: return 5;
-    default: return 0;
+    case 30:
+      return 4;
+    case 40:
+      return 5;
+    default:
+      return 0;
   }
 };
 
@@ -152,10 +155,10 @@ export const LOREAL_MAJIREL_CHART: Shade[] = majirelShades.map(shade => ({
   // acceptsPartialLift (see Shade.acceptsPartialLift, ../shades.ts) instead.
   ...(shade.level === 12
     ? highLiftOverride({
-      developerLiftTable: majiblondUltraLiftTable,
-      minStartLevel: 5,
-      fixedProcessingMinutes: MAJIBLOND_ULTRA_PROCESSING_MINUTES,
-    })
+        developerLiftTable: majiblondUltraLiftTable,
+        minStartLevel: 5,
+        fixedProcessingMinutes: MAJIBLOND_ULTRA_PROCESSING_MINUTES,
+      })
     : { fixedMixingRatio: { colorParts: 1, developerParts: 1.5 } }),
 }));
 
@@ -217,7 +220,6 @@ const inoaShades: Shade[] = [
   { code: "5.15", level: 5, tone: "ash", secondaryTone: "mahogany" },
   { code: "5.18", level: 5, tone: "ash", secondaryTone: "pearl" },
   { code: "5.32", level: 5, tone: "gold", secondaryTone: "violet" },
-
 
   // Level 6
   { code: "6.0", level: 6, tone: "natural" },
@@ -311,12 +313,10 @@ const diaLightShades: Shade[] = [
   { code: "6.45", level: 6, tone: "copper", secondaryTone: "mahogany" },
   { code: "6.46", level: 6, tone: "copper", secondaryTone: "red" },
 
-
   { code: "6.1", level: 6, tone: "ash" },
   { code: "6.11", level: 6, tone: "ash", secondaryTone: "ash" },
   { code: "6.13", level: 6, tone: "ash", secondaryTone: "gold" },
   { code: "6.23", level: 6, tone: "pearl", secondaryTone: "gold" },
-
 
   // Level 7
   { code: "7", level: 7, tone: "natural" },
@@ -373,7 +373,10 @@ export const LOREAL_DIA_LIGHT_CHART: Shade[] = diaLightShades.map(shade => ({
   ...shade,
   line: "dia-light",
   fixedMixingRatio: { colorParts: 1, developerParts: 1.5 },
-  mixingRatioChoices: [{ colorParts: 1, developerParts: 1.5 }, { colorParts: 1, developerParts: 2 }],
+  mixingRatioChoices: [
+    { colorParts: 1, developerParts: 1.5 },
+    { colorParts: 1, developerParts: 2 },
+  ],
   developerVolumeChoices: [6, 10],
 }));
 

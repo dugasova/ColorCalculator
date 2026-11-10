@@ -7,7 +7,13 @@ import { usePalette } from "./palette";
 import FormulaCalculator from "./components/FormulaCalculator/FormulaCalculator";
 import { Nav, type AppView } from "./components/Nav/Nav";
 import { BottomNav } from "./components/Nav/BottomNav";
-import { buildRepeatFormulaRequest, buildRepeatSessionRequest, type FormulaHistoryEntry, type RepeatFormulaRequest, type RepeatSessionRequest } from "./history";
+import {
+  buildRepeatFormulaRequest,
+  buildRepeatSessionRequest,
+  type FormulaHistoryEntry,
+  type RepeatFormulaRequest,
+  type RepeatSessionRequest,
+} from "./history";
 import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
 import { trackEvent } from "./productAnalytics";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
@@ -16,45 +22,45 @@ import { AccountMenu } from "./components/AccountMenu/AccountMenu";
 import { useNativeBackButton } from "./nativeBackButton";
 import { useOnlineStatus } from "./useOnlineStatus";
 
-const HistoryView = lazy(() =>
-  import("./components/History/HistoryView").then(m => ({ default: m.HistoryView }))
-);
+const HistoryView = lazy(() => import("./components/History/HistoryView").then(m => ({ default: m.HistoryView })));
 const ColorCorrectionCalculator = lazy(() =>
-  import("./components/ColorCorrection/ColorCorrectionCalculator").then(m => ({ default: m.ColorCorrectionCalculator }))
+  import("./components/ColorCorrection/ColorCorrectionCalculator").then(m => ({
+    default: m.ColorCorrectionCalculator,
+  })),
 );
 const BleachCalculator = lazy(() =>
-  import("./components/Bleach/BleachCalculator").then(m => ({ default: m.BleachCalculator }))
+  import("./components/Bleach/BleachCalculator").then(m => ({ default: m.BleachCalculator })),
 );
 const ComplexColoringCalculator = lazy(() => import("./components/ComplexColoring/ComplexColoringCalculator"));
 const PrePigmentationCalculator = lazy(() =>
-  import("./components/PrePigmentation/PrePigmentationCalculator").then(m => ({ default: m.PrePigmentationCalculator }))
+  import("./components/PrePigmentation/PrePigmentationCalculator").then(m => ({
+    default: m.PrePigmentationCalculator,
+  })),
 );
 const AnalyticsView = lazy(() =>
-  import("./components/Analytics/AnalyticsView").then(m => ({ default: m.AnalyticsView }))
+  import("./components/Analytics/AnalyticsView").then(m => ({ default: m.AnalyticsView })),
 );
 const PaletteAdminView = lazy(() =>
-  import("./components/PaletteAdmin/PaletteAdminView").then(m => ({ default: m.PaletteAdminView }))
+  import("./components/PaletteAdmin/PaletteAdminView").then(m => ({ default: m.PaletteAdminView })),
 );
 const OrderListView = lazy(() =>
-  import("./components/OrderList/OrderListView").then(m => ({ default: m.OrderListView }))
+  import("./components/OrderList/OrderListView").then(m => ({ default: m.OrderListView })),
 );
-const TeamView = lazy(() =>
-  import("./components/Team/TeamView").then(m => ({ default: m.TeamView }))
-);
+const TeamView = lazy(() => import("./components/Team/TeamView").then(m => ({ default: m.TeamView })));
 const ChangePasswordModal = lazy(() =>
-  import("./components/Account/ChangePasswordModal").then(m => ({ default: m.ChangePasswordModal }))
+  import("./components/Account/ChangePasswordModal").then(m => ({ default: m.ChangePasswordModal })),
 );
 const ReferenceIndexPage = lazy(() =>
-  import("./components/Reference/ReferenceIndexPage").then(m => ({ default: m.ReferenceIndexPage }))
+  import("./components/Reference/ReferenceIndexPage").then(m => ({ default: m.ReferenceIndexPage })),
 );
 const BrandCheatSheetPage = lazy(() =>
-  import("./components/BrandNotes/BrandCheatSheetPage").then(m => ({ default: m.BrandCheatSheetPage }))
+  import("./components/BrandNotes/BrandCheatSheetPage").then(m => ({ default: m.BrandCheatSheetPage })),
 );
 const GuideCheatSheetPage = lazy(() =>
-  import("./components/Guides/GuideCheatSheetPage").then(m => ({ default: m.GuideCheatSheetPage }))
+  import("./components/Guides/GuideCheatSheetPage").then(m => ({ default: m.GuideCheatSheetPage })),
 );
 const FavoritesPage = lazy(() =>
-  import("./components/FormulaCalculator/FavoritesPage").then(m => ({ default: m.FavoritesPage }))
+  import("./components/FormulaCalculator/FavoritesPage").then(m => ({ default: m.FavoritesPage })),
 );
 
 export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boolean }) {
@@ -150,10 +156,24 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
 
   return (
     <div>
-      <a href="#main-content" className="skip-link">{t("app.skipToContent")}</a>
+      <a href="#main-content" className="skip-link">
+        {t("app.skipToContent")}
+      </a>
       <header className="app-header">
         <div className="app-topbar">
-          <button type="button" className="app-brand" onClick={() => { navigate("/"); setView("calculator"); }} aria-label={t("nav.calculator")}><img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />{t("app.titlePrefix")}<em>{t("app.titleAccent")}</em></button>
+          <button
+            type="button"
+            className="app-brand"
+            onClick={() => {
+              navigate("/");
+              setView("calculator");
+            }}
+            aria-label={t("nav.calculator")}
+          >
+            <img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />
+            {t("app.titlePrefix")}
+            <em>{t("app.titleAccent")}</em>
+          </button>
           <Nav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} />
           <div className="app-topbar__account">
             <ThemeSwitcher />
@@ -166,7 +186,11 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
           </div>
         </div>
       </header>
-      {!isOnline && <p className="offline-banner" role="status">{t("app.offlineBanner")}</p>}
+      {!isOnline && (
+        <p className="offline-banner" role="status">
+          {t("app.offlineBanner")}
+        </p>
+      )}
       {isChangePasswordOpen && (
         <Suspense fallback={null}>
           <ChangePasswordModal user={user} onClose={() => setIsChangePasswordOpen(false)} />
@@ -193,11 +217,22 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                   )}
                   {view === "correction" && <ColorCorrectionCalculator />}
                   {view === "bleach" && <BleachCalculator />}
-                  {view === "complex" && <ComplexColoringCalculator key={formResetKey} appliedBy={user.email ?? "unknown"} repeatRequest={repeatSessionRequest} onSaved={handleFormulaSaved} />}
+                  {view === "complex" && (
+                    <ComplexColoringCalculator
+                      key={formResetKey}
+                      appliedBy={user.email ?? "unknown"}
+                      repeatRequest={repeatSessionRequest}
+                      onSaved={handleFormulaSaved}
+                    />
+                  )}
                   {view === "prepigment" && <PrePigmentationCalculator />}
-                  {view === "history" && <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
+                  {view === "history" && (
+                    <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />
+                  )}
                   {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
-                  {view === "favorites" && <FavoritesPage appliedBy={user.email ?? "unknown"} brands={brands} onApply={handleApplyFavorite} />}
+                  {view === "favorites" && (
+                    <FavoritesPage appliedBy={user.email ?? "unknown"} brands={brands} onApply={handleApplyFavorite} />
+                  )}
                   {view === "palette" && isAdmin && <PaletteAdminView />}
                   {view === "orders" && isAdmin && <OrderListView />}
                   {view === "team" && isAdmin && <TeamView />}

@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  getUnderlyingPigment,
-  maxLiftForDeveloper,
-  canReachTarget,
-  type Level,
-} from "./levels";
+import { getUnderlyingPigment, maxLiftForDeveloper, canReachTarget, type Level } from "./levels";
 
 describe("getUnderlyingPigment", () => {
   it("maps each level to the correct underlying pigment", () => {

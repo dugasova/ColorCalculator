@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import {
-  applyFavoriteRecipe, applyFormValues, repeatRequestToFormValues, type FormulaFormSetters, type FormulaFormValues,
+  applyFavoriteRecipe,
+  applyFormValues,
+  repeatRequestToFormValues,
+  type FormulaFormSetters,
+  type FormulaFormValues,
 } from "./formulaRequests";
 import type { RepeatFormulaRequest } from "../../history";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
@@ -55,9 +59,15 @@ const RECIPE: FavoriteFormulaRecipe = {
 
 describe("repeatRequestToFormValues", () => {
   it("restores a saved hair canvas, and falls back to the fresh-calculator defaults without one", () => {
-    expect(repeatRequestToFormValues(REPEAT)).toMatchObject({ porosity: "high", thickness: "fine", chemicalHistory: ["bleached-blonde"] });
+    expect(repeatRequestToFormValues(REPEAT)).toMatchObject({
+      porosity: "high",
+      thickness: "fine",
+      chemicalHistory: ["bleached-blonde"],
+    });
     expect(repeatRequestToFormValues({ ...REPEAT, canvas: undefined })).toMatchObject({
-      porosity: "normal", thickness: "medium", chemicalHistory: [],
+      porosity: "normal",
+      thickness: "medium",
+      chemicalHistory: [],
     });
   });
 
@@ -74,19 +84,26 @@ describe("repeatRequestToFormValues", () => {
   it("enables blend mode only when both blend components were saved", () => {
     expect(repeatRequestToFormValues(REPEAT).blendModeEnabled).toBe(false);
     expect(repeatRequestToFormValues({ ...REPEAT, blendShadeACode: "7/0" }).blendModeEnabled).toBe(false);
-    expect(repeatRequestToFormValues({ ...REPEAT, blendShadeACode: "7/0", blendShadeBCode: "7/11" }).blendModeEnabled).toBe(true);
+    expect(
+      repeatRequestToFormValues({ ...REPEAT, blendShadeACode: "7/0", blendShadeBCode: "7/11" }).blendModeEnabled,
+    ).toBe(true);
   });
 
   it("restores the gray-coverage natural base choice, defaulting a pre-existing request to off", () => {
-    expect(repeatRequestToFormValues({ ...REPEAT, grayNaturalApplied: true, naturalBaseShadeCode: "7/0" }))
-      .toMatchObject({ grayNaturalApplied: true, naturalBaseShadeCode: "7/0" });
+    expect(
+      repeatRequestToFormValues({ ...REPEAT, grayNaturalApplied: true, naturalBaseShadeCode: "7/0" }),
+    ).toMatchObject({ grayNaturalApplied: true, naturalBaseShadeCode: "7/0" });
     expect(repeatRequestToFormValues(REPEAT)).toMatchObject({ grayNaturalApplied: false, naturalBaseShadeCode: null });
   });
 
   it("restores pricing and processing time as manual overrides, and never re-applies neutralization", () => {
     expect(repeatRequestToFormValues(REPEAT)).toMatchObject({
-      manualPricePerGram: 0.25, manualMarkupMultiplier: 3, manualServicePrice: 1200,
-      manualProcessingMinutes: 35, neutralizationApplied: false, prePigmentationEnabled: true,
+      manualPricePerGram: 0.25,
+      manualMarkupMultiplier: 3,
+      manualServicePrice: 1200,
+      manualProcessingMinutes: 35,
+      neutralizationApplied: false,
+      prePigmentationEnabled: true,
     });
   });
 });
@@ -95,8 +112,15 @@ describe("applyFavoriteRecipe", () => {
   it("never touches the on-screen client's diagnostics, markup or pre-pigmentation", () => {
     const values = applyFavoriteRecipe(RECIPE);
     for (const key of [
-      "startLevel", "grayPercent", "porosity", "thickness", "chemicalHistory", "manualMarkupMultiplier", "prePigmentationEnabled",
-      "grayNaturalApplied", "naturalBaseShadeCode",
+      "startLevel",
+      "grayPercent",
+      "porosity",
+      "thickness",
+      "chemicalHistory",
+      "manualMarkupMultiplier",
+      "prePigmentationEnabled",
+      "grayNaturalApplied",
+      "naturalBaseShadeCode",
     ]) {
       expect(values).not.toHaveProperty(key);
     }
@@ -112,8 +136,12 @@ describe("applyFavoriteRecipe", () => {
 
   it("maps stored null manual overrides to undefined and keeps the saved grams input mode", () => {
     expect(applyFavoriteRecipe(RECIPE)).toMatchObject({
-      manualDeveloperVolume: undefined, manualMixingRatio: undefined, manualProcessingMinutes: undefined,
-      gramsInputMode: "total", blendModeEnabled: true, neutralizationApplied: false,
+      manualDeveloperVolume: undefined,
+      manualMixingRatio: undefined,
+      manualProcessingMinutes: undefined,
+      gramsInputMode: "total",
+      blendModeEnabled: true,
+      neutralizationApplied: false,
     });
   });
 });

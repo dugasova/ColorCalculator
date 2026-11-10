@@ -22,7 +22,7 @@ describe("CollapsibleSection", () => {
     render(
       <CollapsibleSection id="x" title="Title" defaultOpen={false}>
         <input aria-label="child" />
-      </CollapsibleSection>
+      </CollapsibleSection>,
     );
 
     const toggle = screen.getByRole("button", { name: "Title" });
@@ -45,7 +45,7 @@ describe("CollapsibleSection", () => {
     render(
       <CollapsibleSection id="y" title="Title" defaultOpen={true}>
         <input aria-label="child" />
-      </CollapsibleSection>
+      </CollapsibleSection>,
     );
 
     expect(screen.getByRole("button", { name: "Title" })).toHaveAttribute("aria-expanded", "false");
@@ -56,7 +56,7 @@ describe("CollapsibleSection", () => {
     render(
       <CollapsibleSection id="z" title="Title" defaultOpen={true}>
         <StatefulInput />
-      </CollapsibleSection>
+      </CollapsibleSection>,
     );
 
     const input = screen.getByLabelText("stateful") as HTMLInputElement;
@@ -76,7 +76,7 @@ describe("CollapsibleSection", () => {
     render(
       <CollapsibleSection id="w" title="Title" defaultOpen={false} forceOpen={true}>
         <input aria-label="child" />
-      </CollapsibleSection>
+      </CollapsibleSection>,
     );
 
     const toggle = screen.getByRole("button", { name: "Title" });

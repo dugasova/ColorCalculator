@@ -35,18 +35,33 @@ export function ColorCorrectionCalculator() {
   const result = calculateColorCorrection(currentLevel, targetLevel, unwantedTone);
   const correctorGrams = calculateCorrectorGrams(targetLevel, baseGrams);
   const correctorColorName = t(`correction.tones.${result.corrector.color}`);
-  const correctorName = t("correction.correctorName", { color: correctorColorName, qualifier: t(`correction.qualifiers.${result.corrector.qualifier}`) });
+  const correctorName = t("correction.correctorName", {
+    color: correctorColorName,
+    qualifier: t(`correction.qualifiers.${result.corrector.qualifier}`),
+  });
   const unwantedToneName = t(`correction.tones.${unwantedTone}`);
   const tipKey = getTipKey(unwantedTone, result.technique);
 
   return (
     <div className="calculator calculator--wide">
-      <h1 className="calculator__title">{t("correction.titlePrefix")} <span className="calculator__title-accent">{t("correction.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        {t("correction.titlePrefix")} <span className="calculator__title-accent">{t("correction.titleAccent")}</span>
+      </h1>
       <p className="correction__subtitle">{t("correction.subtitle")}</p>
 
       <div className="calculator__form">
-        <LevelField id="currentLevel" label={t("correction.currentLevel")} value={currentLevel} onChange={setCurrentLevel} />
-        <LevelField id="targetLevel" label={t("correction.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
+        <LevelField
+          id="currentLevel"
+          label={t("correction.currentLevel")}
+          value={currentLevel}
+          onChange={setCurrentLevel}
+        />
+        <LevelField
+          id="targetLevel"
+          label={t("correction.targetLevel")}
+          value={targetLevel}
+          onChange={setTargetLevel}
+        />
 
         <div className="field correction__tone-field">
           <label id="unwantedToneLabel">{t("correction.unwantedTone")}</label>
@@ -91,7 +106,9 @@ export function ColorCorrectionCalculator() {
         <div className="results__stats">
           <div className="stat">
             <span className="stat__label">{t("correction.stats.developer")}</span>
-            <span className="stat__value">{t("correction.developerValue", { volume: result.developer.volume, percent: result.developer.percent })}</span>
+            <span className="stat__value">
+              {t("correction.developerValue", { volume: result.developer.volume, percent: result.developer.percent })}
+            </span>
           </div>
           <div className="stat">
             <span className="stat__label">{t("correction.stats.technique")}</span>
@@ -117,12 +134,8 @@ export function ColorCorrectionCalculator() {
           {t("correction.explanation", { corrector: correctorName, tone: unwantedToneName })}
         </p>
 
-        {result.technique === "multi-step" && (
-          <p className="correction__note">{t("correction.tips.multiStep")}</p>
-        )}
-        {tipKey !== "" && (
-          <p className="correction__note">{t(tipKey)}</p>
-        )}
+        {result.technique === "multi-step" && <p className="correction__note">{t("correction.tips.multiStep")}</p>}
+        {tipKey !== "" && <p className="correction__note">{t(tipKey)}</p>}
 
         <p className="correction__note correction__note--strand">{t("correction.strandTest")}</p>
         <p className="correction__disclaimer">{t("correction.disclaimer")}</p>

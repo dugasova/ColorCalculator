@@ -25,11 +25,14 @@ export function formatBleachText(params: FormatBleachParams): string {
     i18n.t("format.ratio", { color: result.mixingRatio.powderParts, developer: result.mixingRatio.developerParts }),
     result.grams !== null
       ? i18n.t("format.mixValue", {
-        value: i18n.t("bleach.mixValue", { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) }),
-      })
+          value: i18n.t("bleach.mixValue", {
+            powder: result.grams.powderGrams.toFixed(1),
+            developer: result.grams.developerGrams.toFixed(1),
+          }),
+        })
       : i18n.t("format.mixFallback", {
-        message: result.multiStepRequired ? i18n.t("bleach.multiStepWarning") : i18n.t("bleach.noLiftWarning"),
-      }),
+          message: result.multiStepRequired ? i18n.t("bleach.multiStepWarning") : i18n.t("bleach.noLiftWarning"),
+        }),
     i18n.t("format.processingTime", { value: processingMinutes }),
   ];
 

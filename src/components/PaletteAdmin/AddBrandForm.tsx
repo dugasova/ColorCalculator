@@ -63,9 +63,8 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
       return;
     }
 
-    const mixingRatioConfig: MixingRatioConfig = mixingKind === "fixed"
-      ? { kind: "fixed", fixedRatio: { colorParts, developerParts } }
-      : { kind: "generic" };
+    const mixingRatioConfig: MixingRatioConfig =
+      mixingKind === "fixed" ? { kind: "fixed", fixedRatio: { colorParts, developerParts } } : { kind: "generic" };
 
     setBrandStatus("saving");
     try {
@@ -86,11 +85,22 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
   };
 
   return (
-    <CollapsibleSection id="addBrand" title={t("palette.addBrandTitle")} defaultOpen={false} className="palette-admin__section">
+    <CollapsibleSection
+      id="addBrand"
+      title={t("palette.addBrandTitle")}
+      defaultOpen={false}
+      className="palette-admin__section"
+    >
       <form className="calculator__form" onSubmit={handleAddBrand}>
         <div className="field">
           <label htmlFor="paletteBrandName">{t("palette.brandName")}</label>
-          <input id="paletteBrandName" type="text" value={brandName} onChange={e => handleBrandNameChange(e.target.value)} required />
+          <input
+            id="paletteBrandName"
+            type="text"
+            value={brandName}
+            onChange={e => handleBrandNameChange(e.target.value)}
+            required
+          />
         </div>
         <div className="field">
           <label htmlFor="paletteBrandId">{t("palette.brandId")}</label>
@@ -98,7 +108,10 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
             id="paletteBrandId"
             type="text"
             value={brandId}
-            onChange={e => { setBrandId(e.target.value); setBrandIdTouched(true); }}
+            onChange={e => {
+              setBrandId(e.target.value);
+              setBrandIdTouched(true);
+            }}
             required
           />
           <small>{t("palette.brandIdHint")}</small>
@@ -130,19 +143,39 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
           <>
             <div className="field">
               <label htmlFor="paletteColorParts">{t("palette.colorParts")}</label>
-              <input id="paletteColorParts" type="number" min={1} value={colorParts} onChange={e => setColorParts(Number(e.target.value))} />
+              <input
+                id="paletteColorParts"
+                type="number"
+                min={1}
+                value={colorParts}
+                onChange={e => setColorParts(Number(e.target.value))}
+              />
             </div>
             <div className="field">
               <label htmlFor="paletteDeveloperParts">{t("palette.developerParts")}</label>
-              <input id="paletteDeveloperParts" type="number" min={1} value={developerParts} onChange={e => setDeveloperParts(Number(e.target.value))} />
+              <input
+                id="paletteDeveloperParts"
+                type="number"
+                min={1}
+                value={developerParts}
+                onChange={e => setDeveloperParts(Number(e.target.value))}
+              />
             </div>
           </>
         )}
-        {brandError !== null && <p className="warning" role="alert">{brandError}</p>}
+        {brandError !== null && (
+          <p className="warning" role="alert">
+            {brandError}
+          </p>
+        )}
         <button type="submit" className="button" disabled={brandStatus === "saving"}>
           {brandStatus === "saving" ? t("palette.saving") : t("palette.addBrand")}
         </button>
-        {brandStatus === "saved" && <span className="palette-admin__status" role="status">{t("palette.brandAdded")}</span>}
+        {brandStatus === "saved" && (
+          <span className="palette-admin__status" role="status">
+            {t("palette.brandAdded")}
+          </span>
+        )}
       </form>
     </CollapsibleSection>
   );

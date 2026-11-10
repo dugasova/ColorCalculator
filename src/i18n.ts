@@ -27,17 +27,15 @@ function getInitialLanguage(): Language {
   return "en";
 }
 
-void i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: { translation: en },
-      uk: { translation: uk },
-    },
-    lng: getInitialLanguage(),
-    fallbackLng: "en",
-    interpolation: { escapeValue: false },
-  });
+void i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: en },
+    uk: { translation: uk },
+  },
+  lng: getInitialLanguage(),
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+});
 
 // WCAG 3.1.1 Language of Page: assistive tech relies on `<html lang>` to pick the right
 // pronunciation/voice, and it's static in index.html -- keep it in sync with the actual

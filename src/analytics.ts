@@ -12,12 +12,12 @@ export interface ShadePopularity {
 export interface SalonAnalytics {
   totalVisits: number;
   uniqueClients: number;
-  returningClients: number;    // named clients with >=2 saved visits
-  retentionRate: number;       // returningClients / uniqueClients; 0 when uniqueClients === 0
+  returningClients: number; // named clients with >=2 saved visits
+  retentionRate: number; // returningClients / uniqueClients; 0 when uniqueClients === 0
   popularShades: ShadePopularity[]; // sorted desc by count, ties broken by shadeCode asc
   averageColorGrams: number | null; // avg colorGrams (dye only, excludes developer) across entries with a computed formula; null if none
   averageActualColorGrams: number | null; // avg recorded real dye grams; null when nothing has been recorded
-  actualVsComputedRatio: number | null;   // sum(actual) / sum(computed) over steps that have both; 1 means the engine matches reality
+  actualVsComputedRatio: number | null; // sum(actual) / sum(computed) over steps that have both; 1 means the engine matches reality
   averageProductCost: number | null; // avg stored productCost across entries with a non-null value; null if none
 }
 
@@ -34,12 +34,16 @@ function countShadePopularity(entries: FormulaHistoryEntry[]): ShadePopularity[]
       if (existing !== undefined) {
         existing.count += 1;
       } else {
-        shadeCounts.set(key, { brandName: step.brandName, line: step.line, shadeCode: step.targetShade.code, count: 1 });
+        shadeCounts.set(key, {
+          brandName: step.brandName,
+          line: step.line,
+          shadeCode: step.targetShade.code,
+          count: 1,
+        });
       }
     }
   }
-  return Array.from(shadeCounts.values())
-    .sort((a, b) => b.count - a.count || a.shadeCode.localeCompare(b.shadeCode));
+  return Array.from(shadeCounts.values()).sort((a, b) => b.count - a.count || a.shadeCode.localeCompare(b.shadeCode));
 }
 
 // Visit count per client identity (see getClientGroupKey), skipping entries with an empty
@@ -70,30 +74,26 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
     .filter((step): step is ColorHistoryStep => step.kind === "color")
     .map(step => step.result.grams?.colorGrams)
     .filter((g): g is number => typeof g === "number");
-  const averageColorGrams = colorGramsValues.length > 0
-    ? colorGramsValues.reduce((sum, g) => sum + g, 0) / colorGramsValues.length
-    : null;
+  const averageColorGrams =
+    colorGramsValues.length > 0 ? colorGramsValues.reduce((sum, g) => sum + g, 0) / colorGramsValues.length : null;
 
   const actualPairs = entries
     .flatMap(e => e.steps)
     .filter((step): step is ColorHistoryStep => step.kind === "color")
     .map(step => ({ actual: step.actualColorGrams, computed: step.result.grams?.colorGrams }))
-    .filter((pair): pair is { actual: number; computed: number } =>
-      typeof pair.actual === "number" && typeof pair.computed === "number");
-  const averageActualColorGrams = actualPairs.length > 0
-    ? actualPairs.reduce((sum, p) => sum + p.actual, 0) / actualPairs.length
-    : null;
+    .filter(
+      (pair): pair is { actual: number; computed: number } =>
+        typeof pair.actual === "number" && typeof pair.computed === "number",
+    );
+  const averageActualColorGrams =
+    actualPairs.length > 0 ? actualPairs.reduce((sum, p) => sum + p.actual, 0) / actualPairs.length : null;
   const computedTotal = actualPairs.reduce((sum, p) => sum + p.computed, 0);
-  const actualVsComputedRatio = computedTotal > 0
-    ? actualPairs.reduce((sum, p) => sum + p.actual, 0) / computedTotal
-    : null;
+  const actualVsComputedRatio =
+    computedTotal > 0 ? actualPairs.reduce((sum, p) => sum + p.actual, 0) / computedTotal : null;
 
-  const productCostValues = entries
-    .map(e => e.productCost)
-    .filter((c): c is number => typeof c === "number");
-  const averageProductCost = productCostValues.length > 0
-    ? productCostValues.reduce((sum, c) => sum + c, 0) / productCostValues.length
-    : null;
+  const productCostValues = entries.map(e => e.productCost).filter((c): c is number => typeof c === "number");
+  const averageProductCost =
+    productCostValues.length > 0 ? productCostValues.reduce((sum, c) => sum + c, 0) / productCostValues.length : null;
 
   // Retention: % of clients (grouped by real clientId when the entry has one, else a
   // normalized-name fallback -- see getClientGroupKey) who have 2 or more saved visits.
@@ -108,8 +108,15 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnal
   const retentionRate = uniqueClients > 0 ? returningClients / uniqueClients : 0;
 
   return {
-    totalVisits, uniqueClients, returningClients, retentionRate, popularShades,
-    averageColorGrams, averageActualColorGrams, actualVsComputedRatio, averageProductCost,
+    totalVisits,
+    uniqueClients,
+    returningClients,
+    retentionRate,
+    popularShades,
+    averageColorGrams,
+    averageActualColorGrams,
+    actualVsComputedRatio,
+    averageProductCost,
   };
 }
 
@@ -122,31 +129,36 @@ const LAST_30_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 // that nothing was filtered out. The other two periods drop entries whose `appliedAt` is
 // still a pending server timestamp (`null`) -- the same exclusion `groupByClient`
 // (revisit.ts) applies -- since there's no date to compare against `start`.
-export function filterEntriesByPeriod(entries: FormulaHistoryEntry[], period: AnalyticsPeriod, now: Date): FormulaHistoryEntry[] {
+export function filterEntriesByPeriod(
+  entries: FormulaHistoryEntry[],
+  period: AnalyticsPeriod,
+  now: Date,
+): FormulaHistoryEntry[] {
   if (period === "all") return entries;
-  const start = period === "last30Days"
-    ? new Date(now.getTime() - LAST_30_DAYS_MS)
-    : new Date(now.getFullYear(), now.getMonth(), 1);
+  const start =
+    period === "last30Days"
+      ? new Date(now.getTime() - LAST_30_DAYS_MS)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
   return entries.filter(entry => entry.appliedAt !== null && entry.appliedAt.toDate() >= start);
 }
 
 export interface StylistStats {
-  stylist: string;                         // entry.appliedBy, exact string
+  stylist: string; // entry.appliedBy, exact string
   visits: number;
   uniqueClients: number;
   returningClients: number;
-  retentionRate: number;                   // returningClients / uniqueClients; 0 when uniqueClients === 0
-  dyeGrams: number;                        // sum of stepTotalGrams over color steps (dye + pre-pigmentation filler, actual-aware)
-  bleachPowderGrams: number;               // sum of stepTotalGrams over bleach steps
-  processingMinutes: number;               // sum of step.processingMinutes (numbers only)
+  retentionRate: number; // returningClients / uniqueClients; 0 when uniqueClients === 0
+  dyeGrams: number; // sum of stepTotalGrams over color steps (dye + pre-pigmentation filler, actual-aware)
+  bleachPowderGrams: number; // sum of stepTotalGrams over bleach steps
+  processingMinutes: number; // sum of step.processingMinutes (numbers only)
   averageProcessingMinutes: number | null; // processingMinutes / visits; null when visits === 0
-  revenue: number;                         // sum of numeric entry.servicePrice
-  pricedVisits: number;                    // entries with numeric servicePrice
-  productCost: number;                     // sum of numeric entry.productCost
-  grossProfit: number | null;              // sum(servicePrice - productCost) over entries where BOTH are numbers; null if none
-  averageTicket: number | null;            // revenue / pricedVisits; null when pricedVisits === 0
-  topShade: ShadePopularity | null;        // countShadePopularity(stylistEntries)[0] ?? null
-  lastVisitAt: Date | null;                // max appliedAt.toDate(); null when every entry has appliedAt === null
+  revenue: number; // sum of numeric entry.servicePrice
+  pricedVisits: number; // entries with numeric servicePrice
+  productCost: number; // sum of numeric entry.productCost
+  grossProfit: number | null; // sum(servicePrice - productCost) over entries where BOTH are numbers; null if none
+  averageTicket: number | null; // revenue / pricedVisits; null when pricedVisits === 0
+  topShade: ShadePopularity | null; // countShadePopularity(stylistEntries)[0] ?? null
+  lastVisitAt: Date | null; // max appliedAt.toDate(); null when every entry has appliedAt === null
 }
 
 // Grouped by `entry.appliedBy` exactly as stored -- always the signed-in stylist's
@@ -216,9 +228,22 @@ export function computeStylistStats(entries: FormulaHistoryEntry[]): StylistStat
     }
 
     stats.push({
-      stylist, visits, uniqueClients, returningClients, retentionRate,
-      dyeGrams, bleachPowderGrams, processingMinutes, averageProcessingMinutes,
-      revenue, pricedVisits, productCost, grossProfit, averageTicket, topShade, lastVisitAt,
+      stylist,
+      visits,
+      uniqueClients,
+      returningClients,
+      retentionRate,
+      dyeGrams,
+      bleachPowderGrams,
+      processingMinutes,
+      averageProcessingMinutes,
+      revenue,
+      pricedVisits,
+      productCost,
+      grossProfit,
+      averageTicket,
+      topShade,
+      lastVisitAt,
     });
   }
 

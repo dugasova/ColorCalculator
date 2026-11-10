@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { BRANDS } from "./engine/brands";
 import { buildBrandCatalog, type CustomBrandRecord, type PaletteOverride } from "./engine/paletteOverrides";
-import { PaletteReactContext, subscribeToCustomBrands, subscribeToPaletteOverrides, type PaletteState } from "./palette";
+import {
+  PaletteReactContext,
+  subscribeToCustomBrands,
+  subscribeToPaletteOverrides,
+  type PaletteState,
+} from "./palette";
 import { subscribeToStock, type StockRecord } from "./stock";
 import { subscribeToPricingSettings, DEFAULT_PRICING_SETTINGS, type PricingSettings } from "./salonSettings";
 import { subscribeToShadeCalibrations } from "./shadeCalibrations";
@@ -15,21 +20,23 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
   const [calibrations, setCalibrations] = useState<ShadeCalibration[]>([]);
 
   useEffect(() => {
-    const unsubscribeBrands = subscribeToCustomBrands(
-      setCustomBrands,
-      err => console.error("Falling back to the last known custom brands -- could not subscribe to customBrands:", err)
+    const unsubscribeBrands = subscribeToCustomBrands(setCustomBrands, err =>
+      console.error("Falling back to the last known custom brands -- could not subscribe to customBrands:", err),
     );
-    const unsubscribeOverrides = subscribeToPaletteOverrides(
-      setOverrides,
-      err => console.error("Falling back to the last known palette overrides -- could not subscribe to paletteOverrides:", err)
+    const unsubscribeOverrides = subscribeToPaletteOverrides(setOverrides, err =>
+      console.error(
+        "Falling back to the last known palette overrides -- could not subscribe to paletteOverrides:",
+        err,
+      ),
     );
-    const unsubscribeStock = subscribeToStock(
-      setStock,
-      err => console.error("Falling back to the last known dye stock -- could not subscribe to dyeStock:", err)
+    const unsubscribeStock = subscribeToStock(setStock, err =>
+      console.error("Falling back to the last known dye stock -- could not subscribe to dyeStock:", err),
     );
-    const unsubscribeCalibrations = subscribeToShadeCalibrations(
-      setCalibrations,
-      err => console.error("Falling back to the last known shade calibrations -- could not subscribe to shadeCalibrations:", err)
+    const unsubscribeCalibrations = subscribeToShadeCalibrations(setCalibrations, err =>
+      console.error(
+        "Falling back to the last known shade calibrations -- could not subscribe to shadeCalibrations:",
+        err,
+      ),
     );
     const unsubscribePricing = subscribeToPricingSettings(setPricingSettings);
     return () => {
@@ -45,7 +52,7 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
   const calibrationIndex = useMemo(() => indexShadeCalibrations(calibrations), [calibrations]);
   const value = useMemo<PaletteState>(
     () => ({ brands, customBrands, overrides, stock, pricingSettings, calibrationIndex }),
-    [brands, customBrands, overrides, stock, pricingSettings, calibrationIndex]
+    [brands, customBrands, overrides, stock, pricingSettings, calibrationIndex],
   );
 
   return <PaletteReactContext.Provider value={value}>{children}</PaletteReactContext.Provider>;

@@ -66,19 +66,30 @@ describe("ComplexColoringCalculator", () => {
 
   it("shows a stock shortage warning for the session once a step's shade is drawn from tracked, insufficient stock", () => {
     const genericShade = GENERIC_SHADE_CHART[0];
-    const shortStock: StockRecord[] = [{
-      id: shadeStockId("generic", genericShade.line ?? null, genericShade.code),
-      kind: "shade",
-      brandId: "generic",
-      line: genericShade.line ?? null,
-      code: genericShade.code,
-      remainingGrams: 1,
-    }];
+    const shortStock: StockRecord[] = [
+      {
+        id: shadeStockId("generic", genericShade.line ?? null, genericShade.code),
+        kind: "shade",
+        brandId: "generic",
+        line: genericShade.line ?? null,
+        code: genericShade.code,
+        remainingGrams: 1,
+      },
+    ];
 
     render(
-      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: shortStock, pricingSettings: DEFAULT_PRICING_SETTINGS, calibrationIndex: new Map() }}>
+      <PaletteReactContext.Provider
+        value={{
+          brands: BRANDS,
+          customBrands: [],
+          overrides: [],
+          stock: shortStock,
+          pricingSettings: DEFAULT_PRICING_SETTINGS,
+          calibrationIndex: new Map(),
+        }}
+      >
         <ComplexColoringCalculator appliedBy="Test Stylist" />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "+ Add color step" }));
 
@@ -87,9 +98,18 @@ describe("ComplexColoringCalculator", () => {
 
   it("shows no stock shortage warning when nothing is tracked", () => {
     render(
-      <PaletteReactContext.Provider value={{ brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS, calibrationIndex: new Map() }}>
+      <PaletteReactContext.Provider
+        value={{
+          brands: BRANDS,
+          customBrands: [],
+          overrides: [],
+          stock: [],
+          pricingSettings: DEFAULT_PRICING_SETTINGS,
+          calibrationIndex: new Map(),
+        }}
+      >
         <ComplexColoringCalculator appliedBy="Test Stylist" />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "+ Add color step" }));
 
@@ -97,9 +117,13 @@ describe("ComplexColoringCalculator", () => {
   });
 
   it("seeds every step, markup, and service price from a History 'Repeat' of a saved multi-step session", () => {
-    const bleachStep = makeBleachStep({ result: { ...makeBleachStep().result, grams: { powderGrams: 30, developerGrams: 60 } } });
+    const bleachStep = makeBleachStep({
+      result: { ...makeBleachStep().result, grams: { powderGrams: 30, developerGrams: 60 } },
+    });
     const entry = makeEntry({
-      clientName: "Anna", markupMultiplier: 3, servicePrice: 120,
+      clientName: "Anna",
+      markupMultiplier: 3,
+      servicePrice: 120,
       steps: [bleachStep, makeColorStep({ strandZone: "mid-lengths" })],
     });
     const repeatRequest = buildRepeatSessionRequest(entry, BRANDS)!;

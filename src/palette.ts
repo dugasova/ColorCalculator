@@ -1,4 +1,13 @@
-import { addDoc, collection, deleteDoc, doc, onSnapshot, setDoc, type FirestoreError, type Unsubscribe } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  type FirestoreError,
+  type Unsubscribe,
+} from "firebase/firestore";
 import { settleWrite } from "./firestoreWrite";
 import { createContext, useContext } from "react";
 import { db } from "./firebase";
@@ -6,7 +15,11 @@ import { parseSnapshotDocs } from "./firestoreSubscribe";
 import { sanitizeForFirestore } from "./history";
 import { BRANDS, type Brand, type BrandId } from "./engine/brands";
 import {
-  type CustomBrandRecord, type MixingRatioConfig, type PaletteOverride, customBrandRecordSchema, paletteOverrideSchema,
+  type CustomBrandRecord,
+  type MixingRatioConfig,
+  type PaletteOverride,
+  customBrandRecordSchema,
+  paletteOverrideSchema,
 } from "./engine/paletteOverrides";
 import type { Shade } from "./engine/shades";
 import type { StockRecord } from "./stock";
@@ -39,7 +52,11 @@ export interface PaletteState {
 // `PaletteProvider` component — mixing hook/context exports into a component file breaks
 // React Fast Refresh.
 export const PaletteReactContext = createContext<PaletteState>({
-  brands: BRANDS, customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS,
+  brands: BRANDS,
+  customBrands: [],
+  overrides: [],
+  stock: [],
+  pricingSettings: DEFAULT_PRICING_SETTINGS,
   calibrationIndex: new Map(),
 });
 
@@ -95,16 +112,30 @@ function disableOverrideId(brandId: BrandId, line: string | null, code: string):
 // A listener-level failure is reported via `onError` instead of throwing -- see
 // stock/firestore.ts's subscribeToStock for the same pattern, wired to `console.error` by
 // PaletteContext.tsx.
-export function subscribeToCustomBrands(onChange: (brands: CustomBrandRecord[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
-  return onSnapshot(collection(db, CUSTOM_BRANDS_COLLECTION), snapshot => {
-    onChange(parseSnapshotDocs(snapshot, customBrandRecordSchema, "custom brand"));
-  }, onError);
+export function subscribeToCustomBrands(
+  onChange: (brands: CustomBrandRecord[]) => void,
+  onError?: (err: FirestoreError) => void,
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, CUSTOM_BRANDS_COLLECTION),
+    snapshot => {
+      onChange(parseSnapshotDocs(snapshot, customBrandRecordSchema, "custom brand"));
+    },
+    onError,
+  );
 }
 
-export function subscribeToPaletteOverrides(onChange: (overrides: PaletteOverride[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
-  return onSnapshot(collection(db, PALETTE_OVERRIDES_COLLECTION), snapshot => {
-    onChange(parseSnapshotDocs(snapshot, paletteOverrideSchema, "palette override"));
-  }, onError);
+export function subscribeToPaletteOverrides(
+  onChange: (overrides: PaletteOverride[]) => void,
+  onError?: (err: FirestoreError) => void,
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, PALETTE_OVERRIDES_COLLECTION),
+    snapshot => {
+      onChange(parseSnapshotDocs(snapshot, paletteOverrideSchema, "palette override"));
+    },
+    onError,
+  );
 }
 
 export interface AddCustomBrandInput {
@@ -118,22 +149,39 @@ export interface AddCustomBrandInput {
 // responsible for picking one that doesn't collide with a built-in or existing custom brand
 // — see PaletteAdminView's slug validation.
 export async function addCustomBrand(input: AddCustomBrandInput): Promise<void> {
-  await settleWrite(setDoc(doc(db, CUSTOM_BRANDS_COLLECTION, input.id), sanitizeForFirestore({
-    name: input.name,
-    pricePerGram: input.pricePerGram,
-    mixingRatioConfig: input.mixingRatioConfig,
-  })), "add custom brand");
+  await settleWrite(
+    setDoc(
+      doc(db, CUSTOM_BRANDS_COLLECTION, input.id),
+      sanitizeForFirestore({
+        name: input.name,
+        pricePerGram: input.pricePerGram,
+        mixingRatioConfig: input.mixingRatioConfig,
+      }),
+    ),
+    "add custom brand",
+  );
 }
 
 export async function addShadeToBrand(brandId: BrandId, shade: Shade): Promise<void> {
-  await settleWrite(addDoc(collection(db, PALETTE_OVERRIDES_COLLECTION), sanitizeForFirestore({
-    kind: "add" as const,
-    brandId,
-    shade,
-  })), "add shade");
+  await settleWrite(
+    addDoc(
+      collection(db, PALETTE_OVERRIDES_COLLECTION),
+      sanitizeForFirestore({
+        kind: "add" as const,
+        brandId,
+        shade,
+      }),
+    ),
+    "add shade",
+  );
 }
 
-export async function setShadeDisabled(brandId: BrandId, line: string | null, code: string, disabled: boolean): Promise<void> {
+export async function setShadeDisabled(
+  brandId: BrandId,
+  line: string | null,
+  code: string,
+  disabled: boolean,
+): Promise<void> {
   const overrideRef = doc(db, PALETTE_OVERRIDES_COLLECTION, disableOverrideId(brandId, line, code));
   if (disabled) {
     await settleWrite(setDoc(overrideRef, { kind: "disable", brandId, line, code }), "set shade disabled");

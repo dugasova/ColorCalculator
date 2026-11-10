@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
-  normalizeHistoryEntry, buildRepeatFormulaRequest, buildRepeatSessionRequest, historyEntryShapeSchema,
-  type ColorHistoryStep, type FormulaHistoryEntry, type LegacyFormulaHistoryEntry,
+  normalizeHistoryEntry,
+  buildRepeatFormulaRequest,
+  buildRepeatSessionRequest,
+  historyEntryShapeSchema,
+  type ColorHistoryStep,
+  type FormulaHistoryEntry,
+  type LegacyFormulaHistoryEntry,
 } from "./history";
 import { BRANDS } from "./engine/brands";
 import { calculatePrePigmentation } from "./engine/prePigmentation";
@@ -123,7 +128,10 @@ describe("normalizeHistoryEntry", () => {
 describe("buildRepeatFormulaRequest", () => {
   it("restores the gray-coverage natural base choice (on/off and picked shade), not its grams", () => {
     const natural = { code: "7.0", level: 7 as const, tone: "natural" as const };
-    const withNatural = buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [makeColorStep({ naturalBase: { shade: natural, grams: 10 } })] }), BRANDS);
+    const withNatural = buildRepeatFormulaRequest(
+      makeEntry({ clientName: "Anna", steps: [makeColorStep({ naturalBase: { shade: natural, grams: 10 } })] }),
+      BRANDS,
+    );
     expect(withNatural).toMatchObject({ grayNaturalApplied: true, naturalBaseShadeCode: "7.0" });
     const legacy = buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [makeColorStep()] }), BRANDS);
     expect(legacy).toMatchObject({ grayNaturalApplied: false, naturalBaseShadeCode: null });
@@ -274,7 +282,10 @@ describe("buildRepeatFormulaRequest", () => {
 describe("buildRepeatSessionRequest", () => {
   it("reconstructs calculator input for every step of a multi-zone session, plus the session-level fields", () => {
     const entry = makeEntry({
-      clientName: "Anna", clientId: "anna-1", markupMultiplier: 3, servicePrice: 120,
+      clientName: "Anna",
+      clientId: "anna-1",
+      markupMultiplier: 3,
+      servicePrice: 120,
       steps: [makeBleachStep({ targetLevel: 9 }), makeColorStep({ strandZone: "mid-lengths" })],
     });
     const request = buildRepeatSessionRequest(entry, BRANDS);
@@ -284,11 +295,22 @@ describe("buildRepeatSessionRequest", () => {
     expect(request!.markupMultiplier).toBe(3);
     expect(request!.servicePrice).toBe(120);
     expect(request!.steps[0]).toMatchObject({
-      kind: "bleach", startLevel: 6, targetLevel: 9, totalGrams: 60, processingMinutes: 35, pricePerGram: 0.1,
+      kind: "bleach",
+      startLevel: 6,
+      targetLevel: 9,
+      totalGrams: 60,
+      processingMinutes: 35,
+      pricePerGram: 0.1,
     });
     expect(request!.steps[1]).toMatchObject({
-      kind: "color", brandId: "generic", targetShadeCode: "7.1", startLevel: 7, totalGrams: 60, colorGrams: 30,
-      strandZone: "mid-lengths", prePigmentationEnabled: false,
+      kind: "color",
+      brandId: "generic",
+      targetShadeCode: "7.1",
+      startLevel: 7,
+      totalGrams: 60,
+      colorGrams: 30,
+      strandZone: "mid-lengths",
+      prePigmentationEnabled: false,
     });
   });
 

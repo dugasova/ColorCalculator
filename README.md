@@ -161,14 +161,14 @@ Safe to run even if Majirel was never migrated, and safe to re-run.
 
 ## Available scripts
 
-| Command                  | Description                                    |
-|---------------------------|-------------------------------------------------|
-| `npm run dev`              | Start the Vite dev server                        |
-| `npm run build`            | Type-check (`tsc -b`) and build for production   |
-| `npm run lint`             | Run ESLint                                       |
-| `npm run test`             | Run the Vitest suite                             |
-| `npm run preview`          | Preview a production build locally               |
-| `npm run migrate:palette`  | One-off migration of built-in shades to Firestore |
+| Command                          | Description                                               |
+| -------------------------------- | --------------------------------------------------------- |
+| `npm run dev`                    | Start the Vite dev server                                 |
+| `npm run build`                  | Type-check (`tsc -b`) and build for production            |
+| `npm run lint`                   | Run ESLint                                                |
+| `npm run test`                   | Run the Vitest suite                                      |
+| `npm run preview`                | Preview a production build locally                        |
+| `npm run migrate:palette`        | One-off migration of built-in shades to Firestore         |
 | `npm run migrate:repair-majirel` | Clears stale migrated Majirel overrides after a chart fix |
 
 ## Releasing

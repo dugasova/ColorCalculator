@@ -49,11 +49,46 @@ describe("buildReorderList", () => {
 
   it("lists only tracked, catalog-present, low/out products, brand-then-shades-then-developers ordered", () => {
     const records: StockRecord[] = [
-      { id: shadeStockId("wella", "koleston-perfect", "7/1"), kind: "shade", brandId: "wella", line: "koleston-perfect", code: "7/1", remainingGrams: 30 },
-      { id: shadeStockId("wella", "koleston-perfect", "8/0"), kind: "shade", brandId: "wella", line: "koleston-perfect", code: "8/0", remainingGrams: 500 },
-      { id: developerStockId("wella", null, 20), kind: "developer", brandId: "wella", line: null, volume: 20, remainingGrams: 0 },
-      { id: shadeStockId("wella", null, "9/99"), kind: "shade", brandId: "wella", line: null, code: "9/99", remainingGrams: 0 },
-      { id: shadeStockId("loreal", "majirel", "7.1"), kind: "shade", brandId: "loreal", line: "majirel", code: "7.1", remainingGrams: 0 },
+      {
+        id: shadeStockId("wella", "koleston-perfect", "7/1"),
+        kind: "shade",
+        brandId: "wella",
+        line: "koleston-perfect",
+        code: "7/1",
+        remainingGrams: 30,
+      },
+      {
+        id: shadeStockId("wella", "koleston-perfect", "8/0"),
+        kind: "shade",
+        brandId: "wella",
+        line: "koleston-perfect",
+        code: "8/0",
+        remainingGrams: 500,
+      },
+      {
+        id: developerStockId("wella", null, 20),
+        kind: "developer",
+        brandId: "wella",
+        line: null,
+        volume: 20,
+        remainingGrams: 0,
+      },
+      {
+        id: shadeStockId("wella", null, "9/99"),
+        kind: "shade",
+        brandId: "wella",
+        line: null,
+        code: "9/99",
+        remainingGrams: 0,
+      },
+      {
+        id: shadeStockId("loreal", "majirel", "7.1"),
+        kind: "shade",
+        brandId: "loreal",
+        line: "majirel",
+        code: "7.1",
+        remainingGrams: 0,
+      },
     ];
 
     const items = buildReorderList(brands, records);
@@ -79,8 +114,22 @@ describe("buildReorderList", () => {
       },
     };
     const records: StockRecord[] = [
-      { id: developerStockId("loreal", null, 20), kind: "developer", brandId: "loreal", line: null, volume: 20, remainingGrams: 500 },
-      { id: developerStockId("loreal", "inoa", 20), kind: "developer", brandId: "loreal", line: "inoa", volume: 20, remainingGrams: 0 },
+      {
+        id: developerStockId("loreal", null, 20),
+        kind: "developer",
+        brandId: "loreal",
+        line: null,
+        volume: 20,
+        remainingGrams: 500,
+      },
+      {
+        id: developerStockId("loreal", "inoa", 20),
+        kind: "developer",
+        brandId: "loreal",
+        line: "inoa",
+        volume: 20,
+        remainingGrams: 0,
+      },
     ];
 
     const items = buildReorderList(brandsWithInoa, records);

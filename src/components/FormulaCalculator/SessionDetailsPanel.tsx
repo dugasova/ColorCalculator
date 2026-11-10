@@ -73,7 +73,14 @@ export type SaveState = "idle" | "saving" | "saved" | "savedOffline" | "error";
 // task, and previously took up permanent scroll space (plus two photo pickers) even before
 // a colorist was ready to save.
 export function SessionDetailsPanel({
-  formulaText, processingMinutes, onSave, saveDisabled, onSaved, appliedBy, canvas, repeatRequest,
+  formulaText,
+  processingMinutes,
+  onSave,
+  saveDisabled,
+  onSaved,
+  appliedBy,
+  canvas,
+  repeatRequest,
 }: SessionDetailsPanelProps) {
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
@@ -162,7 +169,10 @@ export function SessionDetailsPanel({
           });
         }
       } catch (err) {
-        console.error("Could not save the client profile -- the formula will still be saved, just without a linked client id this time.", err);
+        console.error(
+          "Could not save the client profile -- the formula will still be saved, just without a linked client id this time.",
+          err,
+        );
         clientId = selectedClientId;
       }
 
@@ -179,7 +189,11 @@ export function SessionDetailsPanel({
       });
       setSaveState(outcome === "queued" ? "savedOffline" : "saved");
       clearTimeout(saveFeedbackTimeoutRef.current);
-      saveFeedbackTimeoutRef.current = setTimeout(() => { setSaveState("idle"); setIsDetailsModalOpen(false); onSaved?.(); }, SAVED_FEEDBACK_MS);
+      saveFeedbackTimeoutRef.current = setTimeout(() => {
+        setSaveState("idle");
+        setIsDetailsModalOpen(false);
+        onSaved?.();
+      }, SAVED_FEEDBACK_MS);
     } catch {
       setSaveState("error");
     }
@@ -214,15 +228,15 @@ export function SessionDetailsPanel({
         </button>
         <p className="field__hint">{t("results.saveForClientHint")}</p>
         {clientName.trim() !== "" && (
-          <button
-            type="button"
-            className="results__client-summary-name"
-            onClick={() => setIsBowlCardOpen(true)}
-          >
+          <button type="button" className="results__client-summary-name" onClick={() => setIsBowlCardOpen(true)}>
             {t("results.bowlCardOpen", { name: clientName.trim() })}
           </button>
         )}
-        {clientName.trim() !== "" && !patchTestOk && <p className="warning" role="alert">{t("results.patchTestRequired")}</p>}
+        {clientName.trim() !== "" && !patchTestOk && (
+          <p className="warning" role="alert">
+            {t("results.patchTestRequired")}
+          </p>
+        )}
       </div>
 
       {isDetailsModalOpen && (

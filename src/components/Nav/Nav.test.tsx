@@ -7,7 +7,7 @@ describe("Nav", () => {
   it("renders all three tabs and marks the active view as selected", () => {
     const html = renderToStaticMarkup(<Nav view="correction" onViewChange={() => {}} />);
 
-    expect(html).toContain("role=\"tablist\"");
+    expect(html).toContain('role="tablist"');
     expect(html).toContain("Calculator");
     expect(html).toContain("Correction");
     expect(html).toContain("History");

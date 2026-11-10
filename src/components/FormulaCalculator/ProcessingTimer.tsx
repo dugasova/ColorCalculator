@@ -108,23 +108,35 @@ export function ProcessingTimer({ minutes }: ProcessingTimerProps) {
         <span className="processing-timer__clock">{formatClock(remainingSeconds)}</span>
         <div className="processing-timer__controls">
           {status === "idle" && (
-            <button type="button" className="button button--secondary" onClick={handleStart}>{t("results.timerStart")}</button>
+            <button type="button" className="button button--secondary" onClick={handleStart}>
+              {t("results.timerStart")}
+            </button>
           )}
           {status === "running" && !isDone && (
-            <button type="button" className="button button--secondary" onClick={handlePause}>{t("results.timerPause")}</button>
+            <button type="button" className="button button--secondary" onClick={handlePause}>
+              {t("results.timerPause")}
+            </button>
           )}
           {status === "paused" && (
-            <button type="button" className="button button--secondary" onClick={handleResume}>{t("results.timerResume")}</button>
+            <button type="button" className="button button--secondary" onClick={handleResume}>
+              {t("results.timerResume")}
+            </button>
           )}
           {status !== "idle" && (
-            <button type="button" className="button button--secondary" onClick={handleReset}>{t("results.timerReset")}</button>
+            <button type="button" className="button button--secondary" onClick={handleReset}>
+              {t("results.timerReset")}
+            </button>
           )}
         </div>
       </div>
       {/* Only the completion message is a live region -- announcing the clock every
           second would spam screen readers with a running countdown, a known anti-pattern
           for live regions. The one-shot "done" text is the announcement that matters. */}
-      {isDone && <p className="processing-timer__done" role="status" aria-live="polite">{t("results.timerDone")}</p>}
+      {isDone && (
+        <p className="processing-timer__done" role="status" aria-live="polite">
+          {t("results.timerDone")}
+        </p>
+      )}
     </div>
   );
 }

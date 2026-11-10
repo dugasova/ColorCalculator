@@ -25,7 +25,7 @@ vi.mock("firebase/firestore", () => ({
   writeBatch: (...args: unknown[]) => writeBatchMock(...args),
   // schema.ts-style `z.instanceof` check -- any distinct class works here since these
   // tests never construct one. See src/history/firestore.test.ts's identical comment.
-  Timestamp: class MockTimestamp { },
+  Timestamp: class MockTimestamp {},
 }));
 vi.mock("./firebase", () => ({ db: {} }));
 
@@ -53,7 +53,7 @@ describe("ensureAccessRequest", () => {
     expect(result).toBe("created");
     expect(setDocMock).toHaveBeenCalledWith(
       { kind: "doc", args: [{}, "accessRequests", "u1"] },
-      { email: "u1@salon.test", status: "pending", requestedAt: "server-timestamp" }
+      { email: "u1@salon.test", status: "pending", requestedAt: "server-timestamp" },
     );
   });
 });

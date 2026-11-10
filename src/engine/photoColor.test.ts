@@ -1,8 +1,16 @@
 import { describe, it, expect } from "vitest";
 import {
-  measureGreyCard, measureHairColor, estimateStartLevel, toneDirection, buildNaturalLevelReferences,
-  calibratedShades, rankShadesByPhotoColor, MIN_SAMPLE_PIXELS, TONE_DIRECTION_MIN_CHROMA,
-  type LevelReference, type LinearRgb,
+  measureGreyCard,
+  measureHairColor,
+  estimateStartLevel,
+  toneDirection,
+  buildNaturalLevelReferences,
+  calibratedShades,
+  rankShadesByPhotoColor,
+  MIN_SAMPLE_PIXELS,
+  TONE_DIRECTION_MIN_CHROMA,
+  type LevelReference,
+  type LinearRgb,
 } from "./photoColor";
 import { ciede2000, linearRgbToLab, linearToSrgb, type Lab } from "./color";
 import { indexShadeCalibrations, type ShadeCalibration } from "./shadeCalibration";
@@ -15,7 +23,10 @@ function fillLinear(linear: LinearRgb, n: number): Uint8ClampedArray {
   const srgb = linear.map(linearToSrgb) as [number, number, number];
   const out = new Uint8ClampedArray(n * 4);
   for (let i = 0; i < n; i++) {
-    out[i * 4] = srgb[0]; out[i * 4 + 1] = srgb[1]; out[i * 4 + 2] = srgb[2]; out[i * 4 + 3] = 255;
+    out[i * 4] = srgb[0];
+    out[i * 4 + 1] = srgb[1];
+    out[i * 4 + 2] = srgb[2];
+    out[i * 4 + 3] = 255;
   }
   return out;
 }
@@ -25,7 +36,10 @@ function fillLinear(linear: LinearRgb, n: number): Uint8ClampedArray {
 function fillSrgb(rgb: [number, number, number], n: number): Uint8ClampedArray {
   const out = new Uint8ClampedArray(n * 4);
   for (let i = 0; i < n; i++) {
-    out[i * 4] = rgb[0]; out[i * 4 + 1] = rgb[1]; out[i * 4 + 2] = rgb[2]; out[i * 4 + 3] = 255;
+    out[i * 4] = rgb[0];
+    out[i * 4 + 1] = rgb[1];
+    out[i * 4 + 2] = rgb[2];
+    out[i * 4 + 3] = 255;
   }
   return out;
 }
@@ -40,7 +54,11 @@ describe("measureGreyCard + measureHairColor", () => {
     const exposure = 1.8;
 
     const cardLinear: LinearRgb = [0.18 * cast[0] * exposure, 0.18 * cast[1] * exposure, 0.18 * cast[2] * exposure];
-    const hairLinear: LinearRgb = [hair[0] * cast[0] * exposure, hair[1] * cast[1] * exposure, hair[2] * cast[2] * exposure];
+    const hairLinear: LinearRgb = [
+      hair[0] * cast[0] * exposure,
+      hair[1] * cast[1] * exposure,
+      hair[2] * cast[2] * exposure,
+    ];
     const cardPixels = fillLinear(cardLinear, 100);
     const hairPixels = fillLinear(hairLinear, 100);
 
@@ -134,8 +152,20 @@ describe("buildNaturalLevelReferences", () => {
     const natural5: Shade = { code: "5/00", level: 5, tone: "natural", secondaryTone: "natural" };
 
     const brands: Record<BrandId, Brand> = {
-      [BRAND_A]: { id: BRAND_A, name: "Brand A", shades: [brandANatural6, ash6, chocolate6, natural5], mixingRatio: () => ({ colorParts: 1, developerParts: 1 }), pricePerGram: 0.1 },
-      [BRAND_B]: { id: BRAND_B, name: "Brand B", shades: [brandBNatural6], mixingRatio: () => ({ colorParts: 1, developerParts: 1 }), pricePerGram: 0.1 },
+      [BRAND_A]: {
+        id: BRAND_A,
+        name: "Brand A",
+        shades: [brandANatural6, ash6, chocolate6, natural5],
+        mixingRatio: () => ({ colorParts: 1, developerParts: 1 }),
+        pricePerGram: 0.1,
+      },
+      [BRAND_B]: {
+        id: BRAND_B,
+        name: "Brand B",
+        shades: [brandBNatural6],
+        mixingRatio: () => ({ colorParts: 1, developerParts: 1 }),
+        pricePerGram: 0.1,
+      },
     };
 
     const calibrations: ShadeCalibration[] = [
@@ -156,7 +186,13 @@ describe("buildNaturalLevelReferences", () => {
 
   it("returns an empty array when nothing is calibrated", () => {
     const brands: Record<BrandId, Brand> = {
-      [BRAND_A]: { id: BRAND_A, name: "Brand A", shades: [{ code: "6.0", level: 6, tone: "natural" }], mixingRatio: () => ({ colorParts: 1, developerParts: 1 }), pricePerGram: 0.1 },
+      [BRAND_A]: {
+        id: BRAND_A,
+        name: "Brand A",
+        shades: [{ code: "6.0", level: 6, tone: "natural" }],
+        mixingRatio: () => ({ colorParts: 1, developerParts: 1 }),
+        pricePerGram: 0.1,
+      },
     };
     expect(buildNaturalLevelReferences(brands, new Map())).toEqual([]);
   });

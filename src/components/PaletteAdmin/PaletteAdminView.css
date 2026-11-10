@@ -47,7 +47,9 @@
   padding: 8px 10px;
   border: 1px solid rgba(var(--brand-ink-rgb), 0.1);
   border-radius: 8px;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .palette-admin__shade-row:not(.palette-admin__shade-row--disabled):hover {

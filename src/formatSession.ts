@@ -11,7 +11,7 @@ export function formatCanvasText(canvas: HistoryStep["canvas"] | null): string {
   const porosityText = i18n.t(`canvas.porosity.${canvas.porosity}`);
   const thicknessText = i18n.t(`canvas.thickness.${canvas.thickness}`);
   let text = `${i18n.t("canvas.porosity.label")}: ${porosityText}\n${i18n.t("canvas.thickness.label")}: ${thicknessText}`;
-  
+
   if (canvas.chemicalHistory.length > 0) {
     const chemText = canvas.chemicalHistory.map(ch => i18n.t(`canvas.chemicalHistory.${ch}`)).join(", ");
     text += `\n${i18n.t("canvas.chemicalHistory.label")}: ${chemText}`;
@@ -36,9 +36,10 @@ function formatZoneLine(step: HistoryStep): string {
 // nothing unless a colorist actually set it.
 function formatStartingBaseText(step: HistoryStep): string {
   if (step.startingBase === undefined) return "";
-  const value = step.startingBase.kind === "natural"
-    ? i18n.t("fields.startingBase.natural")
-    : i18n.t("format.startingBaseColored", { tone: i18n.t(`palette.toneFamily.${step.startingBase.tone}`) });
+  const value =
+    step.startingBase.kind === "natural"
+      ? i18n.t("fields.startingBase.natural")
+      : i18n.t("format.startingBaseColored", { tone: i18n.t(`palette.toneFamily.${step.startingBase.tone}`) });
   return i18n.t("format.startingBase", { value });
 }
 
@@ -53,9 +54,11 @@ function formatStartingBaseText(step: HistoryStep): string {
 // round-trip through JSON.
 function sameZoneAndCanvasState(prev: HistoryStep | undefined, curr: HistoryStep): boolean {
   if (prev === undefined) return false;
-  return prev.strandZone === curr.strandZone
-    && JSON.stringify(prev.startingBase ?? null) === JSON.stringify(curr.startingBase ?? null)
-    && JSON.stringify(prev.canvas ?? null) === JSON.stringify(curr.canvas ?? null);
+  return (
+    prev.strandZone === curr.strandZone &&
+    JSON.stringify(prev.startingBase ?? null) === JSON.stringify(curr.startingBase ?? null) &&
+    JSON.stringify(prev.canvas ?? null) === JSON.stringify(curr.canvas ?? null)
+  );
 }
 
 // `previousStep` is the immediately preceding step in the session (`undefined` for the
@@ -118,10 +121,12 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
   // function also runs directly on a session still being built (ComplexColoringCalculator
   // passes orderedSteps straight from the step cards), so the fallback stays here too.
   const prePigmentation = step.prePigmentation ?? null;
-  const fillerStepText = prePigmentation !== null ? formatFillerStepText(step.targetShade.level, prePigmentation) : null;
-  const combinedText = fillerStepText !== null 
-    ? `${fillerStepText}\n\n${i18n.t("prePigmentation.finalStepLabel")}\n${targetColorText}`
-    : targetColorText;
+  const fillerStepText =
+    prePigmentation !== null ? formatFillerStepText(step.targetShade.level, prePigmentation) : null;
+  const combinedText =
+    fillerStepText !== null
+      ? `${fillerStepText}\n\n${i18n.t("prePigmentation.finalStepLabel")}\n${targetColorText}`
+      : targetColorText;
 
   return prefixText ? `${prefixText}\n\n${combinedText}` : combinedText;
 }
@@ -135,7 +140,10 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
 // session, or a step saved before strandZone existed) falls back to the bare "Step N".
 function formatStepHeader(step: HistoryStep, number: number): string {
   return step.strandZone !== undefined
-    ? i18n.t("history.stepLabelWithZone", { number, zone: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) })
+    ? i18n.t("history.stepLabelWithZone", {
+        number,
+        zone: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`),
+      })
     : i18n.t("history.stepLabel", { number });
 }
 
@@ -149,7 +157,7 @@ export function formatSessionText(steps: HistoryStep[]): string {
   const blocks = steps.map((step, index) =>
     steps.length > 1
       ? `${formatStepHeader(step, index + 1)}\n${formatStepText(step, steps[index - 1], false)}`
-      : formatStepText(step, undefined, true)
+      : formatStepText(step, undefined, true),
   );
 
   if (steps.length > 1) {
@@ -208,7 +216,10 @@ export function formatSessionSummary(steps: HistoryStep[]): string {
     for (const step of colorSteps) lastStepByZone.set(step.strandZone, step);
     target = [...lastStepByZone.values()]
       .map(step => {
-        const zoneLabel = step.strandZone !== undefined ? `${i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`)} ` : "";
+        const zoneLabel =
+          step.strandZone !== undefined
+            ? `${i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`)} `
+            : "";
         return `${zoneLabel}${step.targetShade.code}`;
       })
       .join(", ");

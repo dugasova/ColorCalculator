@@ -40,11 +40,18 @@ export function ShadeCalibrationDialog({ brandId, shade, onClose }: ShadeCalibra
   return (
     <Modal title={t("palette.calibrateTitle", { code: shade.code })} onClose={onClose}>
       <p className="field__hint">{t("palette.calibrateHint")}</p>
-      <PhotoSampler idPrefix={`calibrate-${shadeCalibrationId(brandId, shade.line ?? null, shade.code)}`} onSampleChange={setSample} />
+      <PhotoSampler
+        idPrefix={`calibrate-${shadeCalibrationId(brandId, shade.line ?? null, shade.code)}`}
+        onSampleChange={setSample}
+      />
       <button type="button" className="button" disabled={sample === null || saving} onClick={handleSave}>
         {t("palette.calibrateSave")}
       </button>
-      {error !== null && <p className="warning" role="alert">{error}</p>}
+      {error !== null && (
+        <p className="warning" role="alert">
+          {error}
+        </p>
+      )}
     </Modal>
   );
 }

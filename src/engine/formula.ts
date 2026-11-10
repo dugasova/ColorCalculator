@@ -1,5 +1,12 @@
 import i18n from "../i18n";
-import { getUnderlyingPigment, pickDeveloperVolume, pickMaxLiftVolume, type DeveloperVolume, type Level, type UnderlyingPigment } from "./levels";
+import {
+  getUnderlyingPigment,
+  pickDeveloperVolume,
+  pickMaxLiftVolume,
+  type DeveloperVolume,
+  type Level,
+  type UnderlyingPigment,
+} from "./levels";
 import { suggestNeutralizingTone } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
 import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
@@ -57,9 +64,27 @@ export const GRAY_COVERAGE_MIN_DEVELOPER_VOLUME: DeveloperVolume = 20;
 // directly (1/3, 1/2); below GRAY_LIGHT_THRESHOLD no natural-base dose is called for at
 // all. GRAY_HEAVY_THRESHOLD plays no part in this mix -- it's a separate threshold (see
 // revisit.ts) for how soon a heavily-gray client should rebook, not for this ratio.
-const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fashionRatio: 1, get note() { return i18n.t("engine.grayCoverage.fashionOnly"); } });
-const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, get note() { return i18n.t("engine.grayCoverage.oneThirdNatural"); } });
-const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5, get note() { return i18n.t("engine.grayCoverage.halfNatural"); } });
+const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({
+  naturalRatio: 0,
+  fashionRatio: 1,
+  get note() {
+    return i18n.t("engine.grayCoverage.fashionOnly");
+  },
+});
+const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({
+  naturalRatio: 1 / 3,
+  fashionRatio: 2 / 3,
+  get note() {
+    return i18n.t("engine.grayCoverage.oneThirdNatural");
+  },
+});
+const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({
+  naturalRatio: 0.5,
+  fashionRatio: 0.5,
+  get note() {
+    return i18n.t("engine.grayCoverage.halfNatural");
+  },
+});
 
 // Re-derives the display note from the strategy's (language-independent) ratios rather
 // than trusting `strategy.note` directly. `note` is a getter that resolves via i18n.t at
@@ -123,8 +148,8 @@ export function getMixingRatio(startLevel: Level, targetLevel: Level): MixingRat
 
 export function calculateFormulaGrams(totalGrams: number, ratio: MixingRatio): FormulaGrams {
   const totalParts = ratio.colorParts + ratio.developerParts;
-  const colorGrams = totalGrams * ratio.colorParts / totalParts;
-  const developerGrams = totalGrams * ratio.developerParts / totalParts;
+  const colorGrams = (totalGrams * ratio.colorParts) / totalParts;
+  const developerGrams = (totalGrams * ratio.developerParts) / totalParts;
   return { colorGrams, developerGrams };
 }
 
@@ -134,7 +159,7 @@ export function calculateFormulaGrams(totalGrams: number, ratio: MixingRatio): F
 // around. Lets a colorist who needs more dye than the calculator's default total simply
 // enter the dye amount they're using; see calculateFullFormula's colorGramsOverride.
 export function calculateFormulaGramsFromColorGrams(colorGrams: number, ratio: MixingRatio): FormulaGrams {
-  const developerGrams = colorGrams * ratio.developerParts / ratio.colorParts;
+  const developerGrams = (colorGrams * ratio.developerParts) / ratio.colorParts;
   return { colorGrams, developerGrams };
 }
 
@@ -142,7 +167,11 @@ export function calculateFormulaGramsFromColorGrams(colorGrams: number, ratio: M
 // corrective addition), on top of the calculated primary mix. The colorist enters the
 // additional shade's grams by hand; the developer amount is recalculated automatically so
 // the color:developer ratio stays correct for the new, larger total color weight.
-export function applyAdditionalShade(grams: FormulaGrams, ratio: MixingRatio, additionalColorGrams: number): FormulaGrams {
+export function applyAdditionalShade(
+  grams: FormulaGrams,
+  ratio: MixingRatio,
+  additionalColorGrams: number,
+): FormulaGrams {
   return calculateFormulaGramsFromColorGrams(grams.colorGrams + additionalColorGrams, ratio);
 }
 
@@ -282,10 +311,18 @@ function deriveCorrectiveGuidance(
 } {
   const underlyingPigment = isActuallyLifting && achievedLevel !== null ? getUnderlyingPigment(achievedLevel) : null;
   const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
-  const correctorGrams = recommendedCorrectiveTone !== null && achievedLevel !== null ? calculateCorrectorGrams(achievedLevel, totalGrams) : null;
-  const toneWarning = isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone
-    ? i18n.t("engine.toneWarning", { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone })
-    : null;
+  const correctorGrams =
+    recommendedCorrectiveTone !== null && achievedLevel !== null
+      ? calculateCorrectorGrams(achievedLevel, totalGrams)
+      : null;
+  const toneWarning =
+    isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone
+      ? i18n.t("engine.toneWarning", {
+          tone: targetShade.tone,
+          pigment: underlyingPigment,
+          recommended: recommendedCorrectiveTone,
+        })
+      : null;
   return { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning };
 }
 
@@ -297,7 +334,10 @@ function resolveMixingRatio(
   mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio,
   manualMixingRatio: MixingRatio | undefined,
 ): MixingRatio {
-  if (manualMixingRatio !== undefined && targetShade.mixingRatioChoices?.some(choice => sameMixingRatio(choice, manualMixingRatio))) {
+  if (
+    manualMixingRatio !== undefined &&
+    targetShade.mixingRatioChoices?.some(choice => sameMixingRatio(choice, manualMixingRatio))
+  ) {
     return manualMixingRatio;
   }
   return targetShade.fixedMixingRatio ?? mixingRatioStrategy(startLevel, targetShade.level);
@@ -323,12 +363,18 @@ export function calculateFullFormula(
   const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
-  const liftUnsupportedWarning = targetShade.developerVolumeChoices !== undefined && isLifting
-    ? i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel })
-    : null;
+  const liftUnsupportedWarning =
+    targetShade.developerVolumeChoices !== undefined && isLifting
+      ? i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel })
+      : null;
 
   const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, manualDeveloperVolume);
-  const { developerVolume, achievedLevel: reachableLevel } = resolvePartialLiftFallback(startLevel, targetShade, isLifting, pickedVolume);
+  const { developerVolume, achievedLevel: reachableLevel } = resolvePartialLiftFallback(
+    startLevel,
+    targetShade,
+    isLifting,
+    pickedVolume,
+  );
   // A line that can't lift, mixed anyway with the developer the colorist picked, only
   // deposits: the hair stays at its starting level rather than reaching the shade's own.
   const achievedLevel = liftUnsupportedWarning !== null && developerVolume !== null ? startLevel : reachableLevel;
@@ -336,22 +382,27 @@ export function calculateFullFormula(
   // No pigment is actually revealed if the line can't lift in the first place, or lifts
   // to nowhere (achievedLevel null alongside developerVolume null).
   const isActuallyLifting = isLifting && liftUnsupportedWarning === null && achievedLevel !== null;
-  const grams = developerVolume !== null
-    ? (colorGramsOverride !== undefined
+  const grams =
+    developerVolume !== null
+      ? colorGramsOverride !== undefined
         ? calculateFormulaGramsFromColorGrams(colorGramsOverride, mixingRatio)
-        : calculateFormulaGrams(totalGrams, mixingRatio))
-    : null;
+        : calculateFormulaGrams(totalGrams, mixingRatio)
+      : null;
   // Corrector grams scale with the real mix total when the dye weight was entered directly.
-  const correctorBaseGrams = colorGramsOverride !== undefined && grams !== null
-    ? grams.colorGrams + grams.developerGrams
-    : totalGrams;
-  const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning } =
-    deriveCorrectiveGuidance(targetShade, isActuallyLifting, achievedLevel, correctorBaseGrams);
+  const correctorBaseGrams =
+    colorGramsOverride !== undefined && grams !== null ? grams.colorGrams + grams.developerGrams : totalGrams;
+  const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning } = deriveCorrectiveGuidance(
+    targetShade,
+    isActuallyLifting,
+    achievedLevel,
+    correctorBaseGrams,
+  );
   const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
 
-  const eligibilityWarning = targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
-    ? i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel })
-    : null;
+  const eligibilityWarning =
+    targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
+      ? i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel })
+      : null;
 
   return {
     developerVolume,

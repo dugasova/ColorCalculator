@@ -19,7 +19,9 @@ function FormattedSessionText({ text }: { text: string }) {
   return (
     <pre className="history__entry-text">
       {lines.map((line, i) => {
-        const isMix = /^(Mix|Суміш|Микс)/.test(line) || /^\d+(\.\d+)?\s*(g|г)\s+(bleach|освітлювального|обесцвечивающего)/.test(line);
+        const isMix =
+          /^(Mix|Суміш|Микс)/.test(line) ||
+          /^\d+(\.\d+)?\s*(g|г)\s+(bleach|освітлювального|обесцвечивающего)/.test(line);
         return (
           <span key={i}>
             {isMix ? <strong className="history__entry-mix">{line}</strong> : line}
@@ -36,7 +38,8 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
   const { t } = useTranslation();
   const brands = usePalette();
   const { gramsDrafts, savingGramsKey, handleActualGramsChange, handleActualGramsBlur } = gramsEditor;
-  const canRepeat = buildRepeatFormulaRequest(entry, brands) !== null || buildRepeatSessionRequest(entry, brands) !== null;
+  const canRepeat =
+    buildRepeatFormulaRequest(entry, brands) !== null || buildRepeatSessionRequest(entry, brands) !== null;
 
   return (
     <li className="history__entry">
@@ -62,9 +65,8 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
         // weight, covering every shade in it (targetShade plus any additional/
         // blend shade -- see buildMixSummary), so naming just the one primary
         // code here read as claiming this input was only about that shade.
-        const zoneLabel = step.strandZone !== undefined
-          ? t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`)
-          : null;
+        const zoneLabel =
+          step.strandZone !== undefined ? t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) : null;
         return (
           <div className="history__entry-actual" key={key}>
             <label htmlFor={`actualGrams-${key}`}>
@@ -80,7 +82,9 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
               value={gramsDrafts[key] ?? persisted}
               disabled={savingGramsKey === key}
               onChange={e => handleActualGramsChange(key, e.target.value)}
-              onBlur={() => { void handleActualGramsBlur(entry, index); }}
+              onBlur={() => {
+                void handleActualGramsBlur(entry, index);
+              }}
             />
             {computed !== null && (
               <span className="history__entry-actual-hint">
@@ -92,8 +96,16 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
       })}
       {(entry.productCost != null || entry.servicePrice != null) && (
         <div className="history__entry-pricing">
-          {entry.productCost != null && <span>{t("results.productCost")}: {entry.productCost.toFixed(2)}</span>}
-          {entry.servicePrice != null && <span>{t("results.servicePrice")}: {entry.servicePrice.toFixed(2)}</span>}
+          {entry.productCost != null && (
+            <span>
+              {t("results.productCost")}: {entry.productCost.toFixed(2)}
+            </span>
+          )}
+          {entry.servicePrice != null && (
+            <span>
+              {t("results.servicePrice")}: {entry.servicePrice.toFixed(2)}
+            </span>
+          )}
         </div>
       )}
       {entry.note && <p className="history__entry-note">{entry.note}</p>}
@@ -138,7 +150,9 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
             type="button"
             className="button button--secondary history__entry-repeat"
             onClick={onEdit}
-            aria-label={t("history.editEntryAria", { date: entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : "" })}
+            aria-label={t("history.editEntryAria", {
+              date: entry.appliedAt ? entry.appliedAt.toDate().toLocaleDateString() : "",
+            })}
           >
             {t("history.editEntry")}
           </button>

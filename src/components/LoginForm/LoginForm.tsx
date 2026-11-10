@@ -2,7 +2,12 @@ import { useState, type FormEvent } from "react";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "../../firebase";
 import { SALON_INVITE_CODE } from "../../inviteCode";
 import { trackEvent } from "../../productAnalytics";
@@ -79,7 +84,11 @@ export default function LoginForm() {
       <div className="login-form__language">
         <LanguageSwitcher />
       </div>
-      <h1 className="calculator__title"><img className="calculator__title-mark" src="/favicon.svg" alt="" width="28" height="28" />{t("app.titlePrefix")}<span className="calculator__title-accent">{t("app.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        <img className="calculator__title-mark" src="/favicon.svg" alt="" width="28" height="28" />
+        {t("app.titlePrefix")}
+        <span className="calculator__title-accent">{t("app.titleAccent")}</span>
+      </h1>
 
       <div className="login-form__tabs">
         <button
@@ -123,33 +132,55 @@ export default function LoginForm() {
         </div>
         {mode === "sign-in" && (
           <div className="forgot-row">
-            <button type="button" className="link-button" onClick={handleForgotPassword} disabled={resetStatus === "sending"}>
+            <button
+              type="button"
+              className="link-button"
+              onClick={handleForgotPassword}
+              disabled={resetStatus === "sending"}
+            >
               {resetStatus === "sending" ? t("login.forgotPasswordSending") : t("login.forgotPassword")}
             </button>
-            {resetStatus === "sent" && <p className="notice" role="status">{t("login.forgotPasswordSent")}</p>}
-            {resetStatus === "error" && <p className="warning" role="alert">{t("login.forgotPasswordError")}</p>}
-            {resetStatus === "missing-email" && <p className="warning" role="alert">{t("login.forgotPasswordMissingEmail")}</p>}
+            {resetStatus === "sent" && (
+              <p className="notice" role="status">
+                {t("login.forgotPasswordSent")}
+              </p>
+            )}
+            {resetStatus === "error" && (
+              <p className="warning" role="alert">
+                {t("login.forgotPasswordError")}
+              </p>
+            )}
+            {resetStatus === "missing-email" && (
+              <p className="warning" role="alert">
+                {t("login.forgotPasswordMissingEmail")}
+              </p>
+            )}
           </div>
         )}
         {mode === "sign-up" && (
           <div className="field">
             <label htmlFor="inviteCode">{t("login.inviteCode")}</label>
-            <input
-              id="inviteCode"
-              value={inviteCode}
-              onChange={e => setInviteCode(e.target.value)}
-              required
-            />
+            <input id="inviteCode" value={inviteCode} onChange={e => setInviteCode(e.target.value)} required />
           </div>
         )}
-        {error !== null && <p className="warning" role="alert">{error}</p>}
+        {error !== null && (
+          <p className="warning" role="alert">
+            {error}
+          </p>
+        )}
         <button type="submit" className="button" disabled={isSubmitting}>
           {isSubmitting
-            ? (mode === "sign-in" ? t("login.signingIn") : t("login.creatingAccount"))
-            : (mode === "sign-in" ? t("login.signIn") : t("login.createAccount"))}
+            ? mode === "sign-in"
+              ? t("login.signingIn")
+              : t("login.creatingAccount")
+            : mode === "sign-in"
+              ? t("login.signIn")
+              : t("login.createAccount")}
         </button>
       </form>
-      <p className="login-form__privacy-link"><Link to="/privacy">{t("login.privacyPolicy")}</Link></p>
+      <p className="login-form__privacy-link">
+        <Link to="/privacy">{t("login.privacyPolicy")}</Link>
+      </p>
       <p className="login-form__copyright">{t("app.copyright")}</p>
     </div>
   );

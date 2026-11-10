@@ -7,16 +7,16 @@ describe("ColorStepCard", () => {
   it("renders the default scenario (generic brand, first shade) with every present field suffixed by stepId", () => {
     const html = renderToStaticMarkup(<ColorStepCard stepId="1" onChange={() => {}} onRemove={() => {}} />);
 
-    expect(html).toContain("id=\"brandId-1\"");
-    expect(html).toContain("id=\"startLevel-1\"");
-    expect(html).toContain("id=\"strandZone-1\"");
-    expect(html).toContain("id=\"startingBaseKind-1\"");
-    expect(html).toContain("id=\"grayPercent-1\"");
-    expect(html).toContain("id=\"targetShadeCode-1\"");
-    expect(html).toContain("id=\"additionalShadeCode-1\"");
-    expect(html).toContain("id=\"gramsAmount-1\"");
-    expect(html).toContain("id=\"stepProcessingMinutes-1\"");
-    expect(html).toContain("id=\"stepPricePerGram-1\"");
+    expect(html).toContain('id="brandId-1"');
+    expect(html).toContain('id="startLevel-1"');
+    expect(html).toContain('id="strandZone-1"');
+    expect(html).toContain('id="startingBaseKind-1"');
+    expect(html).toContain('id="grayPercent-1"');
+    expect(html).toContain('id="targetShadeCode-1"');
+    expect(html).toContain('id="additionalShadeCode-1"');
+    expect(html).toContain('id="gramsAmount-1"');
+    expect(html).toContain('id="stepProcessingMinutes-1"');
+    expect(html).toContain('id="stepPricePerGram-1"');
   });
 
   it("hides fields whose prerequisite is not met yet", () => {
@@ -24,17 +24,17 @@ describe("ColorStepCard", () => {
 
     // The generic chart has one (untagged) line and the first shade has no developer
     // volume choices -- LineField and DeveloperVolumeField render nothing for it.
-    expect(html).not.toContain("id=\"line-1\"");
-    expect(html).not.toContain("id=\"manualDeveloperVolume-1\"");
+    expect(html).not.toContain('id="line-1"');
+    expect(html).not.toContain('id="manualDeveloperVolume-1"');
     // No additional shade chosen yet -- its grams input has nothing to control.
-    expect(html).not.toContain("id=\"additionalShadeGrams-1\"");
+    expect(html).not.toContain('id="additionalShadeGrams-1"');
     // Starting base defaults to "natural" -- the tone sub-picker only appears once
     // "Previously colored" is picked (see StartingBaseField).
-    expect(html).not.toContain("id=\"startingBaseTone-1\"");
+    expect(html).not.toContain('id="startingBaseTone-1"');
     // ApplicationZoneField (full-head vs root-touch-up) is redundant here now that
     // StrandZoneField describes the step's position -- never rendered in a
     // ComplexColoring step, unlike the plain single-shot FormulaCalculator.
-    expect(html).not.toContain("id=\"applicationZone-1\"");
+    expect(html).not.toContain('id="applicationZone-1"');
   });
 
   it("defaults the price-per-gram field to 0.18, independent of any brand default", () => {
@@ -51,8 +51,8 @@ describe("ColorStepCard", () => {
     const htmlB = renderToStaticMarkup(<ColorStepCard stepId="b" onChange={() => {}} onRemove={() => {}} />);
     const combined = htmlA + htmlB;
 
-    expect(htmlA).toContain("id=\"brandId-a\"");
-    expect(htmlB).toContain("id=\"brandId-b\"");
+    expect(htmlA).toContain('id="brandId-a"');
+    expect(htmlB).toContain('id="brandId-b"');
     expect((combined.match(/id="brandId-a"/g) ?? []).length).toBe(1);
     expect((combined.match(/id="brandId-b"/g) ?? []).length).toBe(1);
   });
@@ -73,8 +73,8 @@ describe("ColorStepCard", () => {
     const html = renderToStaticMarkup(<ColorStepCard stepId="1" onChange={() => {}} onRemove={() => {}} />);
     // Default startLevel (10) -> default target shade (Generic 1.0, level 1) is a
     // 9-level drop -- getPrePigmentationNeed's "required-multi-visit" tier.
-    expect(html).toContain("id=\"prePigmentationEnabled-1\"");
-    expect(html).not.toContain("checked=\"\" id=\"prePigmentationEnabled-1\"");
+    expect(html).toContain('id="prePigmentationEnabled-1"');
+    expect(html).not.toContain('checked="" id="prePigmentationEnabled-1"');
     expect(html).not.toContain("prepigment__disclaimer");
   });
 });

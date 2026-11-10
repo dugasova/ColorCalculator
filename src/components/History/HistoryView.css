@@ -18,7 +18,9 @@
   border-radius: 1rem;
   background: var(--brand-field);
   border: 1px solid var(--brand-border);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .history__entry:hover {
@@ -60,7 +62,6 @@
   margin: 0 -0.1rem;
   border-radius: 4px;
 }
-
 
 .history__entry-pricing {
   display: flex;

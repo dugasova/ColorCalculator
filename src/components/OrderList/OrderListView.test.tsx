@@ -27,8 +27,22 @@ describe("OrderListView", () => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     vi.mocked(usePalette).mockReturnValue({ wella: wellaWithOneShade });
     const stock: StockRecord[] = [
-      { id: shadeStockId("wella", "koleston-perfect", "7/1"), kind: "shade", brandId: "wella", line: "koleston-perfect", code: "7/1", remainingGrams: 30 },
-      { id: developerStockId("wella", null, 20), kind: "developer", brandId: "wella", line: null, volume: 20, remainingGrams: 0 },
+      {
+        id: shadeStockId("wella", "koleston-perfect", "7/1"),
+        kind: "shade",
+        brandId: "wella",
+        line: "koleston-perfect",
+        code: "7/1",
+        remainingGrams: 30,
+      },
+      {
+        id: developerStockId("wella", null, 20),
+        kind: "developer",
+        brandId: "wella",
+        line: null,
+        volume: 20,
+        remainingGrams: 0,
+      },
     ];
     vi.mocked(useStock).mockReturnValue(stock);
 
@@ -51,7 +65,14 @@ describe("OrderListView", () => {
   it("disables Copy list once every quantity is zeroed out", () => {
     vi.mocked(usePalette).mockReturnValue({ wella: wellaWithOneShade });
     const stock: StockRecord[] = [
-      { id: shadeStockId("wella", "koleston-perfect", "7/1"), kind: "shade", brandId: "wella", line: "koleston-perfect", code: "7/1", remainingGrams: 30 },
+      {
+        id: shadeStockId("wella", "koleston-perfect", "7/1"),
+        kind: "shade",
+        brandId: "wella",
+        line: "koleston-perfect",
+        code: "7/1",
+        remainingGrams: 30,
+      },
     ];
     vi.mocked(useStock).mockReturnValue(stock);
 
@@ -69,7 +90,9 @@ describe("OrderListView", () => {
 
     render(<OrderListView />);
 
-    expect(screen.getByText("Nothing to order — every tracked product is above its low-stock level.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Nothing to order — every tracked product is above its low-stock level."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copy list" })).not.toBeInTheDocument();
   });
 
@@ -80,8 +103,22 @@ describe("OrderListView", () => {
     };
     vi.mocked(usePalette).mockReturnValue({ wella: wellaWithOneShade, loreal: lorealWithOneShade });
     const stock: StockRecord[] = [
-      { id: shadeStockId("wella", "koleston-perfect", "7/1"), kind: "shade", brandId: "wella", line: "koleston-perfect", code: "7/1", remainingGrams: 30 },
-      { id: shadeStockId("loreal", "majirel", "7.1"), kind: "shade", brandId: "loreal", line: "majirel", code: "7.1", remainingGrams: 0 },
+      {
+        id: shadeStockId("wella", "koleston-perfect", "7/1"),
+        kind: "shade",
+        brandId: "wella",
+        line: "koleston-perfect",
+        code: "7/1",
+        remainingGrams: 30,
+      },
+      {
+        id: shadeStockId("loreal", "majirel", "7.1"),
+        kind: "shade",
+        brandId: "loreal",
+        line: "majirel",
+        code: "7.1",
+        remainingGrams: 0,
+      },
     ];
     vi.mocked(useStock).mockReturnValue(stock);
 

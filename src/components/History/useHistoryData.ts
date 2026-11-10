@@ -46,7 +46,9 @@ export interface HistoryData {
 // renders. `search` is plain client-side filtering over the already-loaded `entries` --
 // cheap enough not to warrant its own fetch, and keeps typing responsive.
 export function useHistoryData({
-  isAdmin, currentUserEmail, search,
+  isAdmin,
+  currentUserEmail,
+  search,
 }: {
   isAdmin: boolean;
   currentUserEmail: string;
@@ -61,19 +63,25 @@ export function useHistoryData({
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
-    return subscribeToFormulaHistory({ isAdmin, currentUserEmail }, entries => {
-      setEntries(entries);
-      setError(null);
-      setIsLoading(false);
-    }, err => {
-      console.error("Formula history subscription failed:", err);
-      setError(t("history.loadError"));
-      setIsLoading(false);
-    });
+    return subscribeToFormulaHistory(
+      { isAdmin, currentUserEmail },
+      entries => {
+        setEntries(entries);
+        setError(null);
+        setIsLoading(false);
+      },
+      err => {
+        console.error("Formula history subscription failed:", err);
+        setError(t("history.loadError"));
+        setIsLoading(false);
+      },
+    );
   }, [t, isAdmin, currentUserEmail]);
 
   useEffect(() => {
-    return subscribeToClients(currentUserEmail, setSavedClients, err => console.error("Saved clients subscription failed:", err));
+    return subscribeToClients(currentUserEmail, setSavedClients, err =>
+      console.error("Saved clients subscription failed:", err),
+    );
   }, [currentUserEmail]);
 
   const profilesByClientKey = useMemo(() => {
@@ -88,9 +96,7 @@ export function useHistoryData({
     return map;
   }, [savedClients]);
 
-  const filtered = entries.filter(entry =>
-    entry.clientName.toLowerCase().includes(search.trim().toLowerCase())
-  );
+  const filtered = entries.filter(entry => entry.clientName.toLowerCase().includes(search.trim().toLowerCase()));
 
   const groups = useMemo<ClientHistoryGroup[]>(() => {
     const map = new Map<string, ClientHistoryGroup>();
@@ -105,9 +111,10 @@ export function useHistoryData({
       // falls back to a normalized-name match only for entries saved before clientId
       // existed, which carries the same "could be the wrong same-named person" risk the
       // rest of this feature exists to avoid, but there's no better signal to use for them.
-      const profile = entry.clientId !== null
-        ? savedClients.find(c => c.id === entry.clientId) ?? null
-        : savedClients.find(c => normalizeClientKey(c.name) === normalizeClientKey(entry.clientName)) ?? null;
+      const profile =
+        entry.clientId !== null
+          ? (savedClients.find(c => c.id === entry.clientId) ?? null)
+          : (savedClients.find(c => normalizeClientKey(c.name) === normalizeClientKey(entry.clientName)) ?? null);
       map.set(key, { key, displayName: entry.clientName, entries: [entry], profile });
     }
     return Array.from(map.values());
@@ -145,7 +152,16 @@ export function useHistoryData({
   }
 
   return {
-    entries, setEntries, isLoading, error, savedClients, filtered, groups, profilesByClientKey,
-    deleteClientGroup, deletingClientKey, deleteError,
+    entries,
+    setEntries,
+    isLoading,
+    error,
+    savedClients,
+    filtered,
+    groups,
+    profilesByClientKey,
+    deleteClientGroup,
+    deletingClientKey,
+    deleteError,
   };
 }
