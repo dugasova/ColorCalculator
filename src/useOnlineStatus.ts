@@ -16,5 +16,9 @@ function subscribe(onChange: () => void) {
 // instead of "Saved". Server snapshot defaults to `true` (assume online during SSR/initial
 // render, matching this app's client-only rendering -- see main.tsx).
 export function useOnlineStatus(): boolean {
-  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true,
+  );
 }

@@ -41,7 +41,11 @@ export function rgbToHex([r, g, b]: [number, number, number]): string {
   return (
     "#" +
     [r, g, b]
-      .map((c) => Math.round(Math.min(255, Math.max(0, c))).toString(16).padStart(2, "0"))
+      .map(c =>
+        Math.round(Math.min(255, Math.max(0, c)))
+          .toString(16)
+          .padStart(2, "0"),
+      )
       .join("")
   );
 }
@@ -139,11 +143,7 @@ export function blendShadeHexColors(shadeA: Shade, shadeB: Shade, primaryPercent
   const ratio = Math.min(100, Math.max(0, primaryPercent)) / 100;
   const [ra, ga, ba] = hexToRgb(shadeToHexColor(shadeA));
   const [rb, gb, bb] = hexToRgb(shadeToHexColor(shadeB));
-  return rgbToHex([
-    ra * ratio + rb * (1 - ratio),
-    ga * ratio + gb * (1 - ratio),
-    ba * ratio + bb * (1 - ratio),
-  ]);
+  return rgbToHex([ra * ratio + rb * (1 - ratio), ga * ratio + gb * (1 - ratio), ba * ratio + bb * (1 - ratio)]);
 }
 
 export type Lab = [number, number, number];
@@ -177,14 +177,18 @@ export function linearToSrgb(v: number): number {
 // white-balance-corrected input).
 export function linearRgbToLab([rl, gl, bl]: [number, number, number]): Lab {
   const x = rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375;
-  const y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750;
-  const z = rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041;
-  const xn = 0.95047, yn = 1.0, zn = 1.08883;
+  const y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.072175;
+  const z = rl * 0.0193339 + gl * 0.119192 + bl * 0.9503041;
+  const xn = 0.95047,
+    yn = 1.0,
+    zn = 1.08883;
   function f(t: number): number {
     const delta = 6 / 29;
     return t > delta ** 3 ? Math.cbrt(t) : t / (3 * delta * delta) + 4 / 29;
   }
-  const fx = f(x / xn), fy = f(y / yn), fz = f(z / zn);
+  const fx = f(x / xn),
+    fy = f(y / yn),
+    fz = f(z / zn);
   return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
 }
 
@@ -225,11 +229,12 @@ export function ciede2000([l1, a1, b1]: [number, number, number], [l2, a2, b2]: 
   else if (Math.abs(h1p - h2p) > 180) avgHp = (h1p + h2p + 360) / 2;
   else avgHp = (h1p + h2p) / 2;
 
-  const t = 1
-    - 0.17 * Math.cos(((avgHp - 30) * Math.PI) / 180)
-    + 0.24 * Math.cos((2 * avgHp * Math.PI) / 180)
-    + 0.32 * Math.cos(((3 * avgHp + 6) * Math.PI) / 180)
-    - 0.20 * Math.cos(((4 * avgHp - 63) * Math.PI) / 180);
+  const t =
+    1 -
+    0.17 * Math.cos(((avgHp - 30) * Math.PI) / 180) +
+    0.24 * Math.cos((2 * avgHp * Math.PI) / 180) +
+    0.32 * Math.cos(((3 * avgHp + 6) * Math.PI) / 180) -
+    0.2 * Math.cos(((4 * avgHp - 63) * Math.PI) / 180);
 
   let deltahp: number;
   if (c1p === 0 || c2p === 0) {

@@ -21,7 +21,21 @@ export interface AddShadeFormProps {
   existingShades: Shade[];
 }
 
-const TONE_FAMILIES: ToneFamily[] = ["natural", "ash", "cendré", "matt", "gold", "beige", "copper", "red", "violet", "chocolate", "pearl", "slate-grey", "mahogany"];
+const TONE_FAMILIES: ToneFamily[] = [
+  "natural",
+  "ash",
+  "cendré",
+  "matt",
+  "gold",
+  "beige",
+  "copper",
+  "red",
+  "violet",
+  "chocolate",
+  "pearl",
+  "slate-grey",
+  "mahogany",
+];
 
 type SubmitStatus = "idle" | "saving" | "saved" | "error";
 
@@ -75,12 +89,23 @@ export function AddShadeForm({ brandId, brandName, existingShades }: AddShadeFor
   };
 
   return (
-    <CollapsibleSection id="addShade" title={t("palette.addShadeTitle")} defaultOpen={false} className="palette-admin__section">
+    <CollapsibleSection
+      id="addShade"
+      title={t("palette.addShadeTitle")}
+      defaultOpen={false}
+      className="palette-admin__section"
+    >
       <p className="palette-admin__hint">{t("palette.addShadeForBrand", { brand: brandName })}</p>
       <form className="calculator__form" onSubmit={handleAddShade}>
         <div className="field">
           <label htmlFor="paletteShadeCode">{t("palette.shadeCode")}</label>
-          <input id="paletteShadeCode" type="text" value={shadeCode} onChange={e => setShadeCode(e.target.value)} required />
+          <input
+            id="paletteShadeCode"
+            type="text"
+            value={shadeCode}
+            onChange={e => setShadeCode(e.target.value)}
+            required
+          />
           <small>{t("palette.shadeCodeHint")}</small>
         </div>
         <LevelField id="paletteShadeLevel" label={t("palette.level")} value={shadeLevel} onChange={setShadeLevel} />
@@ -113,11 +138,19 @@ export function AddShadeForm({ brandId, brandName, existingShades }: AddShadeFor
           <label htmlFor="paletteShadeLine">{t("palette.line")}</label>
           <input id="paletteShadeLine" type="text" value={shadeLine} onChange={e => setShadeLine(e.target.value)} />
         </div>
-        {shadeError !== null && <p className="warning" role="alert">{shadeError}</p>}
+        {shadeError !== null && (
+          <p className="warning" role="alert">
+            {shadeError}
+          </p>
+        )}
         <button type="submit" className="button" disabled={shadeStatus === "saving"}>
           {shadeStatus === "saving" ? t("palette.saving") : t("palette.addShade")}
         </button>
-        {shadeStatus === "saved" && <span className="palette-admin__status" role="status">{t("palette.shadeAdded")}</span>}
+        {shadeStatus === "saved" && (
+          <span className="palette-admin__status" role="status">
+            {t("palette.shadeAdded")}
+          </span>
+        )}
       </form>
     </CollapsibleSection>
   );

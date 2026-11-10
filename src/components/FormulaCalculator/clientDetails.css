@@ -72,7 +72,10 @@
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  transition: box-shadow 0.15s ease, background-position 0.3s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    background-position 0.3s ease,
+    transform 0.15s ease;
 }
 
 .results__photo input[type="file"]:hover::file-selector-button,
@@ -144,7 +147,9 @@
   font-size: 0.85rem;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .results__client-suggestion:hover,

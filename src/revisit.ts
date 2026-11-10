@@ -6,10 +6,10 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 // Regrowth revisit interval by gray-coverage tier: heavier gray coverage means new
 // growth becomes visibly mismatched sooner, so the recommended interval shortens as
 // gray percent increases. Mirrors the tiers `getGrayCoverageStrategy` uses in formula.ts.
-const REGROWTH_INTERVAL_DAYS_LIGHT = 42;    // < 30% gray: 6 weeks
-const REGROWTH_INTERVAL_DAYS_MEDIUM = 35;   // 30-49%: 5 weeks
+const REGROWTH_INTERVAL_DAYS_LIGHT = 42; // < 30% gray: 6 weeks
+const REGROWTH_INTERVAL_DAYS_MEDIUM = 35; // 30-49%: 5 weeks
 const REGROWTH_INTERVAL_DAYS_DOMINANT = 28; // 50-79%: 4 weeks
-const REGROWTH_INTERVAL_DAYS_HEAVY = 21;    // >=80%: 3 weeks
+const REGROWTH_INTERVAL_DAYS_HEAVY = 21; // >=80%: 3 weeks
 
 export function getRegrowthIntervalDays(grayPercent: number): number {
   if (grayPercent < GRAY_LIGHT_THRESHOLD) return REGROWTH_INTERVAL_DAYS_LIGHT;
@@ -22,26 +22,26 @@ export function getRegrowthIntervalDays(grayPercent: number): number {
 // visit's actual service composition (see getRevisitDrivers). The earliest-due driver
 // sets the recommended date; the rest describe services still further out.
 export type RevisitDriverKind =
-  | "multi-visit-filler"
-  | "pigment-fade"
-  | "regrowth"
-  | "toner-refresh"
-  | "partial-lightening";
+  "multi-visit-filler" | "pigment-fade" | "regrowth" | "toner-refresh" | "partial-lightening";
 
 export interface RevisitDriver {
   kind: RevisitDriverKind;
   intervalDays: number;
 }
 
-const TONER_REFRESH_INTERVAL_DAYS = 56;      // 8 weeks — gloss/toner on lifted lengths
+const TONER_REFRESH_INTERVAL_DAYS = 56; // 8 weeks — gloss/toner on lifted lengths
 const PARTIAL_LIGHTENING_INTERVAL_DAYS = 84; // 12 weeks — balayage/highlights grow out softly
-const PIGMENT_FADE_INTERVAL_DAYS = 28;       // 4 weeks — filled/pre-pigmented deposit fades first
+const PIGMENT_FADE_INTERVAL_DAYS = 28; // 4 weeks — filled/pre-pigmented deposit fades first
 const MULTI_VISIT_FILLER_FALLBACK_DAYS = 14; // used only if a stored result predates multiVisitGapDays
 
 // Fixed tie-break order for drivers sharing the same intervalDays, so getRevisitDrivers'
 // output is deterministic.
 const DRIVER_TIE_BREAK: RevisitDriverKind[] = [
-  "multi-visit-filler", "pigment-fade", "regrowth", "toner-refresh", "partial-lightening",
+  "multi-visit-filler",
+  "pigment-fade",
+  "regrowth",
+  "toner-refresh",
+  "partial-lightening",
 ];
 
 // "roots", "full-head", and undefined (a plain FormulaCalculator save, or a step written
@@ -54,13 +54,13 @@ function isLengthsOnly(step: HistoryStep): boolean {
 }
 
 export interface ClientRevisitPlan {
-  clientKey: string;       // see getClientGroupKey -- real clientId, or a name-based fallback
-  clientName: string;      // display name, from the most recent visit
+  clientKey: string; // see getClientGroupKey -- real clientId, or a name-based fallback
+  clientName: string; // display name, from the most recent visit
   lastVisitAt: Date;
-  intervalDays: number;    // rounded to the nearest whole day
+  intervalDays: number; // rounded to the nearest whole day
   intervalBasis: "history" | "service";
   driver: RevisitDriverKind; // the earliest-due driver of the last visit
-  drivers: RevisitDriver[];  // all of the last visit's drivers, ascending by intervalDays
+  drivers: RevisitDriver[]; // all of the last visit's drivers, ascending by intervalDays
   recommendedDate: Date;
 }
 
@@ -115,7 +115,8 @@ export function getRevisitDrivers(entry: FormulaHistoryEntry): RevisitDriver[] {
   const drivers: RevisitDriver[] = [];
 
   const multiVisitStep = entry.steps.find(
-    (step): step is ColorHistoryStep => step.kind === "color" && step.prePigmentation !== null && step.prePigmentation.need === "required-multi-visit",
+    (step): step is ColorHistoryStep =>
+      step.kind === "color" && step.prePigmentation !== null && step.prePigmentation.need === "required-multi-visit",
   );
   if (multiVisitStep) {
     drivers.push({
@@ -125,7 +126,8 @@ export function getRevisitDrivers(entry: FormulaHistoryEntry): RevisitDriver[] {
   }
 
   const prePigmentedStep = entry.steps.find(
-    (step): step is ColorHistoryStep => step.kind === "color" && step.prePigmentation !== null && step.prePigmentation.need !== "none",
+    (step): step is ColorHistoryStep =>
+      step.kind === "color" && step.prePigmentation !== null && step.prePigmentation.need !== "none",
   );
   if (prePigmentedStep) {
     drivers.push({ kind: "pigment-fade", intervalDays: PIGMENT_FADE_INTERVAL_DAYS });
@@ -158,7 +160,10 @@ export function getRevisitDrivers(entry: FormulaHistoryEntry): RevisitDriver[] {
 // Alphabetical (not ascending-days) so the signature stays stable regardless of gray
 // percent, which only affects the regrowth driver's intervalDays, not its presence.
 function serviceSignature(entry: FormulaHistoryEntry): string {
-  return getRevisitDrivers(entry).map(d => d.kind).sort().join("+");
+  return getRevisitDrivers(entry)
+    .map(d => d.kind)
+    .sort()
+    .join("+");
 }
 
 function planForClient(clientEntries: FormulaHistoryEntry[]): ClientRevisitPlan {

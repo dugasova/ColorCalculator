@@ -52,7 +52,9 @@ describe("SessionDetailsPanel client disambiguation", () => {
     mockClients([ANNA_1, ANNA_2]);
     vi.mocked(updateClient).mockResolvedValue(undefined);
     const onSave = vi.fn().mockResolvedValue(undefined);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />,
+    );
     openModal();
 
     fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Anna" } });
@@ -77,7 +79,9 @@ describe("SessionDetailsPanel client disambiguation", () => {
 
   it("re-shows the suggestion list (and drops the previous link) once the name is edited again", async () => {
     mockClients([ANNA_1, ANNA_2]);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />,
+    );
     openModal();
 
     fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Anna" } });
@@ -90,9 +94,11 @@ describe("SessionDetailsPanel client disambiguation", () => {
     expect(screen.queryByText(/Linked to saved client/)).not.toBeInTheDocument();
   });
 
-  it("lets the colorist explicitly detach from a wrongly picked namesake via \"not this person\"", async () => {
+  it('lets the colorist explicitly detach from a wrongly picked namesake via "not this person"', async () => {
     mockClients([ANNA_1]);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />,
+    );
     openModal();
 
     fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Anna K." } });
@@ -111,7 +117,9 @@ describe("SessionDetailsPanel client disambiguation", () => {
     mockClients([]);
     vi.mocked(createClient).mockResolvedValue("brand-new-id");
     const onSave = vi.fn().mockResolvedValue(undefined);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={onSave} appliedBy={APPLIED_BY} />,
+    );
     openModal();
 
     fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Brand New Client" } });
@@ -119,14 +127,18 @@ describe("SessionDetailsPanel client disambiguation", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save to history" }));
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
-    expect(createClient).toHaveBeenCalledWith(expect.objectContaining({ ownedBy: APPLIED_BY, name: "Brand New Client" }));
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({ ownedBy: APPLIED_BY, name: "Brand New Client" }),
+    );
     expect(updateClient).not.toHaveBeenCalled();
     expect(onSave.mock.calls[0][0]).toMatchObject({ clientId: "brand-new-id" });
   });
 
   it("shows the picked client's last visit hint only once a specific match is confirmed", async () => {
     mockClients([ANNA_1, ANNA_2]);
-    render(<SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />);
+    render(
+      <SessionDetailsPanel formulaText="Test formula" processingMinutes={30} onSave={vi.fn()} appliedBy={APPLIED_BY} />,
+    );
     openModal();
 
     fireEvent.change(screen.getByLabelText("Client name"), { target: { value: "Anna" } });

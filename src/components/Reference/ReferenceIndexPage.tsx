@@ -16,7 +16,8 @@ export function ReferenceIndexPage() {
   return (
     <div className="calculator">
       <h1 className="calculator__title">
-        {t("reference.indexTitlePrefix")} <span className="calculator__title-accent">{t("reference.indexTitleAccent")}</span>
+        {t("reference.indexTitlePrefix")}{" "}
+        <span className="calculator__title-accent">{t("reference.indexTitleAccent")}</span>
       </h1>
       <p className="brand-notes__hint">{t("reference.indexHint")}</p>
 

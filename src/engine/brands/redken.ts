@@ -232,12 +232,16 @@ export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
 // reasoning Shades EQ's own Crystal Clear and Igora's 0-series concentrates were left
 // out); levels 2 and below beyond the two confirmed naturals (Chromatics' working
 // range is concentrated in levels 4-10, per Redken's own materials).
-const chromaticsLiftTable: LiftTable = (volume) => {
+const chromaticsLiftTable: LiftTable = volume => {
   switch (volume) {
-    case 10: return 0;
-    case 20: return 1;
-    case 30: return 2;
-    default: return 0; // 6/13/40 -- not sold for this system, never reachable.
+    case 10:
+      return 0;
+    case 20:
+      return 1;
+    case 30:
+      return 2;
+    default:
+      return 0; // 6/13/40 -- not sold for this system, never reachable.
   }
 };
 

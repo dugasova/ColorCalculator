@@ -25,8 +25,14 @@ export interface AdditionalShadeFieldProps {
 // (not as a separate field below it, which used to leave it visually disconnected from
 // the shade it belongs to) and only appears once a shade is picked.
 export function AdditionalShadeField({
-  lineShades, additionalShadeCode, onAdditionalShadeCodeChange,
-  additionalShadeGrams, onAdditionalShadeGramsChange, idSuffix = "", label, hint,
+  lineShades,
+  additionalShadeCode,
+  onAdditionalShadeCodeChange,
+  additionalShadeGrams,
+  onAdditionalShadeGramsChange,
+  idSuffix = "",
+  label,
+  hint,
 }: AdditionalShadeFieldProps) {
   const { t } = useTranslation();
   const additionalShade = lineShades.find(s => s.code === additionalShadeCode) ?? null;
@@ -34,7 +40,9 @@ export function AdditionalShadeField({
   // to `additionalShadeGrams` can briefly show "040" when typing over the default 0
   // before the parent's re-render catches up. min: 0 (not GramsInputField's 1) since 0
   // additional-shade grams is a valid "not blending anything in yet" state.
-  const { inputProps: gramsInputProps } = useClampedNumberText(additionalShadeGrams, onAdditionalShadeGramsChange, { min: 0 });
+  const { inputProps: gramsInputProps } = useClampedNumberText(additionalShadeGrams, onAdditionalShadeGramsChange, {
+    min: 0,
+  });
 
   return (
     <div className="field additional-shade-field">

@@ -43,7 +43,10 @@ export interface ClientLink {
 // entry and its "Repeat formula" replay (see `repeatRequest`, buildRepeatFormulaRequest in
 // History). `appliedBy` scopes the saved-client lookup to the signed-in stylist's own
 // book, same ownership boundary as formulaHistory's `appliedBy`.
-export function useClientLink(appliedBy: string, repeatRequest?: Pick<RepeatFormulaRequest, "clientName" | "clientId"> | null): ClientLink {
+export function useClientLink(
+  appliedBy: string,
+  repeatRequest?: Pick<RepeatFormulaRequest, "clientName" | "clientId"> | null,
+): ClientLink {
   const [clientName, setClientName] = useState("");
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
@@ -53,7 +56,10 @@ export function useClientLink(appliedBy: string, repeatRequest?: Pick<RepeatForm
   // object each time History's "Repeat" button is clicked (see buildRepeatFormulaRequest),
   // so comparing by reference is enough to apply each click exactly once, the same
   // pattern useFormulaCalculatorState uses for the rest of the repeated formula's fields.
-  const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<Pick<RepeatFormulaRequest, "clientName" | "clientId"> | null>(null);
+  const [appliedRepeatRequest, setAppliedRepeatRequest] = useState<Pick<
+    RepeatFormulaRequest,
+    "clientName" | "clientId"
+  > | null>(null);
   // The clientId whose phone/allergy notes have already been backfilled below -- distinct
   // from `appliedRepeatRequest` because the matched ClientProfile may resolve out of the
   // subscribeToClients subscription well after the repeat replay (or an explicit suggestion pick)
@@ -88,8 +94,8 @@ export function useClientLink(appliedBy: string, repeatRequest?: Pick<RepeatForm
   }, [clientName, selectedClientId, savedClients]);
 
   const selectedClient = useMemo(
-    () => (selectedClientId !== null ? savedClients.find(c => c.id === selectedClientId) ?? null : null),
-    [selectedClientId, savedClients]
+    () => (selectedClientId !== null ? (savedClients.find(c => c.id === selectedClientId) ?? null) : null),
+    [selectedClientId, savedClients],
   );
 
   // Backfills phone/allergy notes once the repeat-linked profile resolves out of the

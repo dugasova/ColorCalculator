@@ -6,7 +6,11 @@ export const SERVER_ACK_TIMEOUT_MS = 4000;
 
 export type WriteOutcome = "synced" | "queued";
 
-export function settleWrite(write: Promise<unknown>, label: string, timeoutMs = SERVER_ACK_TIMEOUT_MS): Promise<WriteOutcome> {
+export function settleWrite(
+  write: Promise<unknown>,
+  label: string,
+  timeoutMs = SERVER_ACK_TIMEOUT_MS,
+): Promise<WriteOutcome> {
   // `Promise.resolve` (not used bare) so a caller/mock handing back a plain value instead
   // of an actual Promise -- real Firestore always returns one, but a test double might
   // not bother -- still behaves like an already-resolved write instead of throwing.
@@ -19,8 +23,14 @@ export function settleWrite(write: Promise<unknown>, label: string, timeoutMs = 
       settled.catch(err => console.error(`Queued write "${label}" failed to sync:`, err));
     }, timeoutMs);
     settled.then(
-      () => { clearTimeout(timer); resolve("synced"); },
-      err => { clearTimeout(timer); reject(err); },
+      () => {
+        clearTimeout(timer);
+        resolve("synced");
+      },
+      err => {
+        clearTimeout(timer);
+        reject(err);
+      },
     );
   });
 }

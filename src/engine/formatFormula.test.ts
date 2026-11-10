@@ -24,14 +24,14 @@ describe("formatFormulaText", () => {
 
     expect(text).toBe(
       "Generic — 8.1 (ash)\n" +
-      "Starting level: 8 → Target: 8\n" +
-      "Application: Full head\n" +
-      "Developer: 3% (10 vol)\n" +
-      "Ratio: 1:1\n" +
-      "Mix: 8.1- 30.0 g developer 30.0 g\n" +
-      "Processing time: 30 min\n" +
-      "Gray coverage: apply the fashion tone as-is (0% base / 100% tone)\n" +
-      "Recommended corrective tone: none"
+        "Starting level: 8 → Target: 8\n" +
+        "Application: Full head\n" +
+        "Developer: 3% (10 vol)\n" +
+        "Ratio: 1:1\n" +
+        "Mix: 8.1- 30.0 g developer 30.0 g\n" +
+        "Processing time: 30 min\n" +
+        "Gray coverage: apply the fashion tone as-is (0% base / 100% tone)\n" +
+        "Recommended corrective tone: none",
     );
   });
 
@@ -83,7 +83,13 @@ describe("formatFormulaText", () => {
   });
 
   it("includes the line label and secondaryTone in the title when present", () => {
-    const targetShade: Shade = { code: "8/73", level: 8, tone: "chocolate", secondaryTone: "gold", line: "color-touch" };
+    const targetShade: Shade = {
+      code: "8/73",
+      level: 8,
+      tone: "chocolate",
+      secondaryTone: "gold",
+      line: "color-touch",
+    };
     const result = calculateFullFormula(8, targetShade, 0, 60);
 
     const text = formatFormulaText({
@@ -211,9 +217,7 @@ describe("formatFormulaText", () => {
     const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
     const additionalShade: Shade = { code: "8.3", level: 8, tone: "gold" };
     const baseResult = calculateFullFormula(8, targetShade, 0, 60);
-    const grams = baseResult.grams !== null
-      ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 5)
-      : null;
+    const grams = baseResult.grams !== null ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 5) : null;
     const result = { ...baseResult, grams };
 
     const text = formatFormulaText({
@@ -260,7 +264,9 @@ describe("formatFormulaText", () => {
   it("includes an achievable-level line right after the starting level when a partial-lift shade can't reach its nominal target", () => {
     const specialBlondeLiftTable = (volume: number) => (volume === 40 ? 5 : volume === 30 ? 3 : 0);
     const targetShade: Shade = {
-      code: "12/1", level: 12, tone: "ash",
+      code: "12/1",
+      level: 12,
+      tone: "ash",
       fixedMixingRatio: { colorParts: 1, developerParts: 2 },
       developerLiftTable: specialBlondeLiftTable,
       acceptsPartialLift: true,
@@ -283,7 +289,7 @@ describe("formatFormulaText", () => {
 
     expect(text).toContain(
       "Starting level: 4 → Target: 12\n" +
-      "Achievable level: 9 (target level 12 needs lightening or multiple sessions to reach fully)\n"
+        "Achievable level: 9 (target level 12 needs lightening or multiple sessions to reach fully)\n",
     );
   });
 
@@ -315,18 +321,25 @@ describe("buildMixSummary with a gray-coverage natural base", () => {
   const additional: Shade = { code: "0/11", level: 1, tone: "ash" };
 
   it("carves the natural base out of the primary shade without changing the total or developer", () => {
-    const summary = buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, { shade: natural, grams: 10 });
+    const summary = buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, {
+      shade: natural,
+      grams: 10,
+    });
     expect(summary).toBe("7/1- 20.0 g 7/0- 10.0 g developer 30.0 g");
   });
 
   it("lists an additional shade after the natural base -- it sits on top of the split base weight", () => {
     // 30 g base split 20/10, plus 5 g additional on top: colorGrams 35 (see applyAdditionalShade).
-    const summary = buildMixSummary(target, { colorGrams: 35, developerGrams: 35 }, additional, 5, null, 0, { shade: natural, grams: 10 });
+    const summary = buildMixSummary(target, { colorGrams: 35, developerGrams: 35 }, additional, 5, null, 0, {
+      shade: natural,
+      grams: 10,
+    });
     expect(summary).toBe("7/1- 20.0 g 7/0- 10.0 g 0/11- 5.0 g developer 35.0 g");
   });
 
   it("is unchanged when no natural base is applied", () => {
-    expect(buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, null))
-      .toBe("7/1- 30.0 g developer 30.0 g");
+    expect(buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, null)).toBe(
+      "7/1- 30.0 g developer 30.0 g",
+    );
   });
 });

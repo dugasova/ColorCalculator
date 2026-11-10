@@ -2,11 +2,19 @@ import type { Brand, BrandId } from "../engine/brands";
 import { ALL_DEVELOPER_VOLUMES } from "../engine/levels";
 import type { ReorderItem, StockRecord, StockStatus } from "./types";
 import {
-  DEVELOPER_BOTTLE_SIZE_GRAMS, LOW_STOCK_THRESHOLD_GRAMS, developerStockId, getBrandScopedDeveloperLines,
-  getScopedDeveloperVolumes, getShadeTubeSizeGrams, shadeStockId,
+  DEVELOPER_BOTTLE_SIZE_GRAMS,
+  LOW_STOCK_THRESHOLD_GRAMS,
+  developerStockId,
+  getBrandScopedDeveloperLines,
+  getScopedDeveloperVolumes,
+  getShadeTubeSizeGrams,
+  shadeStockId,
 } from "./products";
 
-export function getStockStatus(remainingGrams: number, thresholdGrams: number = LOW_STOCK_THRESHOLD_GRAMS): StockStatus {
+export function getStockStatus(
+  remainingGrams: number,
+  thresholdGrams: number = LOW_STOCK_THRESHOLD_GRAMS,
+): StockStatus {
   if (remainingGrams <= 0) return "out";
   if (remainingGrams <= thresholdGrams) return "low";
   return "ok";
@@ -45,9 +53,16 @@ export function buildReorderList(brands: Record<BrandId, Brand>, records: StockR
       const status = getStockStatus(record.remainingGrams, packGrams);
       if (status === "ok") continue;
       items.push({
-        id, brandId, remainingGrams: record.remainingGrams, status, packGrams,
+        id,
+        brandId,
+        remainingGrams: record.remainingGrams,
+        status,
+        packGrams,
         suggestedPacks: suggestReorderPacks(record.remainingGrams, packGrams, packGrams),
-        kind: "shade", line: shade.line ?? null, code: shade.code, unit: "tube",
+        kind: "shade",
+        line: shade.line ?? null,
+        code: shade.code,
+        unit: "tube",
       });
     }
     for (const line of [null, ...getBrandScopedDeveloperLines(brandId)]) {
@@ -59,9 +74,20 @@ export function buildReorderList(brands: Record<BrandId, Brand>, records: StockR
         const status = getStockStatus(record.remainingGrams, LOW_STOCK_THRESHOLD_GRAMS);
         if (status === "ok") continue;
         items.push({
-          id, brandId, remainingGrams: record.remainingGrams, status, packGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
-          suggestedPacks: suggestReorderPacks(record.remainingGrams, LOW_STOCK_THRESHOLD_GRAMS, DEVELOPER_BOTTLE_SIZE_GRAMS),
-          kind: "developer", line, volume, unit: "bottle",
+          id,
+          brandId,
+          remainingGrams: record.remainingGrams,
+          status,
+          packGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
+          suggestedPacks: suggestReorderPacks(
+            record.remainingGrams,
+            LOW_STOCK_THRESHOLD_GRAMS,
+            DEVELOPER_BOTTLE_SIZE_GRAMS,
+          ),
+          kind: "developer",
+          line,
+          volume,
+          unit: "bottle",
         });
       }
     }

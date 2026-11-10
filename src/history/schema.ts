@@ -101,14 +101,15 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
   // unchanged (not a copy) when it already has every one of these fields, same as the
   // plain `return raw` this replaced for an already-well-formed modern entry.
   if ("steps" in raw && raw.steps !== undefined) {
-    const needsCoercion = raw.clientId === undefined
-      || raw.schemaVersion === undefined
-      || raw.appVersion === undefined
-      || raw.steps.some(step => step.kind === "color" && step.prePigmentation === undefined);
+    const needsCoercion =
+      raw.clientId === undefined ||
+      raw.schemaVersion === undefined ||
+      raw.appVersion === undefined ||
+      raw.steps.some(step => step.kind === "color" && step.prePigmentation === undefined);
     if (!needsCoercion) return raw;
-    const steps = raw.steps.map(step => (
-      step.kind === "color" ? { ...step, prePigmentation: step.prePigmentation ?? null } : step
-    ));
+    const steps = raw.steps.map(step =>
+      step.kind === "color" ? { ...step, prePigmentation: step.prePigmentation ?? null } : step,
+    );
     return {
       ...raw,
       clientId: raw.clientId ?? null,

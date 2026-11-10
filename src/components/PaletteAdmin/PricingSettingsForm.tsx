@@ -38,7 +38,12 @@ export function PricingSettingsForm() {
   };
 
   return (
-    <CollapsibleSection id="pricing" title={t("palette.pricingTitle")} defaultOpen={false} className="palette-admin__section">
+    <CollapsibleSection
+      id="pricing"
+      title={t("palette.pricingTitle")}
+      defaultOpen={false}
+      className="palette-admin__section"
+    >
       <p className="palette-admin__hint">{t("palette.markupHint")}</p>
       <div className="field">
         <label htmlFor="salonMarkupMultiplier">{t("palette.markupLabel")}</label>
@@ -50,11 +55,21 @@ export function PricingSettingsForm() {
           value={draft ?? String(markupMultiplier)}
           disabled={isSaving}
           onChange={e => setDraft(e.target.value)}
-          onBlur={() => { void handleBlur(); }}
+          onBlur={() => {
+            void handleBlur();
+          }}
         />
       </div>
-      {isSaving && <span className="palette-admin__status" role="status">{t("palette.saving")}</span>}
-      {error !== null && <p className="warning" role="alert">{error}</p>}
+      {isSaving && (
+        <span className="palette-admin__status" role="status">
+          {t("palette.saving")}
+        </span>
+      )}
+      {error !== null && (
+        <p className="warning" role="alert">
+          {error}
+        </p>
+      )}
     </CollapsibleSection>
   );
 }

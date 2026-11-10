@@ -10,7 +10,7 @@ import "./BleachCalculator.css";
 
 // Rough per-gram cost of generic bleach powder; fully editable below, mirrors
 // FormulaCalculator's generic-brand default.
-const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
+const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.1;
 
 export interface BleachResultsProps {
   result: BleachFormula;
@@ -28,8 +28,13 @@ export interface BleachResultsProps {
 // without simulating select interactions — mirrors the FormulaResults /
 // FormulaCalculator split in ../FormulaCalculator.
 export function BleachResults({
-  result, pricePerGram, onPricePerGramChange, markupMultiplier, onMarkupMultiplierChange,
-  productCost, recommendedServicePrice,
+  result,
+  pricePerGram,
+  onPricePerGramChange,
+  markupMultiplier,
+  onMarkupMultiplierChange,
+  productCost,
+  recommendedServicePrice,
 }: BleachResultsProps) {
   const { t } = useTranslation();
 
@@ -51,25 +56,39 @@ export function BleachResults({
       </div>
 
       {result.liftNeeded === 0 && (
-        <p className="warning" role="alert">{t("bleach.noLiftWarning")}</p>
+        <p className="warning" role="alert">
+          {t("bleach.noLiftWarning")}
+        </p>
       )}
 
       {result.multiStepRequired && (
-        <p className="warning" role="alert">{t("bleach.multiStepWarning")}</p>
+        <p className="warning" role="alert">
+          {t("bleach.multiStepWarning")}
+        </p>
       )}
 
       {result.grams !== null && (
         <>
           <div className="results__row">
             <span className="results__row-label">{t("results.mix")}</span>
-            <span>{t("bleach.mixValue", { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) })}</span>
+            <span>
+              {t("bleach.mixValue", {
+                powder: result.grams.powderGrams.toFixed(1),
+                developer: result.grams.developerGrams.toFixed(1),
+              })}
+            </span>
           </div>
           <div className="results__row">
             <span className="results__row-label">{t("bleach.processingTimeLabel")}</span>
             <span>{t("results.processingTimeHint", { minutes: result.recommendedProcessingMinutes })}</span>
           </div>
           <p className="bleach__note">{t("bleach.maxScalpTimeNote", { max: result.maxScalpProcessingMinutes })}</p>
-          <p className="bleach__note">{t("bleach.checkIntervalNote", { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>
+          <p className="bleach__note">
+            {t("bleach.checkIntervalNote", {
+              min: result.checkIntervalMinMinutes,
+              max: result.checkIntervalMaxMinutes,
+            })}
+          </p>
           <p className="bleach__note bleach__note--strand">{t("bleach.strandTestNote")}</p>
 
           <div className="results__pricing">
@@ -132,15 +151,23 @@ export function BleachCalculator() {
   // powder's per-gram price would overstate the real product cost.
   const totalProductGrams = result.grams !== null ? result.grams.powderGrams : null;
   const productCost = totalProductGrams !== null ? calculateProductCost(totalProductGrams, pricePerGram) : null;
-  const recommendedServicePrice = productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
+  const recommendedServicePrice =
+    productCost !== null ? calculateRecommendedServicePrice(productCost, markupMultiplier) : null;
 
   return (
     <div className="calculator calculator--wide">
-      <h1 className="calculator__title">{t("bleach.titlePrefix")} <span className="calculator__title-accent">{t("bleach.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        {t("bleach.titlePrefix")} <span className="calculator__title-accent">{t("bleach.titleAccent")}</span>
+      </h1>
       <p className="bleach__subtitle">{t("bleach.subtitle")}</p>
 
       <div className="calculator__form">
-        <LevelField id="currentLevel" label={t("bleach.currentLevel")} value={currentLevel} onChange={setCurrentLevel} />
+        <LevelField
+          id="currentLevel"
+          label={t("bleach.currentLevel")}
+          value={currentLevel}
+          onChange={setCurrentLevel}
+        />
         <LevelField id="targetLevel" label={t("bleach.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
 
         <div className="field">

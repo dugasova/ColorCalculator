@@ -47,10 +47,13 @@ export function subscribeToPricingSettings(onChange: (settings: PricingSettings)
     err => {
       console.error("Falling back to the default markup -- could not subscribe to salon pricing settings:", err);
       onChange(DEFAULT_PRICING_SETTINGS);
-    }
+    },
   );
 }
 
 export async function setSalonMarkupMultiplier(markupMultiplier: number): Promise<void> {
-  await settleWrite(setDoc(doc(db, SALON_SETTINGS_COLLECTION, PRICING_SETTINGS_DOC_ID), { markupMultiplier }), "set salon markup");
+  await settleWrite(
+    setDoc(doc(db, SALON_SETTINGS_COLLECTION, PRICING_SETTINGS_DOC_ID), { markupMultiplier }),
+    "set salon markup",
+  );
 }

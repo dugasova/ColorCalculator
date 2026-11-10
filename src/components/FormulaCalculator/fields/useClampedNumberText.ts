@@ -11,7 +11,11 @@ export interface ClampedNumberTextOptions {
 // (e.g. the default 0/60) before the parent's re-render catches up. Selecting all text on
 // focus, sanitizing to digits-only, and stripping leading zeros synchronously in the change
 // handler avoids that regardless of how slow the parent's re-render is.
-export function useClampedNumberText(value: number, onChange: (value: number) => void, { min, max }: ClampedNumberTextOptions) {
+export function useClampedNumberText(
+  value: number,
+  onChange: (value: number) => void,
+  { min, max }: ClampedNumberTextOptions,
+) {
   const [text, setText] = useState(String(value));
   const lastEmitted = useRef(value);
 

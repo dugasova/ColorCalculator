@@ -19,7 +19,12 @@ import type { ZodType } from "zod";
 // caller rather than inferred from `schema` -- an `includeId: false` schema only validates
 // `Omit<T, "id">`, so `T` and the schema's own parsed type genuinely differ. This is the
 // same manual `as T` cast every caller made by hand before this loop was extracted.
-export function parseSnapshotDocs<T>(snapshot: QuerySnapshot, schema: ZodType<unknown>, label: string, includeId = false): T[] {
+export function parseSnapshotDocs<T>(
+  snapshot: QuerySnapshot,
+  schema: ZodType<unknown>,
+  label: string,
+  includeId = false,
+): T[] {
   const items: T[] = [];
   for (const d of snapshot.docs) {
     const input = includeId ? { id: d.id, ...d.data() } : d.data();

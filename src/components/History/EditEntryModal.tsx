@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { updateHistoryEntryDetails, type FormulaHistoryEntry, type HistoryEntryDetailsResult, type PhotoEdit } from "../../history";
+import {
+  updateHistoryEntryDetails,
+  type FormulaHistoryEntry,
+  type HistoryEntryDetailsResult,
+  type PhotoEdit,
+} from "../../history";
 import { isPatchTestSufficient } from "../../patchTest";
 import { usePhotoUpload, type PhotoUpload } from "../FormulaCalculator/usePhotoUpload";
 import { Modal } from "../common/Modal";
@@ -166,7 +171,11 @@ export function EditEntryModal({ entry, onClose, onSaved }: EditEntryModalProps)
         {t("results.patchTestOverrideLabel")}
       </label>
 
-      {!patchTestOk && <p className="warning" role="alert">{t("history.editPatchTestRequired")}</p>}
+      {!patchTestOk && (
+        <p className="warning" role="alert">
+          {t("history.editPatchTestRequired")}
+        </p>
+      )}
 
       <div className="results__photos">
         <PhotoSlot
@@ -187,13 +196,24 @@ export function EditEntryModal({ entry, onClose, onSaved }: EditEntryModalProps)
         />
       </div>
 
-      {saveError && <p className="warning" role="alert">{t("history.editSaveError")}</p>}
+      {saveError && (
+        <p className="warning" role="alert">
+          {t("history.editSaveError")}
+        </p>
+      )}
 
       <div className="history__delete-confirm-actions">
         <button type="button" className="button button--secondary" onClick={onClose} disabled={isSaving}>
           {t("common.cancel")}
         </button>
-        <button type="button" className="button" onClick={() => { void handleSave(); }} disabled={isSaving || !patchTestOk}>
+        <button
+          type="button"
+          className="button"
+          onClick={() => {
+            void handleSave();
+          }}
+          disabled={isSaving || !patchTestOk}
+        >
           {isSaving ? t("history.editSaving") : t("history.editSave")}
         </button>
       </div>

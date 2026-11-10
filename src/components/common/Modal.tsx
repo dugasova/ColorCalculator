@@ -64,7 +64,7 @@ export function Modal({ title, onClose, children, size = "default" }: ModalProps
       }
       if (e.key !== "Tab" || dialogRef.current === null) return;
       const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
       );
       if (focusable.length === 0) return;
       const first = focusable[0];
@@ -88,10 +88,24 @@ export function Modal({ title, onClose, children, size = "default" }: ModalProps
     // (see the effect above), matching how the click-outside-to-close listbox popup in
     // Select.tsx makes the same tradeoff.
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div className="modal-overlay" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className={`modal${size === "large" ? " modal--large" : ""}`} role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialogRef} tabIndex={-1}>
+    <div
+      className="modal-overlay"
+      onMouseDown={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className={`modal${size === "large" ? " modal--large" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        ref={dialogRef}
+        tabIndex={-1}
+      >
         <div className="modal__header">
-          <h2 id={titleId} className="modal__title">{title}</h2>
+          <h2 id={titleId} className="modal__title">
+            {title}
+          </h2>
           <button type="button" className="modal__close" onClick={onClose} aria-label={t("common.close")}>
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />

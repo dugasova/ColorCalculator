@@ -19,7 +19,9 @@
   border-radius: 1rem;
   background: var(--field-bg);
   border: 1px solid var(--border-field);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   animation: stat-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 

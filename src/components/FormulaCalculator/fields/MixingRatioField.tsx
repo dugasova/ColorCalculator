@@ -16,15 +16,21 @@ function ratioValue(ratio: MixingRatio): string {
 // Only shown for a shade that offers more than one ratio (Shade.mixingRatioChoices, e.g.
 // Wella Color Touch 1:2 or 1:1.5) -- every other shade's ratio is fixed by the line or by
 // the level-diff strategy, with nothing for the colorist to pick.
-export function MixingRatioField({ targetShade, manualMixingRatio, onManualMixingRatioChange, idSuffix = "" }: MixingRatioFieldProps) {
+export function MixingRatioField({
+  targetShade,
+  manualMixingRatio,
+  onManualMixingRatioChange,
+  idSuffix = "",
+}: MixingRatioFieldProps) {
   const { t } = useTranslation();
   const choices = targetShade.mixingRatioChoices;
   if (choices === undefined || choices.length < 2) {
     return null;
   }
-  const selected = manualMixingRatio !== undefined && choices.some(choice => sameMixingRatio(choice, manualMixingRatio))
-    ? manualMixingRatio
-    : choices[0];
+  const selected =
+    manualMixingRatio !== undefined && choices.some(choice => sameMixingRatio(choice, manualMixingRatio))
+      ? manualMixingRatio
+      : choices[0];
 
   return (
     <div className="field">

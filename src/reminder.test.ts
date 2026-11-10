@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import "./i18n";
-import { toWhatsAppPhone, buildRevisitReminderText, buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "./reminder";
+import {
+  toWhatsAppPhone,
+  buildRevisitReminderText,
+  buildWhatsAppReminderUrl,
+  buildTelegramReminderUrl,
+} from "./reminder";
 
 describe("toWhatsAppPhone", () => {
   it("strips formatting punctuation down to a bare digit string", () => {

@@ -102,22 +102,31 @@ export function getPrePigmentFillerTone(pigment: UnderlyingPigment): ToneFamily 
 // natural/ash/gold/violet/chocolate (no red below level 5 in this chart) - resolves to
 // null, and callers must fall back to the natural (.0) base diluted, or a brand's
 // dedicated filler product.
-export function findExampleFillerShade(targetLevel: Level, fillerTone: ToneFamily, shadeChart: Shade[] = GENERIC_SHADE_CHART): Shade | null {
+export function findExampleFillerShade(
+  targetLevel: Level,
+  fillerTone: ToneFamily,
+  shadeChart: Shade[] = GENERIC_SHADE_CHART,
+): Shade | null {
   return shadeChart.find(s => s.level === targetLevel && s.tone === fillerTone) ?? null;
 }
 
 export function calculateFillerGrams(totalGrams: number, ratio: FillerMixingRatio): FillerGrams {
   const totalParts = ratio.fillerParts + ratio.diluentParts;
   return {
-    fillerGrams: totalGrams * ratio.fillerParts / totalParts,
-    diluentGrams: totalGrams * ratio.diluentParts / totalParts,
+    fillerGrams: (totalGrams * ratio.fillerParts) / totalParts,
+    diluentGrams: (totalGrams * ratio.diluentParts) / totalParts,
   };
 }
 
 // `shadeChart` scopes the worked-example lookup (see findExampleFillerShade above) -
 // pass the colorist's currently selected brand+line shades to recommend a real product
 // from that line instead of the Generic-chart default.
-export function calculatePrePigmentation(startLevel: Level, targetLevel: Level, totalGrams: number, shadeChart: Shade[] = GENERIC_SHADE_CHART): PrePigmentationResult {
+export function calculatePrePigmentation(
+  startLevel: Level,
+  targetLevel: Level,
+  totalGrams: number,
+  shadeChart: Shade[] = GENERIC_SHADE_CHART,
+): PrePigmentationResult {
   const need = getPrePigmentationNeed(startLevel, targetLevel);
   const underlyingPigment = need !== "none" ? getUnderlyingPigment(targetLevel) : null;
   const fillerTone = underlyingPigment !== null ? getPrePigmentFillerTone(underlyingPigment) : null;
@@ -125,9 +134,8 @@ export function calculatePrePigmentation(startLevel: Level, targetLevel: Level, 
   const mixingRatio = need !== "none" ? FILLER_MIXING_RATIO : null;
   const grams = mixingRatio !== null ? calculateFillerGrams(totalGrams, mixingRatio) : null;
   const fillerProcessingMinutes = need !== "none" ? FILLER_PROCESSING_MINUTES[need] : null;
-  const multiVisitGapDays = need === "required-multi-visit"
-    ? { min: MULTI_VISIT_MIN_GAP_DAYS, max: MULTI_VISIT_MAX_GAP_DAYS }
-    : null;
+  const multiVisitGapDays =
+    need === "required-multi-visit" ? { min: MULTI_VISIT_MIN_GAP_DAYS, max: MULTI_VISIT_MAX_GAP_DAYS } : null;
 
   return {
     need,

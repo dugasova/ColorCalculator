@@ -23,7 +23,10 @@ export function StrandZoneField({ strandZone, onStrandZoneChange, idSuffix = "" 
         id={`strandZone${idSuffix}`}
         value={strandZone}
         onChange={value => onStrandZoneChange(value as StrandZone)}
-        options={STRAND_ZONES.map(zone => ({ value: zone, label: t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[zone]}`) }))}
+        options={STRAND_ZONES.map(zone => ({
+          value: zone,
+          label: t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[zone]}`),
+        }))}
       />
     </div>
   );

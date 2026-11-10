@@ -13,12 +13,21 @@ vi.mock("../../clients", () => ({
 }));
 
 const APPLIED_BY = "stylist@salon.test";
-const ANNA_1 = { id: "anna-1", ownedBy: APPLIED_BY, name: "Anna K.", phone: "+1 555 0100", allergyNotes: "PPD sensitivity", lastCanvas: null };
+const ANNA_1 = {
+  id: "anna-1",
+  ownedBy: APPLIED_BY,
+  name: "Anna K.",
+  phone: "+1 555 0100",
+  allergyNotes: "PPD sensitivity",
+  lastCanvas: null,
+};
 
 // Only clientName/clientId are read by SessionDetailsPanel; the rest are dummy values
 // satisfying RepeatFormulaRequest's full shape (the calculator-state fields this panel
 // never touches).
-function makeRepeatRequest(overrides: Partial<Pick<RepeatFormulaRequest, "clientName" | "clientId">>): RepeatFormulaRequest {
+function makeRepeatRequest(
+  overrides: Partial<Pick<RepeatFormulaRequest, "clientName" | "clientId">>,
+): RepeatFormulaRequest {
   return {
     clientName: "Anna K.",
     clientId: "anna-1",
@@ -29,7 +38,8 @@ function makeRepeatRequest(overrides: Partial<Pick<RepeatFormulaRequest, "client
     grayPercent: 0,
     totalGrams: 60,
     colorGrams: 30,
-    manualDeveloperVolume: undefined, manualMixingRatio: undefined,
+    manualDeveloperVolume: undefined,
+    manualMixingRatio: undefined,
     additionalShadeCode: null,
     additionalShadeGrams: 0,
     blendShadeACode: null,
@@ -73,7 +83,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
         onSave={vi.fn()}
         appliedBy={APPLIED_BY}
         repeatRequest={makeRepeatRequest({})}
-      />
+      />,
     );
     openModal();
 
@@ -92,7 +102,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
         onSave={onSave}
         appliedBy={APPLIED_BY}
         repeatRequest={makeRepeatRequest({})}
-      />
+      />,
     );
     openModal();
     await waitFor(() => expect(screen.getByText(/Linked to saved client: Anna K\./)).toBeInTheDocument());
@@ -114,7 +124,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
         onSave={vi.fn()}
         appliedBy={APPLIED_BY}
         repeatRequest={makeRepeatRequest({})}
-      />
+      />,
     );
     openModal();
 
@@ -133,7 +143,7 @@ describe("SessionDetailsPanel repeatRequest client link", () => {
         onSave={onSave}
         appliedBy={APPLIED_BY}
         repeatRequest={makeRepeatRequest({ clientId: null })}
-      />
+      />,
     );
     openModal();
 

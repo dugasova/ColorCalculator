@@ -22,7 +22,14 @@ interface ClientVisitsModalProps {
 // edit/photo/delete-confirm dialogs it opens stack on top of it from HistoryView, which
 // keeps every dialog's open/closed state in one place.
 export function ClientVisitsModal({
-  group, isAdmin, gramsEditor, onClose, onRequestDelete, onEditEntry, onOpenPhoto, onRepeat,
+  group,
+  isAdmin,
+  gramsEditor,
+  onClose,
+  onRequestDelete,
+  onEditEntry,
+  onOpenPhoto,
+  onRepeat,
 }: ClientVisitsModalProps) {
   const { t } = useTranslation();
 

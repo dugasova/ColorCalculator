@@ -20,8 +20,10 @@ vi.mock("../../favoriteFormulas", async () => {
       onChange([]);
       return () => {};
     }),
-    renameFavoriteFormula: (...args: Parameters<typeof actual.renameFavoriteFormula>) => renameFavoriteFormulaMock(...args),
-    deleteFavoriteFormula: (...args: Parameters<typeof actual.deleteFavoriteFormula>) => deleteFavoriteFormulaMock(...args),
+    renameFavoriteFormula: (...args: Parameters<typeof actual.renameFavoriteFormula>) =>
+      renameFavoriteFormulaMock(...args),
+    deleteFavoriteFormula: (...args: Parameters<typeof actual.deleteFavoriteFormula>) =>
+      deleteFavoriteFormulaMock(...args),
   };
 });
 

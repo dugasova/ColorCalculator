@@ -30,7 +30,8 @@ describe("FormulaCalculator substitute-blend candidates", () => {
     selectTargetAndEnableBlend();
 
     openCombobox("Component 1");
-    const codes = within(screen.getByRole("listbox")).getAllByRole("option")
+    const codes = within(screen.getByRole("listbox"))
+      .getAllByRole("option")
       .map(option => option.getAttribute("data-value"));
 
     expect(codes).toContain("7.1"); // one level below
@@ -44,7 +45,8 @@ describe("FormulaCalculator substitute-blend candidates", () => {
     selectTargetAndEnableBlend();
 
     openCombobox("Component 1");
-    const codes = within(screen.getByRole("listbox")).getAllByRole("option")
+    const codes = within(screen.getByRole("listbox"))
+      .getAllByRole("option")
       .map(option => option.getAttribute("data-value"));
 
     expect(codes).not.toContain("8.1");

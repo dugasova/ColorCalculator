@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
-  developerStockId, getBrandScopedDeveloperLines, getScopedDeveloperVolumes, getShadeTubeSizeGrams,
+  developerStockId,
+  getBrandScopedDeveloperLines,
+  getScopedDeveloperVolumes,
+  getShadeTubeSizeGrams,
 } from "./products";
 
 describe("getShadeTubeSizeGrams", () => {

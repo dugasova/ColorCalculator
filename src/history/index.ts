@@ -6,16 +6,34 @@
 // Re-exported from one module so callers needing e.g. a type from ./types alongside a
 // function from ./repeatFormula (App.tsx, HistoryView.tsx) keep a single import.
 export type {
-  ColorHistoryStep, ColorBlend, BleachHistoryStep, HistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry,
+  ColorHistoryStep,
+  ColorBlend,
+  BleachHistoryStep,
+  HistoryStep,
+  FormulaHistoryEntry,
+  LegacyFormulaHistoryEntry,
 } from "./types";
 export { historyEntryShapeSchema, normalizeHistoryEntry } from "./schema";
 export {
-  sanitizeForFirestore, saveFormulaToHistory, subscribeToFormulaHistory, setActualColorGrams, deleteHistoryEntry,
+  sanitizeForFirestore,
+  saveFormulaToHistory,
+  subscribeToFormulaHistory,
+  setActualColorGrams,
+  deleteHistoryEntry,
   updateHistoryEntryDetails,
-  type SaveFormulaParams, type SetActualColorGramsParams, type ActualColorGramsResult,
-  type PhotoEdit, type UpdateHistoryEntryDetailsParams, type HistoryEntryDetailsResult,
+  type SaveFormulaParams,
+  type SetActualColorGramsParams,
+  type ActualColorGramsResult,
+  type PhotoEdit,
+  type UpdateHistoryEntryDetailsParams,
+  type HistoryEntryDetailsResult,
 } from "./firestore";
 export {
-  buildRepeatFormulaRequest, buildRepeatSessionRequest, type RepeatFormulaRequest,
-  type RepeatSessionRequest, type StepSeed, type ColorStepSeed, type BleachStepSeed,
+  buildRepeatFormulaRequest,
+  buildRepeatSessionRequest,
+  type RepeatFormulaRequest,
+  type RepeatSessionRequest,
+  type StepSeed,
+  type ColorStepSeed,
+  type BleachStepSeed,
 } from "./repeatFormula";

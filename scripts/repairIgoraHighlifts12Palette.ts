@@ -1,8 +1,8 @@
 // One-off repair: deletes every migrated `paletteOverrides` `add` document for Igora
 // Royal Highlifts (12-series) (brandId 'igora', shade.line 'royal',
 // shade.level 12), so the corrected shade array in src/engine/brands/igora.ts — which now
-// sets `acceptsPartialLift`, `minStartLevel`, and `fixedProcessingMinutes` on every 
-// Highlifts 12-series shade — takes effect for every salon that already ran 
+// sets `acceptsPartialLift`, `minStartLevel`, and `fixedProcessingMinutes` on every
+// Highlifts 12-series shade — takes effect for every salon that already ran
 // `npm run migrate:palette` before that correction landed.
 //
 // Why this is needed: `getFullBrandShades` drops a base shade in favor of an `add`
@@ -18,7 +18,7 @@
 // purpose).
 //
 // Scoped to level 12 specifically (not the whole 'royal' line) - Highlifts 12-series has no
-// distinct `line` of its own, it shares 'royal' with the regular Igora Royal shades, and 
+// distinct `line` of its own, it shares 'royal' with the regular Igora Royal shades, and
 // this repair must not touch those.
 //
 // Safe to run even if Igora Highlifts 12-series was never migrated (finds nothing, deletes nothing).
@@ -38,7 +38,9 @@ async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;
   const password = process.env.MIGRATION_ADMIN_PASSWORD;
   if (!email || !password) {
-    console.error("Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.");
+    console.error(
+      "Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -48,20 +50,20 @@ async function main() {
   const snapshot = await getDocs(collection(db, "paletteOverrides"));
   const staleHighliftsAdds = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
-    return data.kind === "add" && data.brandId === "igora"
-      && data.shade.line === "royal" && data.shade.level === 12;
+    return data.kind === "add" && data.brandId === "igora" && data.shade.line === "royal" && data.shade.level === 12;
   });
 
   for (const d of staleHighliftsAdds) {
     await deleteDoc(doc(db, "paletteOverrides", d.id));
   }
 
-  console.log(`Deleted ${staleHighliftsAdds.length} stale Igora Royal Highlifts 12-series override(s). The corrected built-in chart now applies.`);
+  console.log(
+    `Deleted ${staleHighliftsAdds.length} stale Igora Royal Highlifts 12-series override(s). The corrected built-in chart now applies.`,
+  );
   await signOut(auth);
 }
 
-main()
-  .catch(err => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+main().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});

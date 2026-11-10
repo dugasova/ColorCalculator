@@ -16,9 +16,15 @@ export function GuideCheatSheetPage() {
   if (guideId === undefined || !hasTechniqueGuide(guideId)) {
     return (
       <div className="calculator">
-        <p className="warning" role="alert">{t("techniqueGuides.notFound", { guideId: guideId ?? "" })}</p>
-        <p className="brand-notes__hint">{t("techniqueGuides.notFoundHint", { ids: TECHNIQUE_GUIDE_IDS.join(", ") })}</p>
-        <Link className="button button--secondary" to="/">{t("techniqueGuides.backToApp")}</Link>
+        <p className="warning" role="alert">
+          {t("techniqueGuides.notFound", { guideId: guideId ?? "" })}
+        </p>
+        <p className="brand-notes__hint">
+          {t("techniqueGuides.notFoundHint", { ids: TECHNIQUE_GUIDE_IDS.join(", ") })}
+        </p>
+        <Link className="button button--secondary" to="/">
+          {t("techniqueGuides.backToApp")}
+        </Link>
       </div>
     );
   }
@@ -36,7 +42,9 @@ export function GuideCheatSheetPage() {
           <li key={point}>{point}</li>
         ))}
       </ul>
-      <Link className="button button--secondary" to="/">{t("techniqueGuides.backToApp")}</Link>
+      <Link className="button button--secondary" to="/">
+        {t("techniqueGuides.backToApp")}
+      </Link>
     </div>
   );
 }

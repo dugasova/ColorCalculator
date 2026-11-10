@@ -1,6 +1,14 @@
 import {
-  collection, deleteDoc, doc, getDoc, increment, onSnapshot, setDoc, updateDoc,
-  type FirestoreError, type Unsubscribe,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  increment,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+  type FirestoreError,
+  type Unsubscribe,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { parseSnapshotDocs } from "../firestoreSubscribe";
@@ -20,26 +28,57 @@ const DYE_STOCK_COLLECTION = "dyeStock";
 // `onSnapshot` call) is reported via `onError` instead of throwing -- PaletteContext.tsx
 // wires it to `console.error` so stale stock data is at least traceable instead of
 // silently never updating again.
-export function subscribeToStock(onChange: (records: StockRecord[]) => void, onError?: (err: FirestoreError) => void): Unsubscribe {
-  return onSnapshot(collection(db, DYE_STOCK_COLLECTION), snapshot => {
-    onChange(parseSnapshotDocs(snapshot, stockRecordSchema, "dye stock"));
-  }, onError);
+export function subscribeToStock(
+  onChange: (records: StockRecord[]) => void,
+  onError?: (err: FirestoreError) => void,
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, DYE_STOCK_COLLECTION),
+    snapshot => {
+      onChange(parseSnapshotDocs(snapshot, stockRecordSchema, "dye stock"));
+    },
+    onError,
+  );
 }
 
-export async function setShadeStockGrams(brandId: BrandId, line: string | null, code: string, remainingGrams: number): Promise<void> {
-  await settleWrite(setDoc(doc(db, DYE_STOCK_COLLECTION, shadeStockId(brandId, line, code)), {
-    kind: "shade", brandId, line, code, remainingGrams,
-  }), "set shade stock");
+export async function setShadeStockGrams(
+  brandId: BrandId,
+  line: string | null,
+  code: string,
+  remainingGrams: number,
+): Promise<void> {
+  await settleWrite(
+    setDoc(doc(db, DYE_STOCK_COLLECTION, shadeStockId(brandId, line, code)), {
+      kind: "shade",
+      brandId,
+      line,
+      code,
+      remainingGrams,
+    }),
+    "set shade stock",
+  );
 }
 
 // `line` determines which stock bucket this write lands in -- see developerStockId's own
 // comment: only a scoped line (products.ts's SEPARATE_DEVELOPER_LINES) actually changes
 // it, every other line resolves to the same brand-wide bucket as passing `null`.
-export async function setDeveloperStockGrams(brandId: BrandId, line: string | null, volume: DeveloperVolume, remainingGrams: number): Promise<void> {
+export async function setDeveloperStockGrams(
+  brandId: BrandId,
+  line: string | null,
+  volume: DeveloperVolume,
+  remainingGrams: number,
+): Promise<void> {
   const stockLine = developerStockLine(brandId, line);
-  await settleWrite(setDoc(doc(db, DYE_STOCK_COLLECTION, developerStockId(brandId, line, volume)), {
-    kind: "developer", brandId, line: stockLine, volume, remainingGrams,
-  }), "set developer stock");
+  await settleWrite(
+    setDoc(doc(db, DYE_STOCK_COLLECTION, developerStockId(brandId, line, volume)), {
+      kind: "developer",
+      brandId,
+      line: stockLine,
+      volume,
+      remainingGrams,
+    }),
+    "set developer stock",
+  );
 }
 
 // Stops tracking a product (an admin clearing the field back to blank) -- distinct from
@@ -91,10 +130,12 @@ export async function reconcileStockConsumption(before: HistoryStep[], after: Hi
   const beforeGrams = new Map(computeStockConsumption(before).map(c => [c.id, c.grams]));
   const afterGrams = new Map(computeStockConsumption(after).map(c => [c.id, c.grams]));
   const ids = new Set([...beforeGrams.keys(), ...afterGrams.keys()]);
-  await Promise.all(Array.from(ids, id => {
-    const delta = (beforeGrams.get(id) ?? 0) - (afterGrams.get(id) ?? 0);
-    return delta === 0 ? Promise.resolve() : applyStockDelta(id, delta);
-  }));
+  await Promise.all(
+    Array.from(ids, id => {
+      const delta = (beforeGrams.get(id) ?? 0) - (afterGrams.get(id) ?? 0);
+      return delta === 0 ? Promise.resolve() : applyStockDelta(id, delta);
+    }),
+  );
 }
 
 // An admin's quick "+1 tube" action (BrandStockList) -- restocks an already-tracked

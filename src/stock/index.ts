@@ -7,15 +7,30 @@
 // Pure logic never imports ./firestore, so its tests can import those files directly
 // without pulling in Firebase; app code keeps a single import from this module.
 export {
-  stockRecordSchema, type StockRecord, type StockStatus, type ReorderItem, type StockConsumption, type StockShortage,
+  stockRecordSchema,
+  type StockRecord,
+  type StockStatus,
+  type ReorderItem,
+  type StockConsumption,
+  type StockShortage,
 } from "./types";
 export {
-  LOW_STOCK_THRESHOLD_GRAMS, DEVELOPER_BOTTLE_SIZE_GRAMS, getShadeTubeSizeGrams, getBrandScopedDeveloperLines,
-  getScopedDeveloperVolumes, shadeStockId, developerStockId,
+  LOW_STOCK_THRESHOLD_GRAMS,
+  DEVELOPER_BOTTLE_SIZE_GRAMS,
+  getShadeTubeSizeGrams,
+  getBrandScopedDeveloperLines,
+  getScopedDeveloperVolumes,
+  shadeStockId,
+  developerStockId,
 } from "./products";
 export { getStockStatus, stockById, suggestReorderPacks, buildReorderList } from "./reorder";
 export { computeStockConsumption, findStockShortages } from "./consumption";
 export {
-  subscribeToStock, setShadeStockGrams, setDeveloperStockGrams, stopTrackingStock, consumeStock,
-  reconcileStockConsumption, restockOneTube,
+  subscribeToStock,
+  setShadeStockGrams,
+  setDeveloperStockGrams,
+  stopTrackingStock,
+  consumeStock,
+  reconcileStockConsumption,
+  restockOneTube,
 } from "./firestore";

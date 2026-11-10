@@ -17,15 +17,15 @@ describe("BleachCalculator", () => {
   it("renders the default scenario (level 6 -> 8) with computed developer, ratio, mix, and pricing", () => {
     const html = renderToStaticMarkup(<BleachCalculator />);
 
-    expect(html).toContain("calculator__title-accent\">Calculator<");
-    expect(html).toContain("id=\"currentLevel\"");
-    expect(html).toContain("id=\"targetLevel\"");
-    expect(html).toContain("id=\"totalGrams\"");
+    expect(html).toContain('calculator__title-accent">Calculator<');
+    expect(html).toContain('id="currentLevel"');
+    expect(html).toContain('id="targetLevel"');
+    expect(html).toContain('id="totalGrams"');
     expect(html).toContain("6 vol"); // 2-level lift -> 6vol now covers up to 3 levels
     expect(html).toContain("1 : 2"); // mixing ratio is now uniformly 1:2
     expect(html).toContain("g bleach powder");
-    expect(html).toContain("id=\"bleachPricePerGram\"");
-    expect(html).toContain("id=\"bleachMarkupMultiplier\"");
+    expect(html).toContain('id="bleachPricePerGram"');
+    expect(html).toContain('id="bleachMarkupMultiplier"');
     expect(html).toContain("2.00"); // productCost: 20g powder (developer excluded) @ default 0.10/g
     expect(html).toContain("8.00"); // recommendedServicePrice: 2.00 * default 4x markup
     expect(html).not.toContain("choose a target level above your current level");

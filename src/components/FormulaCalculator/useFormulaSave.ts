@@ -56,10 +56,31 @@ export interface FormulaSave {
 // useClientLink, usePhotoUpload, useHistoryData).
 export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
   const {
-    brandId, brandName, line, targetShade, startLevel, grayPercent, applicationZone,
-    porosity, thickness, chemicalHistory, result, additionalShade, additionalShadeGrams,
-    additionalShade2, additionalShade2Grams, blend, naturalBase, prePigmentationResult, neutralizationApplied,
-    appliedBy, processingMinutes, pricePerGram, markupMultiplier, productCost, servicePrice,
+    brandId,
+    brandName,
+    line,
+    targetShade,
+    startLevel,
+    grayPercent,
+    applicationZone,
+    porosity,
+    thickness,
+    chemicalHistory,
+    result,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    blend,
+    naturalBase,
+    prePigmentationResult,
+    neutralizationApplied,
+    appliedBy,
+    processingMinutes,
+    pricePerGram,
+    markupMultiplier,
+    productCost,
+    servicePrice,
   } = params;
 
   const step: ColorHistoryStep = {

@@ -41,7 +41,9 @@ async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;
   const password = process.env.MIGRATION_ADMIN_PASSWORD;
   if (!email || !password) {
-    console.error("Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.");
+    console.error(
+      "Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -51,20 +53,25 @@ async function main() {
   const snapshot = await getDocs(collection(db, "paletteOverrides"));
   const staleSpecialBlondeAdds = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
-    return data.kind === "add" && data.brandId === "wella"
-      && data.shade.line === "koleston-perfect" && data.shade.level === 12;
+    return (
+      data.kind === "add" &&
+      data.brandId === "wella" &&
+      data.shade.line === "koleston-perfect" &&
+      data.shade.level === 12
+    );
   });
 
   for (const d of staleSpecialBlondeAdds) {
     await deleteDoc(doc(db, "paletteOverrides", d.id));
   }
 
-  console.log(`Deleted ${staleSpecialBlondeAdds.length} stale Special Blonde override(s). The corrected built-in chart now applies.`);
+  console.log(
+    `Deleted ${staleSpecialBlondeAdds.length} stale Special Blonde override(s). The corrected built-in chart now applies.`,
+  );
   await signOut(auth);
 }
 
-main()
-  .catch(err => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+main().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});

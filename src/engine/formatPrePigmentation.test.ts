@@ -10,13 +10,13 @@ describe("formatPrePigmentationText", () => {
 
     expect(text).toBe(
       "Pre-pigmentation Calculator\n" +
-      "Starting level: 6 → Target: 6\n" +
-      "Pre-pigmentation: Not needed — apply the target formula directly.\n" +
-      "Step 2 — Target color\n" +
-      "Developer: 3% (10 vol)\n" +
-      "Ratio: 1:1\n" +
-      "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 6, not the filled level.\n" +
-      "Basic guidance — does not replace a complete color diagnosis and strand test."
+        "Starting level: 6 → Target: 6\n" +
+        "Pre-pigmentation: Not needed — apply the target formula directly.\n" +
+        "Step 2 — Target color\n" +
+        "Developer: 3% (10 vol)\n" +
+        "Ratio: 1:1\n" +
+        "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 6, not the filled level.\n" +
+        "Basic guidance — does not replace a complete color diagnosis and strand test.",
     );
   });
 
@@ -27,20 +27,20 @@ describe("formatPrePigmentationText", () => {
 
     expect(text).toBe(
       "Pre-pigmentation Calculator\n" +
-      "Starting level: 9 → Target: 5\n" +
-      "Pre-pigmentation: Required, same visit — fill first, then apply the target formula.\n" +
-      "Step 1 — Filler\n" +
-      "Missing underlying pigment: orange\n" +
-      "Recommended filler tone: Copper\n" +
-      "Generic 5.4 (Copper)\n" +
-      "Ratio: 1:1\n" +
-      "Mix: 15.0 g filler : 15.0 g water\n" +
-      "Processing time: 15 min\n" +
-      "Step 2 — Target color\n" +
-      "Developer: 3% (10 vol)\n" +
-      "Ratio: 1:1\n" +
-      "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 9, not the filled level.\n" +
-      "Basic guidance — does not replace a complete color diagnosis and strand test."
+        "Starting level: 9 → Target: 5\n" +
+        "Pre-pigmentation: Required, same visit — fill first, then apply the target formula.\n" +
+        "Step 1 — Filler\n" +
+        "Missing underlying pigment: orange\n" +
+        "Recommended filler tone: Copper\n" +
+        "Generic 5.4 (Copper)\n" +
+        "Ratio: 1:1\n" +
+        "Mix: 15.0 g filler : 15.0 g water\n" +
+        "Processing time: 15 min\n" +
+        "Step 2 — Target color\n" +
+        "Developer: 3% (10 vol)\n" +
+        "Ratio: 1:1\n" +
+        "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 9, not the filled level.\n" +
+        "Basic guidance — does not replace a complete color diagnosis and strand test.",
     );
   });
 
@@ -51,28 +51,33 @@ describe("formatPrePigmentationText", () => {
 
     expect(text).toBe(
       "Pre-pigmentation Calculator\n" +
-      "Starting level: 10 → Target: 2\n" +
-      "Pre-pigmentation: Required, over two visits — fill and process, then apply the target formula at a separate appointment.\n" +
-      "Step 1 — Filler\n" +
-      "Missing underlying pigment: red\n" +
-      "Recommended filler tone: Red\n" +
-      "No dedicated Red shade at level 2 in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.\n" +
-      "Ratio: 1:1\n" +
-      "Mix: 30.0 g filler : 30.0 g water\n" +
-      "Processing time: 15 min\n" +
-      "Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.\n" +
-      "Step 2 — Target color\n" +
-      "Developer: 3% (10 vol)\n" +
-      "Ratio: 1:1\n" +
-      "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 10, not the filled level.\n" +
-      "Basic guidance — does not replace a complete color diagnosis and strand test."
+        "Starting level: 10 → Target: 2\n" +
+        "Pre-pigmentation: Required, over two visits — fill and process, then apply the target formula at a separate appointment.\n" +
+        "Step 1 — Filler\n" +
+        "Missing underlying pigment: red\n" +
+        "Recommended filler tone: Red\n" +
+        "No dedicated Red shade at level 2 in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.\n" +
+        "Ratio: 1:1\n" +
+        "Mix: 30.0 g filler : 30.0 g water\n" +
+        "Processing time: 15 min\n" +
+        "Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.\n" +
+        "Step 2 — Target color\n" +
+        "Developer: 3% (10 vol)\n" +
+        "Ratio: 1:1\n" +
+        "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays 10, not the filled level.\n" +
+        "Basic guidance — does not replace a complete color diagnosis and strand test.",
     );
   });
 
   it("substitutes a real brand+line label for the filler example instead of the Generic default", () => {
     const result = calculatePrePigmentation(9, 5, 30);
 
-    const text = formatPrePigmentationText({ startLevel: 9, targetLevel: 5, result, brandName: "Wella Koleston Perfect" });
+    const text = formatPrePigmentationText({
+      startLevel: 9,
+      targetLevel: 5,
+      result,
+      brandName: "Wella Koleston Perfect",
+    });
 
     expect(text).toContain("Wella Koleston Perfect 5.4 (Copper)");
     expect(text).not.toContain("Generic 5.4");
@@ -86,17 +91,17 @@ describe("formatFillerStepText", () => {
     expect(formatFillerStepText(8, result)).toBeNull();
   });
 
-  it("returns just the filler details, starting straight at \"Step 1\", without the standalone calculator's own title, need line, or \"Step 2\" lines", () => {
+  it('returns just the filler details, starting straight at "Step 1", without the standalone calculator\'s own title, need line, or "Step 2" lines', () => {
     const result = calculatePrePigmentation(9, 5, 30);
 
     expect(formatFillerStepText(5, result)).toBe(
       "Step 1 — Filler\n" +
-      "Missing underlying pigment: orange\n" +
-      "Recommended filler tone: Copper\n" +
-      "Generic 5.4 (Copper)\n" +
-      "Ratio: 1:1\n" +
-      "Mix: 15.0 g filler : 15.0 g water\n" +
-      "Processing time: 15 min"
+        "Missing underlying pigment: orange\n" +
+        "Recommended filler tone: Copper\n" +
+        "Generic 5.4 (Copper)\n" +
+        "Ratio: 1:1\n" +
+        "Mix: 15.0 g filler : 15.0 g water\n" +
+        "Processing time: 15 min",
     );
   });
 
@@ -105,13 +110,13 @@ describe("formatFillerStepText", () => {
 
     expect(formatFillerStepText(2, result)).toBe(
       "Step 1 — Filler\n" +
-      "Missing underlying pigment: red\n" +
-      "Recommended filler tone: Red\n" +
-      "No dedicated Red shade at level 2 in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.\n" +
-      "Ratio: 1:1\n" +
-      "Mix: 30.0 g filler : 30.0 g water\n" +
-      "Processing time: 15 min\n" +
-      "Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result."
+        "Missing underlying pigment: red\n" +
+        "Recommended filler tone: Red\n" +
+        "No dedicated Red shade at level 2 in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.\n" +
+        "Ratio: 1:1\n" +
+        "Mix: 30.0 g filler : 30.0 g water\n" +
+        "Processing time: 15 min\n" +
+        "Let the filler process and settle 7-14 days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.",
     );
   });
 
@@ -120,12 +125,12 @@ describe("formatFillerStepText", () => {
 
     expect(formatFillerStepText(5, result, "Igora Royal")).toBe(
       "Step 1 — Filler\n" +
-      "Missing underlying pigment: orange\n" +
-      "Recommended filler tone: Copper\n" +
-      "Igora Royal 5.4 (Copper)\n" +
-      "Ratio: 1:1\n" +
-      "Mix: 15.0 g filler : 15.0 g water\n" +
-      "Processing time: 15 min"
+        "Missing underlying pigment: orange\n" +
+        "Recommended filler tone: Copper\n" +
+        "Igora Royal 5.4 (Copper)\n" +
+        "Ratio: 1:1\n" +
+        "Mix: 15.0 g filler : 15.0 g water\n" +
+        "Processing time: 15 min",
     );
   });
 });

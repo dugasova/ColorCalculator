@@ -14,7 +14,7 @@ describe("ReferenceIndexPage", () => {
     render(
       <MemoryRouter>
         <ReferenceIndexPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     for (const id of BRAND_CHEAT_SHEET_IDS) {
@@ -27,7 +27,7 @@ describe("ReferenceIndexPage", () => {
     render(
       <MemoryRouter>
         <ReferenceIndexPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     for (const id of TECHNIQUE_GUIDE_IDS) {
@@ -40,7 +40,7 @@ describe("ReferenceIndexPage", () => {
     render(
       <MemoryRouter>
         <ReferenceIndexPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const headings = screen.getAllByRole("heading", { level: 2 }).map(h => h.textContent);

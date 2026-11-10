@@ -19,7 +19,13 @@ export interface GramsInputFieldProps {
 // instead. Whichever mode is inactive keeps its own value untouched (see
 // useShadeFormulaState) so switching back and forth never loses what was typed.
 export function GramsInputField({
-  gramsInputMode, onGramsInputModeChange, totalGrams, onTotalGramsChange, colorGrams, onColorGramsChange, idSuffix = "",
+  gramsInputMode,
+  onGramsInputModeChange,
+  totalGrams,
+  onTotalGramsChange,
+  colorGrams,
+  onColorGramsChange,
+  idSuffix = "",
 }: GramsInputFieldProps) {
   const { t } = useTranslation();
   const isColorMode = gramsInputMode === "color";
@@ -41,7 +47,9 @@ export function GramsInputField({
         />
       </div>
       <div className="field">
-        <label htmlFor={`gramsAmount${idSuffix}`}>{isColorMode ? t("fields.colorGrams") : t("fields.totalGrams")}</label>
+        <label htmlFor={`gramsAmount${idSuffix}`}>
+          {isColorMode ? t("fields.colorGrams") : t("fields.totalGrams")}
+        </label>
         <input id={`gramsAmount${idSuffix}`} {...(isColorMode ? colorInputProps : totalInputProps)} />
       </div>
     </>

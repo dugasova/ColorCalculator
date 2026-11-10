@@ -27,7 +27,14 @@ export interface GrayNaturalFieldProps {
 // natural dose or the target is itself natural; a short note instead when the line has no
 // natural at the target's level to blend in.
 export function GrayNaturalField({
-  naturalRatio, targetShade, candidates, enabled, onEnabledChange, shadeCode, onShadeCodeChange, idSuffix = "",
+  naturalRatio,
+  targetShade,
+  candidates,
+  enabled,
+  onEnabledChange,
+  shadeCode,
+  onShadeCodeChange,
+  idSuffix = "",
 }: GrayNaturalFieldProps) {
   const { t } = useTranslation();
   if (naturalRatio === 0 || isPureNatural(targetShade)) return null;

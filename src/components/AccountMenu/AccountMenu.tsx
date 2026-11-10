@@ -62,7 +62,16 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
         title={t("account.menuLabel")}
         ref={triggerRef}
       >
-        <svg className="account-menu__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          className="account-menu__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="8" r="3.5" />
           <path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" />
         </svg>
@@ -73,14 +82,20 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
           <button
             type="button"
             className="button button--secondary"
-            onClick={() => { setOpen(false); onChangePassword(); }}
+            onClick={() => {
+              setOpen(false);
+              onChangePassword();
+            }}
           >
             {t("account.changePassword")}
           </button>
           <button
             type="button"
             className="button button--secondary"
-            onClick={() => { setOpen(false); onSignOut(); }}
+            onClick={() => {
+              setOpen(false);
+              onSignOut();
+            }}
           >
             {t("account.signOut")}
           </button>
@@ -99,7 +114,9 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
             {t("login.privacyPolicy")}
           </Link>
           <p className="account-menu__build">{t("app.copyright")}</p>
-          <p className="account-menu__build">{t("account.build", { version: __APP_VERSION__, date: __BUILD_TIME__ })}</p>
+          <p className="account-menu__build">
+            {t("account.build", { version: __APP_VERSION__, date: __BUILD_TIME__ })}
+          </p>
         </div>
       )}
     </div>

@@ -64,7 +64,16 @@ export function BottomNav({ view, onViewChange, isAdmin = false }: NavProps) {
           aria-controls={popupId}
           ref={triggerRef}
         >
-          <svg className="bottom-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            className="bottom-nav__icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none" />
             <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
             <circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none" />
@@ -79,7 +88,10 @@ export function BottomNav({ view, onViewChange, isAdmin = false }: NavProps) {
                 type="button"
                 aria-current={view === item ? "page" : undefined}
                 className={clsx("bottom-nav__popup-item", view === item && "bottom-nav__popup-item--active")}
-                onClick={() => { setOpen(false); onViewChange(item); }}
+                onClick={() => {
+                  setOpen(false);
+                  onViewChange(item);
+                }}
               >
                 <NavIcon view={item} className="bottom-nav__icon" />
                 <span>{t(`nav.${item}`)}</span>

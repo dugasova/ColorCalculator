@@ -14,7 +14,10 @@ import type { HistoryStep } from "./history";
 // extra lightening in the swatch since the zone's own startLevel already provides the
 // level, so "light-gold"/"light-copper" collapse to their plain family the same as their
 // non-light counterparts.
-const COMPOUND_BASE_TONE: Record<"copper-gold" | "gold-copper" | "light-gold" | "light-copper" | "red-copper", ToneFamily> = {
+const COMPOUND_BASE_TONE: Record<
+  "copper-gold" | "gold-copper" | "light-gold" | "light-copper" | "red-copper",
+  ToneFamily
+> = {
   "copper-gold": "copper",
   "gold-copper": "gold",
   "light-gold": "gold",
@@ -40,9 +43,10 @@ export interface ZonePreviewRow {
 
 function buildStartSwatch(firstStep: HistoryStep): ZonePreviewSwatch {
   const level = firstStep.startLevel;
-  const tone: ToneFamily = firstStep.startingBase === undefined || firstStep.startingBase.kind === "natural"
-    ? "natural"
-    : resolveStartingBaseTone(firstStep.startingBase.tone);
+  const tone: ToneFamily =
+    firstStep.startingBase === undefined || firstStep.startingBase.kind === "natural"
+      ? "natural"
+      : resolveStartingBaseTone(firstStep.startingBase.tone);
   return {
     hex: shadeToHexColor({ code: String(level), level, tone }),
     caption: String(level),
@@ -62,9 +66,10 @@ function buildBleachSwatch(step: Extract<HistoryStep, { kind: "bleach" }>): Zone
 
 function buildColorSwatch(step: Extract<HistoryStep, { kind: "color" }>): ZonePreviewSwatch {
   const achievedLevel = step.result.achievedLevel;
-  const shade = achievedLevel !== null && achievedLevel !== step.targetShade.level
-    ? { ...step.targetShade, level: achievedLevel }
-    : step.targetShade;
+  const shade =
+    achievedLevel !== null && achievedLevel !== step.targetShade.level
+      ? { ...step.targetShade, level: achievedLevel }
+      : step.targetShade;
   return {
     hex: shadeToHexColor(shade),
     caption: step.targetShade.code,

@@ -15,7 +15,14 @@ export interface ShadeFieldProps {
   idSuffix?: string;
 }
 
-export function ShadeField({ brandId, lineShades, targetShadeCode, targetShade, onTargetShadeCodeChange, idSuffix = "" }: ShadeFieldProps) {
+export function ShadeField({
+  brandId,
+  lineShades,
+  targetShadeCode,
+  targetShade,
+  onTargetShadeCodeChange,
+  idSuffix = "",
+}: ShadeFieldProps) {
   const { t } = useTranslation();
   return (
     <div className="field">
@@ -39,7 +46,13 @@ export function ShadeField({ brandId, lineShades, targetShadeCode, targetShade, 
           title={shadeLabel(targetShade)}
         />
       </div>
-      <PhotoEstimate mode="targetShade" brandId={brandId} lineShades={lineShades} onApplyShade={onTargetShadeCodeChange} idSuffix={idSuffix} />
+      <PhotoEstimate
+        mode="targetShade"
+        brandId={brandId}
+        lineShades={lineShades}
+        onApplyShade={onTargetShadeCodeChange}
+        idSuffix={idSuffix}
+      />
     </div>
   );
 }

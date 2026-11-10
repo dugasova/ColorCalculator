@@ -8,16 +8,26 @@ import { TONE_FAMILIES, type ToneFamily } from "./shades";
 // formula engine's corrective-guidance logic) and every `switch (tone)` over it -- these
 // five values only ever describe what a zone's *current* base looks like, never a real
 // shade a colorist mixes.
-export type StartingBaseTone = ToneFamily | "copper-gold" | "gold-copper" | "light-gold" | "light-copper" | "red-copper";
+export type StartingBaseTone =
+  ToneFamily | "copper-gold" | "gold-copper" | "light-gold" | "light-copper" | "red-copper";
 
 // Every StartingBaseTone value, in display order -- reused by StartingBaseField's tone
 // picker. The gold/copper family is grouped as red, red-copper, copper, light-copper,
 // copper-gold, gold-copper, gold, light-gold (colorist-requested order), interleaved
 // into TONE_FAMILIES' own position for that family rather than appended at the end.
-const GOLD_COPPER_FAMILY: StartingBaseTone[] = ["red", "red-copper", "copper", "light-copper", "copper-gold", "gold-copper", "gold", "light-gold"];
+const GOLD_COPPER_FAMILY: StartingBaseTone[] = [
+  "red",
+  "red-copper",
+  "copper",
+  "light-copper",
+  "copper-gold",
+  "gold-copper",
+  "gold",
+  "light-gold",
+];
 export const STARTING_BASE_TONES: StartingBaseTone[] = [
   ...TONE_FAMILIES.filter(tone => tone !== "gold" && tone !== "copper" && tone !== "red").flatMap(tone =>
-    tone === "matt" ? [tone, ...GOLD_COPPER_FAMILY] : [tone]
+    tone === "matt" ? [tone, ...GOLD_COPPER_FAMILY] : [tone],
   ),
 ];
 

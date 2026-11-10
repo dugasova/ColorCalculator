@@ -9,7 +9,10 @@ import { DEVELOPER_VOLUME_PERCENT, type DeveloperVolume } from "./levels";
 // DeveloperVolume -- e.g. Redken Shades EQ's ~2% Processing Solution routed through 6vol
 // (whose table value, 1.9%, is Wella/Igora/L'Oréal's genuine 6vol product, not Redken's).
 export function formatDeveloperVolume(volume: DeveloperVolume, percentOverride?: number): string {
-  return i18n.t("format.developerVolume", { value: volume, percent: percentOverride ?? DEVELOPER_VOLUME_PERCENT[volume] });
+  return i18n.t("format.developerVolume", {
+    value: volume,
+    percent: percentOverride ?? DEVELOPER_VOLUME_PERCENT[volume],
+  });
 }
 
 // Shared by every format*.ts report (formatFormulaText, formatBleachText,

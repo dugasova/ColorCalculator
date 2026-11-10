@@ -10,7 +10,7 @@ const deleteDocMock = vi.fn();
 // createClient's `doc(collection(db, ...))` and updateClient's `doc(db, ..., id)` each get
 // back what the real SDK would hand them.
 const docMock = vi.fn((...args: unknown[]) =>
-  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args }
+  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args },
 );
 const onSnapshotMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
@@ -51,22 +51,37 @@ describe("createClient", () => {
     });
 
     expect(id).toBe("auto-1");
-    expect(setDocMock).toHaveBeenCalledWith({ kind: "doc", id: "auto-1" }, {
-      ownedBy: "stylist@salon.test",
-      name: "Anna K.",
-      phone: "+1 555 0100",
-      allergyNotes: "PPD sensitivity",
-      lastCanvas: { porosity: "high", thickness: "fine", chemicalHistory: ["keratin"] },
-      updatedAt: "server-timestamp",
-    });
+    expect(setDocMock).toHaveBeenCalledWith(
+      { kind: "doc", id: "auto-1" },
+      {
+        ownedBy: "stylist@salon.test",
+        name: "Anna K.",
+        phone: "+1 555 0100",
+        allergyNotes: "PPD sensitivity",
+        lastCanvas: { porosity: "high", thickness: "fine", chemicalHistory: ["keratin"] },
+        updatedAt: "server-timestamp",
+      },
+    );
   });
 
   // Two real clients sharing a name must never collide into one profile -- calling
   // createClient twice for "Anna K." (e.g. two different people, same name) has to
   // produce two independent ids, since nothing here derives the id from the name.
   it("creates a distinct id on every call, even for the exact same name", async () => {
-    const first = await createClient({ ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", canvas: null });
-    const second = await createClient({ ownedBy: "stylist@salon.test", name: "Anna K.", phone: "", allergyNotes: "", canvas: null });
+    const first = await createClient({
+      ownedBy: "stylist@salon.test",
+      name: "Anna K.",
+      phone: "",
+      allergyNotes: "",
+      canvas: null,
+    });
+    const second = await createClient({
+      ownedBy: "stylist@salon.test",
+      name: "Anna K.",
+      phone: "",
+      allergyNotes: "",
+      canvas: null,
+    });
 
     expect(first).not.toBe(second);
     expect(setDocMock).toHaveBeenCalledTimes(2);
@@ -91,21 +106,25 @@ describe("updateClient", () => {
         allergyNotes: "PPD sensitivity",
         lastCanvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
         updatedAt: "server-timestamp",
-      }
+      },
     );
   });
 });
 
 describe("subscribeToClients", () => {
   it("scopes the query to the given owner and orders by name", () => {
-    subscribeToClients("stylist@salon.test", () => {}, () => {});
+    subscribeToClients(
+      "stylist@salon.test",
+      () => {},
+      () => {},
+    );
 
     expect(whereMock).toHaveBeenCalledWith("ownedBy", "==", "stylist@salon.test");
     expect(orderByMock).toHaveBeenCalledWith("name");
     expect(queryMock).toHaveBeenCalledWith(
       "collection-ref",
       { kind: "where", field: "ownedBy", op: "==", value: "stylist@salon.test" },
-      { kind: "orderBy", field: "name" }
+      { kind: "orderBy", field: "name" },
     );
   });
 
@@ -125,7 +144,9 @@ describe("subscribeToClients", () => {
     subscribeToClients("s@t", onChange, () => {});
 
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange.mock.calls[0][0]).toEqual([{ id: "good", ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null }]);
+    expect(onChange.mock.calls[0][0]).toEqual([
+      { id: "good", ownedBy: "s@t", name: "Anna", phone: "", allergyNotes: "", lastCanvas: null },
+    ]);
     expect(consoleError).toHaveBeenCalledTimes(1);
     consoleError.mockRestore();
   });

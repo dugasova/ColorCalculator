@@ -13,7 +13,7 @@ import type { BleachHistoryStep, BleachStepSeed, HistoryStep } from "../../histo
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
 
-const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.10;
+const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.1;
 
 export interface BleachStepCardProps {
   stepId: string;
@@ -45,13 +45,17 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
   const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
 
   const [startLevel, setStartLevel] = useState<Level>(seed?.startLevel ?? 6);
-  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(seed?.canvas ?? inheritedOnMount?.canvas);
+  const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(
+    seed?.canvas ?? inheritedOnMount?.canvas,
+  );
   const [targetLevel, setTargetLevel] = useState<Level>(seed?.targetLevel ?? 8);
   const [totalGrams, setTotalGrams] = useState(seed?.totalGrams ?? 60);
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(seed?.processingMinutes);
   const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_BLEACH_PRICE_PER_GRAM);
   const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
-  const [startingBase, setStartingBase] = useState<StartingBase>(seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" });
+  const [startingBase, setStartingBase] = useState<StartingBase>(
+    seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" },
+  );
 
   // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
   // -- an imperative one-shot default, not an ongoing sync, so it never overwrites values
@@ -83,7 +87,18 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
   useEffect(() => {
     onChange(step);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startLevel, targetLevel, totalGrams, manualProcessingMinutes, pricePerGram, porosity, thickness, chemicalHistory, strandZone, startingBase]);
+  }, [
+    startLevel,
+    targetLevel,
+    totalGrams,
+    manualProcessingMinutes,
+    pricePerGram,
+    porosity,
+    thickness,
+    chemicalHistory,
+    strandZone,
+    startingBase,
+  ]);
 
   return (
     <div className="step-card">
@@ -95,19 +110,32 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
       </div>
 
       <div className="calculator__form">
-        <LevelField id={`bleachCurrentLevel${idSuffix}`} label={t("bleach.currentLevel")} value={startLevel} onChange={setStartLevel} />
+        <LevelField
+          id={`bleachCurrentLevel${idSuffix}`}
+          label={t("bleach.currentLevel")}
+          value={startLevel}
+          onChange={setStartLevel}
+        />
 
         <StrandZoneField strandZone={strandZone} onStrandZoneChange={handleStrandZoneChange} idSuffix={idSuffix} />
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
 
         <CanvasFields
-          porosity={porosity} onPorosityChange={setPorosity}
-          thickness={thickness} onThicknessChange={setThickness}
-          chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+          porosity={porosity}
+          onPorosityChange={setPorosity}
+          thickness={thickness}
+          onThicknessChange={setThickness}
+          chemicalHistory={chemicalHistory}
+          onChemicalHistoryChange={setChemicalHistory}
           idSuffix={idSuffix}
         />
 
-        <LevelField id={`bleachTargetLevel${idSuffix}`} label={t("bleach.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
+        <LevelField
+          id={`bleachTargetLevel${idSuffix}`}
+          label={t("bleach.targetLevel")}
+          value={targetLevel}
+          onChange={setTargetLevel}
+        />
 
         <div className="field">
           <label htmlFor={`bleachTotalGrams${idSuffix}`}>{t("fields.totalGrams")}</label>
@@ -147,21 +175,39 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
         )}
       </div>
 
-      {result.liftNeeded === 0 && <p className="warning" role="alert">{t("bleach.noLiftWarning")}</p>}
-      {result.multiStepRequired && <p className="warning" role="alert">{t("bleach.multiStepWarning")}</p>}
+      {result.liftNeeded === 0 && (
+        <p className="warning" role="alert">
+          {t("bleach.noLiftWarning")}
+        </p>
+      )}
+      {result.multiStepRequired && (
+        <p className="warning" role="alert">
+          {t("bleach.multiStepWarning")}
+        </p>
+      )}
 
       {result.grams !== null && (
         <>
           <div className="results__row">
             <span className="results__row-label">{t("results.mix")}</span>
-            <span>{t("bleach.mixValue", { powder: result.grams.powderGrams.toFixed(1), developer: result.grams.developerGrams.toFixed(1) })}</span>
+            <span>
+              {t("bleach.mixValue", {
+                powder: result.grams.powderGrams.toFixed(1),
+                developer: result.grams.developerGrams.toFixed(1),
+              })}
+            </span>
           </div>
           <div className="results__row">
             <span className="results__row-label">{t("results.developer")}</span>
             <span>{result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume) : "—"}</span>
           </div>
           <p className="bleach__note">{t("bleach.maxScalpTimeNote", { max: result.maxScalpProcessingMinutes })}</p>
-          <p className="bleach__note">{t("bleach.checkIntervalNote", { min: result.checkIntervalMinMinutes, max: result.checkIntervalMaxMinutes })}</p>
+          <p className="bleach__note">
+            {t("bleach.checkIntervalNote", {
+              min: result.checkIntervalMinMinutes,
+              max: result.checkIntervalMaxMinutes,
+            })}
+          </p>
         </>
       )}
     </div>

@@ -4,11 +4,14 @@ import type { Shade } from "./shades";
 import type { LiftTable } from "./levels";
 
 // Mirrors wella.ts's specialBlondeLiftTable: 10/20 vol unusable, 30 vol -> +3, 40 vol -> +5.
-const specialBlondeLiftTable: LiftTable = (volume) => {
+const specialBlondeLiftTable: LiftTable = volume => {
   switch (volume) {
-    case 30: return 3;
-    case 40: return 5;
-    default: return 0;
+    case 30:
+      return 3;
+    case 40:
+      return 5;
+    default:
+      return 0;
   }
 };
 
@@ -30,7 +33,10 @@ const colorTouchShade: Shade = {
   tone: "chocolate",
   secondaryTone: "gold",
   fixedMixingRatio: { colorParts: 1, developerParts: 2 },
-  mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }, { colorParts: 1, developerParts: 1.5 }],
+  mixingRatioChoices: [
+    { colorParts: 1, developerParts: 2 },
+    { colorParts: 1, developerParts: 1.5 },
+  ],
   developerVolumeChoices: [6, 13],
 };
 
@@ -103,7 +109,11 @@ describe("calculateFullFormula", () => {
     const targetShade: Shade = { code: "7.1", level: 7, tone: "ash" };
     const result = calculateFullFormula(7, targetShade, 65, 60);
 
-    expect(result.grayCoverage).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
+    expect(result.grayCoverage).toEqual({
+      naturalRatio: 0.5,
+      fashionRatio: 0.5,
+      note: "equal parts natural base and fashion tone",
+    });
   });
 
   it("threads recommendedProcessingMinutes through: demi-permanent lines get 20 min regardless of gray, permanent gets 30/45 by gray threshold", () => {
@@ -216,7 +226,10 @@ describe("calculateFullFormula", () => {
     });
 
     it("mixes 1:1.5 and recalculates the developer amount when the colorist picks it", () => {
-      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6, { colorParts: 1, developerParts: 1.5 });
+      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6, {
+        colorParts: 1,
+        developerParts: 1.5,
+      });
 
       expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1.5 });
       expect(result.grams?.colorGrams).toBeCloseTo(24);
@@ -224,21 +237,30 @@ describe("calculateFullFormula", () => {
     });
 
     it("also applies to a can't-lift formula the colorist mixes anyway", () => {
-      const result = calculateFullFormula(6, colorTouchShade, 0, 60, undefined, 6, { colorParts: 1, developerParts: 1.5 });
+      const result = calculateFullFormula(6, colorTouchShade, 0, 60, undefined, 6, {
+        colorParts: 1,
+        developerParts: 1.5,
+      });
 
       expect(result.liftUnsupportedWarning).not.toBeNull();
       expect(result.grams?.developerGrams).toBeCloseTo(36);
     });
 
     it("ignores a ratio the shade doesn't offer, so an unlisted value can never slip into a formula", () => {
-      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6, { colorParts: 1, developerParts: 3 });
+      const result = calculateFullFormula(8, colorTouchShade, 0, 60, undefined, 6, {
+        colorParts: 1,
+        developerParts: 3,
+      });
 
       expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 2 });
     });
 
     it("ignores a manual ratio for a shade with no ratio choices at all", () => {
       const targetShade: Shade = { code: "7.1", level: 7, tone: "ash" };
-      const result = calculateFullFormula(7, targetShade, 0, 60, undefined, undefined, { colorParts: 1, developerParts: 1.5 });
+      const result = calculateFullFormula(7, targetShade, 0, 60, undefined, undefined, {
+        colorParts: 1,
+        developerParts: 1.5,
+      });
 
       expect(result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
     });

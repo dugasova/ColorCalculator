@@ -27,7 +27,11 @@ export function ZoneProgressPreview({ steps }: ZoneProgressPreviewProps) {
           {row.zoneLabel !== null && <span className="zone-preview__zone">{row.zoneLabel}</span>}
           {row.swatches.map((swatch, index) => (
             <Fragment key={index}>
-              {index > 0 && <span className="zone-preview__arrow" aria-hidden="true">→</span>}
+              {index > 0 && (
+                <span className="zone-preview__arrow" aria-hidden="true">
+                  →
+                </span>
+              )}
               <div className="zone-preview__stop">
                 <span className="zone-preview__swatch" style={{ backgroundColor: swatch.hex }} title={swatch.title} />
                 <span className="zone-preview__caption">{swatch.caption}</span>

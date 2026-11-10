@@ -27,7 +27,11 @@ const baseResult: ColorHistoryStep["result"] = {
   grams: { colorGrams: 20, developerGrams: 40 },
 };
 
-function colorStep(strandZone: ColorHistoryStep["strandZone"], startLevel: number, targetShade: Shade): ColorHistoryStep {
+function colorStep(
+  strandZone: ColorHistoryStep["strandZone"],
+  startLevel: number,
+  targetShade: Shade,
+): ColorHistoryStep {
   return {
     kind: "color",
     brandName: "Generic",

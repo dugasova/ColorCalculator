@@ -1,5 +1,16 @@
 import { z } from "zod";
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { db } from "./firebase";
 import { parseSnapshotDocs } from "./firestoreSubscribe";
@@ -80,21 +91,31 @@ const favoriteFormulaShapeSchema = z.object({
 
 // A brand-new favorite in the calling stylist's own library (see firestore.rules's
 // favoriteFormulas block: `create` pins `ownedBy` to the caller's own token email).
-export async function createFavoriteFormula(params: { ownedBy: string; name: string; recipe: FavoriteFormulaRecipe }): Promise<void> {
+export async function createFavoriteFormula(params: {
+  ownedBy: string;
+  name: string;
+  recipe: FavoriteFormulaRecipe;
+}): Promise<void> {
   const docRef = doc(collection(db, FAVORITE_FORMULAS_COLLECTION));
-  await settleWrite(setDoc(docRef, {
-    ownedBy: params.ownedBy,
-    name: params.name.trim(),
-    recipe: params.recipe,
-    updatedAt: serverTimestamp(),
-  }), `favorite formula ${docRef.id}`);
+  await settleWrite(
+    setDoc(docRef, {
+      ownedBy: params.ownedBy,
+      name: params.name.trim(),
+      recipe: params.recipe,
+      updatedAt: serverTimestamp(),
+    }),
+    `favorite formula ${docRef.id}`,
+  );
 }
 
 export async function renameFavoriteFormula(id: string, name: string): Promise<void> {
-  await settleWrite(updateDoc(doc(db, FAVORITE_FORMULAS_COLLECTION, id), {
-    name: name.trim(),
-    updatedAt: serverTimestamp(),
-  }), `favorite formula ${id}`);
+  await settleWrite(
+    updateDoc(doc(db, FAVORITE_FORMULAS_COLLECTION, id), {
+      name: name.trim(),
+      updatedAt: serverTimestamp(),
+    }),
+    `favorite formula ${id}`,
+  );
 }
 
 // Wrapped in settleWrite, unlike clients.ts's bare deleteClient, so an offline delete
@@ -113,12 +134,17 @@ export function subscribeToFavoriteFormulas(
   onError: (error: FirestoreError) => void,
 ): Unsubscribe {
   const q = query(collection(db, FAVORITE_FORMULAS_COLLECTION), where("ownedBy", "==", ownedBy), orderBy("name"));
-  return onSnapshot(q, snapshot => {
-    onChange(parseSnapshotDocs(snapshot, favoriteFormulaShapeSchema, "favorite formula", true));
-  }, onError);
+  return onSnapshot(
+    q,
+    snapshot => {
+      onChange(parseSnapshotDocs(snapshot, favoriteFormulaShapeSchema, "favorite formula", true));
+    },
+    onError,
+  );
 }
 
-export type FavoriteAvailability = { kind: "available" } | { kind: "brand-missing" } | { kind: "shades-missing"; codes: string[] };
+export type FavoriteAvailability =
+  { kind: "available" } | { kind: "brand-missing" } | { kind: "shades-missing"; codes: string[] };
 
 // Guards against useShadeFormulaState.ts's render-time target-shade fallback
 // (targetShade ?? lineShades[0] ?? ...): without this check, a favorite whose shade was
@@ -127,11 +153,20 @@ export type FavoriteAvailability = { kind: "available" } | { kind: "brand-missin
 // usePalette() (buildBrandCatalog, engine/paletteOverrides.ts), which already has
 // discontinued shades removed -- so a discontinued shade's code is genuinely absent from
 // `brand.shades`, exactly like a shade that never existed.
-export function checkFavoriteAvailability(recipe: FavoriteFormulaRecipe, brands: Record<BrandId, Brand>): FavoriteAvailability {
+export function checkFavoriteAvailability(
+  recipe: FavoriteFormulaRecipe,
+  brands: Record<BrandId, Brand>,
+): FavoriteAvailability {
   const brand = brands[recipe.brandId];
   if (brand === undefined) return { kind: "brand-missing" };
   const pool = brand.shades.filter(s => (s.line ?? null) === recipe.line);
-  const codesToCheck = [recipe.targetShadeCode, recipe.additionalShadeCode, recipe.additionalShade2Code, recipe.blendShadeACode, recipe.blendShadeBCode];
+  const codesToCheck = [
+    recipe.targetShadeCode,
+    recipe.additionalShadeCode,
+    recipe.additionalShade2Code,
+    recipe.blendShadeACode,
+    recipe.blendShadeBCode,
+  ];
   const missing: string[] = [];
   for (const code of codesToCheck) {
     if (code === null) continue;

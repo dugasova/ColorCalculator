@@ -27,7 +27,14 @@ const shade: Shade = { code: "7.1", level: 7, tone: "ash" };
 describe("BrandStockList restock button", () => {
   it("restocks a developer row by a full 1000 g bottle, not a 60 g tube", async () => {
     const stock: StockRecord[] = [
-      { id: developerStockId("wella", null, 20), kind: "developer", brandId: "wella", line: null, volume: 20, remainingGrams: 500 },
+      {
+        id: developerStockId("wella", null, 20),
+        kind: "developer",
+        brandId: "wella",
+        line: null,
+        volume: 20,
+        remainingGrams: 500,
+      },
     ];
     vi.mocked(useStock).mockReturnValue(stock);
     render(<BrandStockList brandId="wella" shades={[shade]} disabledKeys={new Set()} />);
@@ -40,7 +47,14 @@ describe("BrandStockList restock button", () => {
 
   it("still restocks a shade row by its tube size, unaffected by the bottle fix", async () => {
     const stock: StockRecord[] = [
-      { id: shadeStockId("wella", null, "7.1"), kind: "shade", brandId: "wella", line: null, code: "7.1", remainingGrams: 10 },
+      {
+        id: shadeStockId("wella", null, "7.1"),
+        kind: "shade",
+        brandId: "wella",
+        line: null,
+        code: "7.1",
+        remainingGrams: 10,
+      },
     ];
     vi.mocked(useStock).mockReturnValue(stock);
 
@@ -54,8 +68,22 @@ describe("BrandStockList restock button", () => {
 
   it("shows a scoped line's own developer row (INOA), separate from the rest of the brand's shared bucket", async () => {
     const stock: StockRecord[] = [
-      { id: developerStockId("loreal", null, 20), kind: "developer", brandId: "loreal", line: null, volume: 20, remainingGrams: 500 },
-      { id: developerStockId("loreal", "inoa", 20), kind: "developer", brandId: "loreal", line: "inoa", volume: 20, remainingGrams: 10 },
+      {
+        id: developerStockId("loreal", null, 20),
+        kind: "developer",
+        brandId: "loreal",
+        line: null,
+        volume: 20,
+        remainingGrams: 500,
+      },
+      {
+        id: developerStockId("loreal", "inoa", 20),
+        kind: "developer",
+        brandId: "loreal",
+        line: "inoa",
+        volume: 20,
+        remainingGrams: 10,
+      },
     ];
     vi.mocked(useStock).mockReturnValue(stock);
     render(<BrandStockList brandId="loreal" shades={[shade]} disabledKeys={new Set()} />);

@@ -64,8 +64,8 @@ export function PhotoCropSelector({ previewUrl, crops, activeRegion, onCropChang
     setDraft(null);
   };
 
-  const cardRect = activeRegion === "card" ? draft ?? crops.card : crops.card;
-  const hairRect = activeRegion === "hair" ? draft ?? crops.hair : crops.hair;
+  const cardRect = activeRegion === "card" ? (draft ?? crops.card) : crops.card;
+  const hairRect = activeRegion === "hair" ? (draft ?? crops.hair) : crops.hair;
 
   return (
     <div

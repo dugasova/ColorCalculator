@@ -43,7 +43,9 @@ async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;
   const password = process.env.MIGRATION_ADMIN_PASSWORD;
   if (!email || !password) {
-    console.error("Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.");
+    console.error(
+      "Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -53,8 +55,11 @@ async function main() {
   const snapshot = await getDocs(collection(db, "paletteOverrides"));
   const staleDiaAdds = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
-    return data.kind === "add" && data.brandId === "loreal"
-      && (data.shade.line === "dia-light" || data.shade.line === "dia-richesse");
+    return (
+      data.kind === "add" &&
+      data.brandId === "loreal" &&
+      (data.shade.line === "dia-light" || data.shade.line === "dia-richesse")
+    );
   });
   const orphanedDiaRichesseDisables = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
@@ -70,8 +75,7 @@ async function main() {
   await signOut(auth);
 }
 
-main()
-  .catch(err => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+main().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});

@@ -3,7 +3,12 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, waitFor, within, fireEvent } from "@testing-library/react";
 import "../../i18n";
 import { HistoryView } from "./HistoryView";
-import { subscribeToFormulaHistory, setActualColorGrams, deleteHistoryEntry, updateHistoryEntryDetails } from "../../history";
+import {
+  subscribeToFormulaHistory,
+  setActualColorGrams,
+  deleteHistoryEntry,
+  updateHistoryEntryDetails,
+} from "../../history";
 import { subscribeToClients, deleteClient } from "../../clients";
 import type { FormulaHistoryEntry } from "../../history";
 import type { ClientProfile } from "../../clients";
@@ -64,7 +69,9 @@ function makeEntry(overrides: Partial<FormulaHistoryEntry> & { id: string; clien
 }
 
 function renderHistoryView(overrides: Partial<{ isAdmin: boolean }> = {}) {
-  return render(<HistoryView onRepeat={vi.fn()} isAdmin={overrides.isAdmin ?? false} currentUserEmail="stylist@salon.test" />);
+  return render(
+    <HistoryView onRepeat={vi.fn()} isAdmin={overrides.isAdmin ?? false} currentUserEmail="stylist@salon.test" />,
+  );
 }
 
 function mockHistory(entries: FormulaHistoryEntry[]) {
@@ -101,10 +108,7 @@ describe("HistoryView client grouping", () => {
   });
 
   it("treats names differing only by case/whitespace as the same client", async () => {
-    mockHistory([
-      makeEntry({ id: "1", clientName: "anna k." }),
-      makeEntry({ id: "2", clientName: "  Anna K.  " }),
-    ]);
+    mockHistory([makeEntry({ id: "1", clientName: "anna k." }), makeEntry({ id: "2", clientName: "  Anna K.  " })]);
     mockClients([]);
 
     renderHistoryView();
@@ -134,10 +138,7 @@ describe("HistoryView client grouping", () => {
   });
 
   it("keeps every client card collapsed until clicked, opening only that client's visits in a modal", async () => {
-    mockHistory([
-      makeEntry({ id: "1", clientName: "Anna K." }),
-      makeEntry({ id: "2", clientName: "Boris P." }),
-    ]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K." }), makeEntry({ id: "2", clientName: "Boris P." })]);
     mockClients([]);
 
     renderHistoryView();
@@ -208,8 +209,22 @@ describe("HistoryView client grouping", () => {
       makeEntry({ id: "2", clientName: "Anna K.", clientId: "anna-2" }),
     ]);
     mockClients([
-      { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+1 555 0100", allergyNotes: "", lastCanvas: null },
-      { id: "anna-2", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+1 555 0200", allergyNotes: "", lastCanvas: null },
+      {
+        id: "anna-1",
+        ownedBy: "stylist@salon.test",
+        name: "Anna K.",
+        phone: "+1 555 0100",
+        allergyNotes: "",
+        lastCanvas: null,
+      },
+      {
+        id: "anna-2",
+        ownedBy: "stylist@salon.test",
+        name: "Anna K.",
+        phone: "+1 555 0200",
+        allergyNotes: "",
+        lastCanvas: null,
+      },
     ]);
 
     renderHistoryView();
@@ -232,11 +247,25 @@ describe("HistoryView repeat", () => {
       clientName: "Anna K.",
       steps: [
         {
-          kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
-            startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-            mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-            recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
-          }, processingMinutes: 35, pricePerGram: 0.1,
+          kind: "bleach",
+          startLevel: 6,
+          targetLevel: 9,
+          strandZone: "mid-lengths",
+          result: {
+            startLevel: 6,
+            targetLevel: 9,
+            liftNeeded: 3,
+            developerVolume: 30,
+            multiStepRequired: false,
+            mixingRatio: { powderParts: 1, developerParts: 2 },
+            grams: { powderGrams: 20, developerGrams: 40 },
+            recommendedProcessingMinutes: 35,
+            maxScalpProcessingMinutes: 50,
+            checkIntervalMinMinutes: 5,
+            checkIntervalMaxMinutes: 10,
+          },
+          processingMinutes: 35,
+          pricePerGram: 0.1,
         },
         { ...colorStep, strandZone: "ends" },
       ],
@@ -255,11 +284,16 @@ describe("HistoryView repeat", () => {
 
 describe("HistoryView revisit reminders", () => {
   it("opens a WhatsApp link addressed to the client's saved phone, prefilled with their name and recommended date", async () => {
-    mockHistory([
-      makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" }),
-    ]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", clientId: "anna-1" })]);
     mockClients([
-      { id: "anna-1", ownedBy: "stylist@salon.test", name: "Anna K.", phone: "+380 50 123 4567", allergyNotes: "", lastCanvas: null },
+      {
+        id: "anna-1",
+        ownedBy: "stylist@salon.test",
+        name: "Anna K.",
+        phone: "+380 50 123 4567",
+        allergyNotes: "",
+        lastCanvas: null,
+      },
     ]);
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
 
@@ -299,11 +333,25 @@ describe("HistoryView revisit reminders", () => {
         clientName: "Anna K.",
         steps: [
           {
-            kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
-              startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-              mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-              recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
-            }, processingMinutes: 35, pricePerGram: 0.1,
+            kind: "bleach",
+            startLevel: 6,
+            targetLevel: 9,
+            strandZone: "mid-lengths",
+            result: {
+              startLevel: 6,
+              targetLevel: 9,
+              liftNeeded: 3,
+              developerVolume: 30,
+              multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 },
+              grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35,
+              maxScalpProcessingMinutes: 50,
+              checkIntervalMinMinutes: 5,
+              checkIntervalMaxMinutes: 10,
+            },
+            processingMinutes: 35,
+            pricePerGram: 0.1,
           },
           { ...colorStep, strandZone: "ends" },
         ],
@@ -362,7 +410,7 @@ describe("HistoryView actual grams", () => {
         steps: entry.steps,
         stepIndex: 0,
         actualColorGrams: 45,
-      })
+      }),
     );
     await waitFor(() => expect(screen.getByText(/Product cost: 18\.00/)).toBeInTheDocument());
   });
@@ -468,8 +516,12 @@ describe("HistoryView edit visit details", () => {
 
   it("saves an edited note and shows it on the visit card, closing the edit dialog", async () => {
     vi.mocked(updateHistoryEntryDetails).mockResolvedValue({
-      note: "Allergic to ammonia", patchTestDate: "", allergyNotes: "", patchTestOverride: true,
-      beforePhotoUrl: null, afterPhotoUrl: null,
+      note: "Allergic to ammonia",
+      patchTestDate: "",
+      allergyNotes: "",
+      patchTestOverride: true,
+      beforePhotoUrl: null,
+      afterPhotoUrl: null,
     });
     const dialog = await openEditDialog([makeEntry({ id: "1", clientName: "Anna K.", note: "typo" })]);
 
@@ -478,39 +530,60 @@ describe("HistoryView edit visit details", () => {
     fireEvent.change(note, { target: { value: "Allergic to ammonia" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Save changes" }));
 
-    await waitFor(() => expect(updateHistoryEntryDetails).toHaveBeenCalledWith(expect.objectContaining({
-      entry: expect.objectContaining({ id: "1" }),
-      note: "Allergic to ammonia",
-      beforePhoto: { kind: "keep" },
-      afterPhoto: { kind: "keep" },
-    })));
+    await waitFor(() =>
+      expect(updateHistoryEntryDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entry: expect.objectContaining({ id: "1" }),
+          note: "Allergic to ammonia",
+          beforePhoto: { kind: "keep" },
+          afterPhoto: { kind: "keep" },
+        }),
+      ),
+    );
     await waitFor(() => expect(screen.queryByRole("dialog", { name: /Edit visit/ })).not.toBeInTheDocument());
     expect(screen.getByText("Allergic to ammonia")).toBeInTheDocument();
   });
 
   it("marks a stored photo for removal and sends a 'remove' edit for just that slot", async () => {
     vi.mocked(updateHistoryEntryDetails).mockResolvedValue({
-      note: "", patchTestDate: "", allergyNotes: "", patchTestOverride: true,
-      beforePhotoUrl: null, afterPhotoUrl: "https://x/after.jpg",
+      note: "",
+      patchTestDate: "",
+      allergyNotes: "",
+      patchTestOverride: true,
+      beforePhotoUrl: null,
+      afterPhotoUrl: "https://x/after.jpg",
     });
-    const dialog = await openEditDialog([makeEntry({
-      id: "1", clientName: "Anna K.", beforePhotoUrl: "https://x/before.jpg", afterPhotoUrl: "https://x/after.jpg",
-    })]);
+    const dialog = await openEditDialog([
+      makeEntry({
+        id: "1",
+        clientName: "Anna K.",
+        beforePhotoUrl: "https://x/before.jpg",
+        afterPhotoUrl: "https://x/after.jpg",
+      }),
+    ]);
 
     fireEvent.click(within(dialog).getAllByRole("button", { name: "Remove photo" })[0]);
     expect(within(dialog).getByText("Photo will be removed on save")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Save changes" }));
 
-    await waitFor(() => expect(updateHistoryEntryDetails).toHaveBeenCalledWith(expect.objectContaining({
-      beforePhoto: { kind: "remove" },
-      afterPhoto: { kind: "keep" },
-    })));
+    await waitFor(() =>
+      expect(updateHistoryEntryDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          beforePhoto: { kind: "remove" },
+          afterPhoto: { kind: "keep" },
+        }),
+      ),
+    );
   });
 
   it("lets the colorist undo a pending photo removal before saving", async () => {
-    const dialog = await openEditDialog([makeEntry({
-      id: "1", clientName: "Anna K.", beforePhotoUrl: "https://x/before.jpg",
-    })]);
+    const dialog = await openEditDialog([
+      makeEntry({
+        id: "1",
+        clientName: "Anna K.",
+        beforePhotoUrl: "https://x/before.jpg",
+      }),
+    ]);
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Remove photo" }));
     fireEvent.click(within(dialog).getByRole("button", { name: "Undo" }));
@@ -524,8 +597,12 @@ describe("HistoryView edit visit details", () => {
     URL.createObjectURL = createObjectURL;
     URL.revokeObjectURL = vi.fn();
     vi.mocked(updateHistoryEntryDetails).mockResolvedValue({
-      note: "", patchTestDate: "", allergyNotes: "", patchTestOverride: true,
-      beforePhotoUrl: null, afterPhotoUrl: "https://x/new.jpg",
+      note: "",
+      patchTestDate: "",
+      allergyNotes: "",
+      patchTestOverride: true,
+      beforePhotoUrl: null,
+      afterPhotoUrl: "https://x/new.jpg",
     });
     const dialog = await openEditDialog([makeEntry({ id: "1", clientName: "Anna K." })]);
     const file = new File(["x"], "after.jpg", { type: "image/jpeg" });
@@ -533,23 +610,34 @@ describe("HistoryView edit visit details", () => {
     fireEvent.change(within(dialog).getByLabelText("After photo"), { target: { files: [file] } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Save changes" }));
 
-    await waitFor(() => expect(updateHistoryEntryDetails).toHaveBeenCalledWith(expect.objectContaining({
-      beforePhoto: { kind: "keep" },
-      afterPhoto: { kind: "replace", file },
-    })));
+    await waitFor(() =>
+      expect(updateHistoryEntryDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          beforePhoto: { kind: "keep" },
+          afterPhoto: { kind: "replace", file },
+        }),
+      ),
+    );
   });
 
   it("blocks saving a patch test that is under 48h before the visit, judged against the visit date rather than today", async () => {
     // Visit on 2024-03-01 (see makeEntry); a test one day earlier is too recent for it,
     // however old it is relative to today.
-    const dialog = await openEditDialog([makeEntry({
-      id: "1", clientName: "Anna K.", patchTestOverride: false, patchTestDate: "2024-02-29T12:00",
-    })]);
+    const dialog = await openEditDialog([
+      makeEntry({
+        id: "1",
+        clientName: "Anna K.",
+        patchTestOverride: false,
+        patchTestDate: "2024-02-29T12:00",
+      }),
+    ]);
 
     expect(within(dialog).getByRole("alert")).toHaveTextContent(/at least 48h before this visit/);
     expect(within(dialog).getByRole("button", { name: "Save changes" })).toBeDisabled();
 
-    fireEvent.change(within(dialog).getByLabelText("Patch test date & time"), { target: { value: "2024-02-27T10:00" } });
+    fireEvent.change(within(dialog).getByLabelText("Patch test date & time"), {
+      target: { value: "2024-02-27T10:00" },
+    });
     expect(within(dialog).getByRole("button", { name: "Save changes" })).toBeEnabled();
   });
 

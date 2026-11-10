@@ -48,7 +48,10 @@ describe("pickBleachMixingRatio", () => {
 
 describe("calculateBleachGrams", () => {
   it("splits total grams by the given powder:developer ratio", () => {
-    expect(calculateBleachGrams(90, { powderParts: 1, developerParts: 2 })).toEqual({ powderGrams: 30, developerGrams: 60 });
+    expect(calculateBleachGrams(90, { powderParts: 1, developerParts: 2 })).toEqual({
+      powderGrams: 30,
+      developerGrams: 60,
+    });
   });
 
   it("sums back to the total amount", () => {

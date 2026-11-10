@@ -10,7 +10,11 @@ export function makeColorStep(overrides: Partial<ColorHistoryStep> = {}): ColorH
     line: "Koleston Perfect",
     targetShade: { code: "7/1", level: 7, tone: "ash", line: "Koleston Perfect" },
     startLevel: 6,
-    result: { ...COLOR_FULL_FORMULA, mixingRatio: { colorParts: 1, developerParts: 2 }, grams: { colorGrams: 30, developerGrams: 60 } },
+    result: {
+      ...COLOR_FULL_FORMULA,
+      mixingRatio: { colorParts: 1, developerParts: 2 },
+      grams: { colorGrams: 30, developerGrams: 60 },
+    },
     pricePerGram: 0.2,
     ...overrides,
   });

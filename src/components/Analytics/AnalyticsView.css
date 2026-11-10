@@ -13,7 +13,9 @@
   border-radius: 1rem;
   background: var(--brand-field);
   border: 1px solid var(--brand-border);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .analytics__kpi:hover {
@@ -64,7 +66,9 @@
   background: var(--brand-field);
   border: 1px solid var(--brand-border);
   font-size: 0.9rem;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .analytics__shade-row:hover {

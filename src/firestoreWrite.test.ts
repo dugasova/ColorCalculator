@@ -29,7 +29,9 @@ describe("settleWrite", () => {
   it("logs, rather than throws, when a write rejects only after it was already treated as queued", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     let reject!: (err: unknown) => void;
-    const write = new Promise((_resolve, r) => { reject = r; });
+    const write = new Promise((_resolve, r) => {
+      reject = r;
+    });
 
     const promise = settleWrite(write, "late write");
     await vi.advanceTimersByTimeAsync(SERVER_ACK_TIMEOUT_MS);

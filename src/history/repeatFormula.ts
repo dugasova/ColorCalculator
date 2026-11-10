@@ -94,22 +94,24 @@ function reconstructColorMix(step: ColorHistoryStep): {
   let totalGrams = 60;
   let colorGrams = APPLICATION_ZONE_DEFAULT_COLOR_GRAMS[applicationZone];
   if (step.result.grams !== null) {
-    const primaryColorGrams = blend !== null
-      ? step.result.grams.colorGrams
-      : step.result.grams.colorGrams - additionalShadeGrams - additionalShade2Grams;
-    const primaryDeveloperGrams = primaryColorGrams * step.result.mixingRatio.developerParts / step.result.mixingRatio.colorParts;
+    const primaryColorGrams =
+      blend !== null
+        ? step.result.grams.colorGrams
+        : step.result.grams.colorGrams - additionalShadeGrams - additionalShade2Grams;
+    const primaryDeveloperGrams =
+      (primaryColorGrams * step.result.mixingRatio.developerParts) / step.result.mixingRatio.colorParts;
     totalGrams = Math.round(primaryColorGrams + primaryDeveloperGrams);
     colorGrams = Math.round(primaryColorGrams);
   }
   return {
     totalGrams,
     colorGrams,
-    manualDeveloperVolume: step.targetShade.developerVolumeChoices !== undefined
-      ? (step.result.developerVolume ?? undefined)
-      : undefined,
-    manualMixingRatio: step.targetShade.mixingRatioChoices !== undefined
-      ? (step.targetShade.mixingRatioChoices.find(choice => sameMixingRatio(choice, step.result.mixingRatio)))
-      : undefined,
+    manualDeveloperVolume:
+      step.targetShade.developerVolumeChoices !== undefined ? (step.result.developerVolume ?? undefined) : undefined,
+    manualMixingRatio:
+      step.targetShade.mixingRatioChoices !== undefined
+        ? step.targetShade.mixingRatioChoices.find(choice => sameMixingRatio(choice, step.result.mixingRatio))
+        : undefined,
   };
 }
 
@@ -175,7 +177,10 @@ export interface RepeatSessionRequest {
 // `buildRepeatSessionRequest` for the "Repeat" action instead).
 // Returns null if the brand no longer exists (e.g. it was renamed or removed since the
 // entry was saved).
-export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Record<BrandId, Brand>): RepeatFormulaRequest | null {
+export function buildRepeatFormulaRequest(
+  entry: FormulaHistoryEntry,
+  brands: Record<BrandId, Brand>,
+): RepeatFormulaRequest | null {
   if (!isSimpleFormulaEntry(entry)) return null;
   const step = entry.steps[0];
   if (step.kind !== "color") return null; // narrowing only; isSimpleFormulaEntry already guarantees it
@@ -197,7 +202,8 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
   const applicationZone = step.applicationZone ?? "full-head";
   const { totalGrams, colorGrams, manualDeveloperVolume, manualMixingRatio } = reconstructColorMix(step);
   const blendTotal = blend !== null ? blend.shadeAGrams + blend.shadeBGrams : 0;
-  const blendPrimaryPercent = blend !== null && blendTotal > 0 ? Math.round(blend.shadeAGrams / blendTotal * 100) : 70;
+  const blendPrimaryPercent =
+    blend !== null && blendTotal > 0 ? Math.round((blend.shadeAGrams / blendTotal) * 100) : 70;
 
   return {
     clientName: entry.clientName,
@@ -240,7 +246,10 @@ export function buildRepeatFormulaRequest(entry: FormulaHistoryEntry, brands: Re
 // (nothing to repeat) or if any color step's brand no longer exists (same rule as
 // `buildRepeatFormulaRequest`: a single missing brand fails the whole entry rather than
 // silently dropping that one step).
-export function buildRepeatSessionRequest(entry: FormulaHistoryEntry, brands: Record<BrandId, Brand>): RepeatSessionRequest | null {
+export function buildRepeatSessionRequest(
+  entry: FormulaHistoryEntry,
+  brands: Record<BrandId, Brand>,
+): RepeatSessionRequest | null {
   if (entry.steps.length === 0 || isSimpleFormulaEntry(entry)) return null;
 
   const steps: StepSeed[] = [];
@@ -284,7 +293,10 @@ export function buildRepeatSessionRequest(entry: FormulaHistoryEntry, brands: Re
         kind: "bleach",
         startLevel: step.startLevel,
         targetLevel: step.targetLevel,
-        totalGrams: step.result.grams !== null ? Math.round(step.result.grams.powderGrams + step.result.grams.developerGrams) : 60,
+        totalGrams:
+          step.result.grams !== null
+            ? Math.round(step.result.grams.powderGrams + step.result.grams.developerGrams)
+            : 60,
         processingMinutes: step.processingMinutes,
         pricePerGram: step.pricePerGram,
         canvas: step.canvas,

@@ -14,7 +14,7 @@ function renderGuidePage(path: string) {
       <Routes>
         <Route path="/guides/:guideId" element={<GuideCheatSheetPage />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 

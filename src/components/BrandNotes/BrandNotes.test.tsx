@@ -14,7 +14,7 @@ function renderBrandPage(path: string) {
       <Routes>
         <Route path="/:brandId" element={<BrandCheatSheetPage />} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 

@@ -27,7 +27,10 @@ const TYPEAHEAD_RESET_MS = 600;
 // Igora 7-1), and Android numeric keyboards offer "," as the decimal key -- treat them
 // all as one separator so "7.1" finds "7/1".
 function normalizeSearch(text: string): string {
-  return text.trim().toLowerCase().replace(/[./,-]/g, "/");
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[./,-]/g, "/");
 }
 
 // A from-scratch listbox replacing the native <select>: the native popup can't be
@@ -54,7 +57,9 @@ export function Select({ id, value, options, onChange, className, searchable = f
   function filterOptions(q: string): SelectOption[] {
     const normalizedQuery = normalizeSearch(q);
     if (normalizedQuery === "") return options;
-    return options.filter(o => normalizeSearch(o.searchText ?? (typeof o.label === "string" ? o.label : "")).startsWith(normalizedQuery));
+    return options.filter(o =>
+      normalizeSearch(o.searchText ?? (typeof o.label === "string" ? o.label : "")).startsWith(normalizedQuery),
+    );
   }
 
   const visibleOptions = searchable ? filterOptions(query) : options;
@@ -107,8 +112,10 @@ export function Select({ id, value, options, onChange, className, searchable = f
     const buffer = typeahead.current;
     clearTimeout(buffer.timeout);
     buffer.text += char.toLowerCase();
-    buffer.timeout = setTimeout(() => { buffer.text = ""; }, TYPEAHEAD_RESET_MS);
-    const anchor = buffer.text.length > 1 ? 0 : (activeIndex >= 0 ? activeIndex + 1 : selectedIndex + 1);
+    buffer.timeout = setTimeout(() => {
+      buffer.text = "";
+    }, TYPEAHEAD_RESET_MS);
+    const anchor = buffer.text.length > 1 ? 0 : activeIndex >= 0 ? activeIndex + 1 : selectedIndex + 1;
     for (let offset = 0; offset < options.length; offset++) {
       const index = (anchor + offset) % options.length;
       const option = options[index];
@@ -236,7 +243,13 @@ export function Select({ id, value, options, onChange, className, searchable = f
           <span className="select__value-text">{selected?.label}</span>
         </span>
         <svg className="select__chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true">
-          <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M1 1.5L6 6.5L11 1.5"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
       {open && (
@@ -273,8 +286,14 @@ export function Select({ id, value, options, onChange, className, searchable = f
                 role="option"
                 data-value={option.value}
                 aria-selected={option.value === value}
-                ref={el => { optionRefs.current[index] = el; }}
-                className={clsx("select__option", index === activeIndex && "select__option--active", option.value === value && "select__option--selected")}
+                ref={el => {
+                  optionRefs.current[index] = el;
+                }}
+                className={clsx(
+                  "select__option",
+                  index === activeIndex && "select__option--active",
+                  option.value === value && "select__option--selected",
+                )}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => commit(index)}
               >
@@ -284,7 +303,13 @@ export function Select({ id, value, options, onChange, className, searchable = f
                 <span className="select__option-label">{option.label}</span>
                 {option.value === value && (
                   <svg className="select__check" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M3.5 8.5L6.5 11.5L12.5 4.5"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 )}
               </li>

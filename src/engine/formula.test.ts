@@ -1,23 +1,61 @@
 import { describe, it, expect } from "vitest";
-import { getGrayCoverageStrategy, getMixingRatio, calculateFormulaGrams, calculateFormulaGramsFromColorGrams, applyAdditionalShade, splitShadeBlend, splitNaturalBase, findNaturalBaseCandidates, getRecommendedProcessingMinutes } from "./formula";
+import {
+  getGrayCoverageStrategy,
+  getMixingRatio,
+  calculateFormulaGrams,
+  calculateFormulaGramsFromColorGrams,
+  applyAdditionalShade,
+  splitShadeBlend,
+  splitNaturalBase,
+  findNaturalBaseCandidates,
+  getRecommendedProcessingMinutes,
+} from "./formula";
 import type { Shade } from "./shades";
 import { BRANDS } from "./brands";
 
 describe("getGrayCoverageStrategy", () => {
   it("returns pure fashion tone below 30% gray", () => {
-    expect(getGrayCoverageStrategy(0)).toEqual({ naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" });
-    expect(getGrayCoverageStrategy(29)).toEqual({ naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" });
+    expect(getGrayCoverageStrategy(0)).toEqual({
+      naturalRatio: 0,
+      fashionRatio: 1,
+      note: "apply the fashion tone as-is",
+    });
+    expect(getGrayCoverageStrategy(29)).toEqual({
+      naturalRatio: 0,
+      fashionRatio: 1,
+      note: "apply the fashion tone as-is",
+    });
   });
 
   it("returns a one-third natural dose in the [30, 50) range -- Wella's Pure Naturals ratio for that gray tier", () => {
-    expect(getGrayCoverageStrategy(30)).toEqual({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, note: "one-third natural base blended in for extra gray coverage" });
-    expect(getGrayCoverageStrategy(49)).toEqual({ naturalRatio: 1 / 3, fashionRatio: 2 / 3, note: "one-third natural base blended in for extra gray coverage" });
+    expect(getGrayCoverageStrategy(30)).toEqual({
+      naturalRatio: 1 / 3,
+      fashionRatio: 2 / 3,
+      note: "one-third natural base blended in for extra gray coverage",
+    });
+    expect(getGrayCoverageStrategy(49)).toEqual({
+      naturalRatio: 1 / 3,
+      fashionRatio: 2 / 3,
+      note: "one-third natural base blended in for extra gray coverage",
+    });
   });
 
   it("returns a 50/50 split at 50% gray and above, capped there even at 100% -- never past Wella's documented half-natural ratio", () => {
-    expect(getGrayCoverageStrategy(50)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
-    expect(getGrayCoverageStrategy(79)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
-    expect(getGrayCoverageStrategy(100)).toEqual({ naturalRatio: 0.5, fashionRatio: 0.5, note: "equal parts natural base and fashion tone" });
+    expect(getGrayCoverageStrategy(50)).toEqual({
+      naturalRatio: 0.5,
+      fashionRatio: 0.5,
+      note: "equal parts natural base and fashion tone",
+    });
+    expect(getGrayCoverageStrategy(79)).toEqual({
+      naturalRatio: 0.5,
+      fashionRatio: 0.5,
+      note: "equal parts natural base and fashion tone",
+    });
+    expect(getGrayCoverageStrategy(100)).toEqual({
+      naturalRatio: 0.5,
+      fashionRatio: 0.5,
+      note: "equal parts natural base and fashion tone",
+    });
   });
 
   it("always sums natural and fashion ratios to 1", () => {
@@ -100,7 +138,9 @@ describe("applyAdditionalShade", () => {
   it("adds the additional grams to the color total and recalculates developer for the same ratio", () => {
     // Primary mix was 30g color : 30g developer (1:1). Adding 10g of another shade should
     // grow color to 40g and developer to 40g, keeping the 1:1 ratio.
-    expect(applyAdditionalShade({ colorGrams: 30, developerGrams: 30 }, { colorParts: 1, developerParts: 1 }, 10)).toEqual({
+    expect(
+      applyAdditionalShade({ colorGrams: 30, developerGrams: 30 }, { colorParts: 1, developerParts: 1 }, 10),
+    ).toEqual({
       colorGrams: 40,
       developerGrams: 40,
     });
@@ -108,14 +148,18 @@ describe("applyAdditionalShade", () => {
 
   it("scales developer by the mixing ratio, not 1:1, for a lifting ratio", () => {
     // 1:1.5 ratio: adding 10g color requires 15g more developer to stay proportional.
-    expect(applyAdditionalShade({ colorGrams: 24, developerGrams: 36 }, { colorParts: 1, developerParts: 1.5 }, 10)).toEqual({
+    expect(
+      applyAdditionalShade({ colorGrams: 24, developerGrams: 36 }, { colorParts: 1, developerParts: 1.5 }, 10),
+    ).toEqual({
       colorGrams: 34,
       developerGrams: 51,
     });
   });
 
   it("is a no-op when no additional grams are added", () => {
-    expect(applyAdditionalShade({ colorGrams: 30, developerGrams: 30 }, { colorParts: 1, developerParts: 1 }, 0)).toEqual({
+    expect(
+      applyAdditionalShade({ colorGrams: 30, developerGrams: 30 }, { colorParts: 1, developerParts: 1 }, 0),
+    ).toEqual({
       colorGrams: 30,
       developerGrams: 30,
     });
@@ -199,7 +243,12 @@ describe("findNaturalBaseCandidates", () => {
   });
 
   it("offers nothing when the target is itself natural, or the line has no natural at that level", () => {
-    expect(findNaturalBaseCandidates(koleston.find(s => s.code === "7/0")!, koleston)).toEqual([]);
+    expect(
+      findNaturalBaseCandidates(
+        koleston.find(s => s.code === "7/0")!,
+        koleston,
+      ),
+    ).toEqual([]);
     expect(findNaturalBaseCandidates(ash7, [ash7])).toEqual([]);
   });
 });

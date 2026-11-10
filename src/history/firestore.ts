@@ -1,4 +1,15 @@
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase";
@@ -45,24 +56,27 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<W
   // can move on immediately -- see settleWrite. Firestore's SDK applies this setDoc to the
   // local cache synchronously and replays it once the connection returns.
   const docRef = doc(collection(db, HISTORY_COLLECTION));
-  const outcome = await settleWrite(setDoc(docRef, {
-    clientName: params.clientName,
-    clientId: params.clientId,
-    note: params.note,
-    appliedBy: params.appliedBy,
-    steps: sanitizeForFirestore(params.steps),
-    markupMultiplier: params.markupMultiplier,
-    productCost: params.productCost,
-    servicePrice: params.servicePrice,
-    patchTestDate: params.patchTestDate,
-    allergyNotes: params.allergyNotes,
-    patchTestOverride: params.patchTestOverride,
-    beforePhotoUrl: null,
-    afterPhotoUrl: null,
-    appliedAt: serverTimestamp(),
-    schemaVersion: CURRENT_HISTORY_SCHEMA_VERSION,
-    appVersion: __APP_VERSION__,
-  }), `history entry ${docRef.id}`);
+  const outcome = await settleWrite(
+    setDoc(docRef, {
+      clientName: params.clientName,
+      clientId: params.clientId,
+      note: params.note,
+      appliedBy: params.appliedBy,
+      steps: sanitizeForFirestore(params.steps),
+      markupMultiplier: params.markupMultiplier,
+      productCost: params.productCost,
+      servicePrice: params.servicePrice,
+      patchTestDate: params.patchTestDate,
+      allergyNotes: params.allergyNotes,
+      patchTestOverride: params.patchTestOverride,
+      beforePhotoUrl: null,
+      afterPhotoUrl: null,
+      appliedAt: serverTimestamp(),
+      schemaVersion: CURRENT_HISTORY_SCHEMA_VERSION,
+      appVersion: __APP_VERSION__,
+    }),
+    `history entry ${docRef.id}`,
+  );
 
   // Stock is a convenience ledger, not part of the visit record: a failure here must not
   // surface as a save error (the stylist would retry and create a duplicate entry), and
@@ -87,7 +101,9 @@ export async function saveFormulaToHistory(params: SaveFormulaParams): Promise<W
     }
     try {
       const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
-        params.beforePhotoFile ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile) : Promise.resolve(null),
+        params.beforePhotoFile
+          ? uploadFormulaPhoto(docRef.id, "before", params.beforePhotoFile)
+          : Promise.resolve(null),
         params.afterPhotoFile ? uploadFormulaPhoto(docRef.id, "after", params.afterPhotoFile) : Promise.resolve(null),
       ]);
       if (beforePhotoUrl !== null || afterPhotoUrl !== null) {
@@ -138,10 +154,12 @@ export interface ActualColorGramsResult {
 export async function setActualColorGrams(params: SetActualColorGramsParams): Promise<ActualColorGramsResult> {
   const target = params.steps[params.stepIndex];
   if (target === undefined || target.kind !== "color") {
-    throw new Error(`Cannot record actual grams for step ${params.stepIndex} of history entry ${params.id}: not a color step`);
+    throw new Error(
+      `Cannot record actual grams for step ${params.stepIndex} of history entry ${params.id}: not a color step`,
+    );
   }
   const steps = params.steps.map((step, index) =>
-    index === params.stepIndex ? { ...step, actualColorGrams: params.actualColorGrams } : step
+    index === params.stepIndex ? { ...step, actualColorGrams: params.actualColorGrams } : step,
   );
   const productCost = calculateSessionProductCost(steps);
   const outcome = await settleWrite(
@@ -167,10 +185,7 @@ export async function setActualColorGrams(params: SetActualColorGramsParams): Pr
 }
 
 // What to do with one photo slot when amending a saved visit.
-export type PhotoEdit =
-  | { kind: "keep" }
-  | { kind: "replace"; file: File }
-  | { kind: "remove" };
+export type PhotoEdit = { kind: "keep" } | { kind: "replace"; file: File } | { kind: "remove" };
 
 export interface UpdateHistoryEntryDetailsParams {
   // The entry as currently held by the caller -- only its id and current photo URLs are
@@ -192,12 +207,18 @@ export type HistoryEntryDetailsResult = Pick<
 >;
 
 async function resolvePhotoUrl(
-  historyId: string, slot: "before" | "after", edit: PhotoEdit, currentUrl: string | null,
+  historyId: string,
+  slot: "before" | "after",
+  edit: PhotoEdit,
+  currentUrl: string | null,
 ): Promise<string | null> {
   switch (edit.kind) {
-    case "keep": return currentUrl;
-    case "remove": return null;
-    case "replace": return uploadFormulaPhoto(historyId, slot, edit.file);
+    case "keep":
+      return currentUrl;
+    case "remove":
+      return null;
+    case "replace":
+      return uploadFormulaPhoto(historyId, slot, edit.file);
   }
 }
 
@@ -217,7 +238,9 @@ async function resolvePhotoUrl(
 // (see that file) so a stylist editing offline sees the edit queue instead of the UI
 // hanging on a write the server hasn't acknowledged yet; the photo delete that follows
 // is unaffected either way, since it's already best-effort.
-export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetailsParams): Promise<HistoryEntryDetailsResult> {
+export async function updateHistoryEntryDetails(
+  params: UpdateHistoryEntryDetailsParams,
+): Promise<HistoryEntryDetailsResult> {
   const { entry } = params;
   const [beforePhotoUrl, afterPhotoUrl] = await Promise.all([
     resolvePhotoUrl(entry.id, "before", params.beforePhoto, entry.beforePhotoUrl),
@@ -233,8 +256,12 @@ export async function updateHistoryEntryDetails(params: UpdateHistoryEntryDetail
   };
   await settleWrite(updateDoc(doc(db, HISTORY_COLLECTION, entry.id), result), `update history entry ${entry.id}`);
   await Promise.all([
-    params.beforePhoto.kind === "remove" && entry.beforePhotoUrl !== null ? deleteFormulaPhoto(entry.id, "before") : Promise.resolve(),
-    params.afterPhoto.kind === "remove" && entry.afterPhotoUrl !== null ? deleteFormulaPhoto(entry.id, "after") : Promise.resolve(),
+    params.beforePhoto.kind === "remove" && entry.beforePhotoUrl !== null
+      ? deleteFormulaPhoto(entry.id, "before")
+      : Promise.resolve(),
+    params.afterPhoto.kind === "remove" && entry.afterPhotoUrl !== null
+      ? deleteFormulaPhoto(entry.id, "after")
+      : Promise.resolve(),
   ]);
   return result;
 }
@@ -263,15 +290,24 @@ export function subscribeToFormulaHistory(
 ): Unsubscribe {
   const q = scope.isAdmin
     ? query(collection(db, HISTORY_COLLECTION), orderBy("appliedAt", "desc"))
-    : query(collection(db, HISTORY_COLLECTION), where("appliedBy", "==", scope.currentUserEmail), orderBy("appliedAt", "desc"));
-  return onSnapshot(q, snapshot => {
-    // See historyEntryShapeSchema's comment above for why this is shallow (its output's
-    // nested fields are validated as "some object", not deep-checked against FullFormula/
-    // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
-    const entries = parseSnapshotDocs(snapshot, historyEntryShapeSchema, "history", true)
-      .map(entry => normalizeHistoryEntry(entry as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry));
-    onChange(entries);
-  }, onError);
+    : query(
+        collection(db, HISTORY_COLLECTION),
+        where("appliedBy", "==", scope.currentUserEmail),
+        orderBy("appliedAt", "desc"),
+      );
+  return onSnapshot(
+    q,
+    snapshot => {
+      // See historyEntryShapeSchema's comment above for why this is shallow (its output's
+      // nested fields are validated as "some object", not deep-checked against FullFormula/
+      // BleachFormula) - the cast trusts only the fields the schema left unvalidated.
+      const entries = parseSnapshotDocs(snapshot, historyEntryShapeSchema, "history", true).map(entry =>
+        normalizeHistoryEntry(entry as unknown as LegacyFormulaHistoryEntry | FormulaHistoryEntry),
+      );
+      onChange(entries);
+    },
+    onError,
+  );
 }
 
 // Best-effort delete of one uploaded photo slot -- mirrors uploadFormulaPhoto's own
@@ -283,7 +319,8 @@ async function deleteFormulaPhoto(historyId: string, slot: "before" | "after"): 
   try {
     await deleteObject(ref(storage, `formulaHistory/${historyId}/${slot}`));
   } catch (err) {
-    const isObjectNotFound = typeof err === "object" && err !== null && "code" in err && err.code === "storage/object-not-found";
+    const isObjectNotFound =
+      typeof err === "object" && err !== null && "code" in err && err.code === "storage/object-not-found";
     if (!isObjectNotFound) {
       console.error(`Failed to delete "${slot}" photo for history entry "${historyId}":`, err);
     }
@@ -294,7 +331,9 @@ async function deleteFormulaPhoto(historyId: string, slot: "before" | "after"): 
 // HistoryView's "Delete client" flow to wipe every visit belonging to a client being
 // deleted. Deletes both photo slots before the document itself so a partial failure
 // never leaves an orphaned Storage object with no Firestore record pointing back to it.
-export async function deleteHistoryEntry(entry: Pick<FormulaHistoryEntry, "id" | "beforePhotoUrl" | "afterPhotoUrl">): Promise<void> {
+export async function deleteHistoryEntry(
+  entry: Pick<FormulaHistoryEntry, "id" | "beforePhotoUrl" | "afterPhotoUrl">,
+): Promise<void> {
   await Promise.all([
     entry.beforePhotoUrl !== null ? deleteFormulaPhoto(entry.id, "before") : Promise.resolve(),
     entry.afterPhotoUrl !== null ? deleteFormulaPhoto(entry.id, "after") : Promise.resolve(),

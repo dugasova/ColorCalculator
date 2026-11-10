@@ -25,11 +25,21 @@ const shadeB: Shade = { code: "TEST-B", level: shadeA.level, tone: "ash" };
 const shadeOtherLine: Shade = { code: "TEST-C", level: 6, tone: "gold", line: "other-line" };
 
 function brandsWith(shades: Shade[]): Record<BrandId, Brand> {
-  return { ...BRANDS, generic: { id: "generic", name: "Generic", shades, mixingRatio: getMixingRatio, pricePerGram: 0.1 } };
+  return {
+    ...BRANDS,
+    generic: { id: "generic", name: "Generic", shades, mixingRatio: getMixingRatio, pricePerGram: 0.1 },
+  };
 }
 
 function paletteState(shades: Shade[]): PaletteState {
-  return { brands: brandsWith(shades), customBrands: [], overrides: [], stock: [], pricingSettings: DEFAULT_PRICING_SETTINGS, calibrationIndex: new Map() };
+  return {
+    brands: brandsWith(shades),
+    customBrands: [],
+    overrides: [],
+    stock: [],
+    pricingSettings: DEFAULT_PRICING_SETTINGS,
+    calibrationIndex: new Map(),
+  };
 }
 
 // The custom Select (see components/common/Select) has no native <select> "change" event
@@ -53,7 +63,7 @@ describe("ColorStepCard live palette sync", () => {
     const { rerender } = render(
       <PaletteReactContext.Provider value={paletteState([shadeA, shadeB])}>
         <ColorStepCard stepId="1" onChange={onChange} onRemove={() => {}} />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
 
     chooseOption("Shade", shadeB.code);
@@ -64,7 +74,7 @@ describe("ColorStepCard live palette sync", () => {
     rerender(
       <PaletteReactContext.Provider value={paletteState([shadeA])}>
         <ColorStepCard stepId="1" onChange={onChange} onRemove={() => {}} />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
 
     expect(lastStep(onChange).targetShade.code).toBe(shadeA.code);
@@ -78,7 +88,7 @@ describe("ColorStepCard live palette sync", () => {
     const { rerender } = render(
       <PaletteReactContext.Provider value={paletteState([shadeA, shadeOtherLine])}>
         <ColorStepCard stepId="1" onChange={onChange} onRemove={() => {}} />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
     expect(lastStep(onChange).targetShade.code).toBe(shadeA.code);
 
@@ -87,7 +97,7 @@ describe("ColorStepCard live palette sync", () => {
     rerender(
       <PaletteReactContext.Provider value={paletteState([shadeOtherLine])}>
         <ColorStepCard stepId="1" onChange={onChange} onRemove={() => {}} />
-      </PaletteReactContext.Provider>
+      </PaletteReactContext.Provider>,
     );
 
     expect(lastStep(onChange).targetShade.code).toBe(shadeOtherLine.code);

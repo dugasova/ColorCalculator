@@ -57,13 +57,14 @@ export const app = initializeApp(firebaseConfig);
 // exists in a browser: this module doubles as the Firebase client for the Node-run
 // migration scripts (see the comment above), which must keep the plain in-memory client
 // or `initializeFirestore` throws immediately on startup.
-export const db = typeof indexedDB !== "undefined"
-  ? initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      cacheSizeBytes: CACHE_SIZE_UNLIMITED,
-      tabManager: persistentMultipleTabManager(),
-    }),
-  })
-  : getFirestore(app);
+export const db =
+  typeof indexedDB !== "undefined"
+    ? initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+          tabManager: persistentMultipleTabManager(),
+        }),
+      })
+    : getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);

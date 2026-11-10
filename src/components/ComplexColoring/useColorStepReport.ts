@@ -1,7 +1,10 @@
 import { useEffect, useMemo } from "react";
 import type { Brand, BrandId } from "../../engine/brands";
 import {
-  getPrePigmentationNeed, calculatePrePigmentation, type PrePigmentationNeed, type PrePigmentationResult,
+  getPrePigmentationNeed,
+  calculatePrePigmentation,
+  type PrePigmentationNeed,
+  type PrePigmentationResult,
 } from "../../engine/prePigmentation";
 import type { StartingBase } from "../../engine/startingBase";
 import type { StrandZone } from "../../engine/strandZone";
@@ -23,13 +26,37 @@ export interface UseColorStepReportParams {
 // render, so they're destructured into plain values first -- only those values (never
 // the containing objects) may appear in the memo/effect dependency arrays below.
 export function useColorStepReport({
-  brands, formula, strandZone, startingBase, pricePerGram, prePigmentationEnabled, onChange,
-}: UseColorStepReportParams): { prePigmentationNeed: PrePigmentationNeed; prePigmentationResult: PrePigmentationResult | null } {
+  brands,
+  formula,
+  strandZone,
+  startingBase,
+  pricePerGram,
+  prePigmentationEnabled,
+  onChange,
+}: UseColorStepReportParams): {
+  prePigmentationNeed: PrePigmentationNeed;
+  prePigmentationResult: PrePigmentationResult | null;
+} {
   const {
-    brandId, line, targetShade, startLevel, grayPercent, porosity, thickness, chemicalHistory,
-    applicationZone, effectiveTotalGrams, lineShades, effectiveResult,
-    additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams,
-    neutralizationApplied, processingMinutes, naturalBase,
+    brandId,
+    line,
+    targetShade,
+    startLevel,
+    grayPercent,
+    porosity,
+    thickness,
+    chemicalHistory,
+    applicationZone,
+    effectiveTotalGrams,
+    lineShades,
+    effectiveResult,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    neutralizationApplied,
+    processingMinutes,
+    naturalBase,
   } = formula;
 
   // Reevaluated from startLevel/targetShade every render, matched against this step's
@@ -46,10 +73,11 @@ export function useColorStepReport({
   // object: infinite "Maximum update depth exceeded" the moment prePigmentation turns on.
   const prePigmentationNeed = getPrePigmentationNeed(startLevel, targetShade.level);
   const prePigmentationResult = useMemo(
-    () => (prePigmentationEnabled && prePigmentationNeed !== "none"
-      ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
-      : null),
-    [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, effectiveTotalGrams, lineShades]
+    () =>
+      prePigmentationEnabled && prePigmentationNeed !== "none"
+        ? calculatePrePigmentation(startLevel, targetShade.level, effectiveTotalGrams, lineShades)
+        : null,
+    [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, effectiveTotalGrams, lineShades],
   );
 
   // Report the computed step up on every change — the parent aggregates all steps'
@@ -89,8 +117,23 @@ export function useColorStepReport({
     onChange(stepData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    brandId, applicationZone, strandZone, startingBase, effectiveResult, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, neutralizationApplied, processingMinutes, pricePerGram,
-    porosity, thickness, chemicalHistory, prePigmentationResult, naturalBase
+    brandId,
+    applicationZone,
+    strandZone,
+    startingBase,
+    effectiveResult,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    neutralizationApplied,
+    processingMinutes,
+    pricePerGram,
+    porosity,
+    thickness,
+    chemicalHistory,
+    prePigmentationResult,
+    naturalBase,
   ]);
 
   return { prePigmentationNeed, prePigmentationResult };

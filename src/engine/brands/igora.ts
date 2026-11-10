@@ -1,18 +1,20 @@
 import { highLiftOverride, type Shade } from "../shades";
 import type { LiftTable } from "../levels";
 
-const igoraHighlifts12LiftTable: LiftTable = (volume) => {
+const igoraHighlifts12LiftTable: LiftTable = volume => {
   switch (volume) {
-    case 30: return 4; // 9%
-    case 40: return 5; // 12%
-    default: return 0;
+    case 30:
+      return 4; // 9%
+    case 40:
+      return 5; // 12%
+    default:
+      return 0;
   }
 };
 
 // Igora Royal Highlifts 12-series processes for 30-45 minutes without heat.
 // Using 45 minutes as the full cure time for maximum lift.
 const HIGHLIFTS_12_PROCESSING_MINUTES = 45;
-
 
 // Transcribed from Schwarzkopf Professional's official Igora Royal numbering system
 // (igora-royal.schwarzkopf-professional.com) and its Highlifts sub-range. Level-dash-tone
@@ -146,10 +148,10 @@ export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({
   // (see igoraHighlifts12LiftTable/HIGHLIFTS_12_PROCESSING_MINUTES above).
   ...(shade.level === 12
     ? highLiftOverride({
-      developerLiftTable: igoraHighlifts12LiftTable,
-      minStartLevel: 6,
-      fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES,
-    })
+        developerLiftTable: igoraHighlifts12LiftTable,
+        minStartLevel: 6,
+        fixedProcessingMinutes: HIGHLIFTS_12_PROCESSING_MINUTES,
+      })
     : {}),
 }));
 

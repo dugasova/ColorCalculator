@@ -9,11 +9,27 @@ import {
 
 describe("getComplementaryCorrector", () => {
   it("maps each unwanted tone to its opposite on the color star", () => {
-    expect(getComplementaryCorrector("red")).toEqual({ color: "green", qualifier: "ash-matte", reflections: [".13", ".31"] });
-    expect(getComplementaryCorrector("orange")).toEqual({ color: "blue", qualifier: "ash", reflections: [".1", ".01"] });
-    expect(getComplementaryCorrector("yellow")).toEqual({ color: "violet", qualifier: "iridescent", reflections: [".2"] });
+    expect(getComplementaryCorrector("red")).toEqual({
+      color: "green",
+      qualifier: "ash-matte",
+      reflections: [".13", ".31"],
+    });
+    expect(getComplementaryCorrector("orange")).toEqual({
+      color: "blue",
+      qualifier: "ash",
+      reflections: [".1", ".01"],
+    });
+    expect(getComplementaryCorrector("yellow")).toEqual({
+      color: "violet",
+      qualifier: "iridescent",
+      reflections: [".2"],
+    });
     expect(getComplementaryCorrector("green")).toEqual({ color: "red", qualifier: "copper", reflections: [".4"] });
-    expect(getComplementaryCorrector("blue")).toEqual({ color: "orange", qualifier: "copper-gold", reflections: [".43", ".34"] });
+    expect(getComplementaryCorrector("blue")).toEqual({
+      color: "orange",
+      qualifier: "copper-gold",
+      reflections: [".43", ".34"],
+    });
     expect(getComplementaryCorrector("violet")).toEqual({ color: "yellow", qualifier: "gold", reflections: [".3"] });
   });
 });

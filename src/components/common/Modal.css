@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: calc(20px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 20px
-           calc(20px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    calc(20px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
   animation: modal-overlay-enter 0.15s ease both;
@@ -74,7 +74,9 @@
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .modal__close svg {

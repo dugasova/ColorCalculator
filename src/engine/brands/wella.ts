@@ -13,11 +13,14 @@ import { highLiftOverride, type Shade } from "../shades";
 
 import type { DeveloperVolume, LiftTable } from "../levels";
 
-const specialBlondeLiftTable: LiftTable = (volume) => {
+const specialBlondeLiftTable: LiftTable = volume => {
   switch (volume) {
-    case 30: return 3; // 9%
-    case 40: return 5; // 12%
-    default: return 0;
+    case 30:
+      return 3; // 9%
+    case 40:
+      return 5; // 12%
+    default:
+      return 0;
   }
 };
 
@@ -207,10 +210,10 @@ export const WELLA_SHADE_CHART: Shade[] = kolestonPerfectShades.map(shade => ({
   // ../shades.ts) instead.
   ...(shade.level === 12
     ? highLiftOverride({
-      developerLiftTable: specialBlondeLiftTable,
-      minStartLevel: 6,
-      fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES,
-    })
+        developerLiftTable: specialBlondeLiftTable,
+        minStartLevel: 6,
+        fixedProcessingMinutes: SPECIAL_BLONDE_PROCESSING_MINUTES,
+      })
     : { noLiftDeveloperVolume: KOLESTON_PERFECT_NO_LIFT_DEVELOPER_VOLUME }),
 }));
 
@@ -340,7 +343,9 @@ export const WELLA_COLOR_TOUCH_CHART: Shade[] = colorTouchBaseShades.map(shade =
   ...shade,
   line: "color-touch",
   fixedMixingRatio: { colorParts: 1, developerParts: 2 },
-  mixingRatioChoices: [{ colorParts: 1, developerParts: 2 }, { colorParts: 1, developerParts: 1.5 }],
+  mixingRatioChoices: [
+    { colorParts: 1, developerParts: 2 },
+    { colorParts: 1, developerParts: 1.5 },
+  ],
   developerVolumeChoices: [6, 13],
 }));
-

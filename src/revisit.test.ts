@@ -37,7 +37,10 @@ describe("planClientRevisits", () => {
     const entries = [
       makeEntry({ clientName: "Anna K.", appliedAt: Timestamp.fromDate(base) }),
       makeEntry({ clientName: "Anna K.", appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)) }),
-      makeEntry({ clientName: "Anna K.", appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY + 28 * MS_PER_DAY)) }),
+      makeEntry({
+        clientName: "Anna K.",
+        appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY + 28 * MS_PER_DAY)),
+      }),
     ];
 
     const [plan] = planClientRevisits(entries);
@@ -47,7 +50,11 @@ describe("planClientRevisits", () => {
 
   it("falls back to the service interval for a first-time client", () => {
     const entries = [
-      makeEntry({ clientName: "New Client", steps: [makeColorStep({ grayPercent: 85 })], appliedAt: Timestamp.fromDate(new Date()) }),
+      makeEntry({
+        clientName: "New Client",
+        steps: [makeColorStep({ grayPercent: 85 })],
+        appliedAt: Timestamp.fromDate(new Date()),
+      }),
     ];
 
     const [plan] = planClientRevisits(entries);
@@ -59,13 +66,28 @@ describe("planClientRevisits", () => {
     const entries = [
       makeEntry({
         clientName: "Bleach Only",
-        steps: [{
-          kind: "bleach", startLevel: 6, targetLevel: 9, result: {
-            startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-            mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-            recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
-          }, processingMinutes: 35, pricePerGram: 0.1,
-        }],
+        steps: [
+          {
+            kind: "bleach",
+            startLevel: 6,
+            targetLevel: 9,
+            result: {
+              startLevel: 6,
+              targetLevel: 9,
+              liftNeeded: 3,
+              developerVolume: 30,
+              multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 },
+              grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35,
+              maxScalpProcessingMinutes: 50,
+              checkIntervalMinMinutes: 5,
+              checkIntervalMaxMinutes: 10,
+            },
+            processingMinutes: 35,
+            pricePerGram: 0.1,
+          },
+        ],
         appliedAt: Timestamp.fromDate(new Date()),
       }),
     ];
@@ -99,8 +121,16 @@ describe("planClientRevisits", () => {
   it("sorts results ascending by recommended date", () => {
     const now = new Date("2026-01-01T00:00:00Z");
     const entries = [
-      makeEntry({ clientName: "Later Client", steps: [makeColorStep({ grayPercent: 10 })], appliedAt: Timestamp.fromDate(now) }), // +42d
-      makeEntry({ clientName: "Sooner Client", steps: [makeColorStep({ grayPercent: 90 })], appliedAt: Timestamp.fromDate(now) }), // +21d
+      makeEntry({
+        clientName: "Later Client",
+        steps: [makeColorStep({ grayPercent: 10 })],
+        appliedAt: Timestamp.fromDate(now),
+      }), // +42d
+      makeEntry({
+        clientName: "Sooner Client",
+        steps: [makeColorStep({ grayPercent: 90 })],
+        appliedAt: Timestamp.fromDate(now),
+      }), // +21d
     ];
 
     const plans = planClientRevisits(entries);
@@ -113,11 +143,25 @@ describe("planClientRevisits", () => {
         clientName: "Balayage Client",
         steps: [
           {
-            kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
-              startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-              mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-              recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
-            }, processingMinutes: 35, pricePerGram: 0.1,
+            kind: "bleach",
+            startLevel: 6,
+            targetLevel: 9,
+            strandZone: "mid-lengths",
+            result: {
+              startLevel: 6,
+              targetLevel: 9,
+              liftNeeded: 3,
+              developerVolume: 30,
+              multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 },
+              grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35,
+              maxScalpProcessingMinutes: 50,
+              checkIntervalMinMinutes: 5,
+              checkIntervalMaxMinutes: 10,
+            },
+            processingMinutes: 35,
+            pricePerGram: 0.1,
           },
           makeColorStep({ strandZone: "ends", grayPercent: 0 }),
         ],
@@ -158,10 +202,15 @@ describe("planClientRevisits", () => {
           makeColorStep({
             grayPercent: 0,
             prePigmentation: {
-              need: "required-same-session", underlyingPigment: "orange", fillerTone: "copper",
-              exampleFillerShade: null, mixingRatio: { fillerParts: 1, diluentParts: 1 },
-              grams: { fillerGrams: 40, diluentGrams: 40 }, fillerProcessingMinutes: 20,
-              multiVisitGapDays: null, finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
+              need: "required-same-session",
+              underlyingPigment: "orange",
+              fillerTone: "copper",
+              exampleFillerShade: null,
+              mixingRatio: { fillerParts: 1, diluentParts: 1 },
+              grams: { fillerGrams: 40, diluentGrams: 40 },
+              fillerProcessingMinutes: 20,
+              multiVisitGapDays: null,
+              finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
               finalStepDeveloperVolume: 10,
             },
           }),
@@ -179,18 +228,28 @@ describe("planClientRevisits", () => {
     const base = new Date("2026-01-01T00:00:00Z");
     const entries = [
       makeEntry({ clientName: "Filler Client", appliedAt: Timestamp.fromDate(base) }),
-      makeEntry({ clientName: "Filler Client", appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)) }),
       makeEntry({
         clientName: "Filler Client",
-        steps: [makeColorStep({
-          prePigmentation: {
-            need: "required-multi-visit", underlyingPigment: "orange", fillerTone: "copper",
-            exampleFillerShade: null, mixingRatio: { fillerParts: 1, diluentParts: 1 },
-            grams: { fillerGrams: 40, diluentGrams: 40 }, fillerProcessingMinutes: 20,
-            multiVisitGapDays: { min: 7, max: 14 }, finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
-            finalStepDeveloperVolume: 10,
-          },
-        })],
+        appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)),
+      }),
+      makeEntry({
+        clientName: "Filler Client",
+        steps: [
+          makeColorStep({
+            prePigmentation: {
+              need: "required-multi-visit",
+              underlyingPigment: "orange",
+              fillerTone: "copper",
+              exampleFillerShade: null,
+              mixingRatio: { fillerParts: 1, diluentParts: 1 },
+              grams: { fillerGrams: 40, diluentGrams: 40 },
+              fillerProcessingMinutes: 20,
+              multiVisitGapDays: { min: 7, max: 14 },
+              finalStepMixingRatio: { colorParts: 1, developerParts: 1 },
+              finalStepDeveloperVolume: 10,
+            },
+          }),
+        ],
         appliedAt: Timestamp.fromDate(new Date(base.getTime() + 28 * MS_PER_DAY)),
       }),
     ];
@@ -205,16 +264,33 @@ describe("planClientRevisits", () => {
     const base = new Date("2026-01-01T00:00:00Z");
     const entries = [
       makeEntry({ clientName: "Switching Client", appliedAt: Timestamp.fromDate(base) }),
-      makeEntry({ clientName: "Switching Client", appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)) }),
+      makeEntry({
+        clientName: "Switching Client",
+        appliedAt: Timestamp.fromDate(new Date(base.getTime() + 14 * MS_PER_DAY)),
+      }),
       makeEntry({
         clientName: "Switching Client",
         steps: [
           {
-            kind: "bleach", startLevel: 6, targetLevel: 9, strandZone: "mid-lengths", result: {
-              startLevel: 6, targetLevel: 9, liftNeeded: 3, developerVolume: 30, multiStepRequired: false,
-              mixingRatio: { powderParts: 1, developerParts: 2 }, grams: { powderGrams: 20, developerGrams: 40 },
-              recommendedProcessingMinutes: 35, maxScalpProcessingMinutes: 50, checkIntervalMinMinutes: 5, checkIntervalMaxMinutes: 10,
-            }, processingMinutes: 35, pricePerGram: 0.1,
+            kind: "bleach",
+            startLevel: 6,
+            targetLevel: 9,
+            strandZone: "mid-lengths",
+            result: {
+              startLevel: 6,
+              targetLevel: 9,
+              liftNeeded: 3,
+              developerVolume: 30,
+              multiStepRequired: false,
+              mixingRatio: { powderParts: 1, developerParts: 2 },
+              grams: { powderGrams: 20, developerGrams: 40 },
+              recommendedProcessingMinutes: 35,
+              maxScalpProcessingMinutes: 50,
+              checkIntervalMinMinutes: 5,
+              checkIntervalMaxMinutes: 10,
+            },
+            processingMinutes: 35,
+            pricePerGram: 0.1,
           },
           makeColorStep({ strandZone: "ends", grayPercent: 0 }),
         ],

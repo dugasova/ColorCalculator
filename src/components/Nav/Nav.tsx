@@ -4,7 +4,19 @@ import { useTranslation } from "react-i18next";
 import { navItems } from "./navItems";
 import "./Nav.css";
 
-export type AppView = "calculator" | "correction" | "history" | "bleach" | "complex" | "prepigment" | "analytics" | "favorites" | "palette" | "orders" | "team" | "reference";
+export type AppView =
+  | "calculator"
+  | "correction"
+  | "history"
+  | "bleach"
+  | "complex"
+  | "prepigment"
+  | "analytics"
+  | "favorites"
+  | "palette"
+  | "orders"
+  | "team"
+  | "reference";
 
 const ICON_PATHS: Record<AppView, ReactNode> = {
   calculator: (
@@ -21,9 +33,7 @@ const ICON_PATHS: Record<AppView, ReactNode> = {
       <circle cx="12" cy="18.5" r="0.9" fill="currentColor" stroke="none" />
     </>
   ),
-  correction: (
-    <path d="M12 2.5s7 8.2 7 12.7a7 7 0 1 1-14 0c0-4.5 7-12.7 7-12.7z" />
-  ),
+  correction: <path d="M12 2.5s7 8.2 7 12.7a7 7 0 1 1-14 0c0-4.5 7-12.7 7-12.7z" />,
   history: (
     <>
       <circle cx="12" cy="12" r="9" />
@@ -81,9 +91,7 @@ const ICON_PATHS: Record<AppView, ReactNode> = {
       <path d="M16 14.2c2.7 0 5 1.8 5 4.8" />
     </>
   ),
-  favorites: (
-    <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L12 3.5z" />
-  ),
+  favorites: <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.2 5.9-.8L12 3.5z" />,
   reference: (
     <>
       <path d="M4 4.5c2-1 5-1 8 0v15c-3-1-6-1-8 0V4.5z" />
@@ -100,7 +108,16 @@ export interface NavProps {
 
 export function NavIcon({ view, className }: { view: AppView; className: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       {ICON_PATHS[view]}
     </svg>
   );

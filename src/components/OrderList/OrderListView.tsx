@@ -71,19 +71,25 @@ export function OrderListView() {
     : (groups[0]?.brandId ?? null);
   const selectedGroup = groups.find(group => group.brandId === effectiveSelectedBrandId) ?? null;
 
-  const orderLines = selectedGroup === null
-    ? []
-    : selectedGroup.items
-        .filter(item => qtyOf(item) > 0)
-        .map(item => t(item.unit === "bottle" ? "orders.textBottleLine" : "orders.textTubeLine", {
-          label: labelOf(item), qty: qtyOf(item), grams: item.packGrams,
-        }));
-  const orderText = selectedGroup === null || orderLines.length === 0
-    ? null
-    : [
-        t("orders.textTitle", { date: new Date().toLocaleDateString() }),
-        `${brands[selectedGroup.brandId].name}\n${orderLines.join("\n")}`,
-      ].join("\n\n");
+  const orderLines =
+    selectedGroup === null
+      ? []
+      : selectedGroup.items
+          .filter(item => qtyOf(item) > 0)
+          .map(item =>
+            t(item.unit === "bottle" ? "orders.textBottleLine" : "orders.textTubeLine", {
+              label: labelOf(item),
+              qty: qtyOf(item),
+              grams: item.packGrams,
+            }),
+          );
+  const orderText =
+    selectedGroup === null || orderLines.length === 0
+      ? null
+      : [
+          t("orders.textTitle", { date: new Date().toLocaleDateString() }),
+          `${brands[selectedGroup.brandId].name}\n${orderLines.join("\n")}`,
+        ].join("\n\n");
 
   const handleCopy = async () => {
     if (orderText === null) return;
@@ -105,7 +111,9 @@ export function OrderListView() {
 
   return (
     <div className="calculator">
-      <h1 className="calculator__title">{t("orders.titlePrefix")} <span className="calculator__title-accent">{t("orders.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        {t("orders.titlePrefix")} <span className="calculator__title-accent">{t("orders.titleAccent")}</span>
+      </h1>
       <p className="palette-admin__hint">{t("orders.hint")}</p>
 
       {items.length === 0 ? (
@@ -129,7 +137,13 @@ export function OrderListView() {
                 {selectedGroup.items.map(item => {
                   const label = labelOf(item);
                   return (
-                    <li key={item.id} className={clsx("palette-admin__stock-row", item.status === "out" && "palette-admin__stock-row--out")}>
+                    <li
+                      key={item.id}
+                      className={clsx(
+                        "palette-admin__stock-row",
+                        item.status === "out" && "palette-admin__stock-row--out",
+                      )}
+                    >
                       <span className="palette-admin__stock-label">{label}</span>
                       <input
                         type="number"
@@ -141,7 +155,8 @@ export function OrderListView() {
                       />
                       <span>
                         {t(item.unit === "bottle" ? "orders.bottleDetail" : "orders.tubeDetail", {
-                          grams: item.packGrams, remaining: Math.round(item.remainingGrams),
+                          grams: item.packGrams,
+                          remaining: Math.round(item.remainingGrams),
                         })}
                       </span>
                       <span className="palette-admin__stock-badge">
@@ -161,10 +176,20 @@ export function OrderListView() {
           </div>
 
           <div className="results__share">
-            <button type="button" className="button button--share button--whatsapp" disabled={orderText === null} onClick={handleShareWhatsApp}>
+            <button
+              type="button"
+              className="button button--share button--whatsapp"
+              disabled={orderText === null}
+              onClick={handleShareWhatsApp}
+            >
               {t("results.shareWhatsApp")}
             </button>
-            <button type="button" className="button button--share button--telegram" disabled={orderText === null} onClick={handleShareTelegram}>
+            <button
+              type="button"
+              className="button button--share button--telegram"
+              disabled={orderText === null}
+              onClick={handleShareTelegram}
+            >
               {t("results.shareTelegram")}
             </button>
           </div>

@@ -32,18 +32,22 @@ async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;
   const password = process.env.MIGRATION_ADMIN_PASSWORD;
   if (!email || !password) {
-    console.error("Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.");
+    console.error(
+      "Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.",
+    );
     process.exitCode = 1;
     return;
   }
 
   await signInWithEmailAndPassword(auth, email, password);
 
-  const existingOverrides = (await getDocs(collection(db, "paletteOverrides"))).docs.map(d => d.data() as PaletteOverride);
+  const existingOverrides = (await getDocs(collection(db, "paletteOverrides"))).docs.map(
+    d => d.data() as PaletteOverride,
+  );
   const alreadyMigrated = new Set(
     existingOverrides
       .filter((o): o is Extract<PaletteOverride, { kind: "add" }> => o.kind === "add")
-      .map(o => migrationKey(o.brandId, o.shade))
+      .map(o => migrationKey(o.brandId, o.shade)),
   );
 
   let migrated = 0;
@@ -63,8 +67,7 @@ async function main() {
   await signOut(auth);
 }
 
-main()
-  .catch(err => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+main().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});

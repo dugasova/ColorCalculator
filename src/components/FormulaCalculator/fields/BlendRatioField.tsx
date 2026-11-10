@@ -21,7 +21,12 @@ const RATIO_PRESETS = [50, 70] as const;
 // Only rendered once both blend components are chosen (see BlendComponentField). Splits
 // the already-calculated color total between them and previews the resulting swatch.
 export function BlendRatioField({
-  shadeA, shadeB, colorGrams, primaryPercent, onPrimaryPercentChange, idSuffix = "",
+  shadeA,
+  shadeB,
+  colorGrams,
+  primaryPercent,
+  onPrimaryPercentChange,
+  idSuffix = "",
 }: BlendRatioFieldProps) {
   const { t } = useTranslation();
   const { primaryGrams, secondaryGrams } = splitShadeBlend(colorGrams, primaryPercent);
@@ -53,13 +58,20 @@ export function BlendRatioField({
           className="shade-swatch"
           style={{ backgroundColor: blendShadeHexColors(shadeA, shadeB, primaryPercent) }}
           title={t("fields.blendRatioPreview", {
-            primaryCode: shadeA.code, primaryPercent,
-            secondaryCode: shadeB.code, secondaryPercent: 100 - primaryPercent,
+            primaryCode: shadeA.code,
+            primaryPercent,
+            secondaryCode: shadeB.code,
+            secondaryPercent: 100 - primaryPercent,
           })}
         />
       </div>
       <span className="blend-ratio__grams">
-        {t("fields.blendRatioGrams", { primaryCode: shadeA.code, primaryGrams: primaryGrams.toFixed(1), secondaryCode: shadeB.code, secondaryGrams: secondaryGrams.toFixed(1) })}
+        {t("fields.blendRatioGrams", {
+          primaryCode: shadeA.code,
+          primaryGrams: primaryGrams.toFixed(1),
+          secondaryCode: shadeB.code,
+          secondaryGrams: secondaryGrams.toFixed(1),
+        })}
       </span>
     </div>
   );

@@ -33,7 +33,9 @@ async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;
   const password = process.env.MIGRATION_ADMIN_PASSWORD;
   if (!email || !password) {
-    console.error("Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.");
+    console.error(
+      "Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -43,8 +45,9 @@ async function main() {
   const snapshot = await getDocs(collection(db, "paletteOverrides"));
   const staleIgoraAdds = snapshot.docs.filter(d => {
     const data = d.data() as PaletteOverride;
-    return data.kind === "add" && data.brandId === "igora"
-      && (data.shade.line === "royal" || data.shade.line === "vibrance");
+    return (
+      data.kind === "add" && data.brandId === "igora" && (data.shade.line === "royal" || data.shade.line === "vibrance")
+    );
   });
 
   for (const d of staleIgoraAdds) {
@@ -55,8 +58,7 @@ async function main() {
   await signOut(auth);
 }
 
-main()
-  .catch(err => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+main().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});

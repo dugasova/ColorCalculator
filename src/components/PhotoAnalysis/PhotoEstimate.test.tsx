@@ -20,7 +20,10 @@ import { usePalette, useShadeCalibrationIndex } from "../../palette";
 function fillSrgb(rgb: [number, number, number], n: number): Uint8ClampedArray {
   const out = new Uint8ClampedArray(n * 4);
   for (let i = 0; i < n; i++) {
-    out[i * 4] = rgb[0]; out[i * 4 + 1] = rgb[1]; out[i * 4 + 2] = rgb[2]; out[i * 4 + 3] = 255;
+    out[i * 4] = rgb[0];
+    out[i * 4 + 1] = rgb[1];
+    out[i * 4 + 2] = rgb[2];
+    out[i * 4 + 3] = 255;
   }
   return out;
 }
@@ -43,7 +46,15 @@ function measuredLab(hairSrgb: [number, number, number]): Lab {
 const BRAND_ID: BrandId = "brand-a";
 
 function brandWith(shades: Shade[]): Record<BrandId, Brand> {
-  return { [BRAND_ID]: { id: BRAND_ID, name: "Brand A", shades, mixingRatio: () => ({ colorParts: 1, developerParts: 1 }), pricePerGram: 0.1 } };
+  return {
+    [BRAND_ID]: {
+      id: BRAND_ID,
+      name: "Brand A",
+      shades,
+      mixingRatio: () => ({ colorParts: 1, developerParts: 1 }),
+      pricePerGram: 0.1,
+    },
+  };
 }
 
 beforeEach(() => {
@@ -65,14 +76,18 @@ async function pickPhoto(file: File) {
 describe("PhotoEstimate, startLevel mode", () => {
   it("estimates the closest calibrated level and applies it on click", async () => {
     const hairLab = measuredLab([140, 95, 70]);
-    vi.mocked(usePalette).mockReturnValue(brandWith([
-      { code: "5.0", level: 5, tone: "natural" },
-      { code: "7.0", level: 7, tone: "natural" },
-    ]));
-    vi.mocked(useShadeCalibrationIndex).mockReturnValue(new Map<string, Lab>([
-      [shadeCalibrationId(BRAND_ID, null, "5.0"), [hairLab[0] - 20, hairLab[1], hairLab[2]]],
-      [shadeCalibrationId(BRAND_ID, null, "7.0"), hairLab],
-    ]));
+    vi.mocked(usePalette).mockReturnValue(
+      brandWith([
+        { code: "5.0", level: 5, tone: "natural" },
+        { code: "7.0", level: 7, tone: "natural" },
+      ]),
+    );
+    vi.mocked(useShadeCalibrationIndex).mockReturnValue(
+      new Map<string, Lab>([
+        [shadeCalibrationId(BRAND_ID, null, "5.0"), [hairLab[0] - 20, hairLab[1], hairLab[2]]],
+        [shadeCalibrationId(BRAND_ID, null, "7.0"), hairLab],
+      ]),
+    );
     vi.mocked(readPhotoPixels).mockResolvedValue([fillSrgb([140, 95, 70], 100), cardPixels]);
 
     const onApplyLevel = vi.fn();
@@ -98,13 +113,17 @@ describe("PhotoEstimate, startLevel mode", () => {
     render(<PhotoEstimate mode="startLevel" onApplyLevel={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Estimate from photo" }));
 
-    expect(screen.getByText("No natural shades are calibrated yet — an admin can calibrate them in Palette.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No natural shades are calibrated yet — an admin can calibrate them in Palette."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Analyze" })).not.toBeInTheDocument();
   });
 
   it("shows an alert when the grey card is overexposed", async () => {
     vi.mocked(usePalette).mockReturnValue(brandWith([{ code: "6.0", level: 6, tone: "natural" }]));
-    vi.mocked(useShadeCalibrationIndex).mockReturnValue(new Map<string, Lab>([[shadeCalibrationId(BRAND_ID, null, "6.0"), [50, 0, 0]]]));
+    vi.mocked(useShadeCalibrationIndex).mockReturnValue(
+      new Map<string, Lab>([[shadeCalibrationId(BRAND_ID, null, "6.0"), [50, 0, 0]]]),
+    );
     vi.mocked(readPhotoPixels).mockResolvedValue([fillSrgb([140, 95, 70], 100), fillSrgb([255, 255, 255], 100)]);
 
     render(<PhotoEstimate mode="startLevel" onApplyLevel={vi.fn()} />);
@@ -117,7 +136,9 @@ describe("PhotoEstimate, startLevel mode", () => {
 
   it("shows a decode error when reading the photo fails", async () => {
     vi.mocked(usePalette).mockReturnValue(brandWith([{ code: "6.0", level: 6, tone: "natural" }]));
-    vi.mocked(useShadeCalibrationIndex).mockReturnValue(new Map<string, Lab>([[shadeCalibrationId(BRAND_ID, null, "6.0"), [50, 0, 0]]]));
+    vi.mocked(useShadeCalibrationIndex).mockReturnValue(
+      new Map<string, Lab>([[shadeCalibrationId(BRAND_ID, null, "6.0"), [50, 0, 0]]]),
+    );
     vi.mocked(readPhotoPixels).mockRejectedValue(new Error("boom"));
 
     render(<PhotoEstimate mode="startLevel" onApplyLevel={vi.fn()} />);
@@ -139,10 +160,12 @@ describe("PhotoEstimate, targetShade mode", () => {
   it("ranks the calibrated shade closest to the photo first and applies it on click", async () => {
     const hairLab = measuredLab([170, 110, 60]);
     vi.mocked(usePalette).mockReturnValue({});
-    vi.mocked(useShadeCalibrationIndex).mockReturnValue(new Map<string, Lab>([
-      [shadeCalibrationId(BRAND_ID, null, "5.0"), [hairLab[0] - 30, hairLab[1], hairLab[2]]],
-      [shadeCalibrationId(BRAND_ID, null, "8.3"), hairLab],
-    ]));
+    vi.mocked(useShadeCalibrationIndex).mockReturnValue(
+      new Map<string, Lab>([
+        [shadeCalibrationId(BRAND_ID, null, "5.0"), [hairLab[0] - 30, hairLab[1], hairLab[2]]],
+        [shadeCalibrationId(BRAND_ID, null, "8.3"), hairLab],
+      ]),
+    );
     vi.mocked(readPhotoPixels).mockResolvedValue([fillSrgb([170, 110, 60], 100), cardPixels]);
 
     const onApplyShade = vi.fn();
@@ -167,7 +190,9 @@ describe("PhotoEstimate, targetShade mode", () => {
     render(<PhotoEstimate mode="targetShade" brandId={BRAND_ID} lineShades={lineShades} onApplyShade={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "Pick shade from photo" }));
 
-    expect(screen.getByText("No shades in this line are calibrated yet — an admin can calibrate them in Palette.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No shades in this line are calibrated yet — an admin can calibrate them in Palette."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Analyze" })).not.toBeInTheDocument();
   });
 });

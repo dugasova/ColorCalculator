@@ -18,10 +18,14 @@ const THICKNESS_OPTIONS: HairThickness[] = ["fine", "medium", "coarse"];
 const CHEMICAL_HISTORY_OPTIONS: ChemicalHistory[] = ["keratin", "perm", "henna", "direct_dye", "bleached-blonde"];
 
 export function CanvasFields({
-  porosity, onPorosityChange,
-  thickness, onThicknessChange,
-  chemicalHistory, onChemicalHistoryChange,
-  idSuffix = "", porosityHint
+  porosity,
+  onPorosityChange,
+  thickness,
+  onThicknessChange,
+  chemicalHistory,
+  onChemicalHistoryChange,
+  idSuffix = "",
+  porosityHint,
 }: CanvasFieldsProps) {
   const { t } = useTranslation();
 
@@ -40,7 +44,7 @@ export function CanvasFields({
         <Select
           id={`porosity${idSuffix}`}
           value={porosity}
-          onChange={(v) => onPorosityChange(v as Porosity)}
+          onChange={v => onPorosityChange(v as Porosity)}
           options={POROSITY_OPTIONS.map(p => ({ value: p, label: t(`canvas.porosity.${p}`) }))}
         />
         {porosityHint !== undefined && <p className="field__hint">{porosityHint}</p>}
@@ -51,16 +55,33 @@ export function CanvasFields({
         <Select
           id={`thickness${idSuffix}`}
           value={thickness}
-          onChange={(v) => onThicknessChange(v as HairThickness)}
+          onChange={v => onThicknessChange(v as HairThickness)}
           options={THICKNESS_OPTIONS.map(th => ({ value: th, label: t(`canvas.thickness.${th}`) }))}
         />
       </div>
 
       <div className="field chemical-history">
         <label>{t("canvas.chemicalHistory.label")}</label>
-        <div className="checkbox-group" style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "2px" }}>
+        <div
+          className="checkbox-group"
+          style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "2px" }}
+        >
           {CHEMICAL_HISTORY_OPTIONS.map(ch => (
-            <label key={ch} className="checkbox-label" style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "0.95rem", color: "var(--ink)", cursor: "pointer", fontWeight: 400, textTransform: "none", letterSpacing: "normal" }}>
+            <label
+              key={ch}
+              className="checkbox-label"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                fontSize: "0.95rem",
+                color: "var(--ink)",
+                cursor: "pointer",
+                fontWeight: 400,
+                textTransform: "none",
+                letterSpacing: "normal",
+              }}
+            >
               <input
                 type="checkbox"
                 checked={chemicalHistory.includes(ch)}

@@ -28,7 +28,10 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
 }
 
 .tone-btn:hover {
@@ -125,7 +128,6 @@
   color: var(--brand-ink);
 }
 
-
 .correction__stat-value--small {
   font-size: 1.05rem;
 }
@@ -166,4 +168,3 @@
     grid-column: 1 / -1;
   }
 }
-

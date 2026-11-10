@@ -32,7 +32,10 @@
   font-size: 1rem;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .field textarea {
@@ -51,7 +54,9 @@
   height: 40px;
   border-radius: 50%;
   border: 2px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--border-field), 0 2px 6px -2px rgba(22, 18, 31, 0.35);
+  box-shadow:
+    0 0 0 1px var(--border-field),
+    0 2px 6px -2px rgba(22, 18, 31, 0.35);
   transition: transform 0.2s ease;
 }
 

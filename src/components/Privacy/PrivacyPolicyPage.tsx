@@ -41,12 +41,18 @@ export function PrivacyPolicyPage() {
 
       <h2 className="results__section-heading">{t("privacy.contactTitle")}</h2>
       {FEEDBACK_URL !== undefined ? (
-        <p><a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">{t("privacy.contactLinkLabel")}</a></p>
+        <p>
+          <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
+            {t("privacy.contactLinkLabel")}
+          </a>
+        </p>
       ) : (
         <p>{t("privacy.contactBody")}</p>
       )}
 
-      <Link className="button button--secondary" to="/">{t("brandNotes.backToApp")}</Link>
+      <Link className="button button--secondary" to="/">
+        {t("brandNotes.backToApp")}
+      </Link>
     </div>
   );
 }

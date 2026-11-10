@@ -36,36 +36,64 @@ export interface FormulaCalculatorProps {
   // field (brand/shade/level down through the client-details panel) for the next client.
   onSaved?: () => void;
 }
-export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRequest, onSaved }: FormulaCalculatorProps) {
+export default function FormulaCalculator({
+  appliedBy,
+  repeatRequest,
+  favoriteRequest,
+  onSaved,
+}: FormulaCalculatorProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const {
-    startLevel, setStartLevel,
-    grayPercent, setGrayPercent,
-    porosity, setPorosity,
-    thickness, setThickness,
-    chemicalHistory, setChemicalHistory,
+    startLevel,
+    setStartLevel,
+    grayPercent,
+    setGrayPercent,
+    porosity,
+    setPorosity,
+    thickness,
+    setThickness,
+    chemicalHistory,
+    setChemicalHistory,
     targetShadeCode,
     applicationZone,
-    totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode, colorGrams, setColorGrams,
+    totalGrams,
+    setTotalGrams,
+    gramsInputMode,
+    setGramsInputMode,
+    colorGrams,
+    setColorGrams,
     brandId,
     line,
-    manualDeveloperVolume, setManualDeveloperVolume,
-    manualMixingRatio, setManualMixingRatio,
+    manualDeveloperVolume,
+    setManualDeveloperVolume,
+    manualMixingRatio,
+    setManualMixingRatio,
     setManualPricePerGram,
-    markupMultiplier, setMarkupMultiplier,
+    markupMultiplier,
+    setMarkupMultiplier,
     setManualServicePrice,
     additionalShadeCode,
-    additionalShade2Code, setAdditionalShade2Code,
-    additionalShade2Grams, setAdditionalShade2Grams,
-    additionalShadeGrams, setAdditionalShadeGrams,
+    additionalShade2Code,
+    setAdditionalShade2Code,
+    additionalShade2Grams,
+    setAdditionalShade2Grams,
+    additionalShadeGrams,
+    setAdditionalShadeGrams,
     blendModeEnabled,
-    setBlendShadeACode, setBlendShadeBCode,
-    blendPrimaryPercent, setBlendPrimaryPercent,
-    neutralizationApplied, setNeutralizationApplied,
-    grayNaturalApplied, setGrayNaturalApplied,
-    naturalBaseShadeCode, setNaturalBaseShadeCode,
-    prePigmentationNeed, prePigmentationEnabled, setPrePigmentationEnabled,
+    setBlendShadeACode,
+    setBlendShadeBCode,
+    blendPrimaryPercent,
+    setBlendPrimaryPercent,
+    neutralizationApplied,
+    setNeutralizationApplied,
+    grayNaturalApplied,
+    setGrayNaturalApplied,
+    naturalBaseShadeCode,
+    setNaturalBaseShadeCode,
+    prePigmentationNeed,
+    prePigmentationEnabled,
+    setPrePigmentationEnabled,
     setManualProcessingMinutes,
 
     availableLines,
@@ -103,7 +131,9 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
 
   return (
     <div className="calculator calculator--wide">
-      <h1 className="calculator__title">{t("app.titlePrefix")} <span className="calculator__title-accent">{t("app.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        {t("app.titlePrefix")} <span className="calculator__title-accent">{t("app.titleAccent")}</span>
+      </h1>
       <p className="calculator__intro">{t("calculator.intro")}</p>
       <div className="calculator__form">
         <h2 className="results__section-heading calculator__step-heading">{t("calculator.stepHair")}</h2>
@@ -118,9 +148,12 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
           })}
         />
         <CanvasFields
-          porosity={porosity} onPorosityChange={setPorosity}
-          thickness={thickness} onThicknessChange={setThickness}
-          chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+          porosity={porosity}
+          onPorosityChange={setPorosity}
+          thickness={thickness}
+          onThicknessChange={setThickness}
+          chemicalHistory={chemicalHistory}
+          onChemicalHistoryChange={setChemicalHistory}
           porosityHint={t("canvas.porosity.hint")}
         />
 
@@ -184,7 +217,11 @@ export default function FormulaCalculator({ appliedBy, repeatRequest, favoriteRe
               brands={brands}
               onSelectMatch={handleCrossBrandMatchSelect}
             />
-            <BlendModeField substituteBlend={blendModeEnabled} onSubstituteBlendChange={handleBlendModeChange} hint={t("fields.substituteBlendHint")} />
+            <BlendModeField
+              substituteBlend={blendModeEnabled}
+              onSubstituteBlendChange={handleBlendModeChange}
+              hint={t("fields.substituteBlendHint")}
+            />
             <AdditionalShadeField
               lineShades={lineShades}
               additionalShadeCode={additionalShadeCode}

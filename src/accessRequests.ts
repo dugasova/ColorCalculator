@@ -1,5 +1,17 @@
 import { z } from "zod";
-import { Timestamp, collection, doc, getDoc, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
+import {
+  Timestamp,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import type { FirestoreError, Unsubscribe } from "firebase/firestore";
 import { db } from "./firebase";
 import { parseSnapshotDocs } from "./firestoreSubscribe";
@@ -56,7 +68,10 @@ export async function approveAccessRequest(uid: string): Promise<void> {
 // a rejected requester's PendingAccessScreen can show a clear reason instead of just
 // looping back to "request sent" the next time ensureAccessRequest runs.
 export async function rejectAccessRequest(uid: string): Promise<void> {
-  await settleWrite(updateDoc(doc(db, ACCESS_REQUESTS_COLLECTION, uid), { status: "rejected" }), `reject access ${uid}`);
+  await settleWrite(
+    updateDoc(doc(db, ACCESS_REQUESTS_COLLECTION, uid), { status: "rejected" }),
+    `reject access ${uid}`,
+  );
 }
 
 // Admin-only live list of requests still awaiting a decision (TeamView). No `orderBy`
@@ -68,13 +83,17 @@ export function subscribeToPendingAccessRequests(
   onError: (error: FirestoreError) => void,
 ): Unsubscribe {
   const q = query(collection(db, ACCESS_REQUESTS_COLLECTION), where("status", "==", "pending"));
-  return onSnapshot(q, snapshot => {
-    const requests = parseSnapshotDocs<AccessRequest>(snapshot, accessRequestShapeSchema, "access request", true);
-    requests.sort((a, b) => {
-      if (a.requestedAt === null) return b.requestedAt === null ? 0 : 1;
-      if (b.requestedAt === null) return -1;
-      return a.requestedAt.toMillis() - b.requestedAt.toMillis();
-    });
-    onChange(requests);
-  }, onError);
+  return onSnapshot(
+    q,
+    snapshot => {
+      const requests = parseSnapshotDocs<AccessRequest>(snapshot, accessRequestShapeSchema, "access request", true);
+      requests.sort((a, b) => {
+        if (a.requestedAt === null) return b.requestedAt === null ? 0 : 1;
+        if (b.requestedAt === null) return -1;
+        return a.requestedAt.toMillis() - b.requestedAt.toMillis();
+      });
+      onChange(requests);
+    },
+    onError,
+  );
 }

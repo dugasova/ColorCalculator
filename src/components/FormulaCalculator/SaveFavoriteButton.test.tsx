@@ -9,7 +9,10 @@ import FormulaCalculator from "./FormulaCalculator";
 // jsdom, and clients/favorites subscriptions aren't under test here (see
 // SessionDetailsPanel.bowlCard.test.tsx for the same clients stub).
 vi.mock("../../clients", () => ({
-  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => { onChange([]); return () => {}; }),
+  subscribeToClients: vi.fn((_ownedBy: string, onChange: (clients: unknown[]) => void) => {
+    onChange([]);
+    return () => {};
+  }),
   createClient: vi.fn().mockResolvedValue("new-client-id"),
   updateClient: vi.fn().mockResolvedValue(undefined),
 }));
@@ -20,7 +23,8 @@ vi.mock("../../favoriteFormulas", async () => {
   const actual = await vi.importActual<typeof FavoriteFormulasModule>("../../favoriteFormulas");
   return {
     ...actual,
-    createFavoriteFormula: (...args: Parameters<typeof actual.createFavoriteFormula>) => createFavoriteFormulaMock(...args),
+    createFavoriteFormula: (...args: Parameters<typeof actual.createFavoriteFormula>) =>
+      createFavoriteFormulaMock(...args),
   };
 });
 

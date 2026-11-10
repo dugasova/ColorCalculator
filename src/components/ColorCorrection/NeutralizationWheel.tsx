@@ -68,13 +68,7 @@ export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectT
         viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}
         onMouseLeave={() => setHoveredTone(null)}
       >
-        <line
-          className="neutralization-wheel__link"
-          x1={lineStart.x}
-          y1={lineStart.y}
-          x2={lineEnd.x}
-          y2={lineEnd.y}
-        />
+        <line className="neutralization-wheel__link" x1={lineStart.x} y1={lineStart.y} x2={lineEnd.x} y2={lineEnd.y} />
         {tones.map(tone => {
           const active = tone === activeTone || tone === complementTone;
           return (

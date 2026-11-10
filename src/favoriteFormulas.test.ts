@@ -19,7 +19,7 @@ const deleteDocMock = vi.fn();
 // createFavoriteFormula's `doc(collection(db, ...))` and renameFavoriteFormula/
 // deleteFavoriteFormula's `doc(db, ..., id)` each get back what the real SDK would hand them.
 const docMock = vi.fn((...args: unknown[]) =>
-  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args }
+  args.length === 1 ? { kind: "doc", id: `auto-${++autoIdCounter}` } : { kind: "doc", args },
 );
 const onSnapshotMock = vi.fn();
 const orderByMock = vi.fn((...args: unknown[]) => ({ kind: "orderBy", field: args[0] }));
@@ -75,7 +75,7 @@ describe("createFavoriteFormula", () => {
 
     expect(setDocMock).toHaveBeenCalledWith(
       { kind: "doc", id: "auto-1" },
-      { ownedBy: "stylist@salon.test", name: "Blonde", recipe: RECIPE, updatedAt: "server-timestamp" }
+      { ownedBy: "stylist@salon.test", name: "Blonde", recipe: RECIPE, updatedAt: "server-timestamp" },
     );
   });
 });
@@ -87,7 +87,7 @@ describe("renameFavoriteFormula", () => {
     expect(docMock).toHaveBeenCalledWith({}, "favoriteFormulas", "fav-1");
     expect(updateDocMock).toHaveBeenCalledWith(
       { kind: "doc", args: [{}, "favoriteFormulas", "fav-1"] },
-      { name: "New", updatedAt: "server-timestamp" }
+      { name: "New", updatedAt: "server-timestamp" },
     );
   });
 });
@@ -103,14 +103,18 @@ describe("deleteFavoriteFormula", () => {
 
 describe("subscribeToFavoriteFormulas", () => {
   it("scopes the query to the given owner and orders by name", () => {
-    subscribeToFavoriteFormulas("stylist@salon.test", () => {}, () => {});
+    subscribeToFavoriteFormulas(
+      "stylist@salon.test",
+      () => {},
+      () => {},
+    );
 
     expect(whereMock).toHaveBeenCalledWith("ownedBy", "==", "stylist@salon.test");
     expect(orderByMock).toHaveBeenCalledWith("name");
     expect(queryMock).toHaveBeenCalledWith(
       "collection-ref",
       { kind: "where", field: "ownedBy", op: "==", value: "stylist@salon.test" },
-      { kind: "orderBy", field: "name" }
+      { kind: "orderBy", field: "name" },
     );
   });
 
@@ -159,10 +163,14 @@ describe("defaultFavoriteName", () => {
   });
 
   it("appends the additional shade code when present", () => {
-    expect(defaultFavoriteName({ ...RECIPE, additionalShadeCode: "7/3" }, BRANDS)).toBe("Wella Koleston Perfect 7/1 + 7/3");
+    expect(defaultFavoriteName({ ...RECIPE, additionalShadeCode: "7/3" }, BRANDS)).toBe(
+      "Wella Koleston Perfect 7/1 + 7/3",
+    );
   });
 
   it("omits the line for a brand with no sub-lines", () => {
-    expect(defaultFavoriteName({ ...RECIPE, brandId: "generic", line: null, targetShadeCode: "1.0" }, BRANDS)).toBe("Generic 1.0");
+    expect(defaultFavoriteName({ ...RECIPE, brandId: "generic", line: null, targetShadeCode: "1.0" }, BRANDS)).toBe(
+      "Generic 1.0",
+    );
   });
 });

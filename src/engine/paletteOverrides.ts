@@ -80,7 +80,7 @@ export function getDisabledShadeKeys(overrides: PaletteOverride[], brandId: Bran
   return new Set(
     overrides
       .filter((o): o is Extract<PaletteOverride, { kind: "disable" }> => o.kind === "disable" && o.brandId === brandId)
-      .map(o => shadeKey({ line: o.line ?? undefined, code: o.code }))
+      .map(o => shadeKey({ line: o.line ?? undefined, code: o.code })),
   );
 }
 
@@ -101,7 +101,12 @@ export function getDisabledShadeKeys(overrides: PaletteOverride[], brandId: Bran
 // the built-in shade it replaces. Without this, every salon that ran the migration would
 // keep the stale copy shadowing the built-in and never see a newly added ratio picker,
 // short of an admin-run repair script deleting those Firestore documents.
-export function getFullBrandShades(baseBrands: Record<BrandId, Brand>, customBrands: CustomBrandRecord[], overrides: PaletteOverride[], brandId: BrandId): Shade[] {
+export function getFullBrandShades(
+  baseBrands: Record<BrandId, Brand>,
+  customBrands: CustomBrandRecord[],
+  overrides: PaletteOverride[],
+  brandId: BrandId,
+): Shade[] {
   void customBrands; // custom brands never ship their own shades; they only gain them through `add` overrides.
   const baseShades = baseBrands[brandId]?.shades ?? [];
   const baseByKey = new Map(baseShades.map(s => [shadeKey(s), s]));
@@ -120,7 +125,11 @@ export function getFullBrandShades(baseBrands: Record<BrandId, Brand>, customBra
 // catalog the calculators use: discontinued shades removed, admin-added shades
 // included, custom lines resolved to a real `Brand`. Pure and Firestore-agnostic so it
 // can be unit tested without a backend — see `PaletteContext` for the live wiring.
-export function buildBrandCatalog(baseBrands: Record<BrandId, Brand>, customBrands: CustomBrandRecord[], overrides: PaletteOverride[]): Record<BrandId, Brand> {
+export function buildBrandCatalog(
+  baseBrands: Record<BrandId, Brand>,
+  customBrands: CustomBrandRecord[],
+  overrides: PaletteOverride[],
+): Record<BrandId, Brand> {
   const ids = new Set<BrandId>([...Object.keys(baseBrands), ...customBrands.map(c => c.id)]);
   const catalog: Record<BrandId, Brand> = {};
   for (const id of ids) {

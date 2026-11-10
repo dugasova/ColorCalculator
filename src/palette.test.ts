@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setShadeDisabled, addShadeToBrand, addCustomBrand } from "./palette";
 
 const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
-const collectionMock = vi.fn((...args: unknown[]) => { void args; return "collection-ref"; });
+const collectionMock = vi.fn((...args: unknown[]) => {
+  void args;
+  return "collection-ref";
+});
 const setDocMock = vi.fn();
 const deleteDocMock = vi.fn();
 const addDocMock = vi.fn();
@@ -30,7 +33,7 @@ describe("setShadeDisabled", () => {
     expect(docMock).toHaveBeenCalledWith({}, "paletteOverrides", "wella::Koleston%20Perfect::5%2F41");
     expect(setDocMock).toHaveBeenCalledWith(
       { kind: "doc", args: [{}, "paletteOverrides", "wella::Koleston%20Perfect::5%2F41"] },
-      { kind: "disable", brandId: "wella", line: "Koleston Perfect", code: "5/41" }
+      { kind: "disable", brandId: "wella", line: "Koleston Perfect", code: "5/41" },
     );
     expect(deleteDocMock).not.toHaveBeenCalled();
   });
@@ -44,9 +47,10 @@ describe("setShadeDisabled", () => {
   it("deletes the same-keyed document (and never writes) when re-enabling", async () => {
     await setShadeDisabled("wella", "Koleston Perfect", "5/41", false);
 
-    expect(deleteDocMock).toHaveBeenCalledWith(
-      { kind: "doc", args: [{}, "paletteOverrides", "wella::Koleston%20Perfect::5%2F41"] }
-    );
+    expect(deleteDocMock).toHaveBeenCalledWith({
+      kind: "doc",
+      args: [{}, "paletteOverrides", "wella::Koleston%20Perfect::5%2F41"],
+    });
     expect(setDocMock).not.toHaveBeenCalled();
   });
 });
@@ -76,7 +80,7 @@ describe("addCustomBrand", () => {
     expect(docMock).toHaveBeenCalledWith({}, "customBrands", "my-brand");
     expect(setDocMock).toHaveBeenCalledWith(
       { kind: "doc", args: [{}, "customBrands", "my-brand"] },
-      { name: "My Brand", pricePerGram: 0.25, mixingRatioConfig: { kind: "generic" } }
+      { name: "My Brand", pricePerGram: 0.25, mixingRatioConfig: { kind: "generic" } },
     );
   });
 });

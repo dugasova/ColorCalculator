@@ -22,7 +22,9 @@
   color: var(--brand-ink);
   font-weight: 600;
   text-decoration: none;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .brand-notes__row:hover,

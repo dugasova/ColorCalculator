@@ -62,30 +62,54 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
 
   const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_PRICE_PER_GRAM);
   const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
-  const [startingBase, setStartingBase] = useState<StartingBase>(seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" });
+  const [startingBase, setStartingBase] = useState<StartingBase>(
+    seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" },
+  );
   const [prePigmentationEnabled, setPrePigmentationEnabled] = useState(seed?.prePigmentationEnabled ?? false);
 
-  const formula = useShadeFormulaState({ brands, initialCanvas: seed?.canvas ?? inheritedOnMount?.canvas, initial: seed });
+  const formula = useShadeFormulaState({
+    brands,
+    initialCanvas: seed?.canvas ?? inheritedOnMount?.canvas,
+    initial: seed,
+  });
   const {
-    startLevel, setStartLevel,
-    grayPercent, setGrayPercent,
-    porosity, setPorosity,
-    thickness, setThickness,
-    chemicalHistory, setChemicalHistory,
+    startLevel,
+    setStartLevel,
+    grayPercent,
+    setGrayPercent,
+    porosity,
+    setPorosity,
+    thickness,
+    setThickness,
+    chemicalHistory,
+    setChemicalHistory,
     targetShadeCode,
-    totalGrams, setTotalGrams, gramsInputMode, setGramsInputMode, colorGrams, setColorGrams,
+    totalGrams,
+    setTotalGrams,
+    gramsInputMode,
+    setGramsInputMode,
+    colorGrams,
+    setColorGrams,
     brandId,
     line,
-    manualDeveloperVolume, setManualDeveloperVolume,
-    manualMixingRatio, setManualMixingRatio,
+    manualDeveloperVolume,
+    setManualDeveloperVolume,
+    manualMixingRatio,
+    setManualMixingRatio,
     setManualProcessingMinutes,
     additionalShadeCode,
-    additionalShadeGrams, setAdditionalShadeGrams,
-    additionalShade2Code, setAdditionalShade2Code,
-    additionalShade2Grams, setAdditionalShade2Grams,
-    neutralizationApplied, setNeutralizationApplied,
-    grayNaturalApplied, setGrayNaturalApplied,
-    naturalBaseShadeCode, setNaturalBaseShadeCode,
+    additionalShadeGrams,
+    setAdditionalShadeGrams,
+    additionalShade2Code,
+    setAdditionalShade2Code,
+    additionalShade2Grams,
+    setAdditionalShade2Grams,
+    neutralizationApplied,
+    setNeutralizationApplied,
+    grayNaturalApplied,
+    setGrayNaturalApplied,
+    naturalBaseShadeCode,
+    setNaturalBaseShadeCode,
 
     availableLines,
     lineShades,
@@ -104,7 +128,13 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     handleAdditionalShadeCodeChange,
   } = formula;
   const { prePigmentationNeed, prePigmentationResult } = useColorStepReport({
-    brands, formula, strandZone, startingBase, pricePerGram, prePigmentationEnabled, onChange,
+    brands,
+    formula,
+    strandZone,
+    startingBase,
+    pricePerGram,
+    prePigmentationEnabled,
+    onChange,
   });
 
   // Re-seeds starting base/canvas only at the moment the colorist actively picks a zone
@@ -136,9 +166,12 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
         <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} idSuffix={idSuffix} />
         <CanvasFields
-          porosity={porosity} onPorosityChange={setPorosity}
-          thickness={thickness} onThicknessChange={setThickness}
-          chemicalHistory={chemicalHistory} onChemicalHistoryChange={setChemicalHistory}
+          porosity={porosity}
+          onPorosityChange={setPorosity}
+          thickness={thickness}
+          onThicknessChange={setThickness}
+          chemicalHistory={chemicalHistory}
+          onChemicalHistoryChange={setChemicalHistory}
           idSuffix={idSuffix}
         />
         <ShadeField
@@ -232,13 +265,23 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
 
       {prePigmentationResult !== null && (
         <>
-          <PrePigmentationStep targetLevel={targetShade.level} result={prePigmentationResult} brandName={brands[brandId].name} />
+          <PrePigmentationStep
+            targetLevel={targetShade.level}
+            result={prePigmentationResult}
+            brandName={brands[brandId].name}
+          />
           <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
         </>
       )}
-      {result.liftUnsupportedWarning !== null && <p className="warning" role="alert">{result.liftUnsupportedWarning}</p>}
+      {result.liftUnsupportedWarning !== null && (
+        <p className="warning" role="alert">
+          {result.liftUnsupportedWarning}
+        </p>
+      )}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning" role="alert">{t("results.notAchievable")}</p>
+        <p className="warning" role="alert">
+          {t("results.notAchievable")}
+        </p>
       )}
       {result.achievedLevel !== null && result.achievedLevel !== targetShade.level && (
         <div className="results__row">
@@ -246,16 +289,36 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
           <span>{t("results.achievedLevelValue", { level: result.achievedLevel, target: targetShade.level })}</span>
         </div>
       )}
-      {result.toneWarning !== null && !neutralizationApplied && <p className="warning" role="alert">{result.toneWarning}</p>}
-      {result.eligibilityWarning !== null && <p className="warning" role="alert">{result.eligibilityWarning}</p>}
+      {result.toneWarning !== null && !neutralizationApplied && (
+        <p className="warning" role="alert">
+          {result.toneWarning}
+        </p>
+      )}
+      {result.eligibilityWarning !== null && (
+        <p className="warning" role="alert">
+          {result.eligibilityWarning}
+        </p>
+      )}
       {porosity === "high" && (
-        <p className="warning" role="alert">{t("results.porousWarning")}</p>
+        <p className="warning" role="alert">
+          {t("results.porousWarning")}
+        </p>
       )}
 
       {grams !== null && (
         <div className="results__row">
           <span className="results__row-label">{t("results.mix")}</span>
-          <span>{buildMixSummary(targetShade, grams, additionalShade, additionalShadeGrams, additionalShade2, additionalShade2Grams, naturalBase)}</span>
+          <span>
+            {buildMixSummary(
+              targetShade,
+              grams,
+              additionalShade,
+              additionalShadeGrams,
+              additionalShade2,
+              additionalShade2Grams,
+              naturalBase,
+            )}
+          </span>
         </div>
       )}
 
@@ -263,7 +326,10 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         <div className="results__row">
           <span className="results__row-label">{t("results.recommendedTone")}</span>
           <span>
-            {t("results.recommendedToneValue", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })}
+            {t("results.recommendedToneValue", {
+              grams: result.correctorGrams,
+              tone: result.recommendedCorrectiveTone,
+            })}
             <label className="results__neutralization-toggle">
               <input
                 type="checkbox"

@@ -27,7 +27,14 @@ export interface BrandShadeListProps {
 // Brand selector plus that brand's full shade list (including discontinued shades, so
 // an admin can re-enable one) with a per-shade discontinued toggle and photo
 // calibration control.
-export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBrand, shades, disabledKeys }: BrandShadeListProps) {
+export function BrandShadeList({
+  brands,
+  brandIds,
+  selectedBrandId,
+  onSelectBrand,
+  shades,
+  disabledKeys,
+}: BrandShadeListProps) {
   const { t } = useTranslation();
   const calibrationIndex = useShadeCalibrationIndex();
   const [pendingShadeKeys, setPendingShadeKeys] = useState<Set<string>>(new Set());
@@ -74,7 +81,12 @@ export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBran
 
   return (
     <>
-      <CollapsibleSection id="shades" title={t("palette.shadesTitle")} defaultOpen={true} className="palette-admin__section">
+      <CollapsibleSection
+        id="shades"
+        title={t("palette.shadesTitle")}
+        defaultOpen={true}
+        className="palette-admin__section"
+      >
         <div className="field">
           <label htmlFor="paletteSelectedBrand">{t("palette.selectBrandLabel")}</label>
           <Select
@@ -84,16 +96,31 @@ export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBran
             options={brandIds.map(id => ({ value: id, label: brands[id].name }))}
           />
         </div>
-        {error !== null && <p className="warning" role="alert">{error}</p>}
+        {error !== null && (
+          <p className="warning" role="alert">
+            {error}
+          </p>
+        )}
 
         {shades.length === 0 ? (
-          <p className="history__status" aria-live="polite">{t("palette.noShades")}</p>
+          <p className="history__status" aria-live="polite">
+            {t("palette.noShades")}
+          </p>
         ) : (
           <ul className="palette-admin__shade-list">
             {shades.map(shade => (
-              <li key={shadeKey(shade)} className={clsx("palette-admin__shade-row", disabledKeys.has(shadeKey(shade)) && "palette-admin__shade-row--disabled")}>
+              <li
+                key={shadeKey(shade)}
+                className={clsx(
+                  "palette-admin__shade-row",
+                  disabledKeys.has(shadeKey(shade)) && "palette-admin__shade-row--disabled",
+                )}
+              >
                 <span className="shade-swatch" style={{ backgroundColor: shadeToHexColor(shade) }} />
-                <span className="palette-admin__shade-code">{shade.code}{shade.name !== undefined ? ` "${shade.name}"` : ""}</span>
+                <span className="palette-admin__shade-code">
+                  {shade.code}
+                  {shade.name !== undefined ? ` "${shade.name}"` : ""}
+                </span>
                 <span className="palette-admin__shade-detail">
                   {t("palette.level")} {shade.level} · {t(`palette.toneFamily.${shade.tone}`)}
                   {shade.secondaryTone ? ` / ${t(`palette.toneFamily.${shade.secondaryTone}`)}` : ""}
@@ -146,7 +173,11 @@ export function BrandShadeList({ brands, brandIds, selectedBrandId, onSelectBran
         )}
       </CollapsibleSection>
       {calibratingShade !== null && (
-        <ShadeCalibrationDialog brandId={selectedBrandId} shade={calibratingShade} onClose={() => setCalibratingShade(null)} />
+        <ShadeCalibrationDialog
+          brandId={selectedBrandId}
+          shade={calibratingShade}
+          onClose={() => setCalibratingShade(null)}
+        />
       )}
     </>
   );

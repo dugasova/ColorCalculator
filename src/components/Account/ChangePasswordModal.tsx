@@ -82,8 +82,12 @@ export function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps)
     <Modal title={t("account.changePassword")} onClose={onClose}>
       {isDone ? (
         <div className="change-password__done">
-          <p className="notice" role="status">{t("account.changePasswordSuccess")}</p>
-          <button type="button" className="button" onClick={onClose}>{t("common.close")}</button>
+          <p className="notice" role="status">
+            {t("account.changePasswordSuccess")}
+          </p>
+          <button type="button" className="button" onClick={onClose}>
+            {t("common.close")}
+          </button>
         </div>
       ) : (
         <form className="calculator__form change-password-form" onSubmit={handleSubmit}>
@@ -98,13 +102,26 @@ export function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps)
             />
           </div>
           <div className="forgot-row">
-            <button type="button" className="link-button" onClick={handleSendResetEmail} disabled={resetEmailStatus === "sending" || user.email === null}>
-              {resetEmailStatus === "sending" ? t("account.forgotCurrentPasswordSending") : t("account.forgotCurrentPassword")}
+            <button
+              type="button"
+              className="link-button"
+              onClick={handleSendResetEmail}
+              disabled={resetEmailStatus === "sending" || user.email === null}
+            >
+              {resetEmailStatus === "sending"
+                ? t("account.forgotCurrentPasswordSending")
+                : t("account.forgotCurrentPassword")}
             </button>
             {resetEmailStatus === "sent" && (
-              <p className="notice" role="status">{t("account.forgotCurrentPasswordSent", { email: user.email })}</p>
+              <p className="notice" role="status">
+                {t("account.forgotCurrentPasswordSent", { email: user.email })}
+              </p>
             )}
-            {resetEmailStatus === "error" && <p className="warning" role="alert">{t("account.forgotCurrentPasswordError")}</p>}
+            {resetEmailStatus === "error" && (
+              <p className="warning" role="alert">
+                {t("account.forgotCurrentPasswordError")}
+              </p>
+            )}
           </div>
           <div className="field">
             <label htmlFor="new-password">{t("account.newPassword")}</label>
@@ -128,10 +145,26 @@ export function ChangePasswordModal({ user, onClose }: ChangePasswordModalProps)
               required
             />
           </div>
-          {error === "mismatch" && <p className="warning" role="alert">{t("account.passwordMismatch")}</p>}
-          {error === "wrongPassword" && <p className="warning" role="alert">{t("account.wrongCurrentPassword")}</p>}
-          {error === "weakPassword" && <p className="warning" role="alert">{t("account.weakPassword")}</p>}
-          {error === "generic" && <p className="warning" role="alert">{t("account.changePasswordFailed")}</p>}
+          {error === "mismatch" && (
+            <p className="warning" role="alert">
+              {t("account.passwordMismatch")}
+            </p>
+          )}
+          {error === "wrongPassword" && (
+            <p className="warning" role="alert">
+              {t("account.wrongCurrentPassword")}
+            </p>
+          )}
+          {error === "weakPassword" && (
+            <p className="warning" role="alert">
+              {t("account.weakPassword")}
+            </p>
+          )}
+          {error === "generic" && (
+            <p className="warning" role="alert">
+              {t("account.changePasswordFailed")}
+            </p>
+          )}
           <button type="submit" className="button" disabled={isSubmitting}>
             {isSubmitting ? t("account.changingPassword") : t("account.changePasswordSubmit")}
           </button>

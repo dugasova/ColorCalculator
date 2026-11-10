@@ -32,7 +32,9 @@ async function main() {
   const email = process.env.MIGRATION_ADMIN_EMAIL;
   const password = process.env.MIGRATION_ADMIN_PASSWORD;
   if (!email || !password) {
-    console.error("Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.");
+    console.error(
+      "Set MIGRATION_ADMIN_EMAIL and MIGRATION_ADMIN_PASSWORD to an account with role: 'admin' before running this script.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -49,12 +51,13 @@ async function main() {
     await deleteDoc(doc(db, "paletteOverrides", d.id));
   }
 
-  console.log(`Deleted ${staleMajirelAdds.length} stale Majirel override(s). The corrected built-in chart now applies.`);
+  console.log(
+    `Deleted ${staleMajirelAdds.length} stale Majirel override(s). The corrected built-in chart now applies.`,
+  );
   await signOut(auth);
 }
 
-main()
-  .catch(err => {
-    console.error(err);
-    process.exitCode = 1;
-  });
+main().catch(err => {
+  console.error(err);
+  process.exitCode = 1;
+});

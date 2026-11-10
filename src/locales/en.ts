@@ -84,7 +84,8 @@ export const en = {
     startLevel: "Starting level",
     startLevelHint: "Depth at the roots: 1 = black, 10 = lightest blonde, 11–12 = special blondes.",
     grayPercent: "Gray percentage",
-    grayPercentHint: "Under {{light}}%: fashion tone only. From {{light}}% a third of natural base is added (half from {{medium}}%), with at least {{developer}} developer.",
+    grayPercentHint:
+      "Under {{light}}%: fashion tone only. From {{light}}% a third of natural base is added (half from {{medium}}%), with at least {{developer}} developer.",
     grayNatural: "Add natural base for gray coverage ({{natural}}% of the color)",
     grayNaturalShade: "Natural shade",
     grayNaturalUnavailable: "This line has no natural shade at level {{level}} to blend in for gray coverage.",
@@ -127,7 +128,8 @@ export const en = {
     gramsInputModeColor: "Color only",
     crossBrandFind: "Find equivalent in another brand",
     crossBrandEmpty: "No other brands in the palette yet",
-    crossBrandUnknownPermanence: "Can't determine a safe equivalent for this line's chemistry (permanent vs. semi-permanent)",
+    crossBrandUnknownPermanence:
+      "Can't determine a safe equivalent for this line's chemistry (permanent vs. semi-permanent)",
     crossBrandUse: "Use this",
     crossBrandQualityExcellent: "Excellent match",
     crossBrandQualityGood: "Good match",
@@ -196,7 +198,8 @@ export const en = {
     ratio: "Ratio",
     notAchievable: "Not achievable in a single process — multi-step lightening required",
     achievedLevel: "Achievable level",
-    achievedLevelValue: "Level {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
+    achievedLevelValue:
+      "Level {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
     mix: "Mix",
     processingTime: "Processing time, min",
     processingTimeHint: "Recommended: {{minutes}} min",
@@ -208,7 +211,8 @@ export const en = {
     timingPricingSectionTitle: "Timing & pricing",
     clientDetailsSectionTitle: "Client & visit details",
     saveForClient: "Save for a client…",
-    saveForClientHint: "You'll need the client's name and a patch-test date (at least 48 h ago), or a note that none is needed.",
+    saveForClientHint:
+      "You'll need the client's name and a patch-test date (at least 48 h ago), or a note that none is needed.",
     pricePerGram: "Price per gram",
     markupMultiplier: "Markup multiplier",
     productCost: "Product cost",
@@ -275,8 +279,8 @@ export const en = {
     deleteConfirmButton: "Confirm delete",
     writeError: "Could not update favorites — check your connection and try again",
     loadError: "Could not load your favorite formulas",
-    brandMissing: "\"{{name}}\" can't be inserted: its brand is no longer in the palette.",
-    shadesMissing: "\"{{name}}\" can't be inserted: {{codes}} no longer in the palette.",
+    brandMissing: '"{{name}}" can\'t be inserted: its brand is no longer in the palette.',
+    shadesMissing: '"{{name}}" can\'t be inserted: {{codes}} no longer in the palette.',
   },
   login: {
     signIn: "Sign in",
@@ -322,7 +326,7 @@ export const en = {
     searchPlaceholder: "Client name",
     loading: "Loading…",
     loadError: "Failed to load history",
-    emptyFirstRun: "Your clients will appear here. Calculate a formula in the Calculator and tap \"Save for a client…\".",
+    emptyFirstRun: 'Your clients will appear here. Calculate a formula in the Calculator and tap "Save for a client…".',
     empty: "Nothing matches this search.",
     appliedBy: "Applied by {{name}}",
     savedInVersion: "v{{version}}",
@@ -357,7 +361,8 @@ export const en = {
     reminderNextService: "then {{reason}} in ~{{weeks}} weeks",
     remindWhatsApp: "Remind via WhatsApp",
     remindTelegram: "Remind via Telegram",
-    remindMessage: "Hi {{name}}! Time to plan your next color visit — we recommend around {{date}}. Tell us what time suits you.",
+    remindMessage:
+      "Hi {{name}}! Time to plan your next color visit — we recommend around {{date}}. Tell us what time suits you.",
     actualColorGrams: "Actually used, g",
     actualColorGramsWithZone: "{{zone}} — Actually used, g",
     computedColorGrams: "calculated: {{grams}} g",
@@ -376,7 +381,8 @@ export const en = {
     editSaveError: "Could not save the changes — check your connection and try again",
     deleteClient: "Delete client",
     deleteClientConfirmTitle: "Delete {{name}}?",
-    deleteClientConfirmBody: "This permanently deletes {{name}}'s profile and all {{count}} saved visit(s), including any photos. This cannot be undone.",
+    deleteClientConfirmBody:
+      "This permanently deletes {{name}}'s profile and all {{count}} saved visit(s), including any photos. This cannot be undone.",
     deleteClientConfirmButton: "Delete permanently",
     deletingClient: "Deleting…",
     deleteClientError: "Could not delete this client — check your connection and try again",
@@ -428,15 +434,15 @@ export const en = {
     },
     liftUnsupportedWarning:
       "'{{code}}' can't lift level — it only deposits color at level {{level}} or lower, but the starting level is {{startLevel}}",
-    toneWarning:
-      "The chosen tone '{{tone}}' won't neutralize {{pigment}} pigment; '{{recommended}}' is recommended",
+    toneWarning: "The chosen tone '{{tone}}' won't neutralize {{pigment}} pigment; '{{recommended}}' is recommended",
     eligibilityWarning:
       "Shade '{{code}}' requires a starting level of {{minLevel}} or higher (natural base); current start level is {{startLevel}}",
   },
   format: {
     startingLevel: "Starting level: {{start}} → Target: {{target}}",
     startingLevelRange: "Starting level: {{start}}–{{end}} → Target: {{target}}",
-    achievedLevel: "Achievable level: {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
+    achievedLevel:
+      "Achievable level: {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
     applicationZone: "Application: {{value}}",
     strandZone: "Zone: {{value}}",
     startingBase: "Starting base: {{value}}",
@@ -501,26 +507,32 @@ export const en = {
     },
     explanation: "{{corrector}} neutralizes {{tone}} through chromatic opposition",
     tips: {
-      multiStep: "With more than 2 levels of lift, bleach first to the desired level and apply the corrector afterwards as a toner.",
-      orange: "On dark bases (level 5-6), orange is very intense. Use ash .01 instead of .1 for more neutralizing power.",
+      multiStep:
+        "With more than 2 levels of lift, bleach first to the desired level and apply the corrector afterwards as a toner.",
+      orange:
+        "On dark bases (level 5-6), orange is very intense. Use ash .01 instead of .1 for more neutralizing power.",
       yellow: "For extra light blondes, complement with violet maintenance shampoo between visits.",
-      redMultiStep: "Red on dark bases is very persistent. Consider a green color bath beforehand for pre-neutralization.",
+      redMultiStep:
+        "Red on dark bases is very persistent. Consider a green color bath beforehand for pre-neutralization.",
       greenMultiStep: "Greens from chlorine are best treated with a red color bath first, then the final formula.",
-      generic: "Add the corrective reflection to your formula and adjust the amount based on the intensity of the unwanted tone.",
+      generic:
+        "Add the corrective reflection to your formula and adjust the amount based on the intensity of the unwanted tone.",
     },
     strandTest: "Always perform a strand test to verify the result before full application.",
     baseGrams: "Base color amount, g",
     ruleOfTen: {
       label: "Corrector amount (Rule of 10)",
       value: "{{correctorGrams}} g of corrector per {{baseGrams}} g of base color",
-      explanation: "10 minus the level you are coloring at ({{level}}) gives the amount of corrector, in grams (~1 g per cm of tube), to blend into 30 g of base color. From level 10 up this settles at a fixed 0.5 g floor rather than zero, since even very light blondes still carry a faint yellow undertone that needs a touch of violet.",
+      explanation:
+        "10 minus the level you are coloring at ({{level}}) gives the amount of corrector, in grams (~1 g per cm of tube), to blend into 30 g of base color. From level 10 up this settles at a fixed 0.5 g floor rather than zero, since even very light blondes still carry a faint yellow undertone that needs a touch of violet.",
     },
     disclaimer: "Basic guidance — does not replace a complete color diagnosis.",
   },
   prePigmentation: {
     titlePrefix: "Pre-pigmentation",
     titleAccent: "Calculator",
-    subtitle: "Calculate whether hair needs its missing underlying warmth restored before depositing a much darker target level, and the filler formula, timing, and target-color developer/ratio for as many stages as the level drop requires.",
+    subtitle:
+      "Calculate whether hair needs its missing underlying warmth restored before depositing a much darker target level, and the filler formula, timing, and target-color developer/ratio for as many stages as the level drop requires.",
     currentLevel: "Current level",
     targetLevel: "Target level",
     totalGrams: "Filler amount, g",
@@ -530,7 +542,8 @@ export const en = {
       none: "Not needed — apply the target formula directly.",
       recommended: "Recommended — the level drop is moderate; filling first gives a truer, longer-lasting result.",
       "required-same-session": "Required, same visit — fill first, then apply the target formula.",
-      "required-multi-visit": "Required, over two visits — fill and process, then apply the target formula at a separate appointment.",
+      "required-multi-visit":
+        "Required, over two visits — fill and process, then apply the target formula at a separate appointment.",
     },
     fillerSectionLabel: "Step 1 — Filler",
     underlyingPigmentLabel: "Missing underlying pigment",
@@ -539,12 +552,15 @@ export const en = {
     fillerToneValue: "Recommended filler tone: {{value}}",
     exampleFillerShadeLabel: "{{brandName}}-line example",
     exampleFillerShadeValue: "{{brandName}} {{code}} ({{tone}})",
-    noExampleFillerShade: "No dedicated {{tone}} shade at level {{level}} in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.",
+    noExampleFillerShade:
+      "No dedicated {{tone}} shade at level {{level}} in this catalog — use the natural (.0) base diluted, or a dedicated filler/corrector product.",
     fillerMixLabel: "Filler mix",
     fillerMixValue: "{{filler}} g filler : {{diluent}} g water",
-    multiVisitNote: "Let the filler process and settle {{min}}-{{max}} days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.",
+    multiVisitNote:
+      "Let the filler process and settle {{min}}-{{max}} days before the final color visit — combining a large pigment restoration with an immediate dark deposit in one sitting risks an uneven, over-processed result.",
     finalStepLabel: "Step 2 — Target color",
-    finalStepNote: "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays {{start}}, not the filled level.",
+    finalStepNote:
+      "Once filled, apply your target shade formula from the Formula calculator using this developer and ratio — the starting level for that formula stays {{start}}, not the filled level.",
     disclaimer: "Basic guidance — does not replace a complete color diagnosis and strand test.",
   },
   bleach: {
@@ -554,10 +570,12 @@ export const en = {
     currentLevel: "Current level",
     targetLevel: "Target level",
     noLiftWarning: "Bleach only lightens hair — choose a target level above your current level.",
-    multiStepWarning: "This lift cannot be done in a single session. Let the scalp recover for 1-2 weeks before the next lightening session.",
+    multiStepWarning:
+      "This lift cannot be done in a single session. Let the scalp recover for 1-2 weeks before the next lightening session.",
     mixValue: "{{powder}} g bleach powder : {{developer}} g developer",
     processingTimeLabel: "Processing time",
-    maxScalpTimeNote: "Regardless of how much lift is needed, never leave bleach on the scalp for more than {{max}} minutes — this is a hard safety ceiling.",
+    maxScalpTimeNote:
+      "Regardless of how much lift is needed, never leave bleach on the scalp for more than {{max}} minutes — this is a hard safety ceiling.",
     checkIntervalNote: "Check the result visually every {{min}}-{{max}} minutes throughout processing.",
     strandTestNote: "Always perform a strand test to check the result before applying to the full head.",
     recommendedServicePrice: "Recommended service price",
@@ -565,7 +583,8 @@ export const en = {
   complexColoring: {
     titlePrefix: "Complex",
     titleAccent: "Coloring",
-    subtitle: "Combine bleach and color steps into one session — e.g. balayage: lift sections with bleach powder, then tone with a permanent color. Each step is calculated on its own; totals below cover the whole appointment.",
+    subtitle:
+      "Combine bleach and color steps into one session — e.g. balayage: lift sections with bleach powder, then tone with a permanent color. Each step is calculated on its own; totals below cover the whole appointment.",
     empty: "Add a bleach or color step below to start building the session.",
     colorStepTitle: "Color step",
     bleachStepTitle: "Bleach step",
@@ -601,7 +620,8 @@ export const en = {
     calibrated: "Calibrated",
     removeCalibration: "Remove calibration",
     calibrateTitle: "Calibrate {{code}}",
-    calibrateHint: "Photograph this shade's swatch-book strand next to an 18% grey card, in the light you use for clients.",
+    calibrateHint:
+      "Photograph this shade's swatch-book strand next to an 18% grey card, in the light you use for clients.",
     calibrateSave: "Save calibration",
     addShadeTitle: "Add a shade",
     addShadeForBrand: "Adding to: {{brand}}",
@@ -620,7 +640,8 @@ export const en = {
     saving: "Saving…",
     saveError: "Failed to save — check your connection and try again",
     stockTitle: "Stock",
-    stockHint: "Grams left of each product. Leave a field blank to stop tracking it — every saved formula subtracts the grams it used.",
+    stockHint:
+      "Grams left of each product. Leave a field blank to stop tracking it — every saved formula subtracts the grams it used.",
     stockDevelopersTitle: "Developer",
     stockGramsFor: "Grams left of {{code}}",
     stockLow: "Low",
@@ -657,7 +678,7 @@ export const en = {
   orders: {
     titlePrefix: "Order",
     titleAccent: "list",
-    hint: "Tracked products with one tube or less left (developer: 60 g). Each quantity is the fewest tubes/bottles that lifts the product out of \"Low\" — edit any before sending; 0 leaves it out.",
+    hint: 'Tracked products with one tube or less left (developer: 60 g). Each quantity is the fewest tubes/bottles that lifts the product out of "Low" — edit any before sending; 0 leaves it out.',
     empty: "Nothing to order — every tracked product is above its low-stock level.",
     selectBrandLabel: "Brand",
     qtyFor: "Quantity of {{label}} to order",
@@ -672,7 +693,7 @@ export const en = {
 
   brandNotes: {
     backToApp: "← Back to the app",
-    notFound: "No cheat sheet for \"{{brandId}}\".",
+    notFound: 'No cheat sheet for "{{brandId}}".',
     notFoundHint: "Available: {{ids}}",
     loreal: {
       title: "L'Oréal",
@@ -687,7 +708,7 @@ export const en = {
     wella: {
       title: "Wella",
       points: [
-        "Koleston Perfect: 1:1, except the \"12\" Special Blonde series (1:2).",
+        'Koleston Perfect: 1:1, except the "12" Special Blonde series (1:2).',
         "Same depth or darker with little gray: use 4% (13 vol) instead of the usual 3%.",
         "Special Blonde: fixed 55 min, no heat.",
         "Color Touch (demi): its own 1.9%/4% developer choice, separate from the rules above.",
@@ -696,7 +717,7 @@ export const en = {
     igora: {
       title: "Igora",
       points: [
-        "Igora Royal: 1:1, including the \"10-\" Ultra Blonde series. \"12-\" Special Blonde is 1:2.",
+        'Igora Royal: 1:1, including the "10-" Ultra Blonde series. "12-" Special Blonde is 1:2.',
         "Highlifts 12-series: fixed 45 min, no heat.",
         "Igora Vibrance (demi toner): always 1:1 with activator, even the level-10 toners.",
       ],
@@ -726,20 +747,20 @@ export const en = {
   },
   techniqueGuides: {
     backToApp: "← Back to the app",
-    notFound: "No guide for \"{{guideId}}\".",
+    notFound: 'No guide for "{{guideId}}".',
     notFoundHint: "Available: {{ids}}",
     "resistant-gray": {
       title: "Resistant / vitreous gray",
       points: [
-        "Diagnose first: vitreous (\"glassy\") gray has a hard, tightly compacted cuticle -- feels stiff/wiry and looks shiny/translucent rather than dull. It resists oxidative color even when the rest of the head takes normally.",
+        'Diagnose first: vitreous ("glassy") gray has a hard, tightly compacted cuticle -- feels stiff/wiry and looks shiny/translucent rather than dull. It resists oxidative color even when the rest of the head takes normally.',
         "Never skip the natural-base blend on these zones, even at high gray % -- this app's own gray-coverage strategy already doses it (1/3 natural at 30-50% gray, 1/2 at 50%+, see the calculator's gray-percentage field); don't formulate resistant patches fashion-only to \"save time\".",
         "Developer floor: never drop below 20 vol on a resistant zone, even same-depth-or-darker where the level-diff math alone would pick a gentler volume -- 20 vol is the minimum that reliably swells this tougher cuticle enough to deposit oxidative pigment.",
         "Pre-soften stubborn patches (temples, hairline, nape) before the main application: apply the developer alone (no color) to just those sections for 5-10 minutes, blot, then apply the full formula as normal over the now-softer cuticle.",
-        "Alternative/traditional pre-treatment (\"mordanting\"): straight 3% (10 vol) developer on the resistant strands only, left 10 minutes, rinsed, hair dried, then color applied -- functionally the same goal as pre-softening, different order.",
+        'Alternative/traditional pre-treatment ("mordanting"): straight 3% (10 vol) developer on the resistant strands only, left 10 minutes, rinsed, hair dried, then color applied -- functionally the same goal as pre-softening, different order.',
         "Application order: saturate the resistant sections FIRST, the rest of the head after -- resistant hair needs the longest contact time, so give it a head start rather than an equal share.",
         "Processing time: use the maximum recommended time for the formula, not the average -- resistant gray is exactly the case that needs the full window, never a shortened one.",
         "Don't go colder/ashier than the target calls for -- resistant gray tends to grab cool/ash tones unevenly and can read dull or greenish; a touch of warmth in the formula reads truer on it.",
-        "If a client reports color \"looked right for a few days, then faded fast\" on the same zones every time, that's the signature of vitreous gray paired with too weak a developer/too short a time -- fix the process, not just the formula.",
+        'If a client reports color "looked right for a few days, then faded fast" on the same zones every time, that\'s the signature of vitreous gray paired with too weak a developer/too short a time -- fix the process, not just the formula.',
         "Mechanical work helps: comb or massage the color through tightly packed resistant strands (brush-and-bowl application, not just the applicator bottle) so product actually reaches every strand instead of sitting on top.",
         "Expect a shorter revisit interval on heavily resistant zones -- regrowth against stubborn white shows sooner than against normal pigmented hair (see this app's own revisit-planning gray-% tiers).",
       ],
@@ -748,28 +769,37 @@ export const en = {
   reference: {
     indexTitlePrefix: "Quick",
     indexTitleAccent: "reference",
-    indexHint: "Brand mixing/processing quirks and technique cheat sheets -- glance at these with gloves on, instead of hunting through the app.",
+    indexHint:
+      "Brand mixing/processing quirks and technique cheat sheets -- glance at these with gloves on, instead of hunting through the app.",
     brandsSectionTitle: "Brands",
     guidesSectionTitle: "Techniques",
   },
   privacy: {
     title: "Privacy Policy",
     lastUpdated: "Last updated: October 2026",
-    intro: "Formulist is a hair-color formula calculator used by salon colorists. This page explains what data the app collects and why.",
+    intro:
+      "Formulist is a hair-color formula calculator used by salon colorists. This page explains what data the app collects and why.",
     accountTitle: "Account data",
-    accountBody: "Signing in requires an email address and password, handled by Firebase Authentication. Access to a salon's data is granted in-app by that salon's admin (see the \"Team\" screen) after you sign up and verify your email.",
+    accountBody:
+      "Signing in requires an email address and password, handled by Firebase Authentication. Access to a salon's data is granted in-app by that salon's admin (see the \"Team\" screen) after you sign up and verify your email.",
     salonTitle: "Salon & client data",
-    salonBody: "Client names, contact details, formulas, photos, and visit notes that a stylist enters are stored in the salon's own Firestore database and are visible only to that salon's signed-in, approved staff -- never to other salons using the app.",
+    salonBody:
+      "Client names, contact details, formulas, photos, and visit notes that a stylist enters are stored in the salon's own Firestore database and are visible only to that salon's signed-in, approved staff -- never to other salons using the app.",
     monitoringTitle: "Error monitoring",
-    monitoringBody: "Crash and error reports are sent to Sentry to help us fix bugs. These reports include your account id, the app platform (web or Android), and technical details about the error -- never your email, client names, or formula contents.",
+    monitoringBody:
+      "Crash and error reports are sent to Sentry to help us fix bugs. These reports include your account id, the app platform (web or Android), and technical details about the error -- never your email, client names, or formula contents.",
     analyticsTitle: "Product analytics",
-    analyticsBody: "We use Google Analytics for Firebase to see which features are used, so we know what to improve. This is anonymized usage data (which screens are opened, whether a formula was saved) -- never your email, client names, or formula contents, and never used for advertising.",
+    analyticsBody:
+      "We use Google Analytics for Firebase to see which features are used, so we know what to improve. This is anonymized usage data (which screens are opened, whether a formula was saved) -- never your email, client names, or formula contents, and never used for advertising.",
     thirdPartiesTitle: "Third-party processors",
-    thirdPartiesBody: "Data is processed by Google (Firebase Authentication, Firestore, Firebase Storage, Google Analytics) and Sentry, strictly to operate and improve the app -- never sold or used for advertising.",
+    thirdPartiesBody:
+      "Data is processed by Google (Firebase Authentication, Firestore, Firebase Storage, Google Analytics) and Sentry, strictly to operate and improve the app -- never sold or used for advertising.",
     retentionTitle: "Data retention & your rights",
-    retentionBody: "Salon data is kept for as long as the salon account is active. To request deletion of your account or client data, contact us using the details below.",
+    retentionBody:
+      "Salon data is kept for as long as the salon account is active. To request deletion of your account or client data, contact us using the details below.",
     contactTitle: "Contact",
-    contactBody: "To ask a question or request data deletion, contact the salon owner or the app's maintainer directly.",
+    contactBody:
+      "To ask a question or request data deletion, contact the salon owner or the app's maintainer directly.",
     contactLinkLabel: "Contact us",
   },
 };

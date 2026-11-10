@@ -57,12 +57,28 @@ export function VerifyEmailScreen({ user, onRefreshed }: VerifyEmailScreenProps)
       <div className="login-form__language">
         <LanguageSwitcher />
       </div>
-      <h1 className="calculator__title"><img className="calculator__title-mark" src="/favicon.svg" alt="" width="28" height="28" />{t("app.titlePrefix")}<span className="calculator__title-accent">{t("app.titleAccent")}</span></h1>
+      <h1 className="calculator__title">
+        <img className="calculator__title-mark" src="/favicon.svg" alt="" width="28" height="28" />
+        {t("app.titlePrefix")}
+        <span className="calculator__title-accent">{t("app.titleAccent")}</span>
+      </h1>
       <p className="calculator__subtitle">{t("verifyEmail.body", { email: user.email })}</p>
 
-      {resendStatus === "sent" && <p className="notice" role="status">{t("verifyEmail.resent")}</p>}
-      {resendStatus === "error" && <p className="warning" role="alert">{t("verifyEmail.resendFailed")}</p>}
-      {checkStatus === "stillUnverified" && <p className="warning" role="alert">{t("verifyEmail.stillUnverified")}</p>}
+      {resendStatus === "sent" && (
+        <p className="notice" role="status">
+          {t("verifyEmail.resent")}
+        </p>
+      )}
+      {resendStatus === "error" && (
+        <p className="warning" role="alert">
+          {t("verifyEmail.resendFailed")}
+        </p>
+      )}
+      {checkStatus === "stillUnverified" && (
+        <p className="warning" role="alert">
+          {t("verifyEmail.stillUnverified")}
+        </p>
+      )}
 
       <div className="verify-email__actions">
         <button type="button" className="button" onClick={handleCheck} disabled={checkStatus === "checking"}>
