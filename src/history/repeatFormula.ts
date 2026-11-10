@@ -61,12 +61,13 @@ function isSimpleFormulaEntry(entry: FormulaHistoryEntry): boolean {
   return entry.steps.length === 1 && entry.steps[0].kind === "color" && entry.steps[0].strandZone === undefined;
 }
 
-// The step's brand is stored as `brandName` (a display string, see ColorHistoryStep),
-// so it's matched back by name against the live catalog (built-ins plus whatever an
-// admin has added/renamed via PaletteAdminView -- see `usePalette`). `undefined` if the
-// brand no longer exists (e.g. renamed or removed since the entry was saved).
+// Matches the step back to the live catalog (built-ins plus admin-added brands, see
+// `usePalette`). `brandId` first: it survives a brand being renamed in PaletteAdmin.
+// Falls back to the display name for legacy steps saved before `brandId` existed (or
+// whose id is no longer in the catalog). `undefined` if neither matches.
 function resolveStepBrand(step: ColorHistoryStep, brands: Record<BrandId, Brand>): Brand | undefined {
-  return Object.values(brands).find(b => b.name === step.brandName);
+  const byId = step.brandId !== undefined ? brands[step.brandId] : undefined;
+  return byId ?? Object.values(brands).find(b => b.name === step.brandName);
 }
 
 // Neither totalGrams nor colorGrams is stored directly on a saved step; both are
