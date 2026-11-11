@@ -18,13 +18,18 @@
   color: var(--ink);
 }
 
+/* Wraps: the title is two flex items (prefix text + accent span), and a long pair such
+   as "Передпігментація Калькулятор" doesn't fit one line on a phone. The size steps down
+   on very narrow screens so a long single word still fits without breaking mid-word. */
 .calculator__title {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 0 8px;
+  overflow-wrap: anywhere;
   margin: 0 0 24px;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 6.5vw, 1.5rem);
   font-weight: 500;
   color: var(--ink);
 }
