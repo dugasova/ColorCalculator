@@ -343,22 +343,34 @@ function resolveMixingRatio(
   return targetShade.fixedMixingRatio ?? mixingRatioStrategy(startLevel, targetShade.level);
 }
 
-export function calculateFullFormula(
-  startLevel: Level,
-  targetShade: Shade,
-  grayPercent: number,
-  totalGrams: number,
-  mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio = getMixingRatio,
-  manualDeveloperVolume?: DeveloperVolume,
-  manualMixingRatio?: MixingRatio,
+export interface FullFormulaInput {
+  startLevel: Level;
+  targetShade: Shade;
+  grayPercent: number;
+  totalGrams: number;
+  // The brand's level-diff ratio strategy (Brand.mixingRatio); the generic one by default.
+  mixingRatioStrategy?: (startLevel: Level, targetLevel: Level) => MixingRatio;
+  manualDeveloperVolume?: DeveloperVolume;
+  manualMixingRatio?: MixingRatio;
   // Lets a colorist enter the dye weight directly (e.g. "40 g of color per root
   // touch-up") instead of a total mix weight -- developer is then derived from it via
   // the resolved ratio (see calculateFormulaGramsFromColorGrams) rather than backed out
   // of `totalGrams`. When set, `totalGrams` is still used for anything unrelated to the
   // color:developer split itself (e.g. corrector grams), scaled to match the resulting
   // real total so those figures stay proportional to what's actually being mixed.
-  colorGramsOverride?: number,
-): FullFormula {
+  colorGramsOverride?: number;
+}
+
+export function calculateFullFormula({
+  startLevel,
+  targetShade,
+  grayPercent,
+  totalGrams,
+  mixingRatioStrategy = getMixingRatio,
+  manualDeveloperVolume,
+  manualMixingRatio,
+  colorGramsOverride,
+}: FullFormulaInput): FullFormula {
   const isLifting = targetShade.level > startLevel;
   const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);

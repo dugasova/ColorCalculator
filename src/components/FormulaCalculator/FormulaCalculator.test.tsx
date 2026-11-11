@@ -264,7 +264,7 @@ describe("FormulaCalculator gray-coverage natural base", () => {
 describe("FormulaResults pre-pigmentation step", () => {
   const targetShade: Shade = { code: "5.4", level: 5, tone: "copper" };
   // 4-level drop (9 -> 5): 1:1 no-lift ratio, 30g total -> 15g color : 15g developer.
-  const baseResult = calculateFullFormula(9, targetShade, 0, 30);
+  const baseResult = calculateFullFormula({ startLevel: 9, targetShade, grayPercent: 0, totalGrams: 30 });
   const prePigmentationResult = calculatePrePigmentation(9, 5, 30);
 
   const noOps = {
@@ -352,7 +352,7 @@ describe("FormulaResults additional shade blending", () => {
   const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
   const additionalShade: Shade = { code: "8.3", level: 8, tone: "gold" };
   // No lift (level 8 -> 8): 1:1 ratio, 60g total -> 30g color : 30g developer.
-  const baseResult = calculateFullFormula(8, targetShade, 0, 60);
+  const baseResult = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
   const noOps = {
     onProcessingMinutesChange: () => {},
@@ -449,7 +449,7 @@ describe("FormulaResults substitute blend", () => {
   const shadeA: Shade = { code: "8/1", level: 8, tone: "ash" };
   const shadeB: Shade = { code: "8/7", level: 8, tone: "chocolate" };
   // No lift (level 8 -> 8): 1:1 ratio, 60g total -> 30g color : 30g developer.
-  const baseResult = calculateFullFormula(8, targetShade, 0, 60);
+  const baseResult = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
   const noOps = {
     onProcessingMinutesChange: () => {},

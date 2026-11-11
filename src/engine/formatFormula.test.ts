@@ -6,7 +6,7 @@ import type { Shade } from "./shades";
 describe("formatFormulaText", () => {
   it("formats a straightforward achievable formula (no lift, so no pigment warning)", () => {
     const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
-    const result = calculateFullFormula(8, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Generic",
@@ -38,7 +38,7 @@ describe("formatFormulaText", () => {
   it("includes the Rule of 10 microtone length with the recommended corrective tone when lifting", () => {
     // level 8 -> underlying pigment 'yellow' -> recommended corrective tone 'violet'; Rule of 10: (10-8) * (60/30) = 4cm
     const targetShade: Shade = { code: "8.2", level: 8, tone: "violet" };
-    const result = calculateFullFormula(6, targetShade, 10, 60);
+    const result = calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 10, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Generic",
@@ -60,7 +60,7 @@ describe("formatFormulaText", () => {
   it("replaces the recommended-tone line and suppresses the tone warning when neutralization is applied", () => {
     // level 8 -> pigment 'yellow' -> recommended 'violet', but chosen tone is 'gold' -> mismatch
     const targetShade: Shade = { code: "8.3", level: 8, tone: "gold" };
-    const result = calculateFullFormula(6, targetShade, 10, 60);
+    const result = calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 10, totalGrams: 60 });
     expect(result.toneWarning).not.toBeNull();
 
     const text = formatFormulaText({
@@ -90,7 +90,7 @@ describe("formatFormulaText", () => {
       secondaryTone: "gold",
       line: "color-touch",
     };
-    const result = calculateFullFormula(8, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Wella",
@@ -117,7 +117,13 @@ describe("formatFormulaText", () => {
       secondaryTone: "gold",
       developerVolumeChoices: [6, 13],
     };
-    const result = calculateFullFormula(6, targetShade, 0, 60, undefined, 13);
+    const result = calculateFullFormula({
+      startLevel: 6,
+      targetShade,
+      grayPercent: 0,
+      totalGrams: 60,
+      manualDeveloperVolume: 13,
+    });
 
     const text = formatFormulaText({
       brandName: "Wella",
@@ -147,7 +153,7 @@ describe("formatFormulaText", () => {
       secondaryTone: "gold",
       developerVolumeChoices: [6, 13],
     };
-    const result = calculateFullFormula(6, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Wella",
@@ -169,7 +175,7 @@ describe("formatFormulaText", () => {
 
   it("falls back to the generic not-achievable message when grams is null without a liftUnsupportedWarning", () => {
     const targetShade: Shade = { code: "10.0", level: 10, tone: "natural" };
-    const result = calculateFullFormula(1, targetShade, 90, 60);
+    const result = calculateFullFormula({ startLevel: 1, targetShade, grayPercent: 90, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Generic",
@@ -191,7 +197,7 @@ describe("formatFormulaText", () => {
   it("appends toneWarning and eligibilityWarning as separate Warning lines when present", () => {
     // level 8 -> pigment 'yellow' -> recommended 'violet', but chosen tone is 'gold'
     const targetShade: Shade = { code: "8.3", level: 8, tone: "gold", minStartLevel: 6 };
-    const result = calculateFullFormula(5, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 5, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Generic",
@@ -216,7 +222,7 @@ describe("formatFormulaText", () => {
   it("includes the additional shade in the Mix line, with developer recalculated for the blended total", () => {
     const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
     const additionalShade: Shade = { code: "8.3", level: 8, tone: "gold" };
-    const baseResult = calculateFullFormula(8, targetShade, 0, 60);
+    const baseResult = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
     const grams = baseResult.grams !== null ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 5) : null;
     const result = { ...baseResult, grams };
 
@@ -241,7 +247,7 @@ describe("formatFormulaText", () => {
 
   it("omits the second shade from the Mix line when no grams were entered for it", () => {
     const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
-    const result = calculateFullFormula(8, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Generic",
@@ -271,7 +277,7 @@ describe("formatFormulaText", () => {
       developerLiftTable: specialBlondeLiftTable,
       acceptsPartialLift: true,
     };
-    const result = calculateFullFormula(4, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 4, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Wella",
@@ -295,7 +301,7 @@ describe("formatFormulaText", () => {
 
   it("omits the achievable-level line entirely when the target is fully reachable", () => {
     const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
-    const result = calculateFullFormula(8, targetShade, 0, 60);
+    const result = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
     const text = formatFormulaText({
       brandName: "Generic",
