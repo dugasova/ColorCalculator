@@ -1,7 +1,7 @@
 import i18n from "./i18n";
-import { formatFormulaText } from "./engine/formatFormula";
-import { formatBleachText } from "./engine/formatBleach";
-import { formatFillerStepText } from "./engine/formatPrePigmentation";
+import { formatFormulaText } from "./format/formatFormula";
+import { formatBleachText } from "./format/formatBleach";
+import { formatFillerStepText } from "./format/formatPrePigmentation";
 import { formatBrandLineLabel } from "./engine/formatLineLabel";
 import { STRAND_ZONE_I18N_KEY } from "./engine/strandZone";
 import type { ColorHistoryStep, HistoryStep } from "./history";

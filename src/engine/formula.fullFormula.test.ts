@@ -89,8 +89,7 @@ describe("calculateFullFormula", () => {
 
     expect(result.underlyingPigment).toBe("yellow");
     expect(result.recommendedCorrectiveTone).toBe("violet");
-    expect(result.toneWarning).toContain("gold");
-    expect(result.toneWarning).toContain("violet");
+    expect(result.toneWarning).toEqual({ tone: "gold", pigment: "yellow", recommended: "violet" });
   });
 
   it("recommends the matt tone for red/red-orange pigment and warns if it was not chosen", () => {
@@ -100,7 +99,7 @@ describe("calculateFullFormula", () => {
 
     expect(result.underlyingPigment).toBe("red-orange");
     expect(result.recommendedCorrectiveTone).toBe("matt");
-    expect(result.toneWarning).toContain("matt");
+    expect(result.toneWarning).toEqual({ tone: "natural", pigment: "red-orange", recommended: "matt" });
   });
 
   it("returns null developerVolume and null grams when the lift exceeds what any developer can achieve, but still returns other fields", () => {
@@ -120,7 +119,6 @@ describe("calculateFullFormula", () => {
     expect(result.grayCoverage).toEqual({
       naturalRatio: 0.5,
       fashionRatio: 0.5,
-      note: "equal parts natural base and fashion tone",
     });
   });
 
@@ -199,8 +197,7 @@ describe("calculateFullFormula", () => {
       totalGrams: 60,
     });
 
-    expect(result.eligibilityWarning).toContain("12/0");
-    expect(result.eligibilityWarning).toContain("6");
+    expect(result.eligibilityWarning).toEqual({ code: "12/0", minLevel: 6, startLevel: 5 });
   });
 
   it("leaves eligibilityWarning null when startLevel meets minStartLevel", () => {
@@ -244,7 +241,7 @@ describe("calculateFullFormula", () => {
       manualDeveloperVolume: 6,
     });
 
-    expect(result.liftUnsupportedWarning).toContain("8/73");
+    expect(result.liftUnsupportedWarning).toEqual({ code: "8/73", level: 8, startLevel: 6 });
     expect(result.developerVolume).toBe(6);
     expect(result.grams).not.toBeNull();
     // it can't lift, so the hair stays at the starting level instead of reaching 8

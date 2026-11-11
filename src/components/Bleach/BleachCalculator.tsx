@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { useSalonMarkupMultiplier } from "../../palette";
 import "./BleachCalculator.css";

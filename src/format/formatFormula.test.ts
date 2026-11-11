@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { formatFormulaText, buildMixSummary } from "./formatFormula";
-import { calculateFullFormula, applyAdditionalShade } from "./formula";
-import type { Shade } from "./shades";
+import { calculateFullFormula, applyAdditionalShade } from "../engine/formula";
+import type { Shade } from "../engine/shades";
 
 describe("formatFormulaText", () => {
   it("formats a straightforward achievable formula (no lift, so no pigment warning)", () => {

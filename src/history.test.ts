@@ -83,10 +83,10 @@ describe("normalizeHistoryEntry", () => {
   });
 
   it("keeps the stored versions as-is, including a schemaVersion newer than this app knows", () => {
-    const entry = makeEntry({ clientName: "Anna", schemaVersion: 3, appVersion: "2.0.0" });
+    const entry = makeEntry({ clientName: "Anna", schemaVersion: 4, appVersion: "2.0.0" });
     const normalized = normalizeHistoryEntry(entry);
     expect(normalized).toBe(entry);
-    expect(normalized.schemaVersion).toBe(3);
+    expect(normalized.schemaVersion).toBe(4);
     expect(normalized.appVersion).toBe("2.0.0");
   });
 
@@ -376,10 +376,10 @@ describe("historyEntryShapeSchema", () => {
   });
 
   it("keeps schemaVersion/appVersion through parsing, and accepts a newer schemaVersion", () => {
-    const entry = makeEntry({ clientName: "Anna", schemaVersion: 3, appVersion: "2.0.0" });
+    const entry = makeEntry({ clientName: "Anna", schemaVersion: 4, appVersion: "2.0.0" });
     const result = historyEntryShapeSchema.safeParse(entry);
     expect(result.success).toBe(true);
-    expect(result.data).toMatchObject({ schemaVersion: 3, appVersion: "2.0.0" });
+    expect(result.data).toMatchObject({ schemaVersion: 4, appVersion: "2.0.0" });
   });
 
   it("rejects a non-integer schemaVersion", () => {

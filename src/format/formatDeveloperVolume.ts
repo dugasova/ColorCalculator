@@ -1,5 +1,5 @@
 import i18n from "../i18n";
-import { DEVELOPER_VOLUME_PERCENT, type DeveloperVolume } from "./levels";
+import { DEVELOPER_VOLUME_PERCENT, type DeveloperVolume } from "../engine/levels";
 
 // The single formatter every developer-strength label goes through, rendering the
 // percentage printed on the bottle alongside the nominal vol number (e.g. "6% (20 vol)")

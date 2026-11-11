@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";

@@ -3,7 +3,7 @@ import type { BleachHistoryStep, ColorHistoryStep, FormulaHistoryEntry } from ".
 export const COLOR_FULL_FORMULA: ColorHistoryStep["result"] = {
   developerVolume: 20,
   mixingRatio: { colorParts: 1, developerParts: 1 },
-  grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "" },
+  grayCoverage: { naturalRatio: 0, fashionRatio: 1 },
   achievedLevel: 7,
   underlyingPigment: null,
   recommendedCorrectiveTone: null,
@@ -80,7 +80,7 @@ export function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName
     patchTestOverride: true,
     beforePhotoUrl: null,
     afterPhotoUrl: null,
-    schemaVersion: 2,
+    schemaVersion: 3,
     appVersion: null,
     ...overrides,
   };

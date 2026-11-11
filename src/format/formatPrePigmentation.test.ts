@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { formatPrePigmentationText, formatFillerStepText } from "./formatPrePigmentation";
-import { calculatePrePigmentation } from "./prePigmentation";
+import { calculatePrePigmentation } from "../engine/prePigmentation";
 
 describe("formatPrePigmentationText", () => {
   it("formats a no-op scenario with only the target-color step", () => {

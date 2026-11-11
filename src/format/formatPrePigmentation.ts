@@ -1,6 +1,6 @@
 import i18n from "../i18n";
-import type { Level } from "./levels";
-import type { PrePigmentationResult } from "./prePigmentation";
+import type { Level } from "../engine/levels";
+import type { PrePigmentationResult } from "../engine/prePigmentation";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatPrePigmentationParams {

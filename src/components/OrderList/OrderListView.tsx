@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { usePalette, useStock } from "../../palette";
 import { buildReorderList, type ReorderItem } from "../../stock";
 import { formatLineLabel } from "../../engine/formatLineLabel";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { Select } from "../common/Select";
 import "../PaletteAdmin/PaletteAdminView.css";

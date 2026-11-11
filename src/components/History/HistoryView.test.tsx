@@ -40,7 +40,7 @@ const colorStep = makeColorStep({
   startLevel: 6,
   result: {
     ...COLOR_FULL_FORMULA,
-    grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+    grayCoverage: { naturalRatio: 0, fashionRatio: 1 },
     underlyingPigment: "pale-yellow",
     correctorGrams: 0,
   },
@@ -118,7 +118,7 @@ describe("HistoryView client grouping", () => {
   });
 
   it("shows the stylist's own saved phone/allergy notes for a matched client", async () => {
-    mockHistory([makeEntry({ id: "1", clientName: "Anna K." })]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", note: "typo" })]);
     const profile: ClientProfile = {
       id: "c1",
       ownedBy: "stylist@salon.test",
@@ -175,7 +175,7 @@ describe("HistoryView client grouping", () => {
   });
 
   it("closes the modal on Escape, returning to the collapsed card list", async () => {
-    mockHistory([makeEntry({ id: "1", clientName: "Anna K." })]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", note: "typo" })]);
     mockClients([]);
 
     renderHistoryView();
@@ -311,7 +311,7 @@ describe("HistoryView revisit reminders", () => {
   });
 
   it("opens a Telegram share link when the Remind via Telegram button is clicked", async () => {
-    mockHistory([makeEntry({ id: "1", clientName: "Anna K." })]);
+    mockHistory([makeEntry({ id: "1", clientName: "Anna K.", note: "typo" })]);
     mockClients([]);
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
 
@@ -604,7 +604,7 @@ describe("HistoryView edit visit details", () => {
       beforePhotoUrl: null,
       afterPhotoUrl: "https://x/new.jpg",
     });
-    const dialog = await openEditDialog([makeEntry({ id: "1", clientName: "Anna K." })]);
+    const dialog = await openEditDialog([makeEntry({ id: "1", clientName: "Anna K.", note: "typo" })]);
     const file = new File(["x"], "after.jpg", { type: "image/jpeg" });
 
     fireEvent.change(within(dialog).getByLabelText("After photo"), { target: { files: [file] } });
@@ -644,7 +644,7 @@ describe("HistoryView edit visit details", () => {
   it("keeps the dialog open with an error when saving fails, so nothing typed is lost", async () => {
     vi.mocked(updateHistoryEntryDetails).mockRejectedValue(new Error("offline"));
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-    const dialog = await openEditDialog([makeEntry({ id: "1", clientName: "Anna K." })]);
+    const dialog = await openEditDialog([makeEntry({ id: "1", clientName: "Anna K.", note: "typo" })]);
 
     fireEvent.change(within(dialog).getByLabelText("Note"), { target: { value: "new note" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "Save changes" }));

@@ -1,6 +1,6 @@
 import i18n from "../i18n";
-import type { Level } from "./levels";
-import type { BleachFormula } from "./bleach";
+import type { Level } from "../engine/levels";
+import type { BleachFormula } from "../engine/bleach";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatBleachParams {

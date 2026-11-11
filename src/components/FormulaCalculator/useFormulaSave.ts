@@ -2,7 +2,7 @@ import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
-import type { BlendSummary } from "../../engine/formatFormula";
+import type { BlendSummary } from "../../format/formatFormula";
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";

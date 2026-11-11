@@ -1,3 +1,4 @@
+import type { GrayCoverageStrategy } from "./engine/formula";
 import { describe, it, expect } from "vitest";
 import i18n from "../src/i18n";
 import { formatSessionText, formatSessionSummary } from "./formatSession";
@@ -14,7 +15,7 @@ const colorStep: ColorHistoryStep = {
   result: {
     developerVolume: 30,
     mixingRatio: { colorParts: 1, developerParts: 2 },
-    grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+    grayCoverage: { naturalRatio: 0, fashionRatio: 1 },
     achievedLevel: 9,
     underlyingPigment: "pale-yellow",
     recommendedCorrectiveTone: "violet",
@@ -142,7 +143,13 @@ describe("formatSessionText", () => {
       ...colorStep,
       result: {
         ...colorStep.result,
-        grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+        // `note` is no longer part of GrayCoverageStrategy, but documents saved by older
+        // app versions still carry it.
+        grayCoverage: {
+          naturalRatio: 0,
+          fashionRatio: 1,
+          note: "apply the fashion tone as-is",
+        } as GrayCoverageStrategy,
       },
     };
     const originalLanguage = i18n.language;

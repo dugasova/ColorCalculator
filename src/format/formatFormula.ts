@@ -1,10 +1,15 @@
 import i18n from "../i18n";
-import type { Level } from "./levels";
-import type { Shade } from "./shades";
-import type { FullFormula, FormulaGrams, NaturalBase } from "./formula";
-import { getGrayCoverageNote } from "./formula";
-import type { ApplicationZone } from "./applicationZone";
-import { formatBrandLineLabel } from "./formatLineLabel";
+import type { Level } from "../engine/levels";
+import type { Shade } from "../engine/shades";
+import type { FullFormula, FormulaGrams, NaturalBase } from "../engine/formula";
+import {
+  formatEligibilityWarning,
+  formatLiftUnsupportedWarning,
+  formatToneWarning,
+  getGrayCoverageNote,
+} from "./formulaMessages";
+import type { ApplicationZone } from "../engine/applicationZone";
+import { formatBrandLineLabel } from "../engine/formatLineLabel";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatFormulaParams {
@@ -201,7 +206,12 @@ export function formatFormulaText(params: FormatFormulaParams): string {
                   naturalBase,
                 ),
         })
-      : i18n.t("format.mixFallback", { message: result.liftUnsupportedWarning ?? i18n.t("results.notAchievable") }),
+      : i18n.t("format.mixFallback", {
+          message:
+            result.liftUnsupportedWarning !== null
+              ? formatLiftUnsupportedWarning(result.liftUnsupportedWarning)
+              : i18n.t("results.notAchievable"),
+        }),
     i18n.t("format.processingTime", { value: processingMinutes }),
     naturalBase !== null
       ? i18n.t("format.grayCoverageApplied", {
@@ -220,13 +230,13 @@ export function formatFormulaText(params: FormatFormulaParams): string {
   // With no mix to hold it (grams null) the warning already replaces the Mix line above;
   // when the colorist mixes anyway, it stays on record next to the formula instead.
   if (result.liftUnsupportedWarning !== null && result.grams !== null) {
-    lines.push(i18n.t("format.warning", { message: result.liftUnsupportedWarning }));
+    lines.push(i18n.t("format.warning", { message: formatLiftUnsupportedWarning(result.liftUnsupportedWarning) }));
   }
   if (result.toneWarning !== null && !applyNeutralization) {
-    lines.push(i18n.t("format.warning", { message: result.toneWarning }));
+    lines.push(i18n.t("format.warning", { message: formatToneWarning(result.toneWarning) }));
   }
   if (result.eligibilityWarning !== null) {
-    lines.push(i18n.t("format.warning", { message: result.eligibilityWarning }));
+    lines.push(i18n.t("format.warning", { message: formatEligibilityWarning(result.eligibilityWarning) }));
   }
 
   return lines.join("\n");
