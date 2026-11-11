@@ -355,3 +355,46 @@ describe("formatSessionText: zone and starting-base recap", () => {
     expect(text).toContain("Step 2 — Mid-lengths");
   });
 });
+
+describe("formatSessionText: gray percentage recap", () => {
+  const canvas = { porosity: "normal", thickness: "medium", chemicalHistory: ["henna"] } as const;
+
+  it("adds the gray percentage after the chemical history when the colorist recorded gray", () => {
+    const text = formatSessionText([
+      { ...colorStep, canvas: { ...canvas, chemicalHistory: ["henna"] }, grayPercent: 40 },
+    ]);
+    expect(text).toContain("Chemical History: Henna\nGray hair: 40%");
+    expect(text.indexOf("Gray hair: 40%")).toBeLessThan(text.indexOf("Generic — 9.1"));
+  });
+
+  it("leaves it out for a client with no gray", () => {
+    const text = formatSessionText([
+      { ...colorStep, canvas: { ...canvas, chemicalHistory: ["henna"] }, grayPercent: 0 },
+    ]);
+    expect(text).not.toContain("Gray hair");
+  });
+
+  it("still shows it on a color step whose hair-state recap is skipped after a bleach step on the same zone", () => {
+    const shared = { strandZone: "roots", canvas: { ...canvas, chemicalHistory: [] } } as const;
+    const text = formatSessionText([
+      { ...bleachStep, ...shared, canvas: { ...shared.canvas, chemicalHistory: [] } },
+      { ...colorStep, ...shared, canvas: { ...shared.canvas, chemicalHistory: [] }, grayPercent: 60 },
+    ]);
+    expect((text.match(/Porosity: Normal/g) ?? []).length).toBe(1);
+    expect((text.match(/Gray hair: 60%/g) ?? []).length).toBe(1);
+  });
+
+  it("does not repeat it across consecutive color steps on the same hair", () => {
+    const step = {
+      ...colorStep,
+      strandZone: "roots",
+      canvas: { ...canvas, chemicalHistory: [] },
+      grayPercent: 60,
+    } as const;
+    const text = formatSessionText([
+      { ...step, canvas: { ...step.canvas, chemicalHistory: [] } },
+      { ...step, canvas: { ...step.canvas, chemicalHistory: [] } },
+    ]);
+    expect((text.match(/Gray hair: 60%/g) ?? []).length).toBe(1);
+  });
+});

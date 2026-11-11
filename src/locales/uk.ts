@@ -455,6 +455,7 @@ export const uk: typeof en = {
     applicationZone: "Зона нанесення: {{value}}",
     strandZone: "Зона: {{value}}",
     startingBase: "Стартова база: {{value}}",
+    grayPercent: "Сивина: {{percent}}%",
     startingBaseColored: "Фарбована ({{tone}})",
     developer: "Окислювач: {{value}}",
     developerVolume: "{{percent}}% ({{value}} vol)",

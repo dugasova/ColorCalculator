@@ -446,6 +446,7 @@ export const en = {
     applicationZone: "Application: {{value}}",
     strandZone: "Zone: {{value}}",
     startingBase: "Starting base: {{value}}",
+    grayPercent: "Gray hair: {{percent}}%",
     startingBaseColored: "Colored ({{tone}})",
     developer: "Developer: {{value}}",
     developerVolume: "{{percent}}% ({{value}} vol)",
