@@ -1,11 +1,6 @@
+import { LiftOutcome, PorosityNotices, ToneWarnings } from "./FormulaNotices";
 import { useTranslation } from "react-i18next";
-import {
-  formatEligibilityWarning,
-  formatLiftUnsupportedWarning,
-  formatPorosityAdjustment,
-  formatToneWarning,
-  getGrayCoverageNote,
-} from "../../format/formulaMessages";
+import { getGrayCoverageNote } from "../../format/formulaMessages";
 import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
@@ -180,8 +175,6 @@ export function FormulaResults({
     servicePrice,
   });
 
-  const porosityNote = formatPorosityAdjustment(result, targetShade.developerPercentOverride);
-
   return (
     <div className="results">
       {prePigmentationResult !== null && (
@@ -211,28 +204,8 @@ export function FormulaResults({
         </div>
       </div>
 
-      {result.liftUnsupportedWarning !== null && (
-        <p className="warning" role="alert">
-          {formatLiftUnsupportedWarning(result.liftUnsupportedWarning)}
-        </p>
-      )}
-      {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning" role="alert">
-          {t("results.notAchievable")}
-        </p>
-      )}
-      {result.achievedLevel !== null && result.achievedLevel !== targetShade.level && (
-        <div className="results__row">
-          <span className="results__row-label">{t("results.achievedLevel")}</span>
-          <span>{t("results.achievedLevelValue", { level: result.achievedLevel, target: targetShade.level })}</span>
-        </div>
-      )}
-      {porosityNote !== null && <p className="results__info">{porosityNote}</p>}
-      {porosity === "high" && (
-        <p className="warning" role="alert">
-          {t("results.porousWarning")}
-        </p>
-      )}
+      <LiftOutcome result={result} targetShade={targetShade} />
+      <PorosityNotices result={result} targetShade={targetShade} porosity={porosity} />
       {result.grams !== null && (
         <div className="results__row results__row--mix">
           <span className="results__row-label">{t("results.mix")}</span>
@@ -312,16 +285,7 @@ export function FormulaResults({
         </label>
       )}
 
-      {result.toneWarning !== null && !neutralizationApplied && (
-        <p className="warning" role="alert">
-          {formatToneWarning(result.toneWarning)}
-        </p>
-      )}
-      {result.eligibilityWarning !== null && (
-        <p className="warning" role="alert">
-          {formatEligibilityWarning(result.eligibilityWarning)}
-        </p>
-      )}
+      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} />
 
       <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>
 
