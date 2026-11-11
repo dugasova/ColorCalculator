@@ -1,3 +1,8 @@
+import {
+  formatEligibilityWarning,
+  formatLiftUnsupportedWarning,
+  formatToneWarning,
+} from "../../format/formulaMessages";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePalette } from "../../palette";
@@ -18,7 +23,7 @@ import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField
 import type { StrandZone } from "../../engine/strandZone";
 import type { StartingBase } from "../../engine/startingBase";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
-import { buildMixSummary } from "../../engine/formatFormula";
+import { buildMixSummary } from "../../format/formatFormula";
 import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
 import type { ColorHistoryStep, ColorStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
@@ -275,7 +280,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
       )}
       {result.liftUnsupportedWarning !== null && (
         <p className="warning" role="alert">
-          {result.liftUnsupportedWarning}
+          {formatLiftUnsupportedWarning(result.liftUnsupportedWarning)}
         </p>
       )}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
@@ -291,12 +296,12 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
       )}
       {result.toneWarning !== null && !neutralizationApplied && (
         <p className="warning" role="alert">
-          {result.toneWarning}
+          {formatToneWarning(result.toneWarning)}
         </p>
       )}
       {result.eligibilityWarning !== null && (
         <p className="warning" role="alert">
-          {result.eligibilityWarning}
+          {formatEligibilityWarning(result.eligibilityWarning)}
         </p>
       )}
       {porosity === "high" && (

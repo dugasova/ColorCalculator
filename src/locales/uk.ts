@@ -442,7 +442,7 @@ export const uk: typeof en = {
       halfNatural: "рівні частини натуральної бази та модного тону",
     },
     liftUnsupportedWarning:
-      "«{{code}}» не може підняти рівень — він лише наносить колір на рівні {{level}} або нижче, а початковий рівень — {{startLevel}}",
+      "«{{code}}» не може підняти рівень — він лише наносить колір, тому волосся вже має бути рівня {{level}} або вище, а початковий рівень — {{startLevel}}",
     toneWarning: "Обраний тон «{{tone}}» не нейтралізує пігмент {{pigment}}; рекомендовано «{{recommended}}»",
     eligibilityWarning:
       "Відтінок «{{code}}» вимагає початкового рівня {{minLevel}} або вище (натуральна база); поточний початковий рівень — {{startLevel}}",
@@ -455,6 +455,7 @@ export const uk: typeof en = {
     applicationZone: "Зона нанесення: {{value}}",
     strandZone: "Зона: {{value}}",
     startingBase: "Стартова база: {{value}}",
+    grayPercent: "Сивина: {{percent}}%",
     startingBaseColored: "Фарбована ({{tone}})",
     developer: "Окислювач: {{value}}",
     developerVolume: "{{percent}}% ({{value}} vol)",

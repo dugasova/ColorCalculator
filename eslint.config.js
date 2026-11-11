@@ -23,4 +23,22 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // The engine is pure calculation: it returns data (levels, grams, warning params),
+    // never translated text. Anything that renders that data lives in src/format.
+    files: ["src/engine/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "(^|/)i18n$|^i18next$|^react-i18next$",
+              message: "src/engine must stay language-independent: return data and format it in src/format.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

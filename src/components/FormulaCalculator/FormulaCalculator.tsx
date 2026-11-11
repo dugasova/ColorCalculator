@@ -4,7 +4,7 @@ import { usePalette } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 import { GRAY_LIGHT_THRESHOLD, GRAY_MEDIUM_THRESHOLD, GRAY_COVERAGE_MIN_DEVELOPER_VOLUME } from "../../engine/formula";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { useFormulaCalculatorState } from "./useFormulaCalculatorState";
 import { CollapsibleSection } from "../common/CollapsibleSection";
 import { BrandField } from "./fields/BrandField";

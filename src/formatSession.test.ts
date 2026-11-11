@@ -1,3 +1,4 @@
+import type { GrayCoverageStrategy } from "./engine/formula";
 import { describe, it, expect } from "vitest";
 import i18n from "../src/i18n";
 import { formatSessionText, formatSessionSummary } from "./formatSession";
@@ -14,7 +15,7 @@ const colorStep: ColorHistoryStep = {
   result: {
     developerVolume: 30,
     mixingRatio: { colorParts: 1, developerParts: 2 },
-    grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+    grayCoverage: { naturalRatio: 0, fashionRatio: 1 },
     achievedLevel: 9,
     underlyingPigment: "pale-yellow",
     recommendedCorrectiveTone: "violet",
@@ -142,15 +143,21 @@ describe("formatSessionText", () => {
       ...colorStep,
       result: {
         ...colorStep.result,
-        grayCoverage: { naturalRatio: 0, fashionRatio: 1, note: "apply the fashion tone as-is" },
+        // `note` is no longer part of GrayCoverageStrategy, but documents saved by older
+        // app versions still carry it.
+        grayCoverage: {
+          naturalRatio: 0.5,
+          fashionRatio: 0.5,
+          note: "equal parts natural base and fashion tone",
+        } as GrayCoverageStrategy,
       },
     };
     const originalLanguage = i18n.language;
     try {
       i18n.changeLanguage("uk");
       const text = formatSessionText([staleEnglishNoteStep]);
-      expect(text).toContain("Покриття сивини: нанести модний тон без змішування (0% база / 100% тон)");
-      expect(text).not.toContain("apply the fashion tone as-is");
+      expect(text).toContain("Покриття сивини: рівні частини натуральної бази та модного тону (50% база / 50% тон)");
+      expect(text).not.toContain("equal parts natural base and fashion tone");
     } finally {
       i18n.changeLanguage(originalLanguage);
     }
@@ -346,5 +353,48 @@ describe("formatSessionText: zone and starting-base recap", () => {
 
     expect(text).toContain("Step 1 — Roots");
     expect(text).toContain("Step 2 — Mid-lengths");
+  });
+});
+
+describe("formatSessionText: gray percentage recap", () => {
+  const canvas = { porosity: "normal", thickness: "medium", chemicalHistory: ["henna"] } as const;
+
+  it("adds the gray percentage after the chemical history when the colorist recorded gray", () => {
+    const text = formatSessionText([
+      { ...colorStep, canvas: { ...canvas, chemicalHistory: ["henna"] }, grayPercent: 40 },
+    ]);
+    expect(text).toContain("Chemical History: Henna\nGray hair: 40%");
+    expect(text.indexOf("Gray hair: 40%")).toBeLessThan(text.indexOf("Generic — 9.1"));
+  });
+
+  it("leaves it out for a client with no gray", () => {
+    const text = formatSessionText([
+      { ...colorStep, canvas: { ...canvas, chemicalHistory: ["henna"] }, grayPercent: 0 },
+    ]);
+    expect(text).not.toContain("Gray hair");
+  });
+
+  it("still shows it on a color step whose hair-state recap is skipped after a bleach step on the same zone", () => {
+    const shared = { strandZone: "roots", canvas: { ...canvas, chemicalHistory: [] } } as const;
+    const text = formatSessionText([
+      { ...bleachStep, ...shared, canvas: { ...shared.canvas, chemicalHistory: [] } },
+      { ...colorStep, ...shared, canvas: { ...shared.canvas, chemicalHistory: [] }, grayPercent: 60 },
+    ]);
+    expect((text.match(/Porosity: Normal/g) ?? []).length).toBe(1);
+    expect((text.match(/Gray hair: 60%/g) ?? []).length).toBe(1);
+  });
+
+  it("does not repeat it across consecutive color steps on the same hair", () => {
+    const step = {
+      ...colorStep,
+      strandZone: "roots",
+      canvas: { ...canvas, chemicalHistory: [] },
+      grayPercent: 60,
+    } as const;
+    const text = formatSessionText([
+      { ...step, canvas: { ...step.canvas, chemicalHistory: [] } },
+      { ...step, canvas: { ...step.canvas, chemicalHistory: [] } },
+    ]);
+    expect((text.match(/Gray hair: 60%/g) ?? []).length).toBe(1);
   });
 });

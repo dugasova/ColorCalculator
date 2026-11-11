@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import { calculateBleachFormula } from "../../engine/bleach";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
@@ -69,36 +69,47 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
     }
   };
 
-  const result = calculateBleachFormula(startLevel, targetLevel, totalGrams);
+  // Memoized so `step` below keeps its identity until an input actually changes --
+  // calculateBleachFormula builds a fresh object on every call.
+  const result = useMemo(
+    () => calculateBleachFormula(startLevel, targetLevel, totalGrams),
+    [startLevel, targetLevel, totalGrams],
+  );
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
-  const step: BleachHistoryStep = {
-    kind: "bleach",
-    startLevel,
-    targetLevel,
-    result,
-    processingMinutes,
-    pricePerGram,
-    canvas: { porosity, thickness, chemicalHistory },
-    strandZone,
-    startingBase,
-  };
+  const step = useMemo(
+    (): BleachHistoryStep => ({
+      kind: "bleach",
+      startLevel,
+      targetLevel,
+      result,
+      processingMinutes,
+      pricePerGram,
+      canvas: { porosity, thickness, chemicalHistory },
+      strandZone,
+      startingBase,
+    }),
+    [
+      startLevel,
+      targetLevel,
+      result,
+      processingMinutes,
+      pricePerGram,
+      porosity,
+      thickness,
+      chemicalHistory,
+      strandZone,
+      startingBase,
+    ],
+  );
 
+  // Report the step up whenever it changes. `onChange` goes through an effect event: the
+  // parent passes a fresh inline arrow every render, and a new callback identity alone
+  // must not re-report an unchanged step (see useColorStepReport for the same wiring).
+  const reportStep = useEffectEvent(onChange);
   useEffect(() => {
-    onChange(step);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    startLevel,
-    targetLevel,
-    totalGrams,
-    manualProcessingMinutes,
-    pricePerGram,
-    porosity,
-    thickness,
-    chemicalHistory,
-    strandZone,
-    startingBase,
-  ]);
+    reportStep(step);
+  }, [step]);
 
   return (
     <div className="step-card">

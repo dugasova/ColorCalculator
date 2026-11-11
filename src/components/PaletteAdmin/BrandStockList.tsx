@@ -6,7 +6,7 @@ import type { Shade } from "../../engine/shades";
 import { shadeKey } from "../../engine/paletteOverrides";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import { ALL_DEVELOPER_VOLUMES } from "../../engine/levels";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { useStock } from "../../palette";
 import {
   developerStockId,

@@ -1,5 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { getGrayCoverageNote } from "../../engine/formula";
+import {
+  formatEligibilityWarning,
+  formatLiftUnsupportedWarning,
+  formatToneWarning,
+  getGrayCoverageNote,
+} from "../../format/formulaMessages";
 import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
@@ -9,11 +14,11 @@ import {
   buildMixSummary,
   buildBlendMixSummary,
   type BlendSummary,
-} from "../../engine/formatFormula";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+} from "../../format/formatFormula";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
-import { formatFillerStepText } from "../../engine/formatPrePigmentation";
+import { formatFillerStepText } from "../../format/formatPrePigmentation";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import type { RepeatFormulaRequest } from "../../history";
@@ -205,7 +210,7 @@ export function FormulaResults({
 
       {result.liftUnsupportedWarning !== null && (
         <p className="warning" role="alert">
-          {result.liftUnsupportedWarning}
+          {formatLiftUnsupportedWarning(result.liftUnsupportedWarning)}
         </p>
       )}
       {result.liftUnsupportedWarning === null && result.developerVolume === null && (
@@ -260,22 +265,25 @@ export function FormulaResults({
         </span>
       </div>
 
-      <div className="results__row">
-        <span className="results__row-label">{t("results.grayCoverage")}</span>
-        <span>
-          {naturalBase !== null
-            ? t("results.grayCoverageAppliedValue", {
-                code: naturalBase.shade.code,
-                natural: Math.round(result.grayCoverage.naturalRatio * 100),
-                fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-              })
-            : t("results.grayCoverageValue", {
-                note: getGrayCoverageNote(result.grayCoverage),
-                natural: Math.round(result.grayCoverage.naturalRatio * 100),
-                fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-              })}
-        </span>
-      </div>
+      {/* Only when gray coverage changes the mix -- see formatFormulaText's own gray line. */}
+      {(naturalBase !== null || result.grayCoverage.naturalRatio > 0) && (
+        <div className="results__row">
+          <span className="results__row-label">{t("results.grayCoverage")}</span>
+          <span>
+            {naturalBase !== null
+              ? t("results.grayCoverageAppliedValue", {
+                  code: naturalBase.shade.code,
+                  natural: Math.round(result.grayCoverage.naturalRatio * 100),
+                  fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+                })
+              : t("results.grayCoverageValue", {
+                  note: getGrayCoverageNote(result.grayCoverage),
+                  natural: Math.round(result.grayCoverage.naturalRatio * 100),
+                  fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+                })}
+          </span>
+        </div>
+      )}
 
       <div className="results__row">
         <span className="results__row-label">{t("results.recommendedTone")}</span>
@@ -302,12 +310,12 @@ export function FormulaResults({
 
       {result.toneWarning !== null && !neutralizationApplied && (
         <p className="warning" role="alert">
-          {result.toneWarning}
+          {formatToneWarning(result.toneWarning)}
         </p>
       )}
       {result.eligibilityWarning !== null && (
         <p className="warning" role="alert">
-          {result.eligibilityWarning}
+          {formatEligibilityWarning(result.eligibilityWarning)}
         </p>
       )}
 

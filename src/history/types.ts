@@ -118,8 +118,8 @@ export interface FormulaHistoryEntry {
   patchTestOverride: boolean;
   beforePhotoUrl: string | null;
   afterPhotoUrl: string | null;
-  // Document format: 1 = the legacy flat shape below, 2 = the `steps`-based shape (see
-  // CURRENT_HISTORY_SCHEMA_VERSION in ./schema). Neither shape stored it before this field
+  // Document format: 1 = the legacy flat shape below, 2 = the `steps`-based shape, 3 = the
+  // same with formula warnings stored as data (see CURRENT_HISTORY_SCHEMA_VERSION in ./schema). Neither shape stored it before this field
   // existed -- `normalizeHistoryEntry` fills it in from the shape on read.
   schemaVersion: number;
   // The app version (package.json) that computed and saved this entry, i.e. which engine

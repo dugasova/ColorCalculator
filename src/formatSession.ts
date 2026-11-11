@@ -1,7 +1,7 @@
 import i18n from "./i18n";
-import { formatFormulaText } from "./engine/formatFormula";
-import { formatBleachText } from "./engine/formatBleach";
-import { formatFillerStepText } from "./engine/formatPrePigmentation";
+import { formatFormulaText } from "./format/formatFormula";
+import { formatBleachText } from "./format/formatBleach";
+import { formatFillerStepText } from "./format/formatPrePigmentation";
 import { formatBrandLineLabel } from "./engine/formatLineLabel";
 import { STRAND_ZONE_I18N_KEY } from "./engine/strandZone";
 import type { ColorHistoryStep, HistoryStep } from "./history";
@@ -43,6 +43,16 @@ function formatStartingBaseText(step: HistoryStep): string {
   return i18n.t("format.startingBase", { value });
 }
 
+// Gray-percentage recap line, shown with the hair-state recap (starting base, porosity,
+// thickness, chemical history) -- only for a color step where the colorist actually
+// recorded gray: a bleach step has no gray percentage, and "Gray hair: 0%" on a client
+// with none is noise.
+function formatGrayPercentText(step: HistoryStep): string {
+  return step.kind === "color" && step.grayPercent > 0
+    ? i18n.t("format.grayPercent", { percent: step.grayPercent })
+    : "";
+}
+
 // True when `curr` describes the exact same physical section of hair, in the exact same
 // state, as the immediately preceding step -- e.g. a bleach step on "Roots" followed by
 // a color step also on "Roots", with the same starting base/porosity/thickness/chemical
@@ -77,9 +87,15 @@ function sameZoneAndCanvasState(prev: HistoryStep | undefined, curr: HistoryStep
 // in every step's body too would be exactly the redundancy this whole recap-dedup exists
 // to avoid.
 function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined, includeZoneLine: boolean): string {
+  // The gray line rides along with the recap, but is also kept when the recap itself is
+  // skipped and the previous step didn't already state the same percentage (e.g. a bleach
+  // step, which has none, followed by a color step on the same zone).
+  const grayText = formatGrayPercentText(step);
   const stateLines = sameZoneAndCanvasState(previousStep, step)
-    ? []
-    : [formatStartingBaseText(step), formatCanvasText(step.canvas)].filter(text => text !== "");
+    ? previousStep !== undefined && formatGrayPercentText(previousStep) === grayText
+      ? []
+      : [grayText]
+    : [formatStartingBaseText(step), formatCanvasText(step.canvas), grayText].filter(text => text !== "");
   const prefixText = (includeZoneLine ? [formatZoneLine(step), ...stateLines] : stateLines)
     .filter(text => text !== "")
     .join("\n");

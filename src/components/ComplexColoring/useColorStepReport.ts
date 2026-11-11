@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useEffectEvent, useMemo } from "react";
 import type { Brand, BrandId } from "../../engine/brands";
 import {
   getPrePigmentationNeed,
@@ -24,7 +24,7 @@ export interface UseColorStepReportParams {
 // Computes one ColorStepCard's pre-pigmentation and reports the assembled step up to
 // ComplexColoringCalculator on every change. `formula`/`params` are fresh objects every
 // render, so they're destructured into plain values first -- only those values (never
-// the containing objects) may appear in the memo/effect dependency arrays below.
+// the containing objects) may appear in the memo dependency arrays below.
 export function useColorStepReport({
   brands,
   formula,
@@ -80,20 +80,14 @@ export function useColorStepReport({
     [prePigmentationEnabled, prePigmentationNeed, startLevel, targetShade, effectiveTotalGrams, lineShades],
   );
 
-  // Report the computed step up on every change — the parent aggregates all steps'
-  // totals (time, cost) and builds the combined recipe text/save payload from them.
-  // Deliberately not listed:
-  //  - `onChange`: the parent passes a fresh inline arrow every render
-  //    (ComplexColoringCalculator), so listing it would fire this effect every render --
-  //    the same infinite loop as above.
-  //  - `brands` (only read for the display name), and `startLevel`/`targetShade`/
-  //    `grayPercent`/`line`: every one of those feeds `effectiveResult` (see
-  //    useComputedFullFormula), so a change to any of them already re-fires this effect.
-  useEffect(() => {
-    const stepData: ColorHistoryStep = {
+  // The step as it gets saved, rebuilt only when one of its inputs changes. `brandName`
+  // (a string) stands in for `brands` itself, which is only read for that display name.
+  const brandName = brands[brandId].name;
+  const step = useMemo(
+    (): ColorHistoryStep => ({
       kind: "color",
       brandId,
-      brandName: brands[brandId].name,
+      brandName,
       line,
       targetShade,
       startLevel,
@@ -113,28 +107,43 @@ export function useColorStepReport({
       naturalBase,
       processingMinutes,
       pricePerGram,
-    };
-    onChange(stepData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    brandId,
-    applicationZone,
-    strandZone,
-    startingBase,
-    effectiveResult,
-    additionalShade,
-    additionalShadeGrams,
-    additionalShade2,
-    additionalShade2Grams,
-    neutralizationApplied,
-    processingMinutes,
-    pricePerGram,
-    porosity,
-    thickness,
-    chemicalHistory,
-    prePigmentationResult,
-    naturalBase,
-  ]);
+    }),
+    [
+      brandId,
+      brandName,
+      line,
+      targetShade,
+      startLevel,
+      grayPercent,
+      porosity,
+      thickness,
+      chemicalHistory,
+      applicationZone,
+      strandZone,
+      startingBase,
+      effectiveResult,
+      additionalShade,
+      additionalShadeGrams,
+      additionalShade2,
+      additionalShade2Grams,
+      prePigmentationResult,
+      neutralizationApplied,
+      naturalBase,
+      processingMinutes,
+      pricePerGram,
+    ],
+  );
+
+  // Report the step up whenever it changes -- the parent aggregates all steps' totals
+  // (time, cost) and builds the combined recipe text/save payload from them. `onChange`
+  // goes through an effect event because the parent passes a fresh inline arrow every
+  // render (ComplexColoringCalculator): the effect always calls the latest one, but a new
+  // callback identity alone must not re-report an unchanged step (that would loop:
+  // report -> parent setState -> re-render -> new arrow -> report ...).
+  const reportStep = useEffectEvent(onChange);
+  useEffect(() => {
+    reportStep(step);
+  }, [step]);
 
   return { prePigmentationNeed, prePigmentationResult };
 }

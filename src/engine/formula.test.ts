@@ -18,12 +18,10 @@ describe("getGrayCoverageStrategy", () => {
     expect(getGrayCoverageStrategy(0)).toEqual({
       naturalRatio: 0,
       fashionRatio: 1,
-      note: "apply the fashion tone as-is",
     });
     expect(getGrayCoverageStrategy(29)).toEqual({
       naturalRatio: 0,
       fashionRatio: 1,
-      note: "apply the fashion tone as-is",
     });
   });
 
@@ -31,12 +29,10 @@ describe("getGrayCoverageStrategy", () => {
     expect(getGrayCoverageStrategy(30)).toEqual({
       naturalRatio: 1 / 3,
       fashionRatio: 2 / 3,
-      note: "one-third natural base blended in for extra gray coverage",
     });
     expect(getGrayCoverageStrategy(49)).toEqual({
       naturalRatio: 1 / 3,
       fashionRatio: 2 / 3,
-      note: "one-third natural base blended in for extra gray coverage",
     });
   });
 
@@ -44,17 +40,14 @@ describe("getGrayCoverageStrategy", () => {
     expect(getGrayCoverageStrategy(50)).toEqual({
       naturalRatio: 0.5,
       fashionRatio: 0.5,
-      note: "equal parts natural base and fashion tone",
     });
     expect(getGrayCoverageStrategy(79)).toEqual({
       naturalRatio: 0.5,
       fashionRatio: 0.5,
-      note: "equal parts natural base and fashion tone",
     });
     expect(getGrayCoverageStrategy(100)).toEqual({
       naturalRatio: 0.5,
       fashionRatio: 0.5,
-      note: "equal parts natural base and fashion tone",
     });
   });
 

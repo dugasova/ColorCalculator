@@ -433,7 +433,7 @@ export const en = {
       halfNatural: "equal parts natural base and fashion tone",
     },
     liftUnsupportedWarning:
-      "'{{code}}' can't lift level — it only deposits color at level {{level}} or lower, but the starting level is {{startLevel}}",
+      "'{{code}}' can't lift level — it only deposits color, so the hair must already be at level {{level}} or higher, but the starting level is {{startLevel}}",
     toneWarning: "The chosen tone '{{tone}}' won't neutralize {{pigment}} pigment; '{{recommended}}' is recommended",
     eligibilityWarning:
       "Shade '{{code}}' requires a starting level of {{minLevel}} or higher (natural base); current start level is {{startLevel}}",
@@ -446,6 +446,7 @@ export const en = {
     applicationZone: "Application: {{value}}",
     strandZone: "Zone: {{value}}",
     startingBase: "Starting base: {{value}}",
+    grayPercent: "Gray hair: {{percent}}%",
     startingBaseColored: "Colored ({{tone}})",
     developer: "Developer: {{value}}",
     developerVolume: "{{percent}}% ({{value}} vol)",

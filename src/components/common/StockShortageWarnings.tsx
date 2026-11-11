@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { StockShortage } from "../../stock";
 import type { DeveloperVolume } from "../../engine/levels";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 
 export function StockShortageWarnings({ shortages }: { shortages: StockShortage[] }) {
   const { t } = useTranslation();

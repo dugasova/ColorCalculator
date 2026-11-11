@@ -1,4 +1,3 @@
-import i18n from "../i18n";
 import {
   getUnderlyingPigment,
   pickDeveloperVolume,
@@ -14,7 +13,32 @@ import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "
 export interface GrayCoverageStrategy {
   naturalRatio: number;
   fashionRatio: number;
-  note: string;
+}
+
+// The engine reports warnings as data, never as text: each one carries only the
+// language-independent values its message is built from, and the UI layer renders it in
+// the current language (see format/formulaMessages.ts). A saved history entry therefore
+// never freezes a warning in whatever language was active at save time.
+//
+// The chosen tone won't neutralize the pigment that lifting reveals.
+export interface ToneWarning {
+  tone: ToneFamily;
+  pigment: UnderlyingPigment;
+  recommended: ToneFamily;
+}
+
+// The shade needs a lighter natural base than the starting level (Shade.minStartLevel).
+export interface EligibilityWarning {
+  code: string;
+  minLevel: Level;
+  startLevel: Level;
+}
+
+// A deposit-only line (Shade.developerVolumeChoices) was asked to lift.
+export interface LiftUnsupportedWarning {
+  code: string;
+  level: Level;
+  startLevel: Level;
 }
 
 export interface FormulaGrams {
@@ -36,9 +60,9 @@ export interface FullFormula {
   recommendedCorrectiveTone: ToneFamily | null;
   correctorGrams: number | null;
   recommendedProcessingMinutes: number;
-  toneWarning: string | null;
-  eligibilityWarning: string | null;
-  liftUnsupportedWarning: string | null;
+  toneWarning: ToneWarning | null;
+  eligibilityWarning: EligibilityWarning | null;
+  liftUnsupportedWarning: LiftUnsupportedWarning | null;
   grams: FormulaGrams | null;
 }
 
@@ -64,43 +88,9 @@ export const GRAY_COVERAGE_MIN_DEVELOPER_VOLUME: DeveloperVolume = 20;
 // directly (1/3, 1/2); below GRAY_LIGHT_THRESHOLD no natural-base dose is called for at
 // all. GRAY_HEAVY_THRESHOLD plays no part in this mix -- it's a separate threshold (see
 // revisit.ts) for how soon a heavily-gray client should rebook, not for this ratio.
-const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({
-  naturalRatio: 0,
-  fashionRatio: 1,
-  get note() {
-    return i18n.t("engine.grayCoverage.fashionOnly");
-  },
-});
-const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({
-  naturalRatio: 1 / 3,
-  fashionRatio: 2 / 3,
-  get note() {
-    return i18n.t("engine.grayCoverage.oneThirdNatural");
-  },
-});
-const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({
-  naturalRatio: 0.5,
-  fashionRatio: 0.5,
-  get note() {
-    return i18n.t("engine.grayCoverage.halfNatural");
-  },
-});
-
-// Re-derives the display note from the strategy's (language-independent) ratios rather
-// than trusting `strategy.note` directly. `note` is a getter that resolves via i18n.t at
-// property-access time, which is exactly right for a freshly computed, in-memory
-// strategy -- but a saved history entry has already had that getter resolved to a plain
-// string by sanitizeForFirestore's JSON round-trip (see history/firestore.ts), frozen in
-// whatever language was active at save time. Reading `strategy.note` straight out of a
-// loaded history document would then silently show stale-language text even when the
-// rest of the UI has since switched locale. naturalRatio/fashionRatio are plain numbers,
-// unaffected by that round-trip, so re-deriving the note from them here keeps both the
-// live calculator and History always rendering the note in the current UI language.
-export function getGrayCoverageNote(strategy: Pick<GrayCoverageStrategy, "naturalRatio">): string {
-  if (strategy.naturalRatio === 0) return i18n.t("engine.grayCoverage.fashionOnly");
-  if (strategy.naturalRatio < 0.5) return i18n.t("engine.grayCoverage.oneThirdNatural");
-  return i18n.t("engine.grayCoverage.halfNatural");
-}
+const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fashionRatio: 1 });
+const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 1 / 3, fashionRatio: 2 / 3 });
+const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5 });
 
 export function getGrayCoverageStrategy(grayPercent: number): GrayCoverageStrategy {
   if (grayPercent < GRAY_LIGHT_THRESHOLD) {
@@ -307,7 +297,7 @@ function deriveCorrectiveGuidance(
   underlyingPigment: UnderlyingPigment | null;
   recommendedCorrectiveTone: ToneFamily | null;
   correctorGrams: number | null;
-  toneWarning: string | null;
+  toneWarning: ToneWarning | null;
 } {
   const underlyingPigment = isActuallyLifting && achievedLevel !== null ? getUnderlyingPigment(achievedLevel) : null;
   const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
@@ -316,12 +306,8 @@ function deriveCorrectiveGuidance(
       ? calculateCorrectorGrams(achievedLevel, totalGrams)
       : null;
   const toneWarning =
-    isActuallyLifting && recommendedCorrectiveTone !== targetShade.tone
-      ? i18n.t("engine.toneWarning", {
-          tone: targetShade.tone,
-          pigment: underlyingPigment,
-          recommended: recommendedCorrectiveTone,
-        })
+    underlyingPigment !== null && recommendedCorrectiveTone !== null && recommendedCorrectiveTone !== targetShade.tone
+      ? { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone }
       : null;
   return { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning };
 }
@@ -343,29 +329,41 @@ function resolveMixingRatio(
   return targetShade.fixedMixingRatio ?? mixingRatioStrategy(startLevel, targetShade.level);
 }
 
-export function calculateFullFormula(
-  startLevel: Level,
-  targetShade: Shade,
-  grayPercent: number,
-  totalGrams: number,
-  mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio = getMixingRatio,
-  manualDeveloperVolume?: DeveloperVolume,
-  manualMixingRatio?: MixingRatio,
+export interface FullFormulaInput {
+  startLevel: Level;
+  targetShade: Shade;
+  grayPercent: number;
+  totalGrams: number;
+  // The brand's level-diff ratio strategy (Brand.mixingRatio); the generic one by default.
+  mixingRatioStrategy?: (startLevel: Level, targetLevel: Level) => MixingRatio;
+  manualDeveloperVolume?: DeveloperVolume;
+  manualMixingRatio?: MixingRatio;
   // Lets a colorist enter the dye weight directly (e.g. "40 g of color per root
   // touch-up") instead of a total mix weight -- developer is then derived from it via
   // the resolved ratio (see calculateFormulaGramsFromColorGrams) rather than backed out
   // of `totalGrams`. When set, `totalGrams` is still used for anything unrelated to the
   // color:developer split itself (e.g. corrector grams), scaled to match the resulting
   // real total so those figures stay proportional to what's actually being mixed.
-  colorGramsOverride?: number,
-): FullFormula {
+  colorGramsOverride?: number;
+}
+
+export function calculateFullFormula({
+  startLevel,
+  targetShade,
+  grayPercent,
+  totalGrams,
+  mixingRatioStrategy = getMixingRatio,
+  manualDeveloperVolume,
+  manualMixingRatio,
+  colorGramsOverride,
+}: FullFormulaInput): FullFormula {
   const isLifting = targetShade.level > startLevel;
   const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
   const liftUnsupportedWarning =
     targetShade.developerVolumeChoices !== undefined && isLifting
-      ? i18n.t("engine.liftUnsupportedWarning", { code: targetShade.code, level: targetShade.level, startLevel })
+      ? { code: targetShade.code, level: targetShade.level, startLevel }
       : null;
 
   const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, manualDeveloperVolume);
@@ -401,7 +399,7 @@ export function calculateFullFormula(
 
   const eligibilityWarning =
     targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
-      ? i18n.t("engine.eligibilityWarning", { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel })
+      ? { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel }
       : null;
 
   return {

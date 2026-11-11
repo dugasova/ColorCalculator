@@ -46,7 +46,7 @@ function useComputedFullFormula(
 ) {
   const result = useMemo(
     () =>
-      calculateFullFormula(
+      calculateFullFormula({
         startLevel,
         targetShade,
         grayPercent,
@@ -55,7 +55,7 @@ function useComputedFullFormula(
         manualDeveloperVolume,
         manualMixingRatio,
         colorGramsOverride,
-      ),
+      }),
     [
       startLevel,
       targetShade,

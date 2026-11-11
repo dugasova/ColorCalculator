@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Shade } from "../../../engine/shades";
 import type { DeveloperVolume } from "../../../engine/levels";
-import { formatDeveloperVolume } from "../../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../../format/formatDeveloperVolume";
 import { Select } from "../../common/Select";
 
 export interface DeveloperVolumeFieldProps {

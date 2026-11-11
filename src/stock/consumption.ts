@@ -5,7 +5,7 @@ import { developerStockId, shadeStockId } from "./products";
 import { stockById } from "./reorder";
 
 // Attributes a saved session's grams to the exact products a colorist actually weighed
-// out, mirroring engine/formatFormula.ts's buildMixSummary/buildBlendMixSummary:
+// out, mirroring format/formatFormula.ts's buildMixSummary/buildBlendMixSummary:
 //  - A step with no `brandId` (saved before stock tracking existed, or upgraded from the
 //    legacy flat shape by normalizeHistoryEntry) or no computed grams is skipped: there's
 //    nothing to charge accurately.

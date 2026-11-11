@@ -73,7 +73,7 @@ describe("IGORA_ROYAL_CHART Highlifts 12-series overrides", () => {
   it("end-to-end: a real Highlifts 12-series shade lifts as far as 12% developer allows and reports that level", () => {
     const shade = IGORA_ROYAL_CHART.find(s => s.code === "12-1");
     // Starting from level 6, should lift up to 5 levels with 40 vol
-    const result = calculateFullFormula(6, shade!, 0, 60);
+    const result = calculateFullFormula({ startLevel: 6, targetShade: shade!, grayPercent: 0, totalGrams: 60 });
 
     expect(result.developerVolume).toBe(40);
     expect(result.achievedLevel).toBe(11); // 6 + 5 levels of lift
@@ -129,7 +129,7 @@ describe("WELLA_SHADE_CHART processing-time and no-lift-developer overrides", ()
 
   it("end-to-end: a real Special Blonde shade lifts as far as 12% Welloxon allows and reports that level, not its own nominal 12", () => {
     const shade = WELLA_SHADE_CHART.find(s => s.code === "12/1");
-    const result = calculateFullFormula(4, shade!, 0, 60);
+    const result = calculateFullFormula({ startLevel: 4, targetShade: shade!, grayPercent: 0, totalGrams: 60 });
 
     expect(result.developerVolume).toBe(40);
     expect(result.achievedLevel).toBe(9); // 4 + the documented 4-5 levels of lift at 12%
@@ -180,7 +180,7 @@ describe("LOREAL_MAJIREL_CHART High Lift / Majiblond Ultra overrides", () => {
   it("end-to-end: a real High Lift shade lifts as far as 40vol allows and reports that level", () => {
     const shade = LOREAL_MAJIREL_CHART.find(s => s.code === ".1");
     // Starting from level 6, should lift up to 5 levels with 40 vol
-    const result = calculateFullFormula(6, shade!, 0, 60);
+    const result = calculateFullFormula({ startLevel: 6, targetShade: shade!, grayPercent: 0, totalGrams: 60 });
 
     expect(result.developerVolume).toBe(40);
     expect(result.achievedLevel).toBe(11); // 6 + 5 levels of lift

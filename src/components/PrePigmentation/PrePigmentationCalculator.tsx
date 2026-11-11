@@ -5,7 +5,7 @@ import { calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { BrandId } from "../../engine/brands";
 import { usePalette } from "../../palette";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
-import { formatDeveloperVolume } from "../../engine/formatDeveloperVolume";
+import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";

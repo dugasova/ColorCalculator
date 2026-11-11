@@ -6,7 +6,7 @@ Question: should this project's calculations (engine) be moved to a backend. Dec
 
 Grounds (verified in code):
 
-- `src/engine/*` (~6000 lines) — pure deterministic functions with no `firebase` imports. Dependencies are only `zod`, `../i18n`, `../levels`, `../shades`.
+- `src/engine/*` (~6000 lines) — pure deterministic functions with no `firebase` imports. Dependencies are only `zod` and other engine modules (since 2026-11-11 the engine no longer imports `i18n`; text rendering lives in `src/format`).
 - Offline operation is required: `src/firebase.ts` uses `persistentLocalCache`, saving without network shows "Saved on device". The app is built as a Capacitor APK.
 - There is no backend (no `functions/` directory). Getting one would require the Blaze plan.
 

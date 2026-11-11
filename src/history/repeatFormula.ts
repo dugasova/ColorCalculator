@@ -65,7 +65,7 @@ function isSimpleFormulaEntry(entry: FormulaHistoryEntry): boolean {
 // `usePalette`). `brandId` first: it survives a brand being renamed in PaletteAdmin.
 // Falls back to the display name for legacy steps saved before `brandId` existed (or
 // whose id is no longer in the catalog). `undefined` if neither matches.
-function resolveStepBrand(step: ColorHistoryStep, brands: Record<BrandId, Brand>): Brand | undefined {
+export function resolveStepBrand(step: ColorHistoryStep, brands: Record<BrandId, Brand>): Brand | undefined {
   const byId = step.brandId !== undefined ? brands[step.brandId] : undefined;
   return byId ?? Object.values(brands).find(b => b.name === step.brandName);
 }

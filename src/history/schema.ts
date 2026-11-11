@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Timestamp } from "firebase/firestore";
 import { canvasShapeSchema } from "../engine/canvas";
+import type { FullFormula } from "../engine/formula";
 import type { ColorHistoryStep, FormulaHistoryEntry, LegacyFormulaHistoryEntry } from "./types";
 
 // Validates a formulaHistory Firestore document's top-level shape (see subscribeToFormulaHistory
@@ -87,8 +88,67 @@ export const historyEntryShapeSchema = z.union([formulaHistoryEntryShapeSchema, 
 // The `schemaVersion` every new history document is written with (see
 // saveFormulaToHistory). Bump it -- and teach normalizeHistoryEntry to upgrade the previous
 // value -- whenever a change makes old documents need conversion on read.
-export const CURRENT_HISTORY_SCHEMA_VERSION = 2;
+//  1 = the legacy flat shape (no `steps`)
+//  2 = the `steps`-based shape, formula warnings stored as translated text
+//  3 = formula warnings stored as language-independent data (see upgradeFormulaWarnings)
+export const CURRENT_HISTORY_SCHEMA_VERSION = 3;
 const LEGACY_HISTORY_SCHEMA_VERSION = 1;
+// What a `steps`-based document saved before versioning existed is taken to be.
+const UNVERSIONED_STEPS_SCHEMA_VERSION = 2;
+
+type WarningKey = "toneWarning" | "eligibilityWarning" | "liftUnsupportedWarning";
+const WARNING_KEYS: WarningKey[] = ["toneWarning", "eligibilityWarning", "liftUnsupportedWarning"];
+
+// True for a warning that isn't in the current shape: a translated string (schema < 3), or
+// a field the document doesn't have at all (saved before that warning existed).
+function isOutdatedWarning(value: unknown): boolean {
+  return typeof value === "string" || value === undefined;
+}
+
+function hasOutdatedWarnings(result: FullFormula): boolean {
+  return WARNING_KEYS.some(key => isOutdatedWarning(result[key]));
+}
+
+// Before schema 3 the engine stored each warning as a sentence already translated into
+// whatever language was active at save time. They're now plain data rendered at display
+// time (see engine/formula.ts's ToneWarning & co., format/formulaMessages.ts), so an old
+// text warning is rebuilt here from the same values the engine derived it from, all of
+// which the step itself still holds: the target shade snapshot, the start level and the
+// result's own pigment/corrective tone. A warning whose inputs are somehow gone becomes
+// `null` rather than surviving as text nothing can render; a missing field likewise.
+function upgradeFormulaWarnings(step: Pick<ColorHistoryStep, "targetShade" | "startLevel" | "result">): FullFormula {
+  const { result, targetShade, startLevel } = step;
+  if (!hasOutdatedWarnings(result)) return result;
+  const stored: Record<WarningKey, unknown> = result;
+
+  let toneWarning = result.toneWarning ?? null;
+  if (isOutdatedWarning(stored.toneWarning)) {
+    toneWarning =
+      typeof stored.toneWarning === "string" &&
+      result.underlyingPigment != null &&
+      result.recommendedCorrectiveTone != null
+        ? { tone: targetShade.tone, pigment: result.underlyingPigment, recommended: result.recommendedCorrectiveTone }
+        : null;
+  }
+
+  let eligibilityWarning = result.eligibilityWarning ?? null;
+  if (isOutdatedWarning(stored.eligibilityWarning)) {
+    eligibilityWarning =
+      typeof stored.eligibilityWarning === "string" && targetShade.minStartLevel !== undefined
+        ? { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel }
+        : null;
+  }
+
+  let liftUnsupportedWarning = result.liftUnsupportedWarning ?? null;
+  if (isOutdatedWarning(stored.liftUnsupportedWarning)) {
+    liftUnsupportedWarning =
+      typeof stored.liftUnsupportedWarning === "string"
+        ? { code: targetShade.code, level: targetShade.level, startLevel }
+        : null;
+  }
+
+  return { ...result, toneWarning, eligibilityWarning, liftUnsupportedWarning };
+}
 
 export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHistoryEntry): FormulaHistoryEntry {
   // `raw.clientId` reads as `undefined` (not `null`), and a color step's
@@ -97,7 +157,9 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
   // downstream can rely on the declared `string | null` / `PrePigmentationResult | null`
   // types without re-deriving the fallback itself (formatSession.ts, repeatFormula.ts
   // and revisit.ts each used to, with two different idioms). `schemaVersion`/`appVersion`
-  // are likewise absent on documents saved before versioning existed. Returns `raw`
+  // are likewise absent on documents saved before versioning existed, and a color step's
+  // formula warnings are text rather than data on documents older than schema 3 (see
+  // upgradeFormulaWarnings). The stored `schemaVersion` itself is kept as-is. Returns `raw`
   // unchanged (not a copy) when it already has every one of these fields, same as the
   // plain `return raw` this replaced for an already-well-formed modern entry.
   if ("steps" in raw && raw.steps !== undefined) {
@@ -105,15 +167,19 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
       raw.clientId === undefined ||
       raw.schemaVersion === undefined ||
       raw.appVersion === undefined ||
-      raw.steps.some(step => step.kind === "color" && step.prePigmentation === undefined);
+      raw.steps.some(
+        step => step.kind === "color" && (step.prePigmentation === undefined || hasOutdatedWarnings(step.result)),
+      );
     if (!needsCoercion) return raw;
     const steps = raw.steps.map(step =>
-      step.kind === "color" ? { ...step, prePigmentation: step.prePigmentation ?? null } : step,
+      step.kind === "color"
+        ? { ...step, prePigmentation: step.prePigmentation ?? null, result: upgradeFormulaWarnings(step) }
+        : step,
     );
     return {
       ...raw,
       clientId: raw.clientId ?? null,
-      schemaVersion: raw.schemaVersion ?? CURRENT_HISTORY_SCHEMA_VERSION,
+      schemaVersion: raw.schemaVersion ?? UNVERSIONED_STEPS_SCHEMA_VERSION,
       appVersion: raw.appVersion ?? null,
       steps,
     };
@@ -129,7 +195,7 @@ export function normalizeHistoryEntry(raw: LegacyFormulaHistoryEntry | FormulaHi
     grayPercent: legacy.grayPercent,
     canvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
     applicationZone: legacy.applicationZone,
-    result: legacy.result,
+    result: upgradeFormulaWarnings(legacy),
     additionalShade: legacy.additionalShade ?? null,
     additionalShadeGrams: legacy.additionalShadeGrams ?? null,
     additionalShade2: legacy.additionalShade2 ?? null,
