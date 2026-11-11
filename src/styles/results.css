@@ -55,6 +55,18 @@
   color: var(--ink);
 }
 
+/* An explanation of why the result differs from the plain rule (e.g. porosity changed
+   the developer) -- informational, unlike .warning. */
+.results__info {
+  margin: 0 0 16px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--brand-primary-ink);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
 .results__row {
   display: flex;
   justify-content: space-between;

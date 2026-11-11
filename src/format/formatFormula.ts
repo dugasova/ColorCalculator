@@ -5,6 +5,7 @@ import type { FullFormula, FormulaGrams, NaturalBase } from "../engine/formula";
 import {
   formatEligibilityWarning,
   formatLiftUnsupportedWarning,
+  formatPorosityAdjustment,
   formatToneWarning,
   getGrayCoverageNote,
 } from "./formulaMessages";
@@ -183,6 +184,8 @@ export function formatFormulaText(params: FormatFormulaParams): string {
           })
         : null;
 
+  const porosityNote = formatPorosityAdjustment(result, targetShade.developerPercentOverride);
+
   const lines = [
     title,
     i18n.t("format.startingLevel", { start: startLevel, target: targetShade.level }),
@@ -233,6 +236,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     i18n.t("format.processingTime", { value: processingMinutes }),
     ...(grayCoverageLine !== null ? [grayCoverageLine] : []),
     correctiveToneLine,
+    ...(porosityNote !== null ? [porosityNote] : []),
   ];
 
   // With no mix to hold it (grams null) the warning already replaces the Mix line above;

@@ -8,6 +8,7 @@ import {
 } from "./levels";
 import { suggestNeutralizingTone } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
+import type { Porosity } from "./canvas";
 import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
 
 export interface GrayCoverageStrategy {
@@ -64,7 +65,18 @@ export interface FullFormula {
   eligibilityWarning: EligibilityWarning | null;
   liftUnsupportedWarning: LiftUnsupportedWarning | null;
   grams: FormulaGrams | null;
+  // Set when porosity changed what the level/gray rules alone would have recommended
+  // (see applyPorosity). Absent on every result saved before porosity fed the formula.
+  porosityAdjustment?: PorosityAdjustment | null;
 }
+
+// How the hair's porosity changed the recommendation, reported as data like the warnings
+// above so the UI can explain it in the current language.
+//  - high: `developerVolume` is one grade gentler than `fromDeveloperVolume`.
+//  - low: `recommendedProcessingMinutes` already includes `addedMinutes`.
+export type PorosityAdjustment =
+  | { kind: "developer-lowered"; fromDeveloperVolume: DeveloperVolume }
+  | { kind: "processing-extended"; addedMinutes: number };
 
 export const GRAY_LIGHT_THRESHOLD = 30;
 export const GRAY_MEDIUM_THRESHOLD = 50;
@@ -111,6 +123,71 @@ export function getGrayCoverageStrategy(grayPercent: number): GrayCoverageStrate
 const DEMI_PERMANENT_PROCESSING_MINUTES = 20;
 const STANDARD_PROCESSING_MINUTES = 30;
 const EXTENDED_PROCESSING_MINUTES = 45;
+
+// Highly porous hair (raised or damaged cuticle) takes developer faster and lifts more
+// easily, so the auto-picked developer drops one grade on the 10/20/30/40 vol ladder --
+// never below 10 vol, and never below GRAY_COVERAGE_MIN_DEVELOPER_VOLUME once gray
+// coverage calls for that floor: unopened gray won't take pigment, which is worse than a
+// slightly strong developer. The lift itself is treated as unchanged (the gentler
+// developer reaches the same level on porous hair).
+const POROSITY_DEVELOPER_LADDER: DeveloperVolume[] = [10, 20, 30, 40];
+
+// Low-porosity (tight, glassy cuticle) hair takes pigment slowly: the developer stays as
+// picked and the recommended time is extended instead.
+export const LOW_POROSITY_EXTRA_PROCESSING_MINUTES = 5;
+
+function lowerDeveloperForHighPorosity(volume: DeveloperVolume, grayPercent: number): DeveloperVolume {
+  const index = POROSITY_DEVELOPER_LADDER.indexOf(volume);
+  if (index <= 0) return volume;
+  const lowered = POROSITY_DEVELOPER_LADDER[index - 1];
+  if (grayPercent >= GRAY_LIGHT_THRESHOLD && lowered < GRAY_COVERAGE_MIN_DEVELOPER_VOLUME) return volume;
+  return lowered;
+}
+
+// Applies porosity on top of the developer/time the level and gray rules produced. Leaves
+// alone whatever the product line or the colorist fixed rather than the calculator
+// picking it: a manually chosen developer (Shade.developerVolumeChoices), a line's own
+// no-lift developer (Shade.noLiftDeveloperVolume), and a manufacturer-fixed processing
+// time (Shade.fixedProcessingMinutes).
+function applyPorosity(
+  porosity: Porosity,
+  targetShade: Shade,
+  grayPercent: number,
+  isLifting: boolean,
+  developerVolume: DeveloperVolume | null,
+  recommendedProcessingMinutes: number,
+): {
+  developerVolume: DeveloperVolume | null;
+  recommendedProcessingMinutes: number;
+  adjustment: PorosityAdjustment | null;
+} {
+  const unchanged = { developerVolume, recommendedProcessingMinutes, adjustment: null };
+  if (developerVolume === null) return unchanged;
+
+  if (porosity === "high") {
+    const developerIsFixed =
+      targetShade.developerVolumeChoices !== undefined ||
+      (!isLifting && targetShade.noLiftDeveloperVolume !== undefined);
+    if (developerIsFixed) return unchanged;
+    const lowered = lowerDeveloperForHighPorosity(developerVolume, grayPercent);
+    if (lowered === developerVolume) return unchanged;
+    return {
+      developerVolume: lowered,
+      recommendedProcessingMinutes,
+      adjustment: { kind: "developer-lowered", fromDeveloperVolume: developerVolume },
+    };
+  }
+
+  if (porosity === "low" && targetShade.fixedProcessingMinutes === undefined) {
+    return {
+      developerVolume,
+      recommendedProcessingMinutes: recommendedProcessingMinutes + LOW_POROSITY_EXTRA_PROCESSING_MINUTES,
+      adjustment: { kind: "processing-extended", addedMinutes: LOW_POROSITY_EXTRA_PROCESSING_MINUTES },
+    };
+  }
+
+  return unchanged;
+}
 
 export function getRecommendedProcessingMinutes(targetShade: Shade, grayPercent: number): number {
   if (targetShade.fixedProcessingMinutes !== undefined) {
@@ -345,6 +422,9 @@ export interface FullFormulaInput {
   // color:developer split itself (e.g. corrector grams), scaled to match the resulting
   // real total so those figures stay proportional to what's actually being mixed.
   colorGramsOverride?: number;
+  // The hair's porosity (HairCanvas.porosity); "normal" leaves the formula as the level
+  // and gray rules alone produce it. See applyPorosity.
+  porosity?: Porosity;
 }
 
 export function calculateFullFormula({
@@ -356,6 +436,7 @@ export function calculateFullFormula({
   manualDeveloperVolume,
   manualMixingRatio,
   colorGramsOverride,
+  porosity = "normal",
 }: FullFormulaInput): FullFormula {
   const isLifting = targetShade.level > startLevel;
   const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
@@ -367,7 +448,7 @@ export function calculateFullFormula({
       : null;
 
   const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, manualDeveloperVolume);
-  const { developerVolume, achievedLevel: reachableLevel } = resolvePartialLiftFallback(
+  const { developerVolume: levelDeveloperVolume, achievedLevel: reachableLevel } = resolvePartialLiftFallback(
     startLevel,
     targetShade,
     isLifting,
@@ -375,7 +456,19 @@ export function calculateFullFormula({
   );
   // A line that can't lift, mixed anyway with the developer the colorist picked, only
   // deposits: the hair stays at its starting level rather than reaching the shade's own.
-  const achievedLevel = liftUnsupportedWarning !== null && developerVolume !== null ? startLevel : reachableLevel;
+  const achievedLevel = liftUnsupportedWarning !== null && levelDeveloperVolume !== null ? startLevel : reachableLevel;
+  const {
+    developerVolume,
+    recommendedProcessingMinutes,
+    adjustment: porosityAdjustment,
+  } = applyPorosity(
+    porosity,
+    targetShade,
+    grayPercent,
+    isLifting,
+    levelDeveloperVolume,
+    getRecommendedProcessingMinutes(targetShade, grayPercent),
+  );
 
   // No pigment is actually revealed if the line can't lift in the first place, or lifts
   // to nowhere (achievedLevel null alongside developerVolume null).
@@ -395,8 +488,6 @@ export function calculateFullFormula({
     achievedLevel,
     correctorBaseGrams,
   );
-  const recommendedProcessingMinutes = getRecommendedProcessingMinutes(targetShade, grayPercent);
-
   const eligibilityWarning =
     targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
       ? { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel }
@@ -415,5 +506,6 @@ export function calculateFullFormula({
     eligibilityWarning,
     liftUnsupportedWarning,
     grams,
+    porosityAdjustment,
   };
 }

@@ -376,3 +376,35 @@ describe("formatFormulaText gray coverage line", () => {
     expect(textFor(80)).toContain("Gray coverage: equal parts natural base and fashion tone (50% base / 50% tone)");
   });
 });
+
+describe("formatFormulaText porosity note", () => {
+  const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
+  const textFor = (porosity: "low" | "normal" | "high") =>
+    formatFormulaText({
+      brandName: "Generic",
+      line: null,
+      targetShade,
+      startLevel: 6,
+      result: calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 0, totalGrams: 60, porosity }),
+      processingMinutes: 30,
+      applicationZone: "full-head",
+      additionalShade: null,
+      additionalShadeGrams: 0,
+      blend: null,
+      neutralizationApplied: false,
+    });
+
+  it("explains a developer lowered for high porosity, next to the lowered developer", () => {
+    const text = textFor("high");
+    expect(text).toContain("Developer: 6% (20 vol)");
+    expect(text).toContain("High porosity: developer lowered from 9% (30 vol) to 6% (20 vol)");
+  });
+
+  it("explains a processing time extended for low porosity", () => {
+    expect(textFor("low")).toContain("Low porosity: recommended processing time extended by 5 min");
+  });
+
+  it("says nothing for normal porosity", () => {
+    expect(textFor("normal")).not.toContain("porosity");
+  });
+});

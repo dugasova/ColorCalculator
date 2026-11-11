@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import {
   formatEligibilityWarning,
   formatLiftUnsupportedWarning,
+  formatPorosityAdjustment,
   formatToneWarning,
   getGrayCoverageNote,
 } from "../../format/formulaMessages";
@@ -179,6 +180,8 @@ export function FormulaResults({
     servicePrice,
   });
 
+  const porosityNote = formatPorosityAdjustment(result, targetShade.developerPercentOverride);
+
   return (
     <div className="results">
       {prePigmentationResult !== null && (
@@ -224,6 +227,7 @@ export function FormulaResults({
           <span>{t("results.achievedLevelValue", { level: result.achievedLevel, target: targetShade.level })}</span>
         </div>
       )}
+      {porosityNote !== null && <p className="results__info">{porosityNote}</p>}
       {porosity === "high" && (
         <p className="warning" role="alert">
           {t("results.porousWarning")}
