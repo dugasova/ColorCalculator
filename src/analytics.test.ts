@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { Timestamp } from "firebase/firestore";
 import { computeSalonAnalytics, computeStylistStats, filterEntriesByPeriod } from "./analytics";
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
+import { BRANDS, type Brand, type BrandId } from "./engine/brands";
 import {
   COLOR_FULL_FORMULA,
   makeColorStep as makeSharedColorStep,
@@ -21,7 +22,40 @@ function makeEntry(overrides: Partial<FormulaHistoryEntry> & { clientName: strin
   return makeSharedEntry({ steps: [makeColorStep()], ...overrides });
 }
 
+const BRANDS_WITH_GENERIC_RENAMED: Record<BrandId, Brand> = {
+  ...BRANDS,
+  generic: { ...BRANDS.generic, name: "House Color" },
+};
+
 describe("computeSalonAnalytics", () => {
+  it("counts a renamed brand's visits as one shade under its current name", () => {
+    const shade = { code: "7.1", level: 7, tone: "ash" } as const;
+    const entries = [
+      // Saved before the rename, with the id.
+      makeEntry({
+        clientName: "Anna",
+        steps: [makeColorStep({ brandId: "generic", brandName: "Generic", targetShade: shade })],
+      }),
+      // Saved after the rename.
+      makeEntry({
+        clientName: "Olga",
+        steps: [makeColorStep({ brandId: "generic", brandName: "House Color", targetShade: shade })],
+      }),
+      // Legacy step without an id, matched by its current name.
+      makeEntry({ clientName: "Ira", steps: [makeColorStep({ brandName: "House Color", targetShade: shade })] }),
+    ];
+    const stats = computeSalonAnalytics(entries, BRANDS_WITH_GENERIC_RENAMED);
+    expect(stats.popularShades).toEqual([{ brandName: "House Color", line: null, shadeCode: "7.1", count: 3 }]);
+  });
+
+  it("keeps a step whose brand left the catalog under its saved name", () => {
+    const entries = [
+      makeEntry({ clientName: "Anna", steps: [makeColorStep({ brandId: "gone", brandName: "Old Brand" })] }),
+    ];
+    const stats = computeSalonAnalytics(entries, BRANDS);
+    expect(stats.popularShades).toEqual([{ brandName: "Old Brand", line: null, shadeCode: "7.1", count: 1 }]);
+  });
+
   it("counts shade popularity per brand+line+code, sorted by count desc", () => {
     const entries = [
       makeEntry({
@@ -38,7 +72,7 @@ describe("computeSalonAnalytics", () => {
       }),
     ];
 
-    const stats = computeSalonAnalytics(entries);
+    const stats = computeSalonAnalytics(entries, BRANDS);
     expect(stats.popularShades).toEqual([
       { brandName: "Wella", line: null, shadeCode: "7.1", count: 2 },
       { brandName: "L'Oréal", line: null, shadeCode: "7.1", count: 1 },
@@ -75,7 +109,7 @@ describe("computeSalonAnalytics", () => {
       }),
     ];
 
-    const stats = computeSalonAnalytics(entries);
+    const stats = computeSalonAnalytics(entries, BRANDS);
     expect(stats.popularShades).toEqual([{ brandName: "Wella", line: null, shadeCode: "9.1", count: 1 }]);
   });
 
@@ -96,12 +130,12 @@ describe("computeSalonAnalytics", () => {
       makeEntry({ clientName: "C", steps: [makeColorStep({ result: { ...makeColorStep().result, grams: null } })] }),
     ];
 
-    expect(computeSalonAnalytics(entries).averageColorGrams).toBe(15);
+    expect(computeSalonAnalytics(entries, BRANDS).averageColorGrams).toBe(15);
   });
 
   it("returns null averageColorGrams when no entry has a computed formula", () => {
     const entries = [makeEntry({ clientName: "A" })];
-    expect(computeSalonAnalytics(entries).averageColorGrams).toBeNull();
+    expect(computeSalonAnalytics(entries, BRANDS).averageColorGrams).toBeNull();
   });
 
   it("ignores a step whose result has no grams field at all (not just null)", () => {
@@ -122,7 +156,7 @@ describe("computeSalonAnalytics", () => {
       }),
     ];
 
-    expect(computeSalonAnalytics(entries).averageColorGrams).toBe(10);
+    expect(computeSalonAnalytics(entries, BRANDS).averageColorGrams).toBe(10);
   });
 
   it("computes actualVsComputedRatio and averageActualColorGrams from recorded-vs-computed pairs", () => {
@@ -147,14 +181,14 @@ describe("computeSalonAnalytics", () => {
       }),
     ];
 
-    const stats = computeSalonAnalytics(entries);
+    const stats = computeSalonAnalytics(entries, BRANDS);
     expect(stats.averageActualColorGrams).toBe(30);
     expect(stats.actualVsComputedRatio).toBeCloseTo(1.5, 5);
   });
 
   it("returns null averageActualColorGrams and actualVsComputedRatio when nothing has been recorded", () => {
     const entries = [makeEntry({ clientName: "A" })];
-    const stats = computeSalonAnalytics(entries);
+    const stats = computeSalonAnalytics(entries, BRANDS);
     expect(stats.averageActualColorGrams).toBeNull();
     expect(stats.actualVsComputedRatio).toBeNull();
   });
@@ -166,12 +200,12 @@ describe("computeSalonAnalytics", () => {
       makeEntry({ clientName: "C", productCost: null }),
     ];
 
-    expect(computeSalonAnalytics(entries).averageProductCost).toBe(15);
+    expect(computeSalonAnalytics(entries, BRANDS).averageProductCost).toBe(15);
   });
 
   it("returns null averageProductCost when every entry has a null cost", () => {
     const entries = [makeEntry({ clientName: "A", productCost: null })];
-    expect(computeSalonAnalytics(entries).averageProductCost).toBeNull();
+    expect(computeSalonAnalytics(entries, BRANDS).averageProductCost).toBeNull();
   });
 
   it("excludes a legacy entry with no productCost field at all, instead of poisoning the average with NaN", () => {
@@ -182,7 +216,7 @@ describe("computeSalonAnalytics", () => {
     delete legacyWithoutProductCost.productCost;
     const entries = [legacyWithoutProductCost as FormulaHistoryEntry, makeEntry({ clientName: "B", productCost: 20 })];
 
-    expect(computeSalonAnalytics(entries).averageProductCost).toBe(20);
+    expect(computeSalonAnalytics(entries, BRANDS).averageProductCost).toBe(20);
   });
 
   it("computes retention rate as returning clients over unique named clients", () => {
@@ -194,14 +228,14 @@ describe("computeSalonAnalytics", () => {
       makeEntry({ clientName: "" }),
     ];
 
-    const stats = computeSalonAnalytics(entries);
+    const stats = computeSalonAnalytics(entries, BRANDS);
     expect(stats.uniqueClients).toBe(3);
     expect(stats.returningClients).toBe(1);
     expect(stats.retentionRate).toBeCloseTo(1 / 3);
   });
 
   it("avoids division by zero when there are no entries", () => {
-    const stats = computeSalonAnalytics([]);
+    const stats = computeSalonAnalytics([], BRANDS);
     expect(stats.uniqueClients).toBe(0);
     expect(stats.retentionRate).toBe(0);
     expect(stats.totalVisits).toBe(0);
@@ -224,7 +258,7 @@ describe("computeStylistStats", () => {
       makeEntry({ appliedBy: "b@salon.test", clientName: "Clara", servicePrice: 200, productCost: 20, steps: [color] }),
     ];
 
-    const stats = computeStylistStats(entries);
+    const stats = computeStylistStats(entries, BRANDS);
     expect(stats.map(s => s.stylist)).toEqual(["b@salon.test", "a@salon.test"]);
 
     const a = stats.find(s => s.stylist === "a@salon.test")!;
@@ -251,7 +285,7 @@ describe("computeStylistStats", () => {
       makeEntry({ appliedBy: "amy@salon.test", clientName: "B", servicePrice: 100, steps: [color] }),
     ];
 
-    const stats = computeStylistStats(entries);
+    const stats = computeStylistStats(entries, BRANDS);
     expect(stats.map(s => s.stylist)).toEqual(["amy@salon.test", "zed@salon.test"]);
   });
 
@@ -261,7 +295,7 @@ describe("computeStylistStats", () => {
     delete legacyWithoutPricing.servicePrice;
     delete legacyWithoutPricing.productCost;
 
-    const [stats] = computeStylistStats([legacyWithoutPricing as FormulaHistoryEntry]);
+    const [stats] = computeStylistStats([legacyWithoutPricing as FormulaHistoryEntry], BRANDS);
     expect(stats.revenue).toBe(0);
     expect(stats.averageTicket).toBeNull();
     expect(stats.grossProfit).toBeNull();
@@ -270,20 +304,24 @@ describe("computeStylistStats", () => {
   it("finds the latest appliedAt as lastVisitAt, null when every entry is still pending", () => {
     const earlier = Timestamp.fromDate(new Date(2024, 0, 1));
     const later = Timestamp.fromDate(new Date(2024, 5, 1));
-    const [withDates] = computeStylistStats([
-      makeEntry({ appliedBy: "a@salon.test", clientName: "A", appliedAt: earlier }),
-      makeEntry({ appliedBy: "a@salon.test", clientName: "B", appliedAt: later }),
-    ]);
+    const [withDates] = computeStylistStats(
+      [
+        makeEntry({ appliedBy: "a@salon.test", clientName: "A", appliedAt: earlier }),
+        makeEntry({ appliedBy: "a@salon.test", clientName: "B", appliedAt: later }),
+      ],
+      BRANDS,
+    );
     expect(withDates.lastVisitAt).toEqual(later.toDate());
 
-    const [pendingOnly] = computeStylistStats([
-      makeEntry({ appliedBy: "a@salon.test", clientName: "A", appliedAt: null }),
-    ]);
+    const [pendingOnly] = computeStylistStats(
+      [makeEntry({ appliedBy: "a@salon.test", clientName: "A", appliedAt: null })],
+      BRANDS,
+    );
     expect(pendingOnly.lastVisitAt).toBeNull();
   });
 
   it("returns an empty array for no entries", () => {
-    expect(computeStylistStats([])).toEqual([]);
+    expect(computeStylistStats([], BRANDS)).toEqual([]);
   });
 });
 

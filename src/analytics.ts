@@ -1,4 +1,5 @@
-import type { ColorHistoryStep, FormulaHistoryEntry } from "./history";
+import { resolveStepBrand, type ColorHistoryStep, type FormulaHistoryEntry } from "./history";
+import type { Brand, BrandId } from "./engine/brands";
 import { getClientGroupKey, normalizeClientKey } from "./revisit";
 import { stepTotalGrams } from "./sessionCost";
 
@@ -23,19 +24,26 @@ export interface SalonAnalytics {
 
 // Keyed by brand + line + shade code: the same code can exist across different brands/
 // lines (e.g. a generic chart's '7.1' vs a brand-specific one), so brand+line disambiguates.
-// Only color steps have a shade; bleach steps (lift-only, no dye) don't contribute here.
-function countShadePopularity(entries: FormulaHistoryEntry[]): ShadePopularity[] {
+// The brand part of the key is the catalog id whenever the step resolves to a live brand
+// (see resolveStepBrand: `brandId` first, display name for legacy steps), so visits saved
+// before and after a brand was renamed in PaletteAdmin count as one shade, shown under the
+// brand's current name. A step whose brand is no longer in the catalog falls back to its
+// saved name. Only color steps have a shade; bleach steps (lift-only, no dye) don't
+// contribute here.
+function countShadePopularity(entries: FormulaHistoryEntry[], brands: Record<BrandId, Brand>): ShadePopularity[] {
   const shadeCounts = new Map<string, ShadePopularity>();
   for (const entry of entries) {
     for (const step of entry.steps) {
       if (step.kind !== "color") continue;
-      const key = `${step.brandName}|${step.line ?? ""}|${step.targetShade.code}`;
+      const brand = resolveStepBrand(step, brands);
+      const brandKey = brand !== undefined ? `id:${brand.id}` : `name:${step.brandName}`;
+      const key = `${brandKey}|${step.line ?? ""}|${step.targetShade.code}`;
       const existing = shadeCounts.get(key);
       if (existing !== undefined) {
         existing.count += 1;
       } else {
         shadeCounts.set(key, {
-          brandName: step.brandName,
+          brandName: brand?.name ?? step.brandName,
           line: step.line,
           shadeCode: step.targetShade.code,
           count: 1,
@@ -58,10 +66,12 @@ function countVisitsByClient(entries: FormulaHistoryEntry[]): Map<string, number
   return visitsByClient;
 }
 
-export function computeSalonAnalytics(entries: FormulaHistoryEntry[]): SalonAnalytics {
+// `brands` is the live catalog (see `usePalette`), used only to group popular shades by
+// brand id rather than by the name saved on each step -- see countShadePopularity.
+export function computeSalonAnalytics(entries: FormulaHistoryEntry[], brands: Record<BrandId, Brand>): SalonAnalytics {
   const totalVisits = entries.length;
 
-  const popularShades = countShadePopularity(entries);
+  const popularShades = countShadePopularity(entries, brands);
 
   // `.filter(typeof … === 'number')` (not `!== null`) is required: Firestore documents
   // saved before the pricing/grams fields existed on this schema simply lack the field,
@@ -157,7 +167,7 @@ export interface StylistStats {
   productCost: number; // sum of numeric entry.productCost
   grossProfit: number | null; // sum(servicePrice - productCost) over entries where BOTH are numbers; null if none
   averageTicket: number | null; // revenue / pricedVisits; null when pricedVisits === 0
-  topShade: ShadePopularity | null; // countShadePopularity(stylistEntries)[0] ?? null
+  topShade: ShadePopularity | null; // countShadePopularity(stylistEntries, brands)[0] ?? null
   lastVisitAt: Date | null; // max appliedAt.toDate(); null when every entry has appliedAt === null
 }
 
@@ -174,7 +184,7 @@ function groupByStylist(entries: FormulaHistoryEntry[]): Map<string, FormulaHist
   return groups;
 }
 
-export function computeStylistStats(entries: FormulaHistoryEntry[]): StylistStats[] {
+export function computeStylistStats(entries: FormulaHistoryEntry[], brands: Record<BrandId, Brand>): StylistStats[] {
   const stats: StylistStats[] = [];
   for (const [stylist, stylistEntries] of groupByStylist(entries)) {
     const visits = stylistEntries.length;
@@ -218,7 +228,7 @@ export function computeStylistStats(entries: FormulaHistoryEntry[]): StylistStat
     const grossProfit = grossProfitCount > 0 ? grossProfitSum : null;
     const averageTicket = pricedVisits > 0 ? revenue / pricedVisits : null;
 
-    const topShade = countShadePopularity(stylistEntries)[0] ?? null;
+    const topShade = countShadePopularity(stylistEntries, brands)[0] ?? null;
 
     let lastVisitAt: Date | null = null;
     for (const entry of stylistEntries) {

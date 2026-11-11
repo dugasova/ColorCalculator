@@ -31,6 +31,7 @@ export {
 export {
   buildRepeatFormulaRequest,
   buildRepeatSessionRequest,
+  resolveStepBrand,
   type RepeatFormulaRequest,
   type RepeatSessionRequest,
   type StepSeed,

@@ -8,6 +8,7 @@ import {
   ANALYTICS_PERIODS,
   type AnalyticsPeriod,
 } from "../../analytics";
+import { usePalette } from "../../palette";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import { Select } from "../common/Select";
 import "./AnalyticsView.css";
@@ -26,6 +27,7 @@ export interface AnalyticsViewProps {
 
 export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps) {
   const { t } = useTranslation();
+  const brands = usePalette();
   const [entries, setEntries] = useState<FormulaHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,8 +50,8 @@ export function AnalyticsView({ isAdmin, currentUserEmail }: AnalyticsViewProps)
   }, [t, isAdmin, currentUserEmail]);
 
   const periodEntries = filterEntriesByPeriod(entries, period, new Date(nowMs));
-  const stats = computeSalonAnalytics(periodEntries);
-  const stylistStats = isAdmin ? computeStylistStats(periodEntries) : [];
+  const stats = computeSalonAnalytics(periodEntries, brands);
+  const stylistStats = isAdmin ? computeStylistStats(periodEntries, brands) : [];
   const topShades = stats.popularShades.slice(0, TOP_SHADES_LIMIT);
   return (
     <div className="calculator">
