@@ -146,9 +146,9 @@ describe("formatSessionText", () => {
         // `note` is no longer part of GrayCoverageStrategy, but documents saved by older
         // app versions still carry it.
         grayCoverage: {
-          naturalRatio: 0,
-          fashionRatio: 1,
-          note: "apply the fashion tone as-is",
+          naturalRatio: 0.5,
+          fashionRatio: 0.5,
+          note: "equal parts natural base and fashion tone",
         } as GrayCoverageStrategy,
       },
     };
@@ -156,8 +156,8 @@ describe("formatSessionText", () => {
     try {
       i18n.changeLanguage("uk");
       const text = formatSessionText([staleEnglishNoteStep]);
-      expect(text).toContain("Покриття сивини: нанести модний тон без змішування (0% база / 100% тон)");
-      expect(text).not.toContain("apply the fashion tone as-is");
+      expect(text).toContain("Покриття сивини: рівні частини натуральної бази та модного тону (50% база / 50% тон)");
+      expect(text).not.toContain("equal parts natural base and fashion tone");
     } finally {
       i18n.changeLanguage(originalLanguage);
     }

@@ -165,6 +165,24 @@ export function formatFormulaText(params: FormatFormulaParams): string {
             : i18n.t("results.none"),
       });
 
+  // Only when gray coverage actually changes the mix: with no natural dose called for
+  // (under 30% gray, including a client with no gray at all) and none blended in, the
+  // line would just say "apply the tone as-is".
+  const grayCoverageLine =
+    naturalBase !== null
+      ? i18n.t("format.grayCoverageApplied", {
+          code: naturalBase.shade.code,
+          natural: Math.round(result.grayCoverage.naturalRatio * 100),
+          fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+        })
+      : result.grayCoverage.naturalRatio > 0
+        ? i18n.t("format.grayCoverage", {
+            note: getGrayCoverageNote(result.grayCoverage),
+            natural: Math.round(result.grayCoverage.naturalRatio * 100),
+            fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+          })
+        : null;
+
   const lines = [
     title,
     i18n.t("format.startingLevel", { start: startLevel, target: targetShade.level }),
@@ -213,17 +231,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
               : i18n.t("results.notAchievable"),
         }),
     i18n.t("format.processingTime", { value: processingMinutes }),
-    naturalBase !== null
-      ? i18n.t("format.grayCoverageApplied", {
-          code: naturalBase.shade.code,
-          natural: Math.round(result.grayCoverage.naturalRatio * 100),
-          fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-        })
-      : i18n.t("format.grayCoverage", {
-          note: getGrayCoverageNote(result.grayCoverage),
-          natural: Math.round(result.grayCoverage.naturalRatio * 100),
-          fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-        }),
+    ...(grayCoverageLine !== null ? [grayCoverageLine] : []),
     correctiveToneLine,
   ];
 

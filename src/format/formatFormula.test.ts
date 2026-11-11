@@ -30,7 +30,6 @@ describe("formatFormulaText", () => {
         "Ratio: 1:1\n" +
         "Mix: 8.1- 30.0 g developer 30.0 g\n" +
         "Processing time: 30 min\n" +
-        "Gray coverage: apply the fashion tone as-is (0% base / 100% tone)\n" +
         "Recommended corrective tone: none",
     );
   });
@@ -347,5 +346,33 @@ describe("buildMixSummary with a gray-coverage natural base", () => {
     expect(buildMixSummary(target, { colorGrams: 30, developerGrams: 30 }, null, 0, null, 0, null)).toBe(
       "7/1- 30.0 g developer 30.0 g",
     );
+  });
+});
+
+describe("formatFormulaText gray coverage line", () => {
+  const targetShade: Shade = { code: "8.1", level: 8, tone: "ash" };
+  const textFor = (grayPercent: number) =>
+    formatFormulaText({
+      brandName: "Generic",
+      line: null,
+      targetShade,
+      startLevel: 8,
+      result: calculateFullFormula({ startLevel: 8, targetShade, grayPercent, totalGrams: 60 }),
+      processingMinutes: 30,
+      applicationZone: "full-head",
+      additionalShade: null,
+      additionalShadeGrams: 0,
+      blend: null,
+      neutralizationApplied: false,
+    });
+
+  it("is left out when no natural base is called for (no gray, or under 30%)", () => {
+    expect(textFor(0)).not.toContain("Gray coverage");
+    expect(textFor(20)).not.toContain("Gray coverage");
+  });
+
+  it("is shown once gray coverage changes the mix", () => {
+    expect(textFor(40)).toContain("Gray coverage: one-third natural base blended in");
+    expect(textFor(80)).toContain("Gray coverage: equal parts natural base and fashion tone (50% base / 50% tone)");
   });
 });

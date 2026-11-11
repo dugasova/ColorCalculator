@@ -265,22 +265,25 @@ export function FormulaResults({
         </span>
       </div>
 
-      <div className="results__row">
-        <span className="results__row-label">{t("results.grayCoverage")}</span>
-        <span>
-          {naturalBase !== null
-            ? t("results.grayCoverageAppliedValue", {
-                code: naturalBase.shade.code,
-                natural: Math.round(result.grayCoverage.naturalRatio * 100),
-                fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-              })
-            : t("results.grayCoverageValue", {
-                note: getGrayCoverageNote(result.grayCoverage),
-                natural: Math.round(result.grayCoverage.naturalRatio * 100),
-                fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-              })}
-        </span>
-      </div>
+      {/* Only when gray coverage changes the mix -- see formatFormulaText's own gray line. */}
+      {(naturalBase !== null || result.grayCoverage.naturalRatio > 0) && (
+        <div className="results__row">
+          <span className="results__row-label">{t("results.grayCoverage")}</span>
+          <span>
+            {naturalBase !== null
+              ? t("results.grayCoverageAppliedValue", {
+                  code: naturalBase.shade.code,
+                  natural: Math.round(result.grayCoverage.naturalRatio * 100),
+                  fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+                })
+              : t("results.grayCoverageValue", {
+                  note: getGrayCoverageNote(result.grayCoverage),
+                  natural: Math.round(result.grayCoverage.naturalRatio * 100),
+                  fashion: Math.round(result.grayCoverage.fashionRatio * 100),
+                })}
+          </span>
+        </div>
+      )}
 
       <div className="results__row">
         <span className="results__row-label">{t("results.recommendedTone")}</span>
