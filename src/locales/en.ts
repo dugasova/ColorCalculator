@@ -175,7 +175,7 @@ export const en = {
       low: "Low",
       normal: "Normal",
       high: "High",
-      hint: "High porosity takes color faster: cut processing on the ends by 5–10 min.",
+      hint: "High: developer one grade gentler, cut processing on the ends by 5–10 min. Low: +5 min processing.",
     },
     thickness: {
       label: "Hair Thickness",
@@ -434,6 +434,11 @@ export const en = {
     },
     liftUnsupportedWarning:
       "'{{code}}' can't lift level — it only deposits color, so the hair must already be at level {{level}} or higher, but the starting level is {{startLevel}}",
+    porosity: {
+      developerLowered: "High porosity: developer lowered from {{from}} to {{to}} — porous hair lifts more easily",
+      processingExtended:
+        "Low porosity: recommended processing time extended by {{minutes}} min — a tight cuticle takes color slowly",
+    },
     toneWarning: "The chosen tone '{{tone}}' won't neutralize {{pigment}} pigment; '{{recommended}}' is recommended",
     eligibilityWarning:
       "Shade '{{code}}' requires a starting level of {{minLevel}} or higher (natural base); current start level is {{startLevel}}",

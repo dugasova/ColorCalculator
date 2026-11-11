@@ -19,7 +19,7 @@ import {
 } from "../../engine/applicationZone";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatio, Shade } from "../../engine/shades";
-import type { HairCanvas } from "../../engine/canvas";
+import type { HairCanvas, Porosity } from "../../engine/canvas";
 import type { ColorStepSeed } from "../../history";
 import { useHairCanvasState } from "./useHairCanvasState";
 
@@ -43,6 +43,7 @@ function useComputedFullFormula(
   manualMixingRatio: MixingRatio | undefined,
   totalExtra: number,
   colorGramsOverride: number | undefined,
+  porosity: Porosity,
 ) {
   const result = useMemo(
     () =>
@@ -55,6 +56,7 @@ function useComputedFullFormula(
         manualDeveloperVolume,
         manualMixingRatio,
         colorGramsOverride,
+        porosity,
       }),
     [
       startLevel,
@@ -65,6 +67,7 @@ function useComputedFullFormula(
       manualDeveloperVolume,
       manualMixingRatio,
       colorGramsOverride,
+      porosity,
     ],
   );
   const grams = useMemo(
@@ -278,6 +281,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     effectiveManualMixingRatio,
     totalExtra,
     colorGramsOverride,
+    porosity,
   );
   // The real primary mix total (color + developer), excluding additional shades --
   // "color" mode never touches `totalGrams` itself, so callers that need the actual

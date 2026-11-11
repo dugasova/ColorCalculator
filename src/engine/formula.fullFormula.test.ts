@@ -538,3 +538,92 @@ describe("calculateFullFormula", () => {
     });
   });
 });
+
+describe("calculateFullFormula: porosity", () => {
+  const shade = (level: Shade["level"]): Shade => ({ code: `${level}.1`, level, tone: "ash" });
+  const formula = (overrides: Partial<Parameters<typeof calculateFullFormula>[0]>) =>
+    calculateFullFormula({ startLevel: 6, targetShade: shade(8), grayPercent: 0, totalGrams: 60, ...overrides });
+
+  it("leaves the formula untouched for normal porosity, and by default", () => {
+    expect(formula({ porosity: "normal" })).toEqual(formula({}));
+    expect(formula({}).porosityAdjustment).toBeNull();
+  });
+
+  it.each([
+    { lift: 1, target: 7, from: 20, to: 10 },
+    { lift: 2, target: 8, from: 30, to: 20 },
+    { lift: 3, target: 9, from: 40, to: 30 },
+  ] as const)("high porosity lowers a $lift-level lift from $from vol to $to vol", ({ target, from, to }) => {
+    expect(formula({ targetShade: shade(target) }).developerVolume).toBe(from);
+    const result = formula({ targetShade: shade(target), porosity: "high" });
+    expect(result.developerVolume).toBe(to);
+    expect(result.porosityAdjustment).toEqual({ kind: "developer-lowered", fromDeveloperVolume: from });
+  });
+
+  it("high porosity still counts the target as reached, with the same time and corrective guidance", () => {
+    const normal = formula({});
+    const high = formula({ porosity: "high" });
+    expect(high.achievedLevel).toBe(8);
+    expect(high.recommendedProcessingMinutes).toBe(normal.recommendedProcessingMinutes);
+    expect(high.underlyingPigment).toBe(normal.underlyingPigment);
+    expect(high.grams).toEqual(normal.grams);
+  });
+
+  it("high porosity has nothing to lower at the gentlest developer", () => {
+    const result = formula({ startLevel: 8, porosity: "high" });
+    expect(result.developerVolume).toBe(10);
+    expect(result.porosityAdjustment).toBeNull();
+  });
+
+  it("gray coverage wins over high porosity: never below 20 vol from 30% gray", () => {
+    // No lift: the gray floor raises 10 -> 20 vol, and porosity must not undo it.
+    const noLift = formula({ startLevel: 8, grayPercent: 40, porosity: "high" });
+    expect(noLift.developerVolume).toBe(20);
+    expect(noLift.porosityAdjustment).toBeNull();
+    // 2-level lift: 30 vol may still drop to 20, which satisfies the floor.
+    const lifting = formula({ grayPercent: 40, porosity: "high" });
+    expect(lifting.developerVolume).toBe(20);
+    expect(lifting.porosityAdjustment).toEqual({ kind: "developer-lowered", fromDeveloperVolume: 30 });
+    // Under 30% gray there is no floor.
+    expect(formula({ targetShade: shade(7), grayPercent: 20, porosity: "high" }).developerVolume).toBe(10);
+  });
+
+  it("high porosity leaves a developer the colorist or the line fixed", () => {
+    const manual = formula({
+      startLevel: 8,
+      targetShade: colorTouchShade,
+      manualDeveloperVolume: 13,
+      porosity: "high",
+    });
+    expect(manual.developerVolume).toBe(13);
+    expect(manual.porosityAdjustment).toBeNull();
+
+    const lineFixed: Shade = { code: "7.1", level: 7, tone: "ash", noLiftDeveloperVolume: 20 };
+    const noLift = formula({ startLevel: 7, targetShade: lineFixed, porosity: "high" });
+    expect(noLift.developerVolume).toBe(20);
+    expect(noLift.porosityAdjustment).toBeNull();
+  });
+
+  it("high porosity changes nothing when the target is not achievable at all", () => {
+    const result = formula({ startLevel: 2, targetShade: shade(9), porosity: "high" });
+    expect(result.developerVolume).toBeNull();
+    expect(result.porosityAdjustment).toBeNull();
+  });
+
+  it("low porosity keeps the developer and extends the recommended time by 5 minutes", () => {
+    const normal = formula({});
+    const low = formula({ porosity: "low" });
+    expect(low.developerVolume).toBe(normal.developerVolume);
+    expect(low.recommendedProcessingMinutes).toBe(normal.recommendedProcessingMinutes + 5);
+    expect(low.porosityAdjustment).toEqual({ kind: "processing-extended", addedMinutes: 5 });
+    // on top of the heavy-gray extension, too
+    expect(formula({ grayPercent: 60, porosity: "low" }).recommendedProcessingMinutes).toBe(50);
+  });
+
+  it("low porosity leaves a manufacturer-fixed processing time alone", () => {
+    const fixed: Shade = { ...shade(8), fixedProcessingMinutes: 55 };
+    const result = formula({ targetShade: fixed, porosity: "low" });
+    expect(result.recommendedProcessingMinutes).toBe(55);
+    expect(result.porosityAdjustment).toBeNull();
+  });
+});

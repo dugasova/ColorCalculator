@@ -1,6 +1,7 @@
 import {
   formatEligibilityWarning,
   formatLiftUnsupportedWarning,
+  formatPorosityAdjustment,
   formatToneWarning,
 } from "../../format/formulaMessages";
 import { useState } from "react";
@@ -154,6 +155,8 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     }
   };
 
+  const porosityNote = formatPorosityAdjustment(result, targetShade.developerPercentOverride);
+
   return (
     <div className="step-card">
       <div className="step-card__header">
@@ -304,6 +307,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
           {formatEligibilityWarning(result.eligibilityWarning)}
         </p>
       )}
+      {porosityNote !== null && <p className="results__info">{porosityNote}</p>}
       {porosity === "high" && (
         <p className="warning" role="alert">
           {t("results.porousWarning")}
