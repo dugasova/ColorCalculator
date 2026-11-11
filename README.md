@@ -175,13 +175,13 @@ Safe to run even if Majirel was never migrated, and safe to re-run.
 
 `package.json`'s `version` (SemVer) is the single source of truth: the web build shows it
 in the account menu and tags Sentry events with it, and `android/app/build.gradle` derives
-`versionName` and `versionCode` (`major*10000 + minor*100 + patch`) from it. Every deploy
-— Firebase Hosting or a Play upload — is a new version.
+`versionName` and `versionCode` (`major*10000 + minor*100 + patch`) from it. Every release
+— a web deploy or a Play upload — is a new version.
 
-1. Add a section for the new version to `CHANGELOG.md`.
-2. `npm version patch|minor|major` — bumps `package.json`, commits, and tags `vX.Y.Z`
+1. On a release branch, add a section for the new version to `CHANGELOG.md`.
+2. `npm version patch|minor|major --no-git-tag-version` — bumps `package.json`
    (PATCH: fixes; MINOR: new features, brands, modes; MAJOR: data changes older app
-   versions can't read).
-3. `git push --follow-tags`
-4. `npm run build && firebase deploy`
-5. `npm run android:aab` for the Play Store bundle.
+   versions can't read). Commit, push and merge the PR: `main` is protected, and merging
+   deploys the web app to Cloudflare Workers through GitHub Actions.
+3. On the merged `main`: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. `npm run android:aab` for the Play Store bundle.
