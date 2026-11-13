@@ -1,7 +1,5 @@
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Level } from "../../engine/levels";
-import { calculateBleachFormula } from "../../engine/bleach";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
@@ -12,8 +10,8 @@ import type { StartingBase } from "../../engine/startingBase";
 import type { BleachHistoryStep, BleachStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
-
-const DEFAULT_BLEACH_PRICE_PER_GRAM = 0.1;
+import { BleachMixRow, BleachSafetyNotes, BleachTotalGramsField, BleachWarnings } from "../Bleach/BleachFormulaParts";
+import { useBleachFormulaState } from "../Bleach/useBleachFormulaState";
 
 export interface BleachStepCardProps {
   stepId: string;
@@ -33,8 +31,10 @@ export interface BleachStepCardProps {
 }
 
 // One bleach (lightening powder) step within a complex-coloring session — e.g. lifting a
-// section before toning. Mirrors BleachCalculator's fields and calculation, minus the
-// per-session bits (overall markup/service price) that live in ComplexColoringCalculator.
+// section before toning. Shares BleachCalculator's inputs and calculation
+// (useBleachFormulaState) and adds what only a session step has: the zone, starting base,
+// canvas and processing time it reports up. The overall markup/service price lives in
+// ComplexColoringCalculator.
 export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onRemove }: BleachStepCardProps) {
   const { t } = useTranslation();
   const idSuffix = `-${stepId}`;
@@ -44,14 +44,21 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
   // it as an effect both cascaded an extra render and tripped react-hooks/set-state-in-effect.
   const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
 
-  const [startLevel, setStartLevel] = useState<Level>(seed?.startLevel ?? 6);
+  const {
+    startLevel,
+    setStartLevel,
+    targetLevel,
+    setTargetLevel,
+    totalGrams,
+    setTotalGrams,
+    pricePerGram,
+    setPricePerGram,
+    result,
+  } = useBleachFormulaState(seed);
   const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(
     seed?.canvas ?? inheritedOnMount?.canvas,
   );
-  const [targetLevel, setTargetLevel] = useState<Level>(seed?.targetLevel ?? 8);
-  const [totalGrams, setTotalGrams] = useState(seed?.totalGrams ?? 60);
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(seed?.processingMinutes);
-  const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_BLEACH_PRICE_PER_GRAM);
   const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
   const [startingBase, setStartingBase] = useState<StartingBase>(
     seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" },
@@ -69,12 +76,6 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
     }
   };
 
-  // Memoized so `step` below keeps its identity until an input actually changes --
-  // calculateBleachFormula builds a fresh object on every call.
-  const result = useMemo(
-    () => calculateBleachFormula(startLevel, targetLevel, totalGrams),
-    [startLevel, targetLevel, totalGrams],
-  );
   const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
   const step = useMemo(
@@ -148,16 +149,11 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
           onChange={setTargetLevel}
         />
 
-        <div className="field">
-          <label htmlFor={`bleachTotalGrams${idSuffix}`}>{t("fields.totalGrams")}</label>
-          <input
-            id={`bleachTotalGrams${idSuffix}`}
-            type="number"
-            min={1}
-            value={totalGrams}
-            onChange={e => setTotalGrams(Number(e.target.value))}
-          />
-        </div>
+        <BleachTotalGramsField
+          id={`bleachTotalGrams${idSuffix}`}
+          totalGrams={totalGrams}
+          onTotalGramsChange={setTotalGrams}
+        />
 
         {result.grams !== null && (
           <>
@@ -186,39 +182,16 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
         )}
       </div>
 
-      {result.liftNeeded === 0 && (
-        <p className="warning" role="alert">
-          {t("bleach.noLiftWarning")}
-        </p>
-      )}
-      {result.multiStepRequired && (
-        <p className="warning" role="alert">
-          {t("bleach.multiStepWarning")}
-        </p>
-      )}
+      <BleachWarnings result={result} />
 
       {result.grams !== null && (
         <>
-          <div className="results__row">
-            <span className="results__row-label">{t("results.mix")}</span>
-            <span>
-              {t("bleach.mixValue", {
-                powder: result.grams.powderGrams.toFixed(1),
-                developer: result.grams.developerGrams.toFixed(1),
-              })}
-            </span>
-          </div>
+          <BleachMixRow result={result} />
           <div className="results__row">
             <span className="results__row-label">{t("results.developer")}</span>
             <span>{result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume) : "—"}</span>
           </div>
-          <p className="bleach__note">{t("bleach.maxScalpTimeNote", { max: result.maxScalpProcessingMinutes })}</p>
-          <p className="bleach__note">
-            {t("bleach.checkIntervalNote", {
-              min: result.checkIntervalMinMinutes,
-              max: result.checkIntervalMaxMinutes,
-            })}
-          </p>
+          <BleachSafetyNotes result={result} />
         </>
       )}
     </div>
