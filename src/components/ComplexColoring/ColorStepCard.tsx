@@ -1,9 +1,4 @@
-import {
-  formatEligibilityWarning,
-  formatLiftUnsupportedWarning,
-  formatPorosityAdjustment,
-  formatToneWarning,
-} from "../../format/formulaMessages";
+import { LiftOutcome, PorosityNotices, ToneWarnings } from "../FormulaCalculator/FormulaNotices";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePalette } from "../../palette";
@@ -155,8 +150,6 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     }
   };
 
-  const porosityNote = formatPorosityAdjustment(result, targetShade.developerPercentOverride);
-
   return (
     <div className="step-card">
       <div className="step-card__header">
@@ -281,38 +274,9 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
           <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
         </>
       )}
-      {result.liftUnsupportedWarning !== null && (
-        <p className="warning" role="alert">
-          {formatLiftUnsupportedWarning(result.liftUnsupportedWarning)}
-        </p>
-      )}
-      {result.liftUnsupportedWarning === null && result.developerVolume === null && (
-        <p className="warning" role="alert">
-          {t("results.notAchievable")}
-        </p>
-      )}
-      {result.achievedLevel !== null && result.achievedLevel !== targetShade.level && (
-        <div className="results__row">
-          <span className="results__row-label">{t("results.achievedLevel")}</span>
-          <span>{t("results.achievedLevelValue", { level: result.achievedLevel, target: targetShade.level })}</span>
-        </div>
-      )}
-      {result.toneWarning !== null && !neutralizationApplied && (
-        <p className="warning" role="alert">
-          {formatToneWarning(result.toneWarning)}
-        </p>
-      )}
-      {result.eligibilityWarning !== null && (
-        <p className="warning" role="alert">
-          {formatEligibilityWarning(result.eligibilityWarning)}
-        </p>
-      )}
-      {porosityNote !== null && <p className="results__info">{porosityNote}</p>}
-      {porosity === "high" && (
-        <p className="warning" role="alert">
-          {t("results.porousWarning")}
-        </p>
-      )}
+      <LiftOutcome result={result} targetShade={targetShade} />
+      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} />
+      <PorosityNotices result={result} targetShade={targetShade} porosity={porosity} />
 
       {grams !== null && (
         <div className="results__row">
