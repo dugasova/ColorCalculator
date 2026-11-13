@@ -177,10 +177,44 @@ describe("useFormulaCalculatorState resets", () => {
       applicationZone: "root-touch-up",
       gramsInputMode: "color",
       colorGrams: 40,
-      totalGrams: 40,
     });
+    // the 120 g typed for the full head is not carried over
+    expect(state().totalGrams).not.toBe(120);
     run(s => s.handleApplicationZoneChange("full-head"));
     expect(state()).toMatchObject({ gramsInputMode: "total", totalGrams: 80, colorGrams: 60 });
+  });
+
+  // A root touch-up is 40 g of dye whichever way the amount is entered: as a total it
+  // is that dye plus the developer the ratio asks for, not a flat 40 g.
+  it("shows a root touch-up's total as its dye plus developer, following the mixing ratio", () => {
+    const { state, run } = renderCalculator();
+    const totalFor = (colorGrams: number) => {
+      const { colorParts, developerParts } = state().result.mixingRatio;
+      return (colorGrams * (colorParts + developerParts)) / colorParts;
+    };
+    run(s => s.handleTargetShadeCodeChange("8.0"));
+    run(s => s.handleApplicationZoneChange("root-touch-up"));
+    run(s => s.setGramsInputMode("total"));
+    expect(state().result.mixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
+    expect(state().totalGrams).toBe(80);
+    expect(state().result.grams!.colorGrams).toBeCloseTo(40);
+
+    // a different ratio changes the developer, never the dye
+    run(s => s.setStartLevel(5));
+    expect(state().result.mixingRatio).toEqual({ colorParts: 1, developerParts: 2 });
+    expect(state().totalGrams).toBe(120);
+    expect(state().result.grams!.colorGrams).toBeCloseTo(40);
+
+    // the dye amount the colorist entered is kept when switching the unit
+    run(s => s.setGramsInputMode("color"));
+    run(s => s.setColorGrams(50));
+    run(s => s.setGramsInputMode("total"));
+    expect(state().totalGrams).toBeCloseTo(totalFor(50));
+
+    // a total typed by hand stays as typed
+    run(s => s.setTotalGrams(90));
+    run(s => s.setStartLevel(10));
+    expect(state().totalGrams).toBe(90);
   });
 });
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
+import { applyAdditionalShade, calculateFullFormula, resolveShadeMixingRatio } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatio, Shade } from "../../engine/shades";
@@ -121,7 +121,13 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   const { brandId, lineShades, targetShade } = selection;
   const additional = useAdditionalShades(lineShades, initial);
   const overrides = useManualOverrides(targetShade, initial);
-  const gramsInput = useGramsInput(initial);
+  const mixingRatio = resolveShadeMixingRatio(
+    startLevel,
+    targetShade,
+    brands[brandId].mixingRatio,
+    overrides.effectiveManualMixingRatio,
+  );
+  const gramsInput = useGramsInput(mixingRatio, initial);
 
   const { result, grams, effectiveResult } = useComputedFullFormula(
     startLevel,
@@ -136,7 +142,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     porosity,
   );
   const grayNatural = useGrayNaturalBase(targetShade, lineShades, result, initial);
-  const effectiveTotalGrams = gramsInput.effectiveTotalGramsFor(result.mixingRatio);
+  const { effectiveTotalGrams } = gramsInput;
   const processingMinutes = overrides.manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
   // Shared by every handler that changes which target shade is in play (see

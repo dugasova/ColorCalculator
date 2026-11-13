@@ -3,9 +3,12 @@ export type ApplicationZone = "full-head" | "root-touch-up";
 // Root touch-up (new-growth only) uses noticeably less product than a full-head
 // application. These are just sensible starting points for the weight field —
 // still fully editable afterward, same as every other default in this calculator.
-export const APPLICATION_ZONE_DEFAULT_GRAMS: Record<ApplicationZone, number> = {
+// Null means the zone has no total of its own: it is measured as dye (see
+// APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE), so its total is that dye amount plus the
+// developer the mixing ratio asks for -- 40 g of dye is 80 g at 1:1 and 120 g at 1:2.
+export const APPLICATION_ZONE_DEFAULT_GRAMS: Record<ApplicationZone, number | null> = {
   "full-head": 80,
-  "root-touch-up": 40,
+  "root-touch-up": null,
 };
 
 // How a colorist enters the amount to mix: "total" is the combined color + developer

@@ -25,6 +25,17 @@ describe("FormulaCalculator grams input mode by application zone", () => {
     expect(screen.getByText(/developer 55\.0 g/)).toBeInTheDocument();
   });
 
+  it("shows the same 40 g of dye as a total once root touch-up is switched to total weight", () => {
+    render(<FormulaCalculator appliedBy="stylist@example.com" />);
+
+    chooseOption("Application", "root-touch-up");
+    chooseOption("Amount entered as", "total");
+
+    // 1:1 here: 40 g of dye + 40 g of developer.
+    expect((screen.getByLabelText("Total weight, g") as HTMLInputElement).value).toBe("80");
+    expect(screen.getByText(/developer 40\.0 g/)).toBeInTheDocument();
+  });
+
   it("switches back to an 80 g total-weight entry for full head", () => {
     render(<FormulaCalculator appliedBy="stylist@example.com" />);
 
