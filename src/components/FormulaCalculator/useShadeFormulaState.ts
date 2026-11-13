@@ -1,27 +1,16 @@
 import { useMemo, useState } from "react";
-import { compareShadesForDisplay } from "../../engine/shades";
-import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
-import {
-  applyAdditionalShade,
-  calculateFullFormula,
-  calculateFormulaGramsFromColorGrams,
-  findNaturalBaseCandidates,
-  splitNaturalBase,
-  type NaturalBase,
-} from "../../engine/formula";
+import { applyAdditionalShade, calculateFullFormula } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
-import {
-  APPLICATION_ZONE_DEFAULT_GRAMS,
-  APPLICATION_ZONE_DEFAULT_COLOR_GRAMS,
-  APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE,
-  type ApplicationZone,
-  type GramsInputMode,
-} from "../../engine/applicationZone";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatio, Shade } from "../../engine/shades";
 import type { HairCanvas, Porosity } from "../../engine/canvas";
 import type { ColorStepSeed } from "../../history";
 import { useHairCanvasState } from "./useHairCanvasState";
+import { useShadeSelection } from "./useShadeSelection";
+import { useAdditionalShades } from "./useAdditionalShades";
+import { useManualOverrides } from "./useManualOverrides";
+import { useGramsInput } from "./useGramsInput";
+import { useGrayNaturalBase } from "./useGrayNaturalBase";
 
 // Split out of useShadeFormulaState below (not just inlined there) so this memoization
 // lives in a function body with no render-time `setState` calls of its own.
@@ -126,68 +115,40 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     useHairCanvasState(initialCanvas);
   const [startLevel, setStartLevel] = useState<Level>(initial?.startLevel ?? 10);
   const [grayPercent, setGrayPercent] = useState(initial?.grayPercent ?? 0);
-  const [targetShadeCode, setTargetShadeCode] = useState(initial?.targetShadeCode ?? GENERIC_SHADE_CHART[0].code);
-  const [applicationZone, setApplicationZone] = useState<ApplicationZone>("full-head");
-  const [totalGrams, setTotalGrams] = useState(initial?.totalGrams ?? APPLICATION_ZONE_DEFAULT_GRAMS["full-head"]);
-  // Which unit the amount field starts in for the current zone (see
-  // APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE); colorGrams below is the dye weight alone
-  // for "color" mode -- a colorist who needs more than the default can just enter
-  // however much dye they're actually using, and developer is derived to match (see
-  // calculateFullFormula's colorGramsOverride).
-  const [gramsInputMode, setGramsInputMode] = useState<GramsInputMode>(
-    APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE["full-head"],
-  );
-  const [colorGrams, setColorGrams] = useState(
-    initial?.colorGrams ?? APPLICATION_ZONE_DEFAULT_COLOR_GRAMS["full-head"],
-  );
-  const [brandId, setBrandId] = useState<BrandId>(initial?.brandId ?? "generic");
-  const [line, setLine] = useState<string | null>(initial?.line ?? null);
-  const [manualDeveloperVolume, setManualDeveloperVolume] = useState<DeveloperVolume | undefined>(
-    initial?.manualDeveloperVolume,
-  );
-  const [manualMixingRatio, setManualMixingRatio] = useState<MixingRatio | undefined>(initial?.manualMixingRatio);
-  const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(
-    initial?.processingMinutes,
-  );
-  const [additionalShadeCode, setAdditionalShadeCode] = useState<string | null>(initial?.additionalShadeCode ?? null);
-  const [additionalShadeGrams, setAdditionalShadeGrams] = useState(initial?.additionalShadeGrams ?? 0);
-  const [additionalShade2Code, setAdditionalShade2Code] = useState<string | null>(
-    initial?.additionalShade2Code ?? null,
-  );
-  const [additionalShade2Grams, setAdditionalShade2Grams] = useState(initial?.additionalShade2Grams ?? 0);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
-  // Gray-coverage natural base (see GrayNaturalField): whether to dose it in, and the
-  // colorist's own pick among the candidates -- null means "use the default candidate".
-  const [grayNaturalApplied, setGrayNaturalApplied] = useState(initial?.grayNaturalApplied ?? false);
-  const [naturalBaseShadeCode, setNaturalBaseShadeCode] = useState<string | null>(
-    initial?.naturalBaseShadeCode ?? null,
-  );
 
-  const availableLines = Array.from(new Set(brands[brandId].shades.map(s => s.line ?? null)));
-  // Memoized: `brands[brandId].shades` is a stable array reference from context (only a
-  // real palette change gives it a new one), so this only recomputes when the brand/line
-  // selection or the palette itself actually changes -- an unmemoized `.filter().sort()`
-  // would return a brand-new array every render, which is exactly the kind of unstable
-  // identity a caller's own memoized derivation (e.g. useColorStepReport's
-  // prePigmentationResult, via useComputedFullFormula's own identical concern above) can't
-  // safely depend on.
-  const lineShades = useMemo(
-    () => brands[brandId].shades.filter(s => (s.line ?? null) === line).sort(compareShadesForDisplay),
-    [brands, brandId, line],
+  const selection = useShadeSelection(brands, initial);
+  const { brandId, lineShades, targetShade } = selection;
+  const additional = useAdditionalShades(lineShades, initial);
+  const overrides = useManualOverrides(targetShade, initial);
+  const gramsInput = useGramsInput(initial);
+
+  const { result, grams, effectiveResult } = useComputedFullFormula(
+    startLevel,
+    targetShade,
+    grayPercent,
+    gramsInput.totalGrams,
+    brands[brandId].mixingRatio,
+    overrides.effectiveManualDeveloperVolume,
+    overrides.effectiveManualMixingRatio,
+    additional.totalExtraGrams,
+    gramsInput.colorGramsOverride,
+    porosity,
   );
+  const grayNatural = useGrayNaturalBase(targetShade, lineShades, result, initial);
+  const effectiveTotalGrams = gramsInput.effectiveTotalGramsFor(result.mixingRatio);
+  const processingMinutes = overrides.manualProcessingMinutes ?? result.recommendedProcessingMinutes;
 
   // Shared by every handler that changes which target shade is in play (see
   // resetShadePoolOverrides for the additional resets when the whole shade POOL changes,
   // e.g. brand/line) -- per-shade manual overrides (developer volume, processing time)
   // don't necessarily carry over to a different shade.
   function resetShadeDependentOverrides() {
-    setManualDeveloperVolume(undefined);
-    setManualMixingRatio(undefined);
-    setManualProcessingMinutes(undefined);
+    overrides.resetManualOverrides();
     setNeutralizationApplied(false);
     // Only the picked natural shade is shade-dependent; whether to dose a natural base at
     // all follows the client's gray %, not the target, so grayNaturalApplied carries over.
-    setNaturalBaseShadeCode(null);
+    grayNatural.setNaturalBaseShadeCode(null);
   }
 
   // Additionally used whenever the whole available-shade pool changes (new brand or
@@ -195,121 +156,23 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   // unlike a same-pool target change.
   function resetShadePoolOverrides() {
     resetShadeDependentOverrides();
-    setAdditionalShade2Code(null);
-    setAdditionalShade2Grams(0);
-    setAdditionalShadeCode(null);
-    setAdditionalShadeGrams(0);
+    additional.resetAdditionalShades();
   }
 
   const handleBrandIdChange = (newBrandId: BrandId) => {
-    const firstShade = brands[newBrandId].shades[0];
-    setBrandId(newBrandId);
-    setLine(firstShade.line ?? null);
-    setTargetShadeCode(firstShade.code);
+    selection.selectBrand(newBrandId);
     resetShadePoolOverrides();
   };
 
   const handleLineChange = (newLine: string | null) => {
-    const firstShade = brands[brandId].shades.find(s => (s.line ?? null) === newLine)!;
-    setLine(newLine);
-    setTargetShadeCode(firstShade.code);
+    selection.selectLine(newLine);
     resetShadePoolOverrides();
   };
 
   const handleTargetShadeCodeChange = (code: string) => {
-    setTargetShadeCode(code);
+    selection.setTargetShadeCode(code);
     resetShadeDependentOverrides();
   };
-
-  const handleApplicationZoneChange = (zone: ApplicationZone) => {
-    setApplicationZone(zone);
-    setTotalGrams(APPLICATION_ZONE_DEFAULT_GRAMS[zone]);
-    setColorGrams(APPLICATION_ZONE_DEFAULT_COLOR_GRAMS[zone]);
-    setGramsInputMode(APPLICATION_ZONE_DEFAULT_GRAMS_INPUT_MODE[zone]);
-  };
-
-  const handleAdditionalShadeCodeChange = (code: string | null) => {
-    setAdditionalShadeCode(code);
-    setAdditionalShadeGrams(0);
-  };
-
-  // The live palette (usePalette(), fed by Firestore onSnapshot) can change out from
-  // under an in-progress selection: an admin can discontinue the currently selected
-  // shade -- or every shade in the currently selected line -- while a stylist has it
-  // open elsewhere in the salon (see PaletteAdmin's discontinue toggle). `lineShades[0]`
-  // alone isn't a safe fallback: once every shade in the current line is gone, it's
-  // `undefined`, which used to crash render outright (this app renders no error
-  // boundary) -- falls back through the brand's own first shade, then the universal
-  // Generic chart, neither of which a real catalog is ever emptied of. Reconciles
-  // targetShadeCode/line to match, right during render (same adjusting-state-on-a-
-  // changed-value pattern as the repeat-request replay in useFormulaCalculatorState.ts)
-  // -- otherwise the shade picker keeps showing the stale, no-longer-valid code
-  // (rendering blank, since it matches nothing in `lineShades`) while the formula/
-  // swatch/price silently keep recalculating for a shade the stylist never chose.
-  const targetShade =
-    lineShades.find(s => s.code === targetShadeCode) ??
-    lineShades[0] ??
-    brands[brandId].shades[0] ??
-    GENERIC_SHADE_CHART[0];
-  if (targetShade.code !== targetShadeCode) {
-    setTargetShadeCode(targetShade.code);
-  }
-  if ((targetShade.line ?? null) !== line) {
-    setLine(targetShade.line ?? null);
-  }
-  const effectiveManualDeveloperVolume = targetShade.developerVolumeChoices
-    ? (manualDeveloperVolume ?? targetShade.developerVolumeChoices[0])
-    : undefined;
-  const effectiveManualMixingRatio = targetShade.mixingRatioChoices
-    ? (manualMixingRatio ?? targetShade.mixingRatioChoices[0])
-    : undefined;
-  const additionalShade =
-    additionalShadeCode !== null ? (lineShades.find(s => s.code === additionalShadeCode) ?? null) : null;
-  const additionalShade2 =
-    additionalShade2Code !== null ? (lineShades.find(s => s.code === additionalShade2Code) ?? null) : null;
-  const hasShade1 = additionalShade !== null && additionalShadeGrams > 0;
-  const hasShade2 = additionalShade2 !== null && additionalShade2Grams > 0;
-  const totalExtra = (hasShade1 ? additionalShadeGrams : 0) + (hasShade2 ? additionalShade2Grams : 0);
-  const colorGramsOverride = gramsInputMode === "color" ? colorGrams : undefined;
-  const { result, grams, effectiveResult } = useComputedFullFormula(
-    startLevel,
-    targetShade,
-    grayPercent,
-    totalGrams,
-    brands[brandId].mixingRatio,
-    effectiveManualDeveloperVolume,
-    effectiveManualMixingRatio,
-    totalExtra,
-    colorGramsOverride,
-    porosity,
-  );
-  // The real primary mix total (color + developer), excluding additional shades --
-  // "color" mode never touches `totalGrams` itself, so callers that need the actual
-  // total for something else (e.g. pre-pigmentation filler sizing) must read this
-  // instead of raw `totalGrams`.
-  const colorModeGrams =
-    gramsInputMode === "color" ? calculateFormulaGramsFromColorGrams(colorGrams, result.mixingRatio) : null;
-  const effectiveTotalGrams =
-    colorModeGrams !== null ? colorModeGrams.colorGrams + colorModeGrams.developerGrams : totalGrams;
-  const processingMinutes = manualProcessingMinutes ?? result.recommendedProcessingMinutes;
-
-  // The gray-coverage natural base, carved out of the base color weight (result.grams,
-  // i.e. before any additional shade is added on top) -- see splitNaturalBase. Null
-  // unless opted in AND the gray % calls for a natural dose AND the line has a natural
-  // at the target's level. Both memoized for the same reason as lineShades above:
-  // useColorStepReport's "report the computed step up" effect depends on naturalBase's
-  // identity, and a fresh object every render would loop that effect forever.
-  const naturalBaseCandidates = useMemo(
-    () => findNaturalBaseCandidates(targetShade, lineShades),
-    [targetShade, lineShades],
-  );
-  const naturalBase = useMemo((): NaturalBase | null => {
-    const naturalRatio = result.grayCoverage.naturalRatio;
-    if (!grayNaturalApplied || naturalRatio === 0 || naturalBaseCandidates.length === 0 || result.grams === null)
-      return null;
-    const shade = naturalBaseCandidates.find(s => s.code === naturalBaseShadeCode) ?? naturalBaseCandidates[0];
-    return { shade, grams: splitNaturalBase(result.grams.colorGrams, naturalRatio).naturalGrams };
-  }, [grayNaturalApplied, naturalBaseShadeCode, naturalBaseCandidates, result]);
 
   return {
     startLevel,
@@ -322,60 +185,71 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     setThickness,
     chemicalHistory,
     setChemicalHistory,
-    targetShadeCode,
-    setTargetShadeCode,
-    applicationZone,
-    setApplicationZone,
-    totalGrams,
-    setTotalGrams,
-    gramsInputMode,
-    setGramsInputMode,
-    colorGrams,
-    setColorGrams,
-    effectiveTotalGrams,
-    brandId,
-    setBrandId,
-    line,
-    setLine,
-    manualDeveloperVolume,
-    setManualDeveloperVolume,
-    manualMixingRatio,
-    setManualMixingRatio,
-    manualProcessingMinutes,
-    setManualProcessingMinutes,
-    additionalShadeCode,
-    setAdditionalShadeCode,
-    additionalShadeGrams,
-    setAdditionalShadeGrams,
-    additionalShade2Code,
-    setAdditionalShade2Code,
-    additionalShade2Grams,
-    setAdditionalShade2Grams,
     neutralizationApplied,
     setNeutralizationApplied,
-    grayNaturalApplied,
-    setGrayNaturalApplied,
-    naturalBaseShadeCode,
-    setNaturalBaseShadeCode,
 
-    availableLines,
+    // brand / line / shade
+    brandId,
+    setBrandId: selection.setBrandId,
+    line: selection.line,
+    setLine: selection.setLine,
+    targetShadeCode: selection.targetShadeCode,
+    setTargetShadeCode: selection.setTargetShadeCode,
+    availableLines: selection.availableLines,
     lineShades,
     targetShade,
+
+    // amount
+    applicationZone: gramsInput.applicationZone,
+    setApplicationZone: gramsInput.setApplicationZone,
+    totalGrams: gramsInput.totalGrams,
+    setTotalGrams: gramsInput.setTotalGrams,
+    gramsInputMode: gramsInput.gramsInputMode,
+    setGramsInputMode: gramsInput.setGramsInputMode,
+    colorGrams: gramsInput.colorGrams,
+    setColorGrams: gramsInput.setColorGrams,
+    effectiveTotalGrams,
+
+    // manual overrides
+    manualDeveloperVolume: overrides.manualDeveloperVolume,
+    setManualDeveloperVolume: overrides.setManualDeveloperVolume,
+    manualMixingRatio: overrides.manualMixingRatio,
+    setManualMixingRatio: overrides.setManualMixingRatio,
+    manualProcessingMinutes: overrides.manualProcessingMinutes,
+    setManualProcessingMinutes: overrides.setManualProcessingMinutes,
+    processingMinutes,
+
+    // additional shades
+    additionalShadeCode: additional.additionalShadeCode,
+    setAdditionalShadeCode: additional.setAdditionalShadeCode,
+    additionalShadeGrams: additional.additionalShadeGrams,
+    setAdditionalShadeGrams: additional.setAdditionalShadeGrams,
+    additionalShade2Code: additional.additionalShade2Code,
+    setAdditionalShade2Code: additional.setAdditionalShade2Code,
+    additionalShade2Grams: additional.additionalShade2Grams,
+    setAdditionalShade2Grams: additional.setAdditionalShade2Grams,
+    additionalShade: additional.additionalShade,
+    additionalShade2: additional.additionalShade2,
+
+    // gray-coverage natural base
+    grayNaturalApplied: grayNatural.grayNaturalApplied,
+    setGrayNaturalApplied: grayNatural.setGrayNaturalApplied,
+    naturalBaseShadeCode: grayNatural.naturalBaseShadeCode,
+    setNaturalBaseShadeCode: grayNatural.setNaturalBaseShadeCode,
+    naturalBaseCandidates: grayNatural.naturalBaseCandidates,
+    naturalBase: grayNatural.naturalBase,
+
+    // formula
     result,
-    additionalShade,
-    additionalShade2,
     grams,
     effectiveResult,
-    processingMinutes,
-    naturalBaseCandidates,
-    naturalBase,
 
     resetShadePoolOverrides,
     handleBrandIdChange,
     handleLineChange,
     handleTargetShadeCodeChange,
-    handleApplicationZoneChange,
-    handleAdditionalShadeCodeChange,
+    handleApplicationZoneChange: gramsInput.handleApplicationZoneChange,
+    handleAdditionalShadeCodeChange: additional.handleAdditionalShadeCodeChange,
   };
 }
 
