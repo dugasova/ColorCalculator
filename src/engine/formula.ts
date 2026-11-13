@@ -257,7 +257,7 @@ function deriveCorrectiveGuidance(
 
 // A manual ratio only counts when the shade actually offers it (Shade.mixingRatioChoices);
 // otherwise the shade's own fixed ratio, or the brand's level-diff strategy, decides.
-function resolveMixingRatio(
+export function resolveShadeMixingRatio(
   startLevel: Level,
   targetShade: Shade,
   mixingRatioStrategy: (startLevel: Level, targetLevel: Level) => MixingRatio,
@@ -305,7 +305,7 @@ export function calculateFullFormula({
   porosity = "normal",
 }: FullFormulaInput): FullFormula {
   const isLifting = targetShade.level > startLevel;
-  const mixingRatio = resolveMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
+  const mixingRatio = resolveShadeMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
   const liftUnsupportedWarning =
