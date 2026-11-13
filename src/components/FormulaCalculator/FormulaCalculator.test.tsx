@@ -10,10 +10,38 @@ import { PaletteReactContext } from "../../palette";
 import { BRANDS } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
 import FormulaCalculator from "./FormulaCalculator";
-import { FormulaResults } from "./FormulaResults";
+import { FormulaResults, type FormulaResultsProps } from "./FormulaResults";
 import { chooseOption } from "../../testDom";
 
 afterEach(cleanup);
+
+// Everything a FormulaResults render needs that the tests below don't vary: a Generic
+// product, an untreated canvas, no pricing figures and no-op handlers.
+const resultsDefaults = {
+  product: { brandId: "generic", brandName: "Generic", line: null },
+  hair: {
+    startLevel: 8,
+    grayPercent: 0,
+    canvas: { porosity: "normal", thickness: "medium", chemicalHistory: [] },
+  },
+  applicationZone: "full-head",
+  neutralizationApplied: false,
+  onNeutralizationAppliedChange: () => {},
+  appliedBy: "stylist@example.com",
+  onProcessingMinutesChange: () => {},
+  pricing: {
+    pricePerGram: 0.18,
+    markupMultiplier: 4,
+    productCost: null,
+    recommendedServicePrice: null,
+    servicePrice: null,
+  },
+  pricingHandlers: {
+    onPricePerGramChange: () => {},
+    onMarkupMultiplierChange: () => {},
+    onServicePriceChange: () => {},
+  },
+} satisfies Partial<FormulaResultsProps>;
 
 describe("FormulaCalculator", () => {
   it("renders the additional shade selector but hides its grams input until a shade is chosen", () => {
@@ -257,41 +285,21 @@ describe("FormulaResults pre-pigmentation step", () => {
   const baseResult = calculateFullFormula({ startLevel: 9, targetShade, grayPercent: 0, totalGrams: 30 });
   const prePigmentationResult = calculatePrePigmentation(9, 5, 30);
 
-  const noOps = {
-    onProcessingMinutesChange: () => {},
-    onPricePerGramChange: () => {},
-    onMarkupMultiplierChange: () => {},
-    onServicePriceChange: () => {},
-    onNeutralizationAppliedChange: () => {},
-  };
-
   it('renders the filler step ahead of a "Step 2" heading once opted in, with the Generic-line example', () => {
     const html = renderToStaticMarkup(
       <FormulaResults
-        brandId="generic"
-        brandName="Generic"
-        line={null}
-        targetShade={targetShade}
-        startLevel={9}
-        grayPercent={0}
-        applicationZone="full-head"
-        porosity="normal"
-        thickness="medium"
-        chemicalHistory={[]}
-        result={baseResult}
-        additionalShade={null}
-        additionalShadeGrams={0}
-        blend={null}
+        {...resultsDefaults}
+        hair={{ ...resultsDefaults.hair, startLevel: 9 }}
+        mix={{
+          targetShade,
+          result: baseResult,
+          additionalShade: null,
+          additionalShadeGrams: 0,
+          blend: null,
+          naturalBase: null,
+        }}
         prePigmentationResult={prePigmentationResult}
-        neutralizationApplied={false}
-        appliedBy="stylist@example.com"
         processingMinutes={baseResult.recommendedProcessingMinutes}
-        pricePerGram={0.18}
-        markupMultiplier={4}
-        productCost={null}
-        recommendedServicePrice={null}
-        servicePrice={null}
-        {...noOps}
       />,
     );
 
@@ -306,30 +314,18 @@ describe("FormulaResults pre-pigmentation step", () => {
   it("omits the filler step entirely when prePigmentationResult is null", () => {
     const html = renderToStaticMarkup(
       <FormulaResults
-        brandId="generic"
-        brandName="Generic"
-        line={null}
-        targetShade={targetShade}
-        startLevel={9}
-        grayPercent={0}
-        applicationZone="full-head"
-        porosity="normal"
-        thickness="medium"
-        chemicalHistory={[]}
-        result={baseResult}
-        additionalShade={null}
-        additionalShadeGrams={0}
-        blend={null}
+        {...resultsDefaults}
+        hair={{ ...resultsDefaults.hair, startLevel: 9 }}
+        mix={{
+          targetShade,
+          result: baseResult,
+          additionalShade: null,
+          additionalShadeGrams: 0,
+          blend: null,
+          naturalBase: null,
+        }}
         prePigmentationResult={null}
-        neutralizationApplied={false}
-        appliedBy="stylist@example.com"
         processingMinutes={baseResult.recommendedProcessingMinutes}
-        pricePerGram={0.18}
-        markupMultiplier={4}
-        productCost={null}
-        recommendedServicePrice={null}
-        servicePrice={null}
-        {...noOps}
       />,
     );
 
@@ -344,44 +340,24 @@ describe("FormulaResults additional shade blending", () => {
   // No lift (level 8 -> 8): 1:1 ratio, 60g total -> 30g color : 30g developer.
   const baseResult = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
-  const noOps = {
-    onProcessingMinutesChange: () => {},
-    onPricePerGramChange: () => {},
-    onMarkupMultiplierChange: () => {},
-    onServicePriceChange: () => {},
-    onNeutralizationAppliedChange: () => {},
-  };
-
   it("recalculates developer proportionally when the colorist blends in an additional shade", () => {
     const grams = baseResult.grams !== null ? applyAdditionalShade(baseResult.grams, baseResult.mixingRatio, 10) : null;
     const effectiveResult = { ...baseResult, grams };
 
     const html = renderToStaticMarkup(
       <FormulaResults
-        brandId="generic"
-        brandName="Generic"
-        line={null}
-        targetShade={targetShade}
-        startLevel={8}
-        grayPercent={0}
-        applicationZone="full-head"
-        porosity="normal"
-        thickness="medium"
-        chemicalHistory={[]}
-        result={effectiveResult}
-        additionalShade={additionalShade}
-        additionalShadeGrams={10}
-        blend={null}
+        {...resultsDefaults}
+        hair={{ ...resultsDefaults.hair, startLevel: 8 }}
+        mix={{
+          targetShade,
+          result: effectiveResult,
+          additionalShade: additionalShade,
+          additionalShadeGrams: 10,
+          blend: null,
+          naturalBase: null,
+        }}
         prePigmentationResult={null}
-        neutralizationApplied={false}
-        appliedBy="stylist@example.com"
         processingMinutes={baseResult.recommendedProcessingMinutes}
-        pricePerGram={0.18}
-        markupMultiplier={4}
-        productCost={null}
-        recommendedServicePrice={null}
-        servicePrice={null}
-        {...noOps}
       />,
     );
 
@@ -393,30 +369,18 @@ describe("FormulaResults additional shade blending", () => {
   it("omits the second shade from the mix line when no grams were entered", () => {
     const html = renderToStaticMarkup(
       <FormulaResults
-        brandId="generic"
-        brandName="Generic"
-        line={null}
-        targetShade={targetShade}
-        startLevel={8}
-        grayPercent={0}
-        applicationZone="full-head"
-        porosity="normal"
-        thickness="medium"
-        chemicalHistory={[]}
-        result={baseResult}
-        additionalShade={null}
-        additionalShadeGrams={0}
-        blend={null}
+        {...resultsDefaults}
+        hair={{ ...resultsDefaults.hair, startLevel: 8 }}
+        mix={{
+          targetShade,
+          result: baseResult,
+          additionalShade: null,
+          additionalShadeGrams: 0,
+          blend: null,
+          naturalBase: null,
+        }}
         prePigmentationResult={null}
-        neutralizationApplied={false}
-        appliedBy="stylist@example.com"
         processingMinutes={baseResult.recommendedProcessingMinutes}
-        pricePerGram={0.18}
-        markupMultiplier={4}
-        productCost={null}
-        recommendedServicePrice={null}
-        servicePrice={null}
-        {...noOps}
       />,
     );
 
@@ -441,14 +405,6 @@ describe("FormulaResults substitute blend", () => {
   // No lift (level 8 -> 8): 1:1 ratio, 60g total -> 30g color : 30g developer.
   const baseResult = calculateFullFormula({ startLevel: 8, targetShade, grayPercent: 0, totalGrams: 60 });
 
-  const noOps = {
-    onProcessingMinutesChange: () => {},
-    onPricePerGramChange: () => {},
-    onMarkupMultiplierChange: () => {},
-    onServicePriceChange: () => {},
-    onNeutralizationAppliedChange: () => {},
-  };
-
   it("lists only the two real components in the Mix line, splitting the single total, never the target shade", () => {
     const split = baseResult.grams !== null ? splitShadeBlend(baseResult.grams.colorGrams, 70) : null;
     const blend =
@@ -456,30 +412,18 @@ describe("FormulaResults substitute blend", () => {
 
     const html = renderToStaticMarkup(
       <FormulaResults
-        brandId="generic"
-        brandName="Generic"
-        line={null}
-        targetShade={targetShade}
-        startLevel={8}
-        grayPercent={0}
-        applicationZone="full-head"
-        porosity="normal"
-        thickness="medium"
-        chemicalHistory={[]}
-        result={baseResult}
-        additionalShade={null}
-        additionalShadeGrams={0}
-        blend={blend}
+        {...resultsDefaults}
+        hair={{ ...resultsDefaults.hair, startLevel: 8 }}
+        mix={{
+          targetShade,
+          result: baseResult,
+          additionalShade: null,
+          additionalShadeGrams: 0,
+          blend: blend,
+          naturalBase: null,
+        }}
         prePigmentationResult={null}
-        neutralizationApplied={false}
-        appliedBy="stylist@example.com"
         processingMinutes={baseResult.recommendedProcessingMinutes}
-        pricePerGram={0.18}
-        markupMultiplier={4}
-        productCost={null}
-        recommendedServicePrice={null}
-        servicePrice={null}
-        {...noOps}
       />,
     );
 
@@ -500,30 +444,18 @@ describe("FormulaResults substitute blend", () => {
 
     const html = renderToStaticMarkup(
       <FormulaResults
-        brandId="generic"
-        brandName="Generic"
-        line={null}
-        targetShade={targetShade}
-        startLevel={8}
-        grayPercent={0}
-        applicationZone="full-head"
-        porosity="normal"
-        thickness="medium"
-        chemicalHistory={[]}
-        result={effectiveResult}
-        additionalShade={additionalShade}
-        additionalShadeGrams={10}
-        blend={blend}
+        {...resultsDefaults}
+        hair={{ ...resultsDefaults.hair, startLevel: 8 }}
+        mix={{
+          targetShade,
+          result: effectiveResult,
+          additionalShade: additionalShade,
+          additionalShadeGrams: 10,
+          blend: blend,
+          naturalBase: null,
+        }}
         prePigmentationResult={null}
-        neutralizationApplied={false}
-        appliedBy="stylist@example.com"
         processingMinutes={baseResult.recommendedProcessingMinutes}
-        pricePerGram={0.18}
-        markupMultiplier={4}
-        productCost={null}
-        recommendedServicePrice={null}
-        servicePrice={null}
-        {...noOps}
       />,
     );
 

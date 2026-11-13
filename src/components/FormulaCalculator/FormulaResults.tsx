@@ -1,49 +1,28 @@
-import { LiftOutcome, PorosityNotices, ToneWarnings } from "./FormulaNotices";
 import { useTranslation } from "react-i18next";
-import { getGrayCoverageNote } from "../../format/formulaMessages";
-import type { FullFormula, NaturalBase } from "../../engine/formula";
-import type { Shade } from "../../engine/shades";
-import type { Level } from "../../engine/levels";
-import type { BrandId } from "../../engine/brands";
-import {
-  formatFormulaText,
-  buildMixSummary,
-  buildBlendMixSummary,
-  type BlendSummary,
-} from "../../format/formatFormula";
-import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
-import type { Porosity, HairThickness, ChemicalHistory } from "../../engine/canvas";
+import { formatFormulaText } from "../../format/formatFormula";
 import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../format/formatPrePigmentation";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
 import type { RepeatFormulaRequest } from "../../history";
-import { useClampedNumberText } from "./fields/useClampedNumberText";
 import { PrePigmentationStep } from "./PrePigmentationStep";
 import { SessionDetailsPanel } from "./SessionDetailsPanel";
+import { FormulaMixSection } from "./FormulaMixSection";
+import { TimingPricingSection } from "./TimingPricingSection";
 import { useFormulaSave } from "./useFormulaSave";
-import { StockShortageWarnings } from "../common/StockShortageWarnings";
+import type {
+  FormulaHair,
+  FormulaMix,
+  FormulaPricing,
+  FormulaPricingHandlers,
+  FormulaProduct,
+} from "./formulaResultsModel";
 
 export interface FormulaResultsProps {
-  brandId: BrandId;
-  brandName: string;
-  line: string | null;
-  targetShade: Shade;
-  startLevel: Level;
-  grayPercent: number;
+  product: FormulaProduct;
+  hair: FormulaHair;
+  mix: FormulaMix;
   applicationZone: ApplicationZone;
-  porosity: Porosity;
-  thickness: HairThickness;
-  chemicalHistory: ChemicalHistory[];
-  result: FullFormula;
-  additionalShade: Shade | null;
-  additionalShadeGrams: number;
-  additionalShade2?: Shade | null;
-  additionalShade2Grams?: number;
-  blend: BlendSummary | null;
-  // The gray-coverage natural base, if opted in (see GrayNaturalField) -- already carved
-  // out of `result.grams`, so it only changes the per-shade breakdown, not the totals.
-  naturalBase?: NaturalBase | null;
   // Recommended (or colorist-opted-in) filler step ahead of this target-color formula --
   // see PrePigmentationField/PrePigmentationStep. Null whenever the checkbox is off or
   // the level drop doesn't warrant it (getPrePigmentationNeed returns 'none').
@@ -53,14 +32,8 @@ export interface FormulaResultsProps {
   appliedBy: string;
   processingMinutes: number;
   onProcessingMinutesChange: (minutes: number) => void;
-  pricePerGram: number;
-  onPricePerGramChange: (value: number) => void;
-  markupMultiplier: number;
-  onMarkupMultiplierChange: (value: number) => void;
-  productCost: number | null;
-  recommendedServicePrice: number | null;
-  servicePrice: number | null;
-  onServicePriceChange: (value: number) => void;
+  pricing: FormulaPricing;
+  pricingHandlers: FormulaPricingHandlers;
   // Bubbled from SessionDetailsPanel's onSaved -- lets the caller reset the whole
   // calculator (brand/shade/level, not just this panel's client fields) once the "Saved!"
   // confirmation has finished showing.
@@ -71,69 +44,40 @@ export interface FormulaResultsProps {
   repeatRequest?: RepeatFormulaRequest | null;
 }
 
-const MAX_PROCESSING_MINUTES = 180;
-
+// The results panel of the simple calculator: the optional filler step, the mix with its
+// guidance, timing and pricing, and the save/share panel. It owns the two things that
+// span all of them -- the shareable formula text and the save.
 export function FormulaResults({
-  brandId,
-  brandName,
-  line,
-  targetShade,
-  startLevel,
-  grayPercent,
-  porosity,
-  thickness,
-  chemicalHistory,
+  product,
+  hair,
+  mix,
   applicationZone,
-  result,
-  additionalShade,
-  additionalShadeGrams,
-  additionalShade2,
-  additionalShade2Grams,
-  blend,
-  naturalBase = null,
   prePigmentationResult,
   neutralizationApplied,
   onNeutralizationAppliedChange,
   appliedBy,
   processingMinutes,
   onProcessingMinutesChange,
-  pricePerGram,
-  onPricePerGramChange,
-  markupMultiplier,
-  onMarkupMultiplierChange,
-  productCost,
-  recommendedServicePrice,
-  servicePrice,
-  onServicePriceChange,
+  pricing,
+  pricingHandlers,
   onSaved,
   repeatRequest,
 }: FormulaResultsProps) {
   const { t } = useTranslation();
-  const { inputProps: processingMinutesInputProps } = useClampedNumberText(
-    processingMinutes,
-    onProcessingMinutesChange,
-    { min: 1, max: MAX_PROCESSING_MINUTES },
-  );
+  const { targetShade } = mix;
 
   const targetColorFormulaText = formatFormulaText({
-    brandName,
-    line,
-    targetShade,
-    startLevel,
-    result,
+    brandName: product.brandName,
+    line: product.line,
+    startLevel: hair.startLevel,
     processingMinutes,
     applicationZone,
-    additionalShade,
-    additionalShadeGrams,
-    additionalShade2,
-    additionalShade2Grams,
-    blend,
     neutralizationApplied,
-    naturalBase,
+    ...mix,
   });
   // Same brand+line display convention as the target-color title above (formatFormulaText),
   // reused for the filler worked example so both steps of a two-part formula name the
-  const fullBrandLabel = formatBrandLineLabel(brandName, line);
+  const fullBrandLabel = formatBrandLineLabel(product.brandName, product.line);
   // Prepend the filler ("Step 1") text ahead of the target-color formula ("Step 2") once
   // the colorist has opted into the pre-pigmentation step -- see PrePigmentationField.
   // fillerStepText is null whenever prePigmentationResult is null (checkbox off, or the
@@ -148,31 +92,15 @@ export function FormulaResults({
       : targetColorFormulaText;
 
   const { shortages, handleSave } = useFormulaSave({
-    brandId,
-    brandName,
-    line,
-    targetShade,
-    startLevel,
-    grayPercent,
+    product,
+    hair,
+    mix,
     applicationZone,
-    porosity,
-    thickness,
-    chemicalHistory,
-    result,
-    additionalShade,
-    additionalShadeGrams,
-    additionalShade2,
-    additionalShade2Grams,
-    blend,
-    naturalBase,
     prePigmentationResult,
     neutralizationApplied,
     appliedBy,
     processingMinutes,
-    pricePerGram,
-    markupMultiplier,
-    productCost,
-    servicePrice,
+    pricing,
   });
 
   return (
@@ -187,180 +115,28 @@ export function FormulaResults({
           <h2 className="results__section-heading">{t("prePigmentation.finalStepLabel")}</h2>
         </>
       )}
-      <div className="results__stats">
-        <div className="stat">
-          <span className="stat__label">{t("results.developer")}</span>
-          <span className="stat__value">
-            {result.developerVolume !== null
-              ? formatDeveloperVolume(result.developerVolume, targetShade.developerPercentOverride)
-              : "—"}
-          </span>
-        </div>
-        <div className="stat">
-          <span className="stat__label">{t("results.ratio")}</span>
-          <span className="stat__value">
-            {result.mixingRatio.colorParts} : {result.mixingRatio.developerParts}
-          </span>
-        </div>
-      </div>
-
-      <LiftOutcome result={result} targetShade={targetShade} />
-      <PorosityNotices result={result} targetShade={targetShade} porosity={porosity} />
-      {result.grams !== null && (
-        <div className="results__row results__row--mix">
-          <span className="results__row-label">{t("results.mix")}</span>
-          <span className="results__mix-value">
-            {blend !== null
-              ? buildBlendMixSummary(
-                  blend,
-                  result.grams.developerGrams,
-                  additionalShade,
-                  additionalShadeGrams,
-                  additionalShade2,
-                  additionalShade2Grams,
-                  naturalBase,
-                )
-              : buildMixSummary(
-                  targetShade,
-                  result.grams,
-                  additionalShade,
-                  additionalShadeGrams,
-                  additionalShade2,
-                  additionalShade2Grams,
-                  naturalBase,
-                )}
-          </span>
-        </div>
-      )}
-
-      <StockShortageWarnings shortages={shortages} />
-
-      <div className="results__row">
-        <span className="results__row-label">{t("results.applicationZone")}</span>
-        <span>
-          {t(applicationZone === "full-head" ? "fields.applicationZoneFullHead" : "fields.applicationZoneRootTouchUp")}
-        </span>
-      </div>
-
-      {/* Only when gray coverage changes the mix -- see formatFormulaText's own gray line. */}
-      {(naturalBase !== null || result.grayCoverage.naturalRatio > 0) && (
-        <div className="results__row">
-          <span className="results__row-label">{t("results.grayCoverage")}</span>
-          <span>
-            {naturalBase !== null
-              ? t("results.grayCoverageAppliedValue", {
-                  code: naturalBase.shade.code,
-                  natural: Math.round(result.grayCoverage.naturalRatio * 100),
-                  fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-                })
-              : t("results.grayCoverageValue", {
-                  note: getGrayCoverageNote(result.grayCoverage),
-                  natural: Math.round(result.grayCoverage.naturalRatio * 100),
-                  fashion: Math.round(result.grayCoverage.fashionRatio * 100),
-                })}
-          </span>
-        </div>
-      )}
-
-      <div className="results__row">
-        <span className="results__row-label">{t("results.recommendedTone")}</span>
-        <span>
-          {result.recommendedCorrectiveTone !== null
-            ? t("results.recommendedToneValue", {
-                grams: result.correctorGrams,
-                tone: result.recommendedCorrectiveTone,
-              })
-            : t("results.none")}
-        </span>
-      </div>
-
-      {result.recommendedCorrectiveTone !== null && (
-        <label className="results__neutralization-toggle">
-          <input
-            type="checkbox"
-            checked={neutralizationApplied}
-            onChange={e => onNeutralizationAppliedChange(e.target.checked)}
-          />
-          {t("results.applyNeutralization")}
-        </label>
-      )}
-
-      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} />
-
-      <h2 className="results__section-heading">{t("results.timingPricingSectionTitle")}</h2>
-
-      <div className="results__control-grid">
-        <div className="field">
-          <label htmlFor="processingMinutes">{t("results.processingTime")}</label>
-          <input id="processingMinutes" {...processingMinutesInputProps} />
-          <span className="processing-time-hint">
-            {t("results.processingTimeHint", { minutes: result.recommendedProcessingMinutes })}
-            {processingMinutes !== result.recommendedProcessingMinutes && (
-              <button type="button" onClick={() => onProcessingMinutesChange(result.recommendedProcessingMinutes)}>
-                {t("results.useRecommended")}
-              </button>
-            )}
-          </span>
-        </div>
-        <div className="field">
-          <label htmlFor="pricePerGram">{t("results.pricePerGram")}</label>
-          <input
-            id="pricePerGram"
-            type="number"
-            min={0}
-            step={0.01}
-            value={pricePerGram}
-            onChange={e => onPricePerGramChange(Number(e.target.value))}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="markupMultiplier">{t("results.markupMultiplier")}</label>
-          <input
-            id="markupMultiplier"
-            type="number"
-            min={1}
-            step={0.1}
-            value={markupMultiplier}
-            onChange={e => onMarkupMultiplierChange(Number(e.target.value))}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="servicePrice">{t("results.servicePrice")}</label>
-          <input
-            id="servicePrice"
-            type="number"
-            min={0}
-            step={0.01}
-            value={servicePrice ?? ""}
-            onChange={e => onServicePriceChange(Number(e.target.value))}
-          />
-          {recommendedServicePrice !== null && (
-            <span className="processing-time-hint">
-              {t("results.servicePriceHint", { price: recommendedServicePrice.toFixed(2) })}
-              {servicePrice !== recommendedServicePrice && (
-                <button type="button" onClick={() => onServicePriceChange(recommendedServicePrice)}>
-                  {t("results.useRecommended")}
-                </button>
-              )}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {productCost !== null && (
-        <div className="results__row">
-          <span className="results__row-label">{t("results.productCost")}</span>
-          <span>{productCost.toFixed(2)}</span>
-        </div>
-      )}
-
+      <FormulaMixSection
+        mix={mix}
+        porosity={hair.canvas.porosity}
+        applicationZone={applicationZone}
+        shortages={shortages}
+        neutralizationApplied={neutralizationApplied}
+        onNeutralizationAppliedChange={onNeutralizationAppliedChange}
+      />
+      <TimingPricingSection
+        recommendedProcessingMinutes={mix.result.recommendedProcessingMinutes}
+        processingMinutes={processingMinutes}
+        onProcessingMinutesChange={onProcessingMinutesChange}
+        pricing={pricing}
+        pricingHandlers={pricingHandlers}
+      />
       <SessionDetailsPanel
         formulaText={formulaText}
         processingMinutes={processingMinutes}
         onSave={handleSave}
         onSaved={onSaved}
         appliedBy={appliedBy}
-        canvas={{ porosity, thickness, chemicalHistory }}
+        canvas={hair.canvas}
         repeatRequest={repeatRequest}
       />
     </div>

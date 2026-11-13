@@ -276,37 +276,31 @@ export default function FormulaCalculator({
         </CollapsibleSection>
       </div>
       <FormulaResults
-        brandId={brandId}
-        brandName={brands[brandId].name}
-        line={line}
-        targetShade={targetShade}
-        startLevel={startLevel}
-        grayPercent={grayPercent}
+        product={{ brandId, brandName: brands[brandId].name, line }}
+        hair={{ startLevel, grayPercent, canvas: { porosity, thickness, chemicalHistory } }}
+        mix={{
+          targetShade,
+          result: effectiveResult,
+          additionalShade,
+          additionalShadeGrams,
+          additionalShade2,
+          additionalShade2Grams,
+          blend,
+          naturalBase,
+        }}
         applicationZone={applicationZone}
-        porosity={porosity}
-        thickness={thickness}
-        chemicalHistory={chemicalHistory}
-        result={effectiveResult}
-        additionalShade={additionalShade}
-        additionalShadeGrams={additionalShadeGrams}
-        additionalShade2={additionalShade2}
-        additionalShade2Grams={additionalShade2Grams}
-        blend={blend}
-        naturalBase={naturalBase}
         prePigmentationResult={prePigmentationResult}
         neutralizationApplied={neutralizationApplied}
         onNeutralizationAppliedChange={setNeutralizationApplied}
         appliedBy={appliedBy}
         processingMinutes={processingMinutes}
         onProcessingMinutesChange={setManualProcessingMinutes}
-        pricePerGram={pricePerGram}
-        onPricePerGramChange={setManualPricePerGram}
-        markupMultiplier={markupMultiplier}
-        onMarkupMultiplierChange={setMarkupMultiplier}
-        productCost={productCost}
-        recommendedServicePrice={recommendedServicePrice}
-        servicePrice={servicePrice}
-        onServicePriceChange={setManualServicePrice}
+        pricing={{ pricePerGram, markupMultiplier, productCost, recommendedServicePrice, servicePrice }}
+        pricingHandlers={{
+          onPricePerGramChange: setManualPricePerGram,
+          onMarkupMultiplierChange: setMarkupMultiplier,
+          onServicePriceChange: setManualServicePrice,
+        }}
         onSaved={onSaved}
         repeatRequest={repeatRequest}
       />
