@@ -10,11 +10,25 @@ import { suggestNeutralizingTone } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
 import type { Porosity } from "./canvas";
 import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
+import {
+  GRAY_COVERAGE_MIN_DEVELOPER_VOLUME,
+  GRAY_LIGHT_THRESHOLD,
+  GRAY_MEDIUM_THRESHOLD,
+  getGrayCoverageStrategy,
+  type GrayCoverageStrategy,
+} from "./grayCoverage";
+import {
+  calculateFormulaGrams,
+  calculateFormulaGramsFromColorGrams,
+  getMixingRatio,
+  type FormulaGrams,
+} from "./formulaGrams";
 
-export interface GrayCoverageStrategy {
-  naturalRatio: number;
-  fashionRatio: number;
-}
+// The full color formula: developer, ratio, grams, corrective guidance and warnings for
+// one target shade. Gray-coverage rules live in ./grayCoverage and weight splits in
+// ./formulaGrams; both are re-exported here so callers keep a single import.
+export * from "./grayCoverage";
+export * from "./formulaGrams";
 
 // The engine reports warnings as data, never as text: each one carries only the
 // language-independent values its message is built from, and the UI layer renders it in
@@ -40,11 +54,6 @@ export interface LiftUnsupportedWarning {
   code: string;
   level: Level;
   startLevel: Level;
-}
-
-export interface FormulaGrams {
-  colorGrams: number;
-  developerGrams: number;
 }
 
 export interface FullFormula {
@@ -78,48 +87,12 @@ export type PorosityAdjustment =
   | { kind: "developer-lowered"; fromDeveloperVolume: DeveloperVolume }
   | { kind: "processing-extended"; addedMinutes: number };
 
-export const GRAY_LIGHT_THRESHOLD = 30;
-export const GRAY_MEDIUM_THRESHOLD = 50;
-export const GRAY_HEAVY_THRESHOLD = 80;
-
-// Wella's own Koleston Perfect / Welloxon Perfect developer guide requires at least 6%
-// (20 vol) to properly cover resistant gray/white hair, even when the target is the same
-// depth or darker (no lift) - where the level-diff-only pickDeveloperVolume (levels.ts)
-// would otherwise pick the gentlest 3% (10 vol), which isn't strong enough to open the
-// cuticle and deposit oxidative pigment into resistant gray. Applied as a floor in
-// calculateFullFormula below once gray coverage is significant (the same >=30% threshold
-// as GRAY_LIGHT_THRESHOLD, which is where gray coverage first starts driving the mix at
-// all -- see getGrayCoverageStrategy); a no-op whenever the level-lift itself already
-// calls for 20 vol or higher.
-export const GRAY_COVERAGE_MIN_DEVELOPER_VOLUME: DeveloperVolume = 20;
-
-// Wella's own "Pure Naturals" dosing guide for stubborn gray/white coverage: blend a
-// natural-base shade into the target (fashion) formula at 1/3 for 30-50% gray and 1/2 for
-// 50-100% gray -- capped at half-and-half even at 100% gray, never going further toward
-// pure natural. `naturalRatio`/`fashionRatio` below mirror those two documented ratios
-// directly (1/3, 1/2); below GRAY_LIGHT_THRESHOLD no natural-base dose is called for at
-// all. GRAY_HEAVY_THRESHOLD plays no part in this mix -- it's a separate threshold (see
-// revisit.ts) for how soon a heavily-gray client should rebook, not for this ratio.
-const FASHION_ONLY: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0, fashionRatio: 1 });
-const ONE_THIRD_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 1 / 3, fashionRatio: 2 / 3 });
-const HALF_NATURAL: GrayCoverageStrategy = Object.freeze({ naturalRatio: 0.5, fashionRatio: 0.5 });
-
-export function getGrayCoverageStrategy(grayPercent: number): GrayCoverageStrategy {
-  if (grayPercent < GRAY_LIGHT_THRESHOLD) {
-    return FASHION_ONLY;
-  }
-  if (grayPercent < GRAY_MEDIUM_THRESHOLD) {
-    return ONE_THIRD_NATURAL;
-  }
-  return HALF_NATURAL;
-}
-
 // Processing time recommendations mirror standard manufacturer instructions: a shade's own
 // `fixedProcessingMinutes` (e.g. Wella Special Blonde's 50-60 min without heat, see
 // brands/wella.ts) wins outright when set; otherwise demi-permanent, deposit-only lines
 // (e.g. Wella Color Touch, identified by developerVolumeChoices) process in 20 minutes,
 // and permanent color processes in 30 minutes, extended to 45 for resistant/heavy gray
-// coverage (the same >=50% gray threshold that drives the half-natural Pure Naturals dose above).
+// coverage (the same >=50% gray threshold that drives the half-natural Pure Naturals dose, see grayCoverage.ts).
 const DEMI_PERMANENT_PROCESSING_MINUTES = 20;
 const STANDARD_PROCESSING_MINUTES = 30;
 const EXTENDED_PROCESSING_MINUTES = 45;
@@ -199,113 +172,6 @@ export function getRecommendedProcessingMinutes(targetShade: Shade, grayPercent:
   return grayPercent >= GRAY_MEDIUM_THRESHOLD ? EXTENDED_PROCESSING_MINUTES : STANDARD_PROCESSING_MINUTES;
 }
 
-const NO_LIFT_MAX_DIFF = 0;
-const MODERATE_LIFT_MAX_DIFF = 2;
-
-export function getMixingRatio(startLevel: Level, targetLevel: Level): MixingRatio {
-  const diff = targetLevel - startLevel;
-  if (diff <= NO_LIFT_MAX_DIFF) {
-    return { colorParts: 1, developerParts: 1 };
-  }
-  if (diff <= MODERATE_LIFT_MAX_DIFF) {
-    return { colorParts: 1, developerParts: 1.5 };
-  }
-  return { colorParts: 1, developerParts: 2 };
-}
-
-export function calculateFormulaGrams(totalGrams: number, ratio: MixingRatio): FormulaGrams {
-  const totalParts = ratio.colorParts + ratio.developerParts;
-  const colorGrams = (totalGrams * ratio.colorParts) / totalParts;
-  const developerGrams = (totalGrams * ratio.developerParts) / totalParts;
-  return { colorGrams, developerGrams };
-}
-
-// Same split as calculateFormulaGrams, but starting from the dye weight the colorist
-// actually wants to use (e.g. "40 g of color per root touch-up") rather than a total mix
-// weight to divide up -- developer is derived to match the ratio instead of the other way
-// around. Lets a colorist who needs more dye than the calculator's default total simply
-// enter the dye amount they're using; see calculateFullFormula's colorGramsOverride.
-export function calculateFormulaGramsFromColorGrams(colorGrams: number, ratio: MixingRatio): FormulaGrams {
-  const developerGrams = (colorGrams * ratio.developerParts) / ratio.colorParts;
-  return { colorGrams, developerGrams };
-}
-
-// Blends in an extra shade the colorist chooses at their own discretion (e.g. a small
-// corrective addition), on top of the calculated primary mix. The colorist enters the
-// additional shade's grams by hand; the developer amount is recalculated automatically so
-// the color:developer ratio stays correct for the new, larger total color weight.
-export function applyAdditionalShade(
-  grams: FormulaGrams,
-  ratio: MixingRatio,
-  additionalColorGrams: number,
-): FormulaGrams {
-  return calculateFormulaGramsFromColorGrams(grams.colorGrams + additionalColorGrams, ratio);
-}
-
-export interface ShadeBlendSplit {
-  primaryGrams: number;
-  secondaryGrams: number;
-}
-
-// Splits a shade's already-calculated color total between two component shades by ratio,
-// for approximating a shade that's out of stock (e.g. no 7/13 on hand -> blend 7/1 and
-// 7/3 at a 70/30 split). Unlike `applyAdditionalShade`, the color/developer weight
-// `calculateFullFormula` produced is left untouched -- the two components share that
-// single total rather than growing it, since together they stand in for the one missing
-// shade. Callers should only pair shades `canBlendShades` (see shades.ts) accepts.
-export function splitShadeBlend(colorGrams: number, primaryPercent: number): ShadeBlendSplit {
-  const ratio = Math.min(100, Math.max(0, primaryPercent)) / 100;
-  return {
-    primaryGrams: colorGrams * ratio,
-    secondaryGrams: colorGrams * (1 - ratio),
-  };
-}
-
-// The natural shade actually dosed into a formula for gray coverage, and its grams --
-// already carved out of the base color weight (see splitNaturalBase), never on top of it.
-export interface NaturalBase {
-  shade: Shade;
-  grams: number;
-}
-
-export interface NaturalBaseSplit {
-  fashionGrams: number;
-  naturalGrams: number;
-}
-
-// Carves the gray-coverage natural-base dose (see getGrayCoverageStrategy) out of the
-// already-calculated base color weight -- Wella's Pure Naturals guide doses the natural
-// shade as a share *of* the color, so the total (and with it developer and cost) stays
-// exactly what calculateFullFormula produced, same as splitShadeBlend above. Any
-// discretionary additional shade is applied on top afterwards, never split here.
-export function splitNaturalBase(baseColorGrams: number, naturalRatio: number): NaturalBaseSplit {
-  const ratio = Math.min(1, Math.max(0, naturalRatio));
-  return {
-    fashionGrams: baseColorGrams * (1 - ratio),
-    naturalGrams: baseColorGrams * ratio,
-  };
-}
-
-// A plain or double natural (7/0, 7/00, 7N, 7NN) -- not a natural with a fashion
-// reflect on top (7/01). Such a target already is its own natural base.
-export function isPureNatural(shade: Shade): boolean {
-  return shade.tone === "natural" && (shade.secondaryTone === undefined || shade.secondaryTone === "natural");
-}
-
-// The natural shades a colorist can dose into `targetShade` for gray coverage: same line
-// (`lineShades`), same level as the target. Double-natural shades (Wella /00, Redken NN --
-// the "Pure Naturals" the gray-coverage guide is built around) come first, so the first
-// entry is the default pick; plain naturals (/0, N) follow. Empty when the target is
-// itself natural (nothing to split) or the line has no natural at that level.
-export function findNaturalBaseCandidates(targetShade: Shade, lineShades: Shade[]): Shade[] {
-  if (isPureNatural(targetShade)) return [];
-  const naturals = lineShades.filter(s => s.level === targetShade.level && isPureNatural(s));
-  return [
-    ...naturals.filter(s => s.secondaryTone === "natural"),
-    ...naturals.filter(s => s.secondaryTone === undefined),
-  ];
-}
-
 // Step 1 of calculateFullFormula: the developer volume before any partial-lift fallback.
 // A shade with its own developerVolumeChoices (demi-permanent lines) always defers to
 // the colorist's manual pick instead of the auto-picked ladder -- including when the
@@ -314,7 +180,7 @@ export function findNaturalBaseCandidates(targetShade: Shade, lineShades: Shade[
 // the developer they chose is what must be mixed and recorded. Otherwise picks via the
 // level-diff lift ladder, then applies two floors: gray coverage forces at least
 // GRAY_COVERAGE_MIN_DEVELOPER_VOLUME (Wella/Welloxon's own resistant-gray guidance, see
-// the const above), and a same-depth-or-darker shade with its own noLiftDeveloperVolume
+// grayCoverage.ts), and a same-depth-or-darker shade with its own noLiftDeveloperVolume
 // uses that instead of the ladder's gentlest default.
 function resolveDeveloperVolume(
   startLevel: Level,

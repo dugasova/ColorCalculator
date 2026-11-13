@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import "../../i18n";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 import FormulaCalculator from "./FormulaCalculator";
+import { chooseOption } from "../../testDom";
 
 // Keeps this a pure component-interaction test: no real Firestore/network reachable from
 // jsdom (see SessionDetailsPanel.bowlCard.test.tsx for the same stubs).
@@ -19,17 +20,6 @@ vi.mock("../../favoriteFormulas", async () => {
   const actual = await vi.importActual<typeof import("../../favoriteFormulas")>("../../favoriteFormulas");
   return { ...actual, subscribeToFavoriteFormulas: vi.fn(() => () => {}) };
 });
-
-// The custom Select (see components/common/Select) has no native <select> "change" event
-// -- it opens on a click of its trigger button and commits a value on a click of the
-// matching option, identified by the `data-value` the component stamps on each
-// <li role="option">.
-function chooseOption(labelText: string, value: string) {
-  fireEvent.click(screen.getByLabelText(labelText));
-  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
-  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
-  fireEvent.click(option);
-}
 
 afterEach(cleanup);
 

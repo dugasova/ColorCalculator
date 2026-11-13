@@ -1,18 +1,11 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import "../../i18n";
 import FormulaCalculator from "./FormulaCalculator";
+import { chooseOption } from "../../testDom";
 
 afterEach(cleanup);
-
-// See FormulaCalculator.gramsInput.test.tsx for why the custom Select is driven by clicks.
-function chooseOption(labelText: string, value: string) {
-  fireEvent.click(screen.getByLabelText(labelText));
-  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
-  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
-  fireEvent.click(option);
-}
 
 // The Porosity field feeds the formula itself (engine/formula.ts's applyPorosity), not
 // just the saved hair description. Defaults: start level 10 -> Generic 1.0, no lift, so

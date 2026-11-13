@@ -66,6 +66,24 @@ function countVisitsByClient(entries: FormulaHistoryEntry[]): Map<string, number
   return visitsByClient;
 }
 
+// Retention: share of clients (grouped by real clientId when the entry has one, else a
+// normalized-name fallback -- see getClientGroupKey) who have 2 or more saved visits.
+// Entries with an empty clientName can't be attributed to a client and are excluded
+// from both the numerator and denominator. `retentionRate` is 0 when there are no clients.
+function computeRetention(entries: FormulaHistoryEntry[]): {
+  uniqueClients: number;
+  returningClients: number;
+  retentionRate: number;
+} {
+  const visitsByClient = countVisitsByClient(entries);
+  const uniqueClients = visitsByClient.size;
+  let returningClients = 0;
+  for (const count of visitsByClient.values()) {
+    if (count >= 2) returningClients += 1;
+  }
+  return { uniqueClients, returningClients, retentionRate: uniqueClients > 0 ? returningClients / uniqueClients : 0 };
+}
+
 // `brands` is the live catalog (see `usePalette`), used only to group popular shades by
 // brand id rather than by the name saved on each step -- see countShadePopularity.
 export function computeSalonAnalytics(entries: FormulaHistoryEntry[], brands: Record<BrandId, Brand>): SalonAnalytics {
@@ -105,17 +123,7 @@ export function computeSalonAnalytics(entries: FormulaHistoryEntry[], brands: Re
   const averageProductCost =
     productCostValues.length > 0 ? productCostValues.reduce((sum, c) => sum + c, 0) / productCostValues.length : null;
 
-  // Retention: % of clients (grouped by real clientId when the entry has one, else a
-  // normalized-name fallback -- see getClientGroupKey) who have 2 or more saved visits.
-  // Entries with an empty clientName can't be attributed to a client and are excluded
-  // from both the numerator and denominator.
-  const visitsByClient = countVisitsByClient(entries);
-  const uniqueClients = visitsByClient.size;
-  let returningClients = 0;
-  for (const count of visitsByClient.values()) {
-    if (count >= 2) returningClients += 1;
-  }
-  const retentionRate = uniqueClients > 0 ? returningClients / uniqueClients : 0;
+  const { uniqueClients, returningClients, retentionRate } = computeRetention(entries);
 
   return {
     totalVisits,
@@ -189,13 +197,7 @@ export function computeStylistStats(entries: FormulaHistoryEntry[], brands: Reco
   for (const [stylist, stylistEntries] of groupByStylist(entries)) {
     const visits = stylistEntries.length;
 
-    const visitsByClient = countVisitsByClient(stylistEntries);
-    const uniqueClients = visitsByClient.size;
-    let returningClients = 0;
-    for (const count of visitsByClient.values()) {
-      if (count >= 2) returningClients += 1;
-    }
-    const retentionRate = uniqueClients > 0 ? returningClients / uniqueClients : 0;
+    const { uniqueClients, returningClients, retentionRate } = computeRetention(stylistEntries);
 
     let dyeGrams = 0;
     let bleachPowderGrams = 0;
