@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import "../../i18n";
 import { ColorStepCard } from "./ColorStepCard";
 import { PaletteReactContext, type PaletteState } from "../../palette";
@@ -10,6 +10,7 @@ import { GENERIC_SHADE_CHART } from "../../engine/brands/generic";
 import { getMixingRatio } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { ColorHistoryStep } from "../../history";
+import { chooseOption } from "../../testDom";
 
 // See ColorStepCard.interaction.test.tsx for why this project needs an explicit
 // afterEach(cleanup): it doesn't set vitest's `test.globals: true`.
@@ -40,17 +41,6 @@ function paletteState(shades: Shade[]): PaletteState {
     pricingSettings: DEFAULT_PRICING_SETTINGS,
     calibrationIndex: new Map(),
   };
-}
-
-// The custom Select (see components/common/Select) has no native <select> "change" event
-// to fire -- it opens on a click of its trigger button and commits a value on a click of
-// the matching option, identified by the `data-value` the component stamps on each
-// <li role="option">. Mirrors ColorStepCard.interaction.test.tsx's own helper.
-function chooseOption(labelText: string, value: string) {
-  fireEvent.click(screen.getByLabelText(labelText));
-  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
-  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
-  fireEvent.click(option);
 }
 
 function lastStep(onChange: ReturnType<typeof vi.fn>): ColorHistoryStep {

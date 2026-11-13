@@ -5,6 +5,7 @@ import "../../i18n";
 import { ColorStepCard } from "./ColorStepCard";
 import { calculateBleachFormula } from "../../engine/bleach";
 import type { ColorHistoryStep, BleachHistoryStep } from "../../history";
+import { chooseOption } from "../../testDom";
 
 // This project doesn't set vitest's `test.globals: true` (every test file imports
 // describe/it/expect explicitly), so @testing-library/react's automatic afterEach
@@ -33,17 +34,6 @@ function renderStep(): RenderedStep {
   const onRemove: Mock<() => void> = vi.fn();
   render(<ColorStepCard stepId="1" onChange={onChange} onRemove={onRemove} />);
   return { onChange, onRemove };
-}
-
-// The custom Select (see components/common/Select) has no native <select> "change" event
-// to fire -- it opens on a click of its trigger button and commits a value on a click of
-// the matching option, identified by the `data-value` the component stamps on each
-// <li role="option">. This mirrors how a colorist actually operates it.
-function chooseOption(labelText: string, value: string) {
-  fireEvent.click(screen.getByLabelText(labelText));
-  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
-  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
-  fireEvent.click(option);
 }
 
 function lastStep(onChange: StepChangeMock): ColorHistoryStep {

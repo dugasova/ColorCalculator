@@ -3,19 +3,9 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import "../../i18n";
 import FormulaCalculator from "./FormulaCalculator";
+import { chooseOption } from "../../testDom";
 
 afterEach(cleanup);
-
-// The custom Select (see components/common/Select) has no native <select> "change" event
-// to fire -- it opens on a click of its trigger button and commits a value on a click of
-// the matching option, identified by the `data-value` the component stamps on each
-// <li role="option">. This mirrors how a colorist actually operates it.
-function chooseOption(labelText: string, value: string) {
-  fireEvent.click(screen.getByLabelText(labelText));
-  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
-  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
-  fireEvent.click(option);
-}
 
 // Regression/feature: choosing "Root touch-up" should switch the amount field to a
 // dye-only entry (40 g of color, developer derived from the ratio) instead of the

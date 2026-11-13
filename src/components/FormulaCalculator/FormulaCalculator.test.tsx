@@ -11,19 +11,9 @@ import { BRANDS } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
 import FormulaCalculator from "./FormulaCalculator";
 import { FormulaResults } from "./FormulaResults";
+import { chooseOption } from "../../testDom";
 
 afterEach(cleanup);
-
-// The custom Select (see components/common/Select) has no native <select> "change" event
-// to fire -- it opens on a click of its trigger button and commits a value on a click of
-// the matching option, identified by the `data-value` the component stamps on each
-// <li role="option">. This mirrors how a colorist actually operates it.
-function chooseOption(labelText: string, value: string) {
-  fireEvent.click(screen.getByLabelText(labelText));
-  const option = document.querySelector(`[role="option"][data-value="${value}"]`);
-  if (option === null) throw new Error(`No option with value "${value}" in the "${labelText}" dropdown`);
-  fireEvent.click(option);
-}
 
 describe("FormulaCalculator", () => {
   it("renders the additional shade selector but hides its grams input until a shade is chosen", () => {
