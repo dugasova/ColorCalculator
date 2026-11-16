@@ -609,6 +609,9 @@ export const en = {
     checkIntervalNote: "Check the result visually every {{min}}-{{max}} minutes throughout processing.",
     strandTestNote: "Always perform a strand test to check the result before applying to the full head.",
     recommendedServicePrice: "Recommended service price",
+    backgroundLabel: "Background after lightening",
+    toningLabel: "Toning",
+    toningValue: "level {{level}} toner, {{tones}}",
   },
   complexColoring: {
     titlePrefix: "Complex",

@@ -18,7 +18,7 @@ import { formatDeveloperVolume } from "./formatDeveloperVolume";
 // whatever language the UI is in now, not the one that was active when it was saved.
 
 // A tone family's name as it reads inside a sentence ("ash", "попелястий").
-function formatToneName(tone: ToneFamily): string {
+export function formatToneName(tone: ToneFamily): string {
   return i18n.t(`palette.toneFamily.${tone}`).toLowerCase();
 }
 

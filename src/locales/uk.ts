@@ -619,6 +619,9 @@ export const uk: typeof en = {
     checkIntervalNote: "Перевіряйте результат візуально кожні {{min}}-{{max}} хвилин протягом витримки.",
     strandTestNote: "Завжди робіть тест на пасмі, щоб перевірити результат перед нанесенням на всю голову.",
     recommendedServicePrice: "Рекомендована вартість послуги",
+    backgroundLabel: "Фон після освітлення",
+    toningLabel: "Тонування",
+    toningValue: "тонер рівня {{level}}, {{tones}}",
   },
   complexColoring: {
     titlePrefix: "Складне",

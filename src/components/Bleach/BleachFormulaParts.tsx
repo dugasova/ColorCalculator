@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { BleachFormula } from "../../engine/bleach";
+import { formatBleachToning } from "../../format/formatBleach";
 
 // The pieces of a bleach formula that read the same on the standalone BleachCalculator
 // and on a bleach step of a Complex Coloring session (BleachStepCard). They are separate
@@ -64,6 +65,26 @@ export function BleachMixRow({ result }: BleachResultProps) {
         })}
       </span>
     </div>
+  );
+}
+
+// What the lightening leaves behind and what to tone it with. Renders nothing when there
+// is no formula.
+export function BleachToningRows({ result }: BleachResultProps) {
+  const { t } = useTranslation();
+  if (result.grams === null) return null;
+  const toning = formatBleachToning(result.targetLevel);
+  return (
+    <>
+      <div className="results__row">
+        <span className="results__row-label">{t("bleach.backgroundLabel")}</span>
+        <span>{toning.background}</span>
+      </div>
+      <div className="results__row">
+        <span className="results__row-label">{t("bleach.toningLabel")}</span>
+        <span>{toning.toner}</span>
+      </div>
+    </>
   );
 }
 

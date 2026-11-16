@@ -12,7 +12,13 @@ import type { StartingBase } from "../../engine/startingBase";
 import type { BleachHistoryStep, BleachStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 import { useHairCanvasState } from "../FormulaCalculator/useHairCanvasState";
-import { BleachMixRow, BleachSafetyNotes, BleachTotalGramsField, BleachWarnings } from "../Bleach/BleachFormulaParts";
+import {
+  BleachMixRow,
+  BleachSafetyNotes,
+  BleachToningRows,
+  BleachTotalGramsField,
+  BleachWarnings,
+} from "../Bleach/BleachFormulaParts";
 import { useBleachFormulaState } from "../Bleach/useBleachFormulaState";
 
 export interface BleachStepCardProps {
@@ -197,6 +203,7 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
             <span className="results__row-label">{t("results.developer")}</span>
             <span>{result.developerVolume !== null ? formatDeveloperVolume(result.developerVolume) : "—"}</span>
           </div>
+          <BleachToningRows result={result} />
           <BleachSafetyNotes result={result} />
         </>
       )}
