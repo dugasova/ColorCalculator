@@ -236,6 +236,7 @@ export const en = {
     recommendedTone: "Recommended corrective tone",
     recommendedToneValue: "{{grams}} g {{tone}}",
     correctorShadeOrMixtone: "{{shade}} or {{mixtone}}",
+    correctorWithDeveloper: "{{corrector}} (+ {{grams}} g developer)",
     toneCoveredByShade: "not needed — the shade's own tone cancels the {{pigment}} background",
     none: "none",
     clientNameLabel: "Client name",

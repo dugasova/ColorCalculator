@@ -117,7 +117,17 @@ const socolorShades: Shade[] = [
   { code: "11P", level: 11, tone: "pearl" },
 ];
 
-export const MATRIX_SOCOLOR_CHART: Shade[] = socolorShades.map(shade => ({ ...shade, line: "socolor" }));
+// SoColor's correctors are the SoBoost boosters (see ../correctorProducts.ts). Matrix doses
+// them by weight, not by the Rule of 10's tube length: at most 1 part booster to 3 parts
+// color, i.e. 25% of the dye. The SoColor Extra Coverage collection (the 500 series) takes
+// no boosters at all -- when it is added as its own line, leave it without them.
+const SOBOOST_MAX_SHARE_OF_COLOR = 0.25;
+
+export const MATRIX_SOCOLOR_CHART: Shade[] = socolorShades.map(shade => ({
+  ...shade,
+  line: "socolor",
+  maxCorrectorShareOfColor: SOBOOST_MAX_SHARE_OF_COLOR,
+}));
 
 // Super Sync (formerly SoColor Sync / Color Sync) -- Matrix's ammonia-free, alkaline
 // demi-permanent line, a second Matrix line alongside the permanent SoColor Pre-Bonded

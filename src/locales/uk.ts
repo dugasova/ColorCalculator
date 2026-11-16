@@ -243,6 +243,7 @@ export const uk: typeof en = {
     recommendedTone: "Рекомендований коригувальний тон",
     recommendedToneValue: "{{grams}} г {{tone}}",
     correctorShadeOrMixtone: "{{shade}} або {{mixtone}}",
+    correctorWithDeveloper: "{{corrector}} (+ {{grams}} г окисника)",
     toneCoveredByShade: "не потрібен — тон самого відтінку гасить {{pigment}} фон",
     none: "немає",
     clientNameLabel: "Ім’я клієнта",

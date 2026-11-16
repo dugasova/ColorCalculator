@@ -256,6 +256,7 @@ function deriveCorrectiveGuidance(
   isActuallyLifting: boolean,
   achievedLevel: Level | null,
   totalGrams: number,
+  colorGrams: number | null,
 ): Pick<
   FullFormula,
   "underlyingPigment" | "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones" | "toneWarning"
@@ -282,9 +283,17 @@ function deriveCorrectiveGuidance(
   // The Rule of 10 gives the weight of a whole neutralizer; a shade that brings part of
   // it itself takes only the rest.
   const wholeCorrectorGrams = calculateCorrectorGrams(achievedLevel, totalGrams);
+  // ...unless the manufacturer caps the corrector (Shade.maxCorrectorShareOfColor): then
+  // every tone is scaled down by the same factor so the blend keeps its proportions.
+  const neededGrams = missing.reduce((sum, part) => sum + wholeCorrectorGrams * part.share, 0);
+  const maxGrams =
+    targetShade.maxCorrectorShareOfColor !== undefined && colorGrams !== null
+      ? colorGrams * targetShade.maxCorrectorShareOfColor
+      : Infinity;
+  const scale = neededGrams > maxGrams ? maxGrams / neededGrams : 1;
   const correctiveTones = missing.map(part => ({
     tone: part.tone,
-    grams: Math.round(wholeCorrectorGrams * part.share * 10) / 10,
+    grams: Math.round(wholeCorrectorGrams * part.share * scale * 10) / 10,
   }));
   const recommendedTones = missing.map(part => part.tone);
   return {
@@ -393,7 +402,13 @@ export function calculateFullFormula({
   const correctorBaseGrams =
     colorGramsOverride !== undefined && grams !== null ? grams.colorGrams + grams.developerGrams : totalGrams;
   const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, correctiveTones, toneWarning } =
-    deriveCorrectiveGuidance(targetShade, isActuallyLifting, achievedLevel, correctorBaseGrams);
+    deriveCorrectiveGuidance(
+      targetShade,
+      isActuallyLifting,
+      achievedLevel,
+      correctorBaseGrams,
+      grams?.colorGrams ?? null,
+    );
   const eligibilityWarning =
     targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
       ? { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel }
