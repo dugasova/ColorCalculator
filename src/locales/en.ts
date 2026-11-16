@@ -235,6 +235,7 @@ export const en = {
     afterPhotoLabel: "After photo",
     recommendedTone: "Recommended corrective tone",
     recommendedToneValue: "{{grams}} g {{tone}}",
+    correctorShadeOrMixtone: "{{shade}} or {{mixtone}}",
     toneCoveredByShade: "not needed — the shade's own tone cancels the {{pigment}} background",
     none: "none",
     clientNameLabel: "Client name",

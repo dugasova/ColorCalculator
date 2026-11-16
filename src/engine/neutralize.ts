@@ -70,10 +70,22 @@ const TONE_NEUTRALIZING_COLORS: Partial<Record<ToneFamily, NeutralizingColor[]>>
   pearl: ["blue", "violet"],
 };
 
-function getShadeNeutralizingColors(shade: Pick<Shade, "tone" | "secondaryTone">): Set<NeutralizingColor> {
+// Wella's /9 (cendré) is charted as slate-grey (see brands/wella.ts) but is grey with
+// violet, so in Wella's lines that tone brings violet too. Other brands' greys are left
+// as plain blue until the colorist confirms them.
+const WELLA_LINES: ReadonlySet<string> = new Set(["koleston-perfect", "color-touch"]);
+
+type NeutralizingShade = Pick<Shade, "tone" | "secondaryTone" | "line">;
+
+function getToneNeutralizingColors(tone: ToneFamily, line: string | undefined): NeutralizingColor[] {
+  if (tone === "slate-grey" && line !== undefined && WELLA_LINES.has(line)) return ["blue", "violet"];
+  return TONE_NEUTRALIZING_COLORS[tone] ?? [];
+}
+
+function getShadeNeutralizingColors(shade: NeutralizingShade): Set<NeutralizingColor> {
   return new Set([
-    ...(TONE_NEUTRALIZING_COLORS[shade.tone] ?? []),
-    ...(shade.secondaryTone !== undefined ? (TONE_NEUTRALIZING_COLORS[shade.secondaryTone] ?? []) : []),
+    ...getToneNeutralizingColors(shade.tone, shade.line),
+    ...(shade.secondaryTone !== undefined ? getToneNeutralizingColors(shade.secondaryTone, shade.line) : []),
   ]);
 }
 
@@ -97,10 +109,7 @@ export interface Neutralization {
 }
 
 // What a shade lifted to `achievedLevel` still needs to come out as the chart shows it.
-export function assessNeutralization(
-  shade: Pick<Shade, "tone" | "secondaryTone">,
-  achievedLevel: Level,
-): Neutralization {
+export function assessNeutralization(shade: NeutralizingShade, achievedLevel: Level): Neutralization {
   const background = getUnderlyingPigment(achievedLevel);
   const needed = getNeutralizer(background);
   const carried = getShadeNeutralizingColors(shade);

@@ -67,6 +67,7 @@ export function FormulaResults({
   const { targetShade } = mix;
 
   const targetColorFormulaText = formatFormulaText({
+    brandId: product.brandId,
     brandName: product.brandName,
     line: product.line,
     startLevel: hair.startLevel,
@@ -116,6 +117,7 @@ export function FormulaResults({
         </>
       )}
       <FormulaMixSection
+        product={product}
         mix={mix}
         porosity={hair.canvas.porosity}
         applicationZone={applicationZone}
