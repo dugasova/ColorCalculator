@@ -3,7 +3,7 @@ import { formatFormulaText } from "./format/formatFormula";
 import { formatBleachText } from "./format/formatBleach";
 import { formatFillerStepText } from "./format/formatPrePigmentation";
 import { formatBrandLineLabel } from "./engine/formatLineLabel";
-import { STRAND_ZONE_I18N_KEY } from "./engine/strandZone";
+import { formatStepZoneLabel } from "./format/formatStepZone";
 import type { ColorHistoryStep, HistoryStep } from "./history";
 
 export function formatCanvasText(canvas: HistoryStep["canvas"] | null): string {
@@ -25,9 +25,8 @@ export function formatCanvasText(canvas: HistoryStep["canvas"] | null): string {
 // exactly like a plain single-formula save), so that's the one case the zone still needs
 // to surface here.
 function formatZoneLine(step: HistoryStep): string {
-  return step.strandZone !== undefined
-    ? i18n.t("format.strandZone", { value: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) })
-    : "";
+  const zone = formatStepZoneLabel(step);
+  return zone !== null ? i18n.t("format.strandZone", { value: zone }) : "";
 }
 
 // Starting-base recap line, prepended ahead of the rest of a step's text -- optional
@@ -155,11 +154,9 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
 // unchanged). A step with no strandZone (plain FormulaCalculator save merged into a
 // session, or a step saved before strandZone existed) falls back to the bare "Step N".
 function formatStepHeader(step: HistoryStep, number: number): string {
-  return step.strandZone !== undefined
-    ? i18n.t("history.stepLabelWithZone", {
-        number,
-        zone: i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`),
-      })
+  const zone = formatStepZoneLabel(step);
+  return zone !== null
+    ? i18n.t("history.stepLabelWithZone", { number, zone })
     : i18n.t("history.stepLabel", { number });
 }
 
@@ -215,7 +212,9 @@ export function formatSessionSummary(steps: HistoryStep[]): string {
   const maxStart = Math.max(...startLevels);
 
   const colorSteps = steps.filter((step): step is ColorHistoryStep => step.kind === "color");
-  const distinctZones = new Set(colorSteps.map(step => step.strandZone));
+  // A zone worked in foils is several groups of hair, each with its own final shade.
+  const hairGroupKey = (step: ColorHistoryStep) => `${step.strandZone ?? ""}|${step.foil?.group ?? ""}`;
+  const distinctZones = new Set(colorSteps.map(hairGroupKey));
 
   let target: string;
   if (colorSteps.length === 0) {
@@ -228,15 +227,12 @@ export function formatSessionSummary(steps: HistoryStep[]): string {
     // Map.set on an already-present key updates its value without moving its position in
     // iteration order, so this ends up with each zone's LAST color step (its real final
     // result), ordered by each zone's first appearance in the session.
-    const lastStepByZone = new Map<ColorHistoryStep["strandZone"], ColorHistoryStep>();
-    for (const step of colorSteps) lastStepByZone.set(step.strandZone, step);
+    const lastStepByZone = new Map<string, ColorHistoryStep>();
+    for (const step of colorSteps) lastStepByZone.set(hairGroupKey(step), step);
     target = [...lastStepByZone.values()]
       .map(step => {
-        const zoneLabel =
-          step.strandZone !== undefined
-            ? `${i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`)} `
-            : "";
-        return `${zoneLabel}${step.targetShade.code}`;
+        const zoneLabel = formatStepZoneLabel(step);
+        return `${zoneLabel !== null ? `${zoneLabel} ` : ""}${step.targetShade.code}`;
       })
       .join(", ");
   }

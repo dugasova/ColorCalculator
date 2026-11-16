@@ -17,6 +17,8 @@ import { GramsInputField } from "../FormulaCalculator/fields/GramsInputField";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
+import type { FoilPlacement } from "../../engine/foil";
+import { FoilPlacementField } from "../FormulaCalculator/fields/FoilPlacementField";
 import type { StartingBase } from "../../engine/startingBase";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../format/formatFormula";
@@ -63,6 +65,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
 
   const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_PRICE_PER_GRAM);
   const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
+  const [foil, setFoil] = useState<FoilPlacement | undefined>(seed?.foil);
   const [startingBase, setStartingBase] = useState<StartingBase>(
     seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" },
   );
@@ -132,6 +135,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     brands,
     formula,
     strandZone,
+    foil,
     startingBase,
     pricePerGram,
     prePigmentationEnabled,
@@ -164,6 +168,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         <LineField availableLines={availableLines} line={line} onLineChange={handleLineChange} idSuffix={idSuffix} />
         <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} idSuffix={idSuffix} />
         <StrandZoneField strandZone={strandZone} onStrandZoneChange={handleStrandZoneChange} idSuffix={idSuffix} />
+        <FoilPlacementField foil={foil} onFoilChange={setFoil} idSuffix={idSuffix} />
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
         <GrayPercentField grayPercent={grayPercent} onGrayPercentChange={setGrayPercent} idSuffix={idSuffix} />
         <CanvasFields

@@ -115,6 +115,14 @@ export const en = {
       ends: "Ends",
       fullHead: "Full head",
     },
+    foil: {
+      label: "Coverage",
+      all: "All hair of the zone",
+      strands1: "Strands 1 (in foil)",
+      strands2: "Strands 2 (in foil)",
+      outside: "Hair outside the foil",
+      percent: "Hair in foil, % (approx.)",
+    },
     startingBase: {
       label: "Starting base",
       natural: "Natural (virgin)",
@@ -450,6 +458,7 @@ export const en = {
       "Achievable level: {{level}} (target level {{target}} needs lightening or multiple sessions to reach fully)",
     applicationZone: "Application: {{value}}",
     strandZone: "Zone: {{value}}",
+    foilWithPercent: "{{group}}, ~{{percent}}%",
     startingBase: "Starting base: {{value}}",
     grayPercent: "Gray hair: {{percent}}%",
     startingBaseColored: "Colored ({{tone}})",

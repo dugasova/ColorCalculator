@@ -280,6 +280,22 @@ describe("buildRepeatFormulaRequest", () => {
 });
 
 describe("buildRepeatSessionRequest", () => {
+  it("carries each step's foil placement over, and adds none to a step that has none", () => {
+    const entry = makeEntry({
+      clientName: "Anna",
+      steps: [
+        makeBleachStep({ strandZone: "full-head", foil: { group: "strands-1", percent: 30 } }),
+        makeColorStep({ strandZone: "full-head", foil: { group: "outside", percent: null } }),
+        makeColorStep({ strandZone: "full-head" }),
+      ],
+    });
+    const request = buildRepeatSessionRequest(entry, BRANDS);
+
+    expect(request!.steps[0].foil).toEqual({ group: "strands-1", percent: 30 });
+    expect(request!.steps[1].foil).toEqual({ group: "outside", percent: null });
+    expect("foil" in request!.steps[2]).toBe(false);
+  });
+
   it("reconstructs calculator input for every step of a multi-zone session, plus the session-level fields", () => {
     const entry = makeEntry({
       clientName: "Anna",

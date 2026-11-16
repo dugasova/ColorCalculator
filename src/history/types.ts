@@ -6,6 +6,7 @@ import type { BleachFormula } from "../engine/bleach";
 import type { PrePigmentationResult } from "../engine/prePigmentation";
 import type { ApplicationZone } from "../engine/applicationZone";
 import type { StrandZone } from "../engine/strandZone";
+import type { FoilPlacement } from "../engine/foil";
 import type { StartingBase } from "../engine/startingBase";
 import type { HairCanvas } from "../engine/canvas";
 import type { BrandId } from "../engine/brands";
@@ -34,6 +35,10 @@ export interface ColorHistoryStep {
   // starting level and target per zone) record and later display *which* zone each
   // step's `startLevel`/`targetShade` belongs to, instead of only a bare per-step level.
   strandZone?: StrandZone;
+  // Which hair of that zone the step is applied to when it is worked in foils (see
+  // engine/foil.ts). Absent on a step that covers all hair of its zone, and on every
+  // step saved before this field existed.
+  foil?: FoilPlacement;
   startingBase?: StartingBase;
   canvas?: HairCanvas;
   result: FullFormula;
@@ -90,6 +95,7 @@ export interface BleachHistoryStep {
   // bleach step in a multi-zone session (e.g. lifting only the mid-lengths/ends before
   // toning) benefits from the same per-zone labeling.
   strandZone?: StrandZone;
+  foil?: FoilPlacement;
   startingBase?: StartingBase;
 }
 

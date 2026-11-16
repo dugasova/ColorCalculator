@@ -3,7 +3,9 @@ import { shadeToHexColor } from "./engine/color";
 import { shadeLabel, type ToneFamily } from "./engine/shades";
 import { getUnderlyingPigment } from "./engine/levels";
 import { getPrePigmentFillerTone } from "./engine/prePigmentation";
-import { STRAND_ZONE_I18N_KEY, type StrandZone } from "./engine/strandZone";
+import type { StrandZone } from "./engine/strandZone";
+import type { FoilGroup } from "./engine/foil";
+import { formatStepZoneLabel } from "./format/formatStepZone";
 import type { StartingBaseTone } from "./engine/startingBase";
 import type { HistoryStep } from "./history";
 
@@ -37,7 +39,11 @@ export interface ZonePreviewSwatch {
 
 export interface ZonePreviewRow {
   zone: StrandZone | undefined;
+  // The zone's name, plus the group of hair within it when the zone is worked in foils
+  // ("Full head · Strands 1 (~30%)"). Null for a step with no zone.
   zoneLabel: string | null;
+  // Set when the zone is split into groups of hair; null for a row covering all of it.
+  foilGroup: FoilGroup | null;
   swatches: ZonePreviewSwatch[];
 }
 
@@ -77,6 +83,48 @@ function buildColorSwatch(step: Extract<HistoryStep, { kind: "color" }>): ZonePr
   };
 }
 
+function buildStepSwatch(step: HistoryStep): ZonePreviewSwatch {
+  return step.kind === "bleach" ? buildBleachSwatch(step) : buildColorSwatch(step);
+}
+
+// The rows of one zone. Normally a single chain: every step lands on all hair of the
+// zone, one after another. Once any step is placed in foils (see engine/foil.ts) the zone
+// is several groups of hair that go different ways, so each group gets its own row:
+// its own steps, plus every "all hair" step, in session order. The hair outside the foil
+// always gets a row, even with no step of its own -- it shows what the rest of the head
+// looks like next to the strands.
+function buildZoneRows(zone: StrandZone | undefined, zoneSteps: HistoryStep[]): ZonePreviewRow[] {
+  const groups: FoilGroup[] = [];
+  for (const step of zoneSteps) {
+    if (step.foil !== undefined && !groups.includes(step.foil.group)) groups.push(step.foil.group);
+  }
+
+  if (groups.length === 0) {
+    return [
+      {
+        zone,
+        zoneLabel: formatStepZoneLabel({ strandZone: zone }),
+        foilGroup: null,
+        swatches: [buildStartSwatch(zoneSteps[0]), ...zoneSteps.map(buildStepSwatch)],
+      },
+    ];
+  }
+
+  if (!groups.includes("outside")) groups.push("outside");
+  return groups.map(group => {
+    const groupSteps = zoneSteps.filter(step => step.foil === undefined || step.foil.group === group);
+    // The latest estimate the colorist entered for this set of strands.
+    const percent =
+      zoneSteps.findLast(step => step.foil?.group === group && step.foil.percent !== null)?.foil?.percent ?? null;
+    return {
+      zone,
+      zoneLabel: formatStepZoneLabel({ strandZone: zone, foil: { group, percent } }),
+      foilGroup: group,
+      swatches: [buildStartSwatch(groupSteps[0] ?? zoneSteps[0]), ...groupSteps.map(buildStepSwatch)],
+    };
+  });
+}
+
 // Groups a session's steps by the strand zone they target (see engine/strandZone.ts),
 // each row rendering that zone's starting state followed by one swatch per step that
 // touched it -- a visual "before -> ... -> after" forecast, colors sourced entirely from
@@ -84,6 +132,7 @@ function buildColorSwatch(step: Extract<HistoryStep, { kind: "color" }>): ZonePr
 // or a step recorded before strandZone existed) is its own bucket, same as
 // formatSessionSummary's per-zone grouping in formatSession.ts. A `Map` preserves
 // first-insertion key order, so rows come out ordered by each zone's first appearance.
+// A zone worked in foils yields one row per group of hair (see buildZoneRows).
 export function buildZonePreview(steps: HistoryStep[]): ZonePreviewRow[] {
   const byZone = new Map<StrandZone | undefined, HistoryStep[]>();
   for (const step of steps) {
@@ -93,15 +142,5 @@ export function buildZonePreview(steps: HistoryStep[]): ZonePreviewRow[] {
     else byZone.set(zone, [step]);
   }
 
-  return [...byZone.entries()].map(([zone, zoneSteps]) => {
-    const swatches: ZonePreviewSwatch[] = [buildStartSwatch(zoneSteps[0])];
-    for (const step of zoneSteps) {
-      swatches.push(step.kind === "bleach" ? buildBleachSwatch(step) : buildColorSwatch(step));
-    }
-    return {
-      zone,
-      zoneLabel: zone !== undefined ? i18n.t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[zone]}`) : null,
-      swatches,
-    };
-  });
+  return [...byZone.entries()].flatMap(([zone, zoneSteps]) => buildZoneRows(zone, zoneSteps));
 }

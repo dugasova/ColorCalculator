@@ -5,6 +5,7 @@ import type { HairCanvas } from "../engine/canvas";
 import { sameMixingRatio, type MixingRatio } from "../engine/shades";
 import { DEFAULT_MARKUP_MULTIPLIER } from "../engine/pricing";
 import type { StrandZone } from "../engine/strandZone";
+import type { FoilPlacement } from "../engine/foil";
 import type { StartingBase } from "../engine/startingBase";
 import type { ColorHistoryStep, FormulaHistoryEntry } from "./types";
 
@@ -144,6 +145,7 @@ export interface ColorStepSeed {
   naturalBaseShadeCode?: string | null;
   canvas?: HairCanvas;
   strandZone?: StrandZone;
+  foil?: FoilPlacement;
   startingBase?: StartingBase;
 }
 
@@ -156,6 +158,7 @@ export interface BleachStepSeed {
   pricePerGram: number;
   canvas?: HairCanvas;
   strandZone?: StrandZone;
+  foil?: FoilPlacement;
   startingBase?: StartingBase;
 }
 
@@ -284,6 +287,7 @@ export function buildRepeatSessionRequest(
         naturalBaseShadeCode: step.naturalBase?.shade.code ?? null,
         canvas: step.canvas,
         strandZone: step.strandZone,
+        ...(step.foil !== undefined && { foil: step.foil }),
         startingBase: step.startingBase,
       });
     } else {
@@ -302,6 +306,7 @@ export function buildRepeatSessionRequest(
         pricePerGram: step.pricePerGram,
         canvas: step.canvas,
         strandZone: step.strandZone,
+        ...(step.foil !== undefined && { foil: step.foil }),
         startingBase: step.startingBase,
       });
     }

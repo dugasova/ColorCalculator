@@ -152,3 +152,76 @@ describe("buildZonePreview", () => {
     expect(buildZonePreview([])).toEqual([]);
   });
 });
+
+describe("buildZonePreview: foil placement", () => {
+  const strandsBleach = bleachStep({
+    strandZone: "full-head",
+    foil: { group: "strands-1", percent: 30 },
+    startLevel: 4,
+    targetLevel: 8,
+  });
+  const restColor = colorStep({
+    strandZone: "full-head",
+    foil: { group: "outside", percent: null },
+    startLevel: 4,
+    targetShade: { code: "5.07", level: 5, tone: "natural" },
+  });
+
+  it("splits a zone worked in foils into one row per group of hair, instead of one chain", () => {
+    const rows = buildZonePreview([strandsBleach, restColor]);
+
+    expect(rows.map(row => [row.zoneLabel, row.swatches.map(s => s.caption)])).toEqual([
+      ["Full head · Strands 1 (in foil), ~30%", ["4", "8"]],
+      ["Full head · Hair outside the foil", ["4", "5.07"]],
+    ]);
+    expect(rows.map(row => row.foilGroup)).toEqual(["strands-1", "outside"]);
+  });
+
+  it("adds a later all-hair step to every group of the zone", () => {
+    const toner = colorStep({
+      strandZone: "full-head",
+      startLevel: 8,
+      targetShade: { code: "9.1", level: 9, tone: "ash" },
+    });
+
+    const rows = buildZonePreview([strandsBleach, restColor, toner]);
+
+    expect(rows.map(row => row.swatches.map(s => s.caption))).toEqual([
+      ["4", "8", "9.1"],
+      ["4", "5.07", "9.1"],
+    ]);
+  });
+
+  it("shows the hair outside the foil at its starting level when no step touches it", () => {
+    const rows = buildZonePreview([strandsBleach]);
+
+    expect(rows.map(row => [row.foilGroup, row.swatches.map(s => s.caption)])).toEqual([
+      ["strands-1", ["4", "8"]],
+      ["outside", ["4"]],
+    ]);
+  });
+
+  it("keeps two sets of strands apart and leaves other zones as single rows", () => {
+    const secondSet = bleachStep({
+      strandZone: "full-head",
+      foil: { group: "strands-2", percent: null },
+      startLevel: 4,
+      targetLevel: 10,
+    });
+    const roots = colorStep({
+      strandZone: "roots",
+      startLevel: 4,
+      targetShade: { code: "5.0", level: 5, tone: "natural" },
+    });
+
+    const rows = buildZonePreview([strandsBleach, secondSet, roots]);
+
+    expect(rows.map(row => [row.zoneLabel, row.swatches.map(s => s.caption)])).toEqual([
+      ["Full head · Strands 1 (in foil), ~30%", ["4", "8"]],
+      ["Full head · Strands 2 (in foil)", ["4", "10"]],
+      ["Full head · Hair outside the foil", ["4"]],
+      ["Roots", ["4", "5.0"]],
+    ]);
+    expect(rows[3].foilGroup).toBeNull();
+  });
+});

@@ -6,6 +6,8 @@ import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
+import type { FoilPlacement } from "../../engine/foil";
+import { FoilPlacementField } from "../FormulaCalculator/fields/FoilPlacementField";
 import type { StartingBase } from "../../engine/startingBase";
 import type { BleachHistoryStep, BleachStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
@@ -60,6 +62,7 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
   );
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(seed?.processingMinutes);
   const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
+  const [foil, setFoil] = useState<FoilPlacement | undefined>(seed?.foil);
   const [startingBase, setStartingBase] = useState<StartingBase>(
     seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" },
   );
@@ -88,6 +91,7 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
       pricePerGram,
       canvas: { porosity, thickness, chemicalHistory },
       strandZone,
+      ...(foil !== undefined && { foil }),
       startingBase,
     }),
     [
@@ -100,6 +104,7 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
       thickness,
       chemicalHistory,
       strandZone,
+      foil,
       startingBase,
     ],
   );
@@ -130,6 +135,7 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
         />
 
         <StrandZoneField strandZone={strandZone} onStrandZoneChange={handleStrandZoneChange} idSuffix={idSuffix} />
+        <FoilPlacementField foil={foil} onFoilChange={setFoil} idSuffix={idSuffix} />
         <StartingBaseField startingBase={startingBase} onStartingBaseChange={setStartingBase} idSuffix={idSuffix} />
 
         <CanvasFields

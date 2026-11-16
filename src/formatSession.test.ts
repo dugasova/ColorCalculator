@@ -398,3 +398,42 @@ describe("formatSessionText: gray percentage recap", () => {
     expect((text.match(/Gray hair: 60%/g) ?? []).length).toBe(1);
   });
 });
+
+describe("foil placement in the session text and summary", () => {
+  const strandsBleach = {
+    ...bleachStep,
+    strandZone: "full-head" as const,
+    foil: { group: "strands-1" as const, percent: 30 },
+  };
+  const strandsToner = {
+    ...colorStep,
+    strandZone: "full-head" as const,
+    foil: { group: "strands-1" as const, percent: 30 },
+    targetShade: { code: "9.1", level: 9 as const, tone: "ash" as const },
+  };
+  const restColor = {
+    ...colorStep,
+    strandZone: "full-head" as const,
+    foil: { group: "outside" as const, percent: null },
+    targetShade: { code: "5.07", level: 5 as const, tone: "natural" as const },
+  };
+
+  it("names the group of hair in each step header", () => {
+    const text = formatSessionText([strandsBleach, restColor]);
+
+    expect(text).toContain("Step 1 — Full head · Strands 1 (in foil), ~30%");
+    expect(text).toContain("Step 2 — Full head · Hair outside the foil");
+  });
+
+  it("names it in the zone line of a single-step session", () => {
+    expect(formatSessionText([restColor])).toContain("Zone: Full head · Hair outside the foil");
+  });
+
+  it("lists each group's own final shade in the summary, not only the last step's", () => {
+    const summary = formatSessionSummary([strandsBleach, strandsToner, restColor]);
+
+    expect(summary).toContain(
+      "Target: Full head · Strands 1 (in foil), ~30% 9.1, Full head · Hair outside the foil 5.07",
+    );
+  });
+});

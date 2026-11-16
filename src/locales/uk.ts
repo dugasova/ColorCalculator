@@ -119,6 +119,14 @@ export const uk: typeof en = {
       ends: "Кінці",
       fullHead: "Все волосся",
     },
+    foil: {
+      label: "Охоплення",
+      all: "Усе волосся зони",
+      strands1: "Пасма 1 (у фользі)",
+      strands2: "Пасма 2 (у фользі)",
+      outside: "Волосся поза фольгою",
+      percent: "Волосся у фользі, % (приблизно)",
+    },
     startingBase: {
       label: "Стартова база",
       natural: "Натуральна (не фарбована)",
@@ -460,6 +468,7 @@ export const uk: typeof en = {
       "Досяжний рівень: {{level}} (цільовий рівень {{target}} потребує освітлення або кількох сеансів для повного досягнення)",
     applicationZone: "Зона нанесення: {{value}}",
     strandZone: "Зона: {{value}}",
+    foilWithPercent: "{{group}}, ~{{percent}}%",
     startingBase: "Стартова база: {{value}}",
     grayPercent: "Сивина: {{percent}}%",
     startingBaseColored: "Фарбована ({{tone}})",
