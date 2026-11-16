@@ -121,3 +121,16 @@ export function assessNeutralization(shade: NeutralizingShade, achievedLevel: Le
     missing: missingParts.map(part => ({ tone: CORRECTIVE_TONE[part.color], share: part.share })),
   };
 }
+
+// What to tone with after lightening to `level`: the background the bleach leaves, and
+// the tones that cancel it, dominant first. Bleach brings no tone of its own, so this is
+// the whole neutralizer.
+export interface ToningRecommendation {
+  background: UnderlyingPigment;
+  tones: ToneFamily[];
+}
+
+export function getToningRecommendation(level: Level): ToningRecommendation {
+  const { background, missing } = assessNeutralization({ tone: "natural" }, level);
+  return { background, tones: missing.map(part => part.tone) };
+}

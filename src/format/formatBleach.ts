@@ -1,7 +1,19 @@
 import i18n from "../i18n";
 import type { Level } from "../engine/levels";
 import type { BleachFormula } from "../engine/bleach";
+import { getToningRecommendation } from "../engine/neutralize";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
+import { formatPigmentName, formatToneName } from "./formulaMessages";
+
+// The background a lightening to `level` leaves and the toner that cancels it, worded for
+// the results panel and the copied text alike.
+export function formatBleachToning(level: Level): { background: string; toner: string } {
+  const { background, tones } = getToningRecommendation(level);
+  return {
+    background: formatPigmentName(background),
+    toner: i18n.t("bleach.toningValue", { level, tones: tones.map(formatToneName).join(" + ") }),
+  };
+}
 
 export interface FormatBleachParams {
   startLevel: Level;
@@ -35,6 +47,11 @@ export function formatBleachText(params: FormatBleachParams): string {
         }),
     i18n.t("format.processingTime", { value: processingMinutes }),
   ];
+  if (result.grams !== null) {
+    const toning = formatBleachToning(targetLevel);
+    lines.push(`${i18n.t("bleach.backgroundLabel")}: ${toning.background}`);
+    lines.push(`${i18n.t("bleach.toningLabel")}: ${toning.toner}`);
+  }
 
   return lines.join("\n");
 }

@@ -5,7 +5,13 @@ import { calculateProductCost, calculateRecommendedServicePrice } from "../../en
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
 import { useSalonMarkupMultiplier } from "../../palette";
-import { BleachMixRow, BleachSafetyNotes, BleachTotalGramsField, BleachWarnings } from "./BleachFormulaParts";
+import {
+  BleachMixRow,
+  BleachSafetyNotes,
+  BleachToningRows,
+  BleachTotalGramsField,
+  BleachWarnings,
+} from "./BleachFormulaParts";
 import { useBleachFormulaState } from "./useBleachFormulaState";
 import "./BleachCalculator.css";
 
@@ -61,6 +67,7 @@ export function BleachResults({
             <span className="results__row-label">{t("bleach.processingTimeLabel")}</span>
             <span>{t("results.processingTimeHint", { minutes: result.recommendedProcessingMinutes })}</span>
           </div>
+          <BleachToningRows result={result} />
           <BleachSafetyNotes result={result} />
           <p className="bleach__note bleach__note--strand">{t("bleach.strandTestNote")}</p>
 
