@@ -235,6 +235,7 @@ export const en = {
     afterPhotoLabel: "After photo",
     recommendedTone: "Recommended corrective tone",
     recommendedToneValue: "{{grams}} g {{tone}}",
+    toneCoveredByShade: "not needed — the shade's own tone cancels the {{pigment}} background",
     none: "none",
     clientNameLabel: "Client name",
     clientNamePlaceholder: "e.g. Anna K.",
@@ -447,7 +448,8 @@ export const en = {
       processingExtended:
         "Low porosity: recommended processing time extended by {{minutes}} min — a tight cuticle takes color slowly",
     },
-    toneWarning: "The chosen tone '{{tone}}' won't neutralize {{pigment}} pigment; '{{recommended}}' is recommended",
+    toneWarning:
+      "The chosen tone '{{tone}}' won't neutralize the {{pigment}} background; add a '{{recommended}}' corrector",
     eligibilityWarning:
       "Shade '{{code}}' requires a starting level of {{minLevel}} or higher (natural base); current start level is {{startLevel}}",
   },
@@ -475,8 +477,19 @@ export const en = {
     grayCoverage: "Gray coverage: {{note}} ({{natural}}% base / {{fashion}}% tone)",
     grayCoverageApplied: "Gray coverage: {{code}} natural base blended in ({{natural}}% base / {{fashion}}% tone)",
     recommendedTone: "Recommended corrective tone: {{value}}",
-    neutralizationApplied: "Neutralization: {{grams}} g {{tone}} corrector",
+    neutralizationApplied: "Neutralization: {{value}} corrector",
     warning: "Warning: {{message}}",
+  },
+  pigment: {
+    red: "red",
+    "red-orange": "red-orange",
+    "orange-red": "orange-red",
+    orange: "orange",
+    "orange-yellow": "orange-yellow",
+    "yellow-orange": "yellow-orange",
+    yellow: "yellow",
+    "pale-yellow": "pale yellow",
+    "very-light-yellow": "very light yellow",
   },
   zonePreview: {
     title: "Result preview",

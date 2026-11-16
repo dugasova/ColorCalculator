@@ -53,11 +53,12 @@ describe("formatFormulaText", () => {
       neutralizationApplied: false,
     });
 
-    expect(text).toContain("Recommended corrective tone: 4 g violet");
+    // level 8 reveals yellow-orange: the violet shade cancels the yellow half, ash is still needed
+    expect(text).toContain("Recommended corrective tone: 2 g ash");
   });
 
   it("replaces the recommended-tone line and suppresses the tone warning when neutralization is applied", () => {
-    // level 8 -> pigment 'yellow' -> recommended 'violet', but chosen tone is 'gold' -> mismatch
+    // level 8 -> yellow-orange background -> ash + violet corrector; a gold shade brings neither
     const targetShade: Shade = { code: "8.3", level: 8, tone: "gold" };
     const result = calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 10, totalGrams: 60 });
     expect(result.toneWarning).not.toBeNull();
@@ -76,7 +77,7 @@ describe("formatFormulaText", () => {
       neutralizationApplied: true,
     });
 
-    expect(text).toContain("Neutralization: 4 g violet corrector");
+    expect(text).toContain("Neutralization: 2 g ash + 2 g violet corrector");
     expect(text).not.toContain("Recommended corrective tone:");
     expect(text).not.toContain("Warning:");
   });

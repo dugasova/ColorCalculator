@@ -34,6 +34,7 @@ describe("getPrePigmentFillerTone", () => {
   it("maps each underlying pigment to its matching filler tone family", () => {
     expect(getPrePigmentFillerTone("red")).toBe("red");
     expect(getPrePigmentFillerTone("red-orange")).toBe("red");
+    expect(getPrePigmentFillerTone("orange-red")).toBe("red");
     expect(getPrePigmentFillerTone("orange")).toBe("copper");
     expect(getPrePigmentFillerTone("orange-yellow")).toBe("copper");
     expect(getPrePigmentFillerTone("yellow-orange")).toBe("gold");
@@ -97,12 +98,12 @@ describe("calculatePrePigmentation", () => {
     });
   });
 
-  it("recommends a gold filler for a moderate 2-level drop", () => {
+  it("recommends a copper filler for a moderate 2-level drop", () => {
     expect(calculatePrePigmentation(9, 7, 45)).toEqual({
       need: "recommended",
-      underlyingPigment: "yellow-orange",
-      fillerTone: "gold",
-      exampleFillerShade: { code: "7.3", level: 7, tone: "gold" },
+      underlyingPigment: "orange-yellow",
+      fillerTone: "copper",
+      exampleFillerShade: { code: "7.4", level: 7, tone: "copper" },
       mixingRatio: { fillerParts: 1, diluentParts: 1 },
       grams: { fillerGrams: 22.5, diluentGrams: 22.5 },
       fillerProcessingMinutes: 10,
@@ -112,12 +113,12 @@ describe("calculatePrePigmentation", () => {
     });
   });
 
-  it("requires a same-session copper filler for a 4-level drop", () => {
+  it("requires a same-session red filler for a 4-level drop", () => {
     expect(calculatePrePigmentation(9, 5, 30)).toEqual({
       need: "required-same-session",
-      underlyingPigment: "orange",
-      fillerTone: "copper",
-      exampleFillerShade: { code: "5.4", level: 5, tone: "copper" },
+      underlyingPigment: "orange-red",
+      fillerTone: "red",
+      exampleFillerShade: { code: "5.5", level: 5, tone: "red" },
       mixingRatio: { fillerParts: 1, diluentParts: 1 },
       grams: { fillerGrams: 15, diluentGrams: 15 },
       fillerProcessingMinutes: 15,
@@ -128,8 +129,8 @@ describe("calculatePrePigmentation", () => {
   });
 
   it("recommends a filler shade from the passed brand/line chart instead of Generic when one is given", () => {
-    const wellaFixture: Shade[] = [{ code: "5/4", level: 5, tone: "copper", line: "koleston-perfect" }];
-    const result = calculatePrePigmentation(9, 5, 30, wellaFixture);
+    const wellaFixture: Shade[] = [{ code: "6/4", level: 6, tone: "copper", line: "koleston-perfect" }];
+    const result = calculatePrePigmentation(9, 6, 30, wellaFixture);
     expect(result.exampleFillerShade).toEqual(wellaFixture[0]);
   });
 

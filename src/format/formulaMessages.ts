@@ -6,6 +6,8 @@ import type {
   LiftUnsupportedWarning,
   ToneWarning,
 } from "../engine/formula";
+import type { UnderlyingPigment } from "../engine/levels";
+import type { ToneFamily } from "../engine/shades";
 import { formatDeveloperVolume } from "./formatDeveloperVolume";
 
 // Renders the engine's language-independent results (engine/formula.ts reports warnings
@@ -13,8 +15,43 @@ import { formatDeveloperVolume } from "./formatDeveloperVolume";
 // display time by both the live calculator and History, so a saved entry always reads in
 // whatever language the UI is in now, not the one that was active when it was saved.
 
+// A tone family's name as it reads inside a sentence ("ash", "попелястий").
+function formatToneName(tone: ToneFamily): string {
+  return i18n.t(`palette.toneFamily.${tone}`).toLowerCase();
+}
+
+export function formatPigmentName(pigment: UnderlyingPigment): string {
+  return i18n.t(`pigment.${pigment}`);
+}
+
 export function formatToneWarning(warning: ToneWarning): string {
-  return i18n.t("engine.toneWarning", { ...warning });
+  return i18n.t("engine.toneWarning", {
+    tone: formatToneName(warning.tone),
+    pigment: formatPigmentName(warning.pigment),
+    recommended: (warning.recommendedTones ?? [warning.recommended]).map(formatToneName).join(" + "),
+  });
+}
+
+type CorrectorResult = Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones">;
+
+// The corrector to add, tone by tone: "1 g ash + 1 g violet". Null when the formula needs
+// none. A result saved before correctors could be blends has only the one tone.
+export function formatCorrectiveTones(result: CorrectorResult): string | null {
+  if (result.recommendedCorrectiveTone === null) return null;
+  const tones =
+    result.correctiveTones !== undefined && result.correctiveTones.length > 0
+      ? result.correctiveTones
+      : [{ tone: result.recommendedCorrectiveTone, grams: result.correctorGrams }];
+  return tones
+    .map(({ tone, grams }) => i18n.t("results.recommendedToneValue", { grams, tone: formatToneName(tone) }))
+    .join(" + ");
+}
+
+// True when lifting reveals a background and the shade's own tone cancels all of it, so
+// no corrector is called for. Never true for a result saved before the shade's tone was
+// taken into account: those always carry a corrector whenever they carry a background.
+export function isBackgroundCoveredByShade(result: CorrectorResult & Pick<FullFormula, "underlyingPigment">): boolean {
+  return result.underlyingPigment !== null && result.recommendedCorrectiveTone === null;
 }
 
 export function formatEligibilityWarning(warning: EligibilityWarning): string {

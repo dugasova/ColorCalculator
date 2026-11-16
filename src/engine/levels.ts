@@ -6,35 +6,42 @@ export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 // literal array.
 export const ALL_LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
+// Warm pigment, from the darkest levels to the lightest. "red-orange" is red with some
+// orange, "orange-red" the reverse; likewise "orange-yellow" and "yellow-orange".
 export type UnderlyingPigment =
-  "red" | "red-orange" | "orange" | "orange-yellow" | "yellow-orange" | "yellow" | "pale-yellow" | "very-light-yellow";
+  | "red"
+  | "red-orange"
+  | "orange-red"
+  | "orange"
+  | "orange-yellow"
+  | "yellow-orange"
+  | "yellow"
+  | "pale-yellow"
+  | "very-light-yellow";
 export type DeveloperVolume = 6 | 10 | 13 | 20 | 30 | 40;
 
+// The warm background at a level: what lifting to that level reveals, and what hair
+// colored down to that level has to be given back. The colorist's working table,
+// confirmed 2026-11-16; neutralization (neutralize.ts) and pre-pigmentation
+// (prePigmentation.ts) both read it.
 export function getUnderlyingPigment(level: Level): UnderlyingPigment {
+  if (level <= 3) return "red";
   switch (level) {
-    case 1:
-      return "red";
-    case 2:
-      return "red";
-    case 3:
-      return "red-orange";
     case 4:
       return "red-orange";
     case 5:
-      return "orange";
+      return "orange-red";
     case 6:
-      return "orange-yellow";
+      return "orange";
     case 7:
-      return "yellow-orange";
+      return "orange-yellow";
     case 8:
-      return "yellow";
+      return "yellow-orange";
     case 9:
-      return "pale-yellow";
+      return "yellow";
     case 10:
       return "pale-yellow";
-    case 11:
-      return "very-light-yellow";
-    case 12:
+    default:
       return "very-light-yellow";
   }
 }

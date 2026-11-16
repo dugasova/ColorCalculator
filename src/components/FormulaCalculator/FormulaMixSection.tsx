@@ -1,5 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { getGrayCoverageNote } from "../../format/formulaMessages";
+import {
+  formatCorrectiveTones,
+  formatPigmentName,
+  getGrayCoverageNote,
+  isBackgroundCoveredByShade,
+} from "../../format/formulaMessages";
 import { buildMixSummary, buildBlendMixSummary } from "../../format/formatFormula";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import type { Porosity } from "../../engine/canvas";
@@ -120,12 +125,10 @@ export function FormulaMixSection({
       <div className="results__row">
         <span className="results__row-label">{t("results.recommendedTone")}</span>
         <span>
-          {result.recommendedCorrectiveTone !== null
-            ? t("results.recommendedToneValue", {
-                grams: result.correctorGrams,
-                tone: result.recommendedCorrectiveTone,
-              })
-            : t("results.none")}
+          {formatCorrectiveTones(result) ??
+            (isBackgroundCoveredByShade(result) && result.underlyingPigment !== null
+              ? t("results.toneCoveredByShade", { pigment: formatPigmentName(result.underlyingPigment) })
+              : t("results.none"))}
         </span>
       </div>
 

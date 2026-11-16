@@ -71,35 +71,64 @@ describe("calculateFullFormula", () => {
     );
   });
 
-  it("has no warning when the chosen tone matches the recommended corrective tone", () => {
-    // level 8 -> underlying pigment 'yellow' -> recommended corrective tone 'violet'
+  it("asks only for the part of the corrector the shade's own tone does not bring, without a warning", () => {
+    // level 8 -> yellow-orange background -> blue + violet; the violet shade brings half
     const targetShade: Shade = { code: "8.2", level: 8, tone: "violet" };
     const result = calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 10, totalGrams: 60 });
 
+    expect(result.underlyingPigment).toBe("yellow-orange");
+    expect(result.recommendedCorrectiveTone).toBe("ash");
+    // Rule of 10: (10 - level 8) * (60g / 30g) = 4g for the whole neutralizer, half of it missing
+    expect(result.correctorGrams).toBe(2);
+    expect(result.correctiveTones).toEqual([{ tone: "ash", grams: 2 }]);
+    expect(result.toneWarning).toBeNull();
+  });
+
+  it("needs no corrector when the shade's own tone cancels the whole background", () => {
+    // level 9 -> yellow background -> violet
+    const targetShade: Shade = { code: "9.2", level: 9, tone: "violet" };
+    const result = calculateFullFormula({ startLevel: 7, targetShade, grayPercent: 0, totalGrams: 60 });
+
     expect(result.underlyingPigment).toBe("yellow");
-    expect(result.recommendedCorrectiveTone).toBe("violet");
-    expect(result.correctorGrams).toBe(4); // Rule of 10: (10 - level 8) * (60g / 30g) = 4g
+    expect(result.recommendedCorrectiveTone).toBeNull();
+    expect(result.correctorGrams).toBeNull();
+    expect(result.correctiveTones).toEqual([]);
     expect(result.toneWarning).toBeNull();
   });
 
   it("warns when the chosen tone does not neutralize the revealed pigment", () => {
-    // level 8 -> pigment 'yellow' -> recommended 'violet', but colorist chose 'gold'
+    // level 8 -> yellow-orange background -> ash + violet, and a gold shade brings neither
     const targetShade: Shade = { code: "8.3", level: 8, tone: "gold" };
     const result = calculateFullFormula({ startLevel: 6, targetShade, grayPercent: 10, totalGrams: 60 });
 
-    expect(result.underlyingPigment).toBe("yellow");
-    expect(result.recommendedCorrectiveTone).toBe("violet");
-    expect(result.toneWarning).toEqual({ tone: "gold", pigment: "yellow", recommended: "violet" });
+    expect(result.underlyingPigment).toBe("yellow-orange");
+    expect(result.recommendedCorrectiveTone).toBe("ash");
+    expect(result.correctorGrams).toBe(4);
+    expect(result.correctiveTones).toEqual([
+      { tone: "ash", grams: 2 },
+      { tone: "violet", grams: 2 },
+    ]);
+    expect(result.toneWarning).toEqual({
+      tone: "gold",
+      pigment: "yellow-orange",
+      recommended: "ash",
+      recommendedTones: ["ash", "violet"],
+    });
   });
 
-  it("recommends the matt tone for red/red-orange pigment and warns if it was not chosen", () => {
-    // level 3 -> pigment 'red-orange' -> suggestNeutralizingTone returns 'matt'
+  it("recommends the matt tone for a red background and warns if it was not chosen", () => {
+    // level 3 -> red background -> green, i.e. the matt tone
     const targetShade: Shade = { code: "3.0", level: 3, tone: "natural" };
     const result = calculateFullFormula({ startLevel: 1, targetShade, grayPercent: 10, totalGrams: 60 });
 
-    expect(result.underlyingPigment).toBe("red-orange");
+    expect(result.underlyingPigment).toBe("red");
     expect(result.recommendedCorrectiveTone).toBe("matt");
-    expect(result.toneWarning).toEqual({ tone: "natural", pigment: "red-orange", recommended: "matt" });
+    expect(result.toneWarning).toEqual({
+      tone: "natural",
+      pigment: "red",
+      recommended: "matt",
+      recommendedTones: ["matt"],
+    });
   });
 
   it("returns null developerVolume and null grams when the lift exceeds what any developer can achieve, but still returns other fields", () => {
@@ -500,7 +529,7 @@ describe("calculateFullFormula", () => {
     });
 
     it("computes underlying pigment, corrective tone, and corrector grams from the achieved level, not the shade's nominal level", () => {
-      // start 3 -> achievedLevel 8 (3 + 5), whose own underlying pigment ('yellow') differs
+      // start 3 -> achievedLevel 8 (3 + 5), whose own background ('yellow-orange') differs
       // from level 12's ('very-light-yellow') -- the corrective tone/grams must track it.
       const result = calculateFullFormula({
         startLevel: 3,
@@ -510,7 +539,7 @@ describe("calculateFullFormula", () => {
       });
 
       expect(result.achievedLevel).toBe(8);
-      expect(result.underlyingPigment).toBe("yellow");
+      expect(result.underlyingPigment).toBe("yellow-orange");
       expect(result.correctorGrams).not.toBeNull();
     });
 

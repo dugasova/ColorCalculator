@@ -2,6 +2,7 @@ import i18n from "../i18n";
 import type { Level } from "../engine/levels";
 import type { PrePigmentationResult } from "../engine/prePigmentation";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
+import { formatPigmentName } from "./formulaMessages";
 
 export interface FormatPrePigmentationParams {
   startLevel: Level;
@@ -62,7 +63,7 @@ function buildFillerLines(targetLevel: Level, result: PrePigmentationResult, bra
   const fillerToneName = i18n.t(`palette.toneFamily.${result.fillerTone}`);
   const lines = [
     i18n.t("prePigmentation.fillerSectionLabel"),
-    i18n.t("prePigmentation.underlyingPigmentValue", { value: result.underlyingPigment }),
+    i18n.t("prePigmentation.underlyingPigmentValue", { value: formatPigmentName(result.underlyingPigment) }),
     i18n.t("prePigmentation.fillerToneValue", { value: fillerToneName }),
     result.exampleFillerShade !== null
       ? i18n.t("prePigmentation.exampleFillerShadeValue", {

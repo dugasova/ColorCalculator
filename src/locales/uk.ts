@@ -242,6 +242,7 @@ export const uk: typeof en = {
     afterPhotoLabel: "Фото «після»",
     recommendedTone: "Рекомендований коригувальний тон",
     recommendedToneValue: "{{grams}} г {{tone}}",
+    toneCoveredByShade: "не потрібен — тон самого відтінку гасить {{pigment}} фон",
     none: "немає",
     clientNameLabel: "Ім’я клієнта",
     clientNamePlaceholder: "напр. Анна К.",
@@ -457,7 +458,7 @@ export const uk: typeof en = {
       processingExtended:
         "Низька пористість: рекомендований час витримки збільшено на {{minutes}} хв — щільна кутикула повільніше приймає колір",
     },
-    toneWarning: "Обраний тон «{{tone}}» не нейтралізує пігмент {{pigment}}; рекомендовано «{{recommended}}»",
+    toneWarning: "Обраний тон «{{tone}}» не нейтралізує {{pigment}} фон освітлення; додайте коректор «{{recommended}}»",
     eligibilityWarning:
       "Відтінок «{{code}}» вимагає початкового рівня {{minLevel}} або вище (натуральна база); поточний початковий рівень — {{startLevel}}",
   },
@@ -485,8 +486,19 @@ export const uk: typeof en = {
     grayCoverage: "Покриття сивини: {{note}} ({{natural}}% база / {{fashion}}% тон)",
     grayCoverageApplied: "Покриття сивини: додано натуральну базу {{code}} ({{natural}}% база / {{fashion}}% тон)",
     recommendedTone: "Рекомендований коригувальний тон: {{value}}",
-    neutralizationApplied: "Нейтралізація: {{grams}} г коректора {{tone}}",
+    neutralizationApplied: "Нейтралізація, коректор: {{value}}",
     warning: "Попередження: {{message}}",
+  },
+  pigment: {
+    red: "червоний",
+    "red-orange": "червоно-помаранчевий",
+    "orange-red": "помаранчево-червоний",
+    orange: "помаранчевий",
+    "orange-yellow": "помаранчево-жовтий",
+    "yellow-orange": "жовто-помаранчевий",
+    yellow: "жовтий",
+    "pale-yellow": "світло-жовтий",
+    "very-light-yellow": "дуже світлий жовтий",
   },
   zonePreview: {
     title: "Прогноз результату",

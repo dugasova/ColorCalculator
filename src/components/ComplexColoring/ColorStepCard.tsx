@@ -1,4 +1,5 @@
 import { LiftOutcome, PorosityNotices, ToneWarnings } from "../FormulaCalculator/FormulaNotices";
+import { formatCorrectiveTones } from "../../format/formulaMessages";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePalette } from "../../palette";
@@ -304,10 +305,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         <div className="results__row">
           <span className="results__row-label">{t("results.recommendedTone")}</span>
           <span>
-            {t("results.recommendedToneValue", {
-              grams: result.correctorGrams,
-              tone: result.recommendedCorrectiveTone,
-            })}
+            {formatCorrectiveTones(result)}
             <label className="results__neutralization-toggle">
               <input
                 type="checkbox"

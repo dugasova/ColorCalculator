@@ -213,7 +213,7 @@ describe("FormulaCalculator", () => {
     );
 
     expect(html).toContain("Step 1");
-    expect(html).toContain("Generic 5.4 (Copper)");
+    expect(html).toContain("Generic 5.5 (Red)");
   });
 
   it("seeds the markup field from the live salon setting, not the hardcoded default", () => {
@@ -305,7 +305,7 @@ describe("FormulaResults pre-pigmentation step", () => {
 
     expect(html).toContain("Step 1");
     expect(html).toContain("Filler");
-    expect(html).toContain("Generic 5.4 (Copper)");
+    expect(html).toContain("Generic 5.5 (Red)");
     expect(html).toContain("15.0 g filler");
     expect(html).toContain("Step 2");
     expect(html).toContain("Target color");
