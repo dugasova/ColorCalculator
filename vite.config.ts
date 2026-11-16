@@ -1,6 +1,6 @@
-/// <reference types="vitest/config" />
 import { readFileSync } from "node:fs";
 import { defineConfig, loadEnv } from "vite";
+import { configDefaults } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -63,6 +63,8 @@ export default defineConfig(({ mode }) => {
     ],
     test: {
       setupFiles: ["./src/test-setup.ts"],
+      // e2e/ holds Playwright specs (npm run test:e2e), which Vitest must not pick up.
+      exclude: [...configDefaults.exclude, "e2e/**"],
     },
     build: {
       sourcemap: uploadSourceMaps ? "hidden" : false,

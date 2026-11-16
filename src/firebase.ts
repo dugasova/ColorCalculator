@@ -6,7 +6,8 @@ import {
   persistentMultipleTabManager,
   CACHE_SIZE_UNLIMITED,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { connectFirestoreEmulator } from "firebase/firestore";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // This module is imported both by the browser app (built by Vite, config injected via
@@ -68,3 +69,12 @@ export const db =
     : getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+
+// End-to-end tests (see e2e/ and .env.e2e) run the app against the local Firebase
+// emulators, never a real project: `vite --mode e2e` sets this flag, nothing else does.
+// The ports match firebase.json's `emulators` block. Storage is left alone -- no e2e
+// scenario uploads a photo, and with .env.e2e's dummy bucket it could not reach a real one.
+if (readEnv(import.meta.env?.VITE_FIREBASE_EMULATORS, "VITE_FIREBASE_EMULATORS") === "true") {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+}

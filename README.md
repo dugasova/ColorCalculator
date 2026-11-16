@@ -167,9 +167,32 @@ Safe to run even if Majirel was never migrated, and safe to re-run.
 | `npm run build`                  | Type-check (`tsc -b`) and build for production            |
 | `npm run lint`                   | Run ESLint                                                |
 | `npm run test`                   | Run the Vitest suite                                      |
+| `npm run test:e2e`               | Run the Playwright end-to-end tests (see below)           |
 | `npm run preview`                | Preview a production build locally                        |
 | `npm run migrate:palette`        | One-off migration of built-in shades to Firestore         |
 | `npm run migrate:repair-majirel` | Clears stale migrated Majirel overrides after a chart fix |
+
+## End-to-end tests
+
+`npm run test:e2e` runs a handful of smoke scenarios in a real browser (Playwright,
+Chromium) against the Firebase Auth and Firestore emulators. They cover what the Vitest
+suite cannot: real layout at phone width, real Firestore reads and writes, and the real
+`firestore.rules`.
+
+The command starts the emulators, Playwright starts the app with `vite --mode e2e`
+(config in `.env.e2e`: placeholder values and a `demo-` project id, so nothing can reach a
+real Firebase project), and `e2e/global-setup.ts` creates the test accounts. Everything
+is discarded when the run ends.
+
+One-time setup:
+
+- Java 21 or newer on the `PATH` (the Firestore emulator needs it).
+- `npx playwright install chromium` to download the browser.
+
+Scenarios live in `e2e/*.spec.ts`. After a failure, `test-results/` holds a screenshot
+and a trace; open the trace with `npx playwright show-trace <path to trace.zip>`.
+
+In CI they run as the separate `e2e` job, which is not required for merging.
 
 ## Releasing
 
