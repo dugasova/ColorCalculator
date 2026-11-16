@@ -19,6 +19,11 @@ dev-dist
 # Environment variables (local Firebase config) — see .env.example
 .env
 
+# Playwright output (npm run test:e2e) and Firebase emulator logs
+test-results/
+playwright-report/
+*-debug.log
+
 # Firebase Admin SDK service account keys (see scripts/forceVerifyEmail.ts) — never commit
 secrets/
 
