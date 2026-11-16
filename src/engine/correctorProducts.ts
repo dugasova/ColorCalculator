@@ -6,7 +6,8 @@ import type { ToneFamily } from "./shades";
 // ("0/88"). The colorist's working table, 2026-11-16. Brands and tones not listed here
 // are named by the generic tone ("ash", "violet").
 export interface CorrectorProduct {
-  shade: string;
+  // Absent where the brand corrects with a dedicated product only (Matrix SoBoost).
+  shade?: string;
   mixtone?: string;
 }
 
@@ -50,6 +51,14 @@ const LOREAL_SHADES_ONLY: CorrectorTable = {
   violet: { shade: ".2" },
 };
 
+// Matrix SoColor is corrected with SoBoost boosters. Super Sync is not listed: SoBoost is
+// documented for SoColor only.
+const MATRIX_SOCOLOR: CorrectorTable = {
+  matt: { mixtone: "SoBoost Green" },
+  ash: { mixtone: "SoBoost Blue" },
+  violet: { mixtone: "SoBoost Violet" },
+};
+
 function lorealTable(line: string | null | undefined): CorrectorTable {
   if (line === "majirel") return LOREAL_MAJIREL;
   if (line === "inoa") return LOREAL_INOA;
@@ -63,5 +72,16 @@ export function getCorrectorProduct(
 ): CorrectorProduct | null {
   if (brandId === "wella") return (line === "color-touch" ? WELLA_COLOR_TOUCH : WELLA_KOLESTON)[tone] ?? null;
   if (brandId === "loreal") return lorealTable(line)[tone] ?? null;
+  if (brandId === "matrix" && line === "socolor") return MATRIX_SOCOLOR[tone] ?? null;
   return null;
+}
+
+// How much developer the corrector itself needs, in parts per part of corrector, where the
+// manufacturer asks for it on top of the formula's own: Matrix mixes Cream Developer 1:1
+// with the summed weight of color and booster. Null where nothing extra is prescribed.
+export function getCorrectorDeveloperParts(
+  brandId: BrandId | undefined,
+  line: string | null | undefined,
+): number | null {
+  return brandId === "matrix" && line === "socolor" ? 1 : null;
 }

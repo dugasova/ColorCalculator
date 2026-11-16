@@ -80,6 +80,10 @@ export interface Shade {
   // developerLiftTable to be set too - meaningless without a lift ceiling to fall back
   // within.
   acceptsPartialLift?: boolean;
+  // The most corrector the manufacturer allows in this shade, as a share of the dye's own
+  // weight -- e.g. Matrix SoBoost's "up to 25% of the color" (see brands/matrix.ts). The
+  // recommended corrector is scaled down to it; unset, the Rule of 10 alone decides.
+  maxCorrectorShareOfColor?: number;
 }
 
 export const mixingRatioSchema = z.object({

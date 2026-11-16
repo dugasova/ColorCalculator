@@ -7,7 +7,7 @@ import type {
   ToneWarning,
 } from "../engine/formula";
 import type { BrandId } from "../engine/brands";
-import { getCorrectorProduct } from "../engine/correctorProducts";
+import { getCorrectorDeveloperParts, getCorrectorProduct } from "../engine/correctorProducts";
 import type { UnderlyingPigment } from "../engine/levels";
 import type { ToneFamily } from "../engine/shades";
 import { formatDeveloperVolume } from "./formatDeveloperVolume";
@@ -38,6 +38,7 @@ export interface CorrectorBrand {
 function formatCorrectorName(tone: ToneFamily, brand?: CorrectorBrand): string {
   const product = getCorrectorProduct(brand?.brandId, brand?.line, tone);
   if (product === null) return formatToneName(tone);
+  if (product.shade === undefined) return product.mixtone ?? formatToneName(tone);
   if (product.mixtone === undefined) return product.shade;
   return i18n.t("results.correctorShadeOrMixtone", { shade: product.shade, mixtone: product.mixtone });
 }
@@ -62,9 +63,17 @@ export function formatCorrectiveTones(result: CorrectorResult, brand?: Corrector
     result.correctiveTones !== undefined && result.correctiveTones.length > 0
       ? result.correctiveTones
       : [{ tone: result.recommendedCorrectiveTone, grams: result.correctorGrams }];
-  return tones
+  const corrector = tones
     .map(({ tone, grams }) => i18n.t("results.recommendedToneValue", { grams, tone: formatCorrectorName(tone, brand) }))
     .join(" + ");
+  // Where the brand mixes developer with the corrector too, say how much more to add.
+  const developerParts = getCorrectorDeveloperParts(brand?.brandId, brand?.line);
+  if (developerParts === null) return corrector;
+  const totalGrams = tones.reduce((sum, { grams }) => sum + (grams ?? 0), 0);
+  return i18n.t("results.correctorWithDeveloper", {
+    corrector,
+    grams: Math.round(totalGrams * developerParts * 10) / 10,
+  });
 }
 
 // True when lifting reveals a background and the shade's own tone cancels all of it, so
