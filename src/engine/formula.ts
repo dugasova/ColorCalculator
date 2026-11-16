@@ -1,12 +1,11 @@
 import {
-  getUnderlyingPigment,
   pickDeveloperVolume,
   pickMaxLiftVolume,
   type DeveloperVolume,
   type Level,
   type UnderlyingPigment,
 } from "./levels";
-import { suggestNeutralizingTone } from "./neutralize";
+import { assessNeutralization } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
 import type { Porosity } from "./canvas";
 import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
@@ -39,7 +38,17 @@ export * from "./formulaGrams";
 export interface ToneWarning {
   tone: ToneFamily;
   pigment: UnderlyingPigment;
+  // The dominant tone of the corrector.
   recommended: ToneFamily;
+  // Every tone of the corrector, dominant first -- a blended background takes a blended
+  // corrector. Absent on warnings saved before correctors could be blends.
+  recommendedTones?: ToneFamily[];
+}
+
+// One tone of the corrector to add, with its weight.
+export interface CorrectiveToneGrams {
+  tone: ToneFamily;
+  grams: number;
 }
 
 // The shade needs a lighter natural base than the starting level (Shade.minStartLevel).
@@ -66,9 +75,17 @@ export interface FullFormula {
   // Special Blonde used to lift as far as a single process allows). Null alongside a null
   // developerVolume, when no lift at all is achievable.
   achievedLevel: Level | null;
+  // The warm background the lift reveals at `achievedLevel`; null when nothing is lifted.
   underlyingPigment: UnderlyingPigment | null;
+  // The corrector the shade still needs on top of its own tone: its dominant tone and its
+  // total weight. Both null when nothing is lifted or the shade's tone already cancels
+  // the whole background.
   recommendedCorrectiveTone: ToneFamily | null;
   correctorGrams: number | null;
+  // The same corrector tone by tone -- two entries for a blended background. Absent on
+  // results saved before correctors could be blends; `recommendedCorrectiveTone` and
+  // `correctorGrams` then describe the whole of it.
+  correctiveTones?: CorrectiveToneGrams[];
   recommendedProcessingMinutes: number;
   toneWarning: ToneWarning | null;
   eligibilityWarning: EligibilityWarning | null;
@@ -228,31 +245,58 @@ function resolvePartialLiftFallback(
 }
 
 // Step 3: no pigment is actually revealed if the line can't lift in the first place, or
-// lifts to nowhere (achievedLevel null alongside developerVolume null) -- underlying
-// pigment, corrective tone, corrector grams, and the tone-mismatch warning only make
-// sense once real lift happened.
+// lifts to nowhere (achievedLevel null alongside developerVolume null) -- the background,
+// the corrector and the tone warning only make sense once real lift happened.
+//
+// The corrector is what the shade's own tone does not already cancel (see
+// assessNeutralization): nothing for a shade that covers the whole background, the missing
+// part for one that covers some of it. The warning is kept for a shade that cancels none.
 function deriveCorrectiveGuidance(
   targetShade: Shade,
   isActuallyLifting: boolean,
   achievedLevel: Level | null,
   totalGrams: number,
-): {
-  underlyingPigment: UnderlyingPigment | null;
-  recommendedCorrectiveTone: ToneFamily | null;
-  correctorGrams: number | null;
-  toneWarning: ToneWarning | null;
-} {
-  const underlyingPigment = isActuallyLifting && achievedLevel !== null ? getUnderlyingPigment(achievedLevel) : null;
-  const recommendedCorrectiveTone = underlyingPigment !== null ? suggestNeutralizingTone(underlyingPigment) : null;
-  const correctorGrams =
-    recommendedCorrectiveTone !== null && achievedLevel !== null
-      ? calculateCorrectorGrams(achievedLevel, totalGrams)
-      : null;
-  const toneWarning =
-    underlyingPigment !== null && recommendedCorrectiveTone !== null && recommendedCorrectiveTone !== targetShade.tone
-      ? { tone: targetShade.tone, pigment: underlyingPigment, recommended: recommendedCorrectiveTone }
-      : null;
-  return { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning };
+): Pick<
+  FullFormula,
+  "underlyingPigment" | "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones" | "toneWarning"
+> {
+  if (!isActuallyLifting || achievedLevel === null) {
+    return {
+      underlyingPigment: null,
+      recommendedCorrectiveTone: null,
+      correctorGrams: null,
+      correctiveTones: [],
+      toneWarning: null,
+    };
+  }
+  const { background, coverage, missing } = assessNeutralization(targetShade, achievedLevel);
+  if (missing.length === 0) {
+    return {
+      underlyingPigment: background,
+      recommendedCorrectiveTone: null,
+      correctorGrams: null,
+      correctiveTones: [],
+      toneWarning: null,
+    };
+  }
+  // The Rule of 10 gives the weight of a whole neutralizer; a shade that brings part of
+  // it itself takes only the rest.
+  const wholeCorrectorGrams = calculateCorrectorGrams(achievedLevel, totalGrams);
+  const correctiveTones = missing.map(part => ({
+    tone: part.tone,
+    grams: Math.round(wholeCorrectorGrams * part.share * 10) / 10,
+  }));
+  const recommendedTones = missing.map(part => part.tone);
+  return {
+    underlyingPigment: background,
+    recommendedCorrectiveTone: recommendedTones[0],
+    correctorGrams: Math.round(correctiveTones.reduce((sum, part) => sum + part.grams, 0) * 10) / 10,
+    correctiveTones,
+    toneWarning:
+      coverage === "none"
+        ? { tone: targetShade.tone, pigment: background, recommended: recommendedTones[0], recommendedTones }
+        : null,
+  };
 }
 
 // A manual ratio only counts when the shade actually offers it (Shade.mixingRatioChoices);
@@ -348,12 +392,8 @@ export function calculateFullFormula({
   // Corrector grams scale with the real mix total when the dye weight was entered directly.
   const correctorBaseGrams =
     colorGramsOverride !== undefined && grams !== null ? grams.colorGrams + grams.developerGrams : totalGrams;
-  const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, toneWarning } = deriveCorrectiveGuidance(
-    targetShade,
-    isActuallyLifting,
-    achievedLevel,
-    correctorBaseGrams,
-  );
+  const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, correctiveTones, toneWarning } =
+    deriveCorrectiveGuidance(targetShade, isActuallyLifting, achievedLevel, correctorBaseGrams);
   const eligibilityWarning =
     targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
       ? { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel }
@@ -367,6 +407,7 @@ export function calculateFullFormula({
     underlyingPigment,
     recommendedCorrectiveTone,
     correctorGrams,
+    correctiveTones,
     recommendedProcessingMinutes,
     toneWarning,
     eligibilityWarning,

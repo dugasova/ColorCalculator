@@ -9,9 +9,9 @@ describe("PrePigmentationCalculator", () => {
 
     expect(html).toContain('calculator__title-accent">Calculator<');
     expect(html).toContain("Required, same visit — fill first, then apply the target formula.");
-    expect(html).toContain(">orange<");
-    expect(html).toContain(">Copper<");
-    expect(html).toContain("Generic 5.4 (Copper)");
+    expect(html).toContain(">orange-red<");
+    expect(html).toContain(">Red<");
+    expect(html).toContain("Generic 5.5 (Red)");
     expect(html).toContain("15.0 g filler : 15.0 g water");
     expect(html).toContain("Processing time: 15 min");
     expect(html).toContain("10 vol");

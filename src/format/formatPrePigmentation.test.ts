@@ -30,9 +30,9 @@ describe("formatPrePigmentationText", () => {
         "Starting level: 9 → Target: 5\n" +
         "Pre-pigmentation: Required, same visit — fill first, then apply the target formula.\n" +
         "Step 1 — Filler\n" +
-        "Missing underlying pigment: orange\n" +
-        "Recommended filler tone: Copper\n" +
-        "Generic 5.4 (Copper)\n" +
+        "Missing underlying pigment: orange-red\n" +
+        "Recommended filler tone: Red\n" +
+        "Generic 5.5 (Red)\n" +
         "Ratio: 1:1\n" +
         "Mix: 15.0 g filler : 15.0 g water\n" +
         "Processing time: 15 min\n" +
@@ -79,8 +79,8 @@ describe("formatPrePigmentationText", () => {
       brandName: "Wella Koleston Perfect",
     });
 
-    expect(text).toContain("Wella Koleston Perfect 5.4 (Copper)");
-    expect(text).not.toContain("Generic 5.4");
+    expect(text).toContain("Wella Koleston Perfect 5.5 (Red)");
+    expect(text).not.toContain("Generic 5.5");
   });
 });
 
@@ -96,9 +96,9 @@ describe("formatFillerStepText", () => {
 
     expect(formatFillerStepText(5, result)).toBe(
       "Step 1 — Filler\n" +
-        "Missing underlying pigment: orange\n" +
-        "Recommended filler tone: Copper\n" +
-        "Generic 5.4 (Copper)\n" +
+        "Missing underlying pigment: orange-red\n" +
+        "Recommended filler tone: Red\n" +
+        "Generic 5.5 (Red)\n" +
         "Ratio: 1:1\n" +
         "Mix: 15.0 g filler : 15.0 g water\n" +
         "Processing time: 15 min",
@@ -125,9 +125,9 @@ describe("formatFillerStepText", () => {
 
     expect(formatFillerStepText(5, result, "Igora Royal")).toBe(
       "Step 1 — Filler\n" +
-        "Missing underlying pigment: orange\n" +
-        "Recommended filler tone: Copper\n" +
-        "Igora Royal 5.4 (Copper)\n" +
+        "Missing underlying pigment: orange-red\n" +
+        "Recommended filler tone: Red\n" +
+        "Igora Royal 5.5 (Red)\n" +
         "Ratio: 1:1\n" +
         "Mix: 15.0 g filler : 15.0 g water\n" +
         "Processing time: 15 min",

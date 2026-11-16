@@ -6,6 +6,7 @@ import type { BrandId } from "../../engine/brands";
 import { usePalette } from "../../palette";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
+import { formatPigmentName } from "../../format/formulaMessages";
 import { LevelField } from "../common/LevelField";
 import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
@@ -96,7 +97,9 @@ export function PrePigmentationCalculator() {
             <div className="results__stats">
               <div className="stat">
                 <span className="stat__label">{t("prePigmentation.underlyingPigmentLabel")}</span>
-                <span className="stat__value prepigment__stat-value--small">{result.underlyingPigment}</span>
+                <span className="stat__value prepigment__stat-value--small">
+                  {formatPigmentName(result.underlyingPigment)}
+                </span>
               </div>
               <div className="stat">
                 <span className="stat__label">{t("prePigmentation.fillerToneLabel")}</span>

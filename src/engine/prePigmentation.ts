@@ -19,8 +19,8 @@ import type { MixingRatio } from "./shades";
 // split across two separate appointments (filler visit, then color visit 1-2 weeks
 // later) to avoid combining a large pigment restoration with an immediate dark deposit
 // in one sitting. The filler's tone family is chosen to match the target level's natural
-// underlying warmth: red pigment levels (getUnderlyingPigment 'red'/'red-orange') need a
-// 'red' filler; orange pigment levels ('orange'/'orange-yellow') need 'copper'; yellow
+// underlying warmth: red pigment levels (getUnderlyingPigment 'red'/'red-orange'/
+// 'orange-red') need a 'red' filler; orange pigment levels ('orange'/'orange-yellow') need 'copper'; yellow
 // pigment levels ('yellow-orange'/'yellow'/'pale-yellow'/'very-light-yellow') need 'gold'.
 // The final color step's own developer/ratio needs no new logic -- darkening always
 // resolves getMixingRatio to a 1:1 no-lift ratio and pickDeveloperVolume to the gentlest
@@ -79,6 +79,7 @@ export function getPrePigmentFillerTone(pigment: UnderlyingPigment): ToneFamily 
   switch (pigment) {
     case "red":
     case "red-orange":
+    case "orange-red":
       return "red";
     case "orange":
     case "orange-yellow":
@@ -96,7 +97,7 @@ export function getPrePigmentFillerTone(pigment: UnderlyingPigment): ToneFamily 
 // Generic chart (GENERIC_SHADE_CHART, ./brands/generic.ts) when it isn't (e.g. the
 // standalone Pre-pigmentation calculator with no brand selected, or a caller that
 // predates this parameter). Worked example against Generic: startLevel 9 -> targetLevel
-// 5 needs a 'copper' filler (underlying pigment 'orange') and Generic has a 5.4 copper
+// 6 needs a 'copper' filler (underlying pigment 'orange') and Generic has a 6.4 copper
 // shade, so this resolves to that shade. startLevel 9 -> targetLevel 4 needs a 'red'
 // filler (underlying pigment 'red-orange'), but Generic's level-4 entries are only
 // natural/ash/gold/violet/chocolate (no red below level 5 in this chart) - resolves to

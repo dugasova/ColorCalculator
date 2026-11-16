@@ -7,6 +7,9 @@ import {
   formatLiftUnsupportedWarning,
   formatPorosityAdjustment,
   formatToneWarning,
+  formatCorrectiveTones,
+  formatPigmentName,
+  isBackgroundCoveredByShade,
   getGrayCoverageNote,
 } from "./formulaMessages";
 import type { ApplicationZone } from "../engine/applicationZone";
@@ -153,17 +156,16 @@ export function formatFormulaText(params: FormatFormulaParams): string {
 
   const developer = formatDeveloperVolumeLine(result.developerVolume, targetShade.developerPercentOverride);
 
-  const applyNeutralization = neutralizationApplied && result.recommendedCorrectiveTone !== null;
+  const corrector = formatCorrectiveTones(result);
+  const applyNeutralization = neutralizationApplied && corrector !== null;
   const correctiveToneLine = applyNeutralization
-    ? i18n.t("format.neutralizationApplied", { grams: result.correctorGrams, tone: result.recommendedCorrectiveTone })
+    ? i18n.t("format.neutralizationApplied", { value: corrector })
     : i18n.t("format.recommendedTone", {
         value:
-          result.recommendedCorrectiveTone !== null
-            ? i18n.t("results.recommendedToneValue", {
-                grams: result.correctorGrams,
-                tone: result.recommendedCorrectiveTone,
-              })
-            : i18n.t("results.none"),
+          corrector ??
+          (isBackgroundCoveredByShade(result) && result.underlyingPigment !== null
+            ? i18n.t("results.toneCoveredByShade", { pigment: formatPigmentName(result.underlyingPigment) })
+            : i18n.t("results.none")),
       });
 
   // Only when gray coverage actually changes the mix: with no natural dose called for

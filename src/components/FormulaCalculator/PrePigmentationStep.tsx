@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Level } from "../../engine/levels";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
+import { formatPigmentName } from "../../format/formulaMessages";
 import "./PrePigmentationStep.css";
 
 export interface PrePigmentationStepProps {
@@ -38,7 +39,9 @@ export function PrePigmentationStep({ targetLevel, result, brandName = "Generic"
       <div className="results__stats">
         <div className="stat">
           <span className="stat__label">{t("prePigmentation.underlyingPigmentLabel")}</span>
-          <span className="stat__value prepigment__stat-value--small">{result.underlyingPigment}</span>
+          <span className="stat__value prepigment__stat-value--small">
+            {formatPigmentName(result.underlyingPigment)}
+          </span>
         </div>
         <div className="stat">
           <span className="stat__label">{t("prePigmentation.fillerToneLabel")}</span>

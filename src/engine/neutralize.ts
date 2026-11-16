@@ -1,19 +1,114 @@
-import type { UnderlyingPigment } from "./levels";
-import type { ToneFamily } from "./shades";
+import { getUnderlyingPigment } from "./levels";
+import type { Level, UnderlyingPigment } from "./levels";
+import type { Shade, ToneFamily } from "./shades";
 
-export function suggestNeutralizingTone(pigment: UnderlyingPigment): ToneFamily {
-  switch (pigment) {
-    case "orange":
-    case "orange-yellow":
-      return "ash";
-    case "yellow-orange":
-    case "yellow":
-    case "pale-yellow":
-      return "violet";
-    case "red":
-    case "red-orange":
-      return "matt";
-    case "very-light-yellow":
-      return "violet";
-  }
+// What lifting reveals, and what cancels it.
+//
+// Lightening hair exposes its warm background; the lighter the level reached, the more
+// the background moves from red through orange to yellow. A formula has to carry the
+// opposite color of the color wheel or the result turns out warmer than the shade chart
+// shows. One level's background is often a blend (yellow-orange at level 8), and then so
+// is its neutralizer (blue with violet), so both are modeled as mixes, not single tones.
+//
+// The background per level is levels.ts's getUnderlyingPigment; the table below is the
+// colorist's working rule for what cancels it, confirmed 2026-11-16.
+
+// The three colors that cancel a warm background: green cancels red, blue cancels
+// orange, violet cancels yellow.
+export type NeutralizingColor = "green" | "blue" | "violet";
+
+export interface NeutralizerPart {
+  color: NeutralizingColor;
+  // This color's part of the neutralizer; the parts of one neutralizer add up to 1.
+  share: number;
+}
+
+// Dominant color first.
+const NEUTRALIZERS: Record<UnderlyingPigment, NeutralizerPart[]> = {
+  red: [{ color: "green", share: 1 }],
+  "red-orange": [
+    { color: "green", share: 0.75 },
+    { color: "blue", share: 0.25 },
+  ],
+  "orange-red": [
+    { color: "blue", share: 0.5 },
+    { color: "green", share: 0.5 },
+  ],
+  orange: [{ color: "blue", share: 1 }],
+  "orange-yellow": [
+    { color: "blue", share: 0.75 },
+    { color: "violet", share: 0.25 },
+  ],
+  "yellow-orange": [
+    { color: "blue", share: 0.5 },
+    { color: "violet", share: 0.5 },
+  ],
+  yellow: [{ color: "violet", share: 1 }],
+  "pale-yellow": [{ color: "violet", share: 1 }],
+  "very-light-yellow": [{ color: "violet", share: 1 }],
+};
+
+export function getNeutralizer(pigment: UnderlyingPigment): NeutralizerPart[] {
+  return NEUTRALIZERS[pigment];
+}
+
+// The retail tone family a colorist reaches for to get each neutralizing color.
+const CORRECTIVE_TONE: Record<NeutralizingColor, ToneFamily> = {
+  green: "matt",
+  blue: "ash",
+  violet: "violet",
+};
+
+// Which neutralizing colors a shade's own tone already brings. Warm and natural families
+// bring none.
+const TONE_NEUTRALIZING_COLORS: Partial<Record<ToneFamily, NeutralizingColor[]>> = {
+  ash: ["blue"],
+  "slate-grey": ["blue"],
+  matt: ["green"],
+  violet: ["violet"],
+  cendré: ["violet"],
+  pearl: ["blue", "violet"],
+};
+
+function getShadeNeutralizingColors(shade: Pick<Shade, "tone" | "secondaryTone">): Set<NeutralizingColor> {
+  return new Set([
+    ...(TONE_NEUTRALIZING_COLORS[shade.tone] ?? []),
+    ...(shade.secondaryTone !== undefined ? (TONE_NEUTRALIZING_COLORS[shade.secondaryTone] ?? []) : []),
+  ]);
+}
+
+// How much of the background the shade's own tone cancels: all of the colors it takes,
+// some of them, or none.
+export type NeutralizationCoverage = "full" | "partial" | "none";
+
+export interface CorrectiveTone {
+  tone: ToneFamily;
+  // The part of the whole neutralizer this tone stands for: 0.5 when the shade already
+  // brings the other half. The corrector's weight is scaled by it.
+  share: number;
+}
+
+export interface Neutralization {
+  background: UnderlyingPigment;
+  coverage: NeutralizationCoverage;
+  // What the shade does not bring itself and a corrector has to: empty when coverage is
+  // full, the whole neutralizer when it is none. Dominant tone first.
+  missing: CorrectiveTone[];
+}
+
+// What a shade lifted to `achievedLevel` still needs to come out as the chart shows it.
+export function assessNeutralization(
+  shade: Pick<Shade, "tone" | "secondaryTone">,
+  achievedLevel: Level,
+): Neutralization {
+  const background = getUnderlyingPigment(achievedLevel);
+  const needed = getNeutralizer(background);
+  const carried = getShadeNeutralizingColors(shade);
+  const missingParts = needed.filter(part => !carried.has(part.color));
+
+  return {
+    background,
+    coverage: missingParts.length === 0 ? "full" : missingParts.length === needed.length ? "none" : "partial",
+    missing: missingParts.map(part => ({ tone: CORRECTIVE_TONE[part.color], share: part.share })),
+  };
 }
