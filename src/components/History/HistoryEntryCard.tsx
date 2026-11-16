@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { buildRepeatFormulaRequest, buildRepeatSessionRequest, type FormulaHistoryEntry } from "../../history";
 import { formatSessionText, formatSessionSummary } from "../../formatSession";
 import { usePalette } from "../../palette";
-import { STRAND_ZONE_I18N_KEY } from "../../engine/strandZone";
+import { formatStepZoneLabel } from "../../format/formatStepZone";
 import { ZoneProgressPreview } from "../common/ZoneProgressPreview";
 import type { ActualGramsEditor } from "./useActualGramsEditor";
 
@@ -65,8 +65,7 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
         // weight, covering every shade in it (targetShade plus any additional/
         // blend shade -- see buildMixSummary), so naming just the one primary
         // code here read as claiming this input was only about that shade.
-        const zoneLabel =
-          step.strandZone !== undefined ? t(`fields.strandZone.${STRAND_ZONE_I18N_KEY[step.strandZone]}`) : null;
+        const zoneLabel = formatStepZoneLabel(step);
         return (
           <div className="history__entry-actual" key={key}>
             <label htmlFor={`actualGrams-${key}`}>

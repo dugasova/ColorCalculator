@@ -23,7 +23,7 @@ export function ZoneProgressPreview({ steps }: ZoneProgressPreviewProps) {
     <>
       <h2 className="results__section-heading">{t("zonePreview.title")}</h2>
       {rows.map((row, rowIndex) => (
-        <div className="zone-preview__row" key={row.zone ?? `__none-${rowIndex}`}>
+        <div className="zone-preview__row" key={`${row.zone ?? `__none-${rowIndex}`}|${row.foilGroup ?? ""}`}>
           {row.zoneLabel !== null && <span className="zone-preview__zone">{row.zoneLabel}</span>}
           {row.swatches.map((swatch, index) => (
             <Fragment key={index}>

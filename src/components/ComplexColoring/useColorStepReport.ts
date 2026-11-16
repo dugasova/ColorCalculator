@@ -8,6 +8,7 @@ import {
 } from "../../engine/prePigmentation";
 import type { StartingBase } from "../../engine/startingBase";
 import type { StrandZone } from "../../engine/strandZone";
+import type { FoilPlacement } from "../../engine/foil";
 import type { ColorHistoryStep } from "../../history";
 import type { ShadeFormulaState } from "../FormulaCalculator/useShadeFormulaState";
 
@@ -15,6 +16,7 @@ export interface UseColorStepReportParams {
   brands: Record<BrandId, Brand>;
   formula: ShadeFormulaState;
   strandZone: StrandZone;
+  foil?: FoilPlacement;
   startingBase: StartingBase;
   pricePerGram: number;
   prePigmentationEnabled: boolean;
@@ -29,6 +31,7 @@ export function useColorStepReport({
   brands,
   formula,
   strandZone,
+  foil,
   startingBase,
   pricePerGram,
   prePigmentationEnabled,
@@ -95,6 +98,7 @@ export function useColorStepReport({
       canvas: { porosity, thickness, chemicalHistory },
       applicationZone,
       strandZone,
+      ...(foil !== undefined && { foil }),
       startingBase,
       result: effectiveResult,
       additionalShade,
@@ -120,6 +124,7 @@ export function useColorStepReport({
       chemicalHistory,
       applicationZone,
       strandZone,
+      foil,
       startingBase,
       effectiveResult,
       additionalShade,

@@ -135,4 +135,60 @@ describe("BleachStepCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove step" }));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
+
+  // Highlights: the step is applied to foiled strands, not to all hair of the zone.
+  it("reports no foil placement until the colorist picks one, then the group and the percentage", () => {
+    const { onChange } = renderStep();
+    expect("foil" in lastStep(onChange)).toBe(false);
+    expect(screen.queryByLabelText("Hair in foil, % (approx.)")).toBeNull();
+
+    chooseOption("Coverage", "strands-1");
+    expect(lastStep(onChange).foil).toEqual({ group: "strands-1", percent: null });
+
+    fireEvent.change(screen.getByLabelText("Hair in foil, % (approx.)"), { target: { value: "30" } });
+    expect(lastStep(onChange).foil).toEqual({ group: "strands-1", percent: 30 });
+
+    // the estimate stays with the strands when the set is renumbered
+    chooseOption("Coverage", "strands-2");
+    expect(lastStep(onChange).foil).toEqual({ group: "strands-2", percent: 30 });
+
+    // hair outside the foil has no percentage of its own
+    chooseOption("Coverage", "outside");
+    expect(lastStep(onChange).foil).toEqual({ group: "outside", percent: null });
+    expect(screen.queryByLabelText("Hair in foil, % (approx.)")).toBeNull();
+
+    chooseOption("Coverage", "all");
+    expect("foil" in lastStep(onChange)).toBe(false);
+  });
+
+  it("keeps the percentage a whole number between 1 and 100, and clears it when emptied", () => {
+    const { onChange } = renderStep({
+      kind: "bleach",
+      startLevel: 4,
+      targetLevel: 8,
+      totalGrams: 60,
+      processingMinutes: 30,
+      pricePerGram: 0.1,
+      foil: { group: "strands-1", percent: 30 },
+    });
+    expect(lastStep(onChange).foil).toEqual({ group: "strands-1", percent: 30 });
+    const input = screen.getByLabelText("Hair in foil, % (approx.)");
+
+    fireEvent.change(input, { target: { value: "250" } });
+    expect(lastStep(onChange).foil?.percent).toBe(100);
+    fireEvent.change(input, { target: { value: "12.6" } });
+    expect(lastStep(onChange).foil?.percent).toBe(13);
+    fireEvent.change(input, { target: { value: "" } });
+    expect(lastStep(onChange).foil?.percent).toBeNull();
+  });
+
+  it("does not change the mix: the placement is a note only", () => {
+    const { onChange } = renderStep();
+    const before = lastStep(onChange).result;
+
+    chooseOption("Coverage", "strands-1");
+    fireEvent.change(screen.getByLabelText("Hair in foil, % (approx.)"), { target: { value: "30" } });
+
+    expect(lastStep(onChange).result).toEqual(before);
+  });
 });

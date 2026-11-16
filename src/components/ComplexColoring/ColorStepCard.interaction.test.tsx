@@ -179,3 +179,20 @@ describe("ColorStepCard interaction", () => {
     expect(step.prePigmentation?.grams).toEqual(fillerBefore);
   });
 });
+
+describe("ColorStepCard foil placement", () => {
+  it("reports the group of hair the color goes on, and nothing for all hair", () => {
+    const { onChange } = renderStep();
+    expect("foil" in lastStep(onChange)).toBe(false);
+
+    chooseOption("Coverage", "outside");
+    expect(lastStep(onChange).foil).toEqual({ group: "outside", percent: null });
+
+    chooseOption("Coverage", "strands-1");
+    fireEvent.change(screen.getByLabelText("Hair in foil, % (approx.)"), { target: { value: "40" } });
+    expect(lastStep(onChange).foil).toEqual({ group: "strands-1", percent: 40 });
+
+    chooseOption("Coverage", "all");
+    expect("foil" in lastStep(onChange)).toBe(false);
+  });
+});
