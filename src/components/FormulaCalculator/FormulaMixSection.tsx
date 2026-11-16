@@ -12,9 +12,10 @@ import type { ApplicationZone } from "../../engine/applicationZone";
 import type { StockShortage } from "../../stock";
 import { StockShortageWarnings } from "../common/StockShortageWarnings";
 import { LiftOutcome, PorosityNotices, ToneWarnings } from "./FormulaNotices";
-import type { FormulaMix } from "./formulaResultsModel";
+import type { FormulaMix, FormulaProduct } from "./formulaResultsModel";
 
 export interface FormulaMixSectionProps {
+  product: FormulaProduct;
   mix: FormulaMix;
   porosity: Porosity;
   applicationZone: ApplicationZone;
@@ -26,6 +27,7 @@ export interface FormulaMixSectionProps {
 // The first block of the results panel: developer and ratio, the mix to weigh out, and
 // the guidance that goes with it (lift, porosity, gray coverage, corrective tone).
 export function FormulaMixSection({
+  product,
   mix,
   porosity,
   applicationZone,
@@ -125,7 +127,7 @@ export function FormulaMixSection({
       <div className="results__row">
         <span className="results__row-label">{t("results.recommendedTone")}</span>
         <span>
-          {formatCorrectiveTones(result) ??
+          {formatCorrectiveTones(result, product) ??
             (isBackgroundCoveredByShade(result) && result.underlyingPigment !== null
               ? t("results.toneCoveredByShade", { pigment: formatPigmentName(result.underlyingPigment) })
               : t("results.none"))}
@@ -143,7 +145,7 @@ export function FormulaMixSection({
         </label>
       )}
 
-      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} />
+      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} brand={product} />
     </>
   );
 }

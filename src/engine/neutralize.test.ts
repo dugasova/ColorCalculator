@@ -64,6 +64,11 @@ describe("assessNeutralization", () => {
     expect(assessNeutralization({ tone: "violet" }, 9).coverage).toBe("full");
     // pearl brings both blue and violet
     expect(assessNeutralization({ tone: "pearl" }, 8).coverage).toBe("full");
+    // so does Wella's /9, charted as slate-grey; other brands' greys bring blue only
+    expect(assessNeutralization({ tone: "slate-grey", line: "koleston-perfect" }, 8).coverage).toBe("full");
+    expect(assessNeutralization({ tone: "slate-grey", line: "color-touch" }, 9).coverage).toBe("full");
+    expect(assessNeutralization({ tone: "slate-grey" }, 8).coverage).toBe("partial");
+    expect(assessNeutralization({ tone: "slate-grey" }, 9).coverage).toBe("none");
   });
 
   it("asks only for the part the shade does not bring", () => {

@@ -1,4 +1,5 @@
 import i18n from "../i18n";
+import type { BrandId } from "../engine/brands";
 import type { Level } from "../engine/levels";
 import type { Shade } from "../engine/shades";
 import type { FullFormula, FormulaGrams, NaturalBase } from "../engine/formula";
@@ -17,6 +18,8 @@ import { formatBrandLineLabel } from "../engine/formatLineLabel";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 
 export interface FormatFormulaParams {
+  // Names the corrector by the brand's own codes; omitted, it is named by its tone.
+  brandId?: BrandId;
   brandName: string;
   line: string | null;
   targetShade: Shade;
@@ -136,6 +139,7 @@ export function buildMixSummary(
 
 export function formatFormulaText(params: FormatFormulaParams): string {
   const {
+    brandId,
     brandName,
     line,
     targetShade,
@@ -156,7 +160,8 @@ export function formatFormulaText(params: FormatFormulaParams): string {
 
   const developer = formatDeveloperVolumeLine(result.developerVolume, targetShade.developerPercentOverride);
 
-  const corrector = formatCorrectiveTones(result);
+  const correctorBrand = brandId !== undefined ? { brandId, line } : undefined;
+  const corrector = formatCorrectiveTones(result, correctorBrand);
   const applyNeutralization = neutralizationApplied && corrector !== null;
   const correctiveToneLine = applyNeutralization
     ? i18n.t("format.neutralizationApplied", { value: corrector })
@@ -247,7 +252,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     lines.push(i18n.t("format.warning", { message: formatLiftUnsupportedWarning(result.liftUnsupportedWarning) }));
   }
   if (result.toneWarning !== null && !applyNeutralization) {
-    lines.push(i18n.t("format.warning", { message: formatToneWarning(result.toneWarning) }));
+    lines.push(i18n.t("format.warning", { message: formatToneWarning(result.toneWarning, correctorBrand) }));
   }
   if (result.eligibilityWarning !== null) {
     lines.push(i18n.t("format.warning", { message: formatEligibilityWarning(result.eligibilityWarning) }));

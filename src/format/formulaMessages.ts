@@ -6,6 +6,8 @@ import type {
   LiftUnsupportedWarning,
   ToneWarning,
 } from "../engine/formula";
+import type { BrandId } from "../engine/brands";
+import { getCorrectorProduct } from "../engine/correctorProducts";
 import type { UnderlyingPigment } from "../engine/levels";
 import type { ToneFamily } from "../engine/shades";
 import { formatDeveloperVolume } from "./formatDeveloperVolume";
@@ -24,11 +26,29 @@ export function formatPigmentName(pigment: UnderlyingPigment): string {
   return i18n.t(`pigment.${pigment}`);
 }
 
-export function formatToneWarning(warning: ToneWarning): string {
+// Which product the corrector is named after. Without it, or for a brand with no
+// corrector table, the corrector is named by its generic tone.
+export interface CorrectorBrand {
+  brandId: BrandId;
+  line: string | null;
+}
+
+// A corrective tone as the colorist reaches for it: the brand's own code ("/8 or 0/88")
+// where the brand has one, the tone's name otherwise.
+function formatCorrectorName(tone: ToneFamily, brand?: CorrectorBrand): string {
+  const product = getCorrectorProduct(brand?.brandId, brand?.line, tone);
+  if (product === null) return formatToneName(tone);
+  if (product.mixtone === undefined) return product.shade;
+  return i18n.t("results.correctorShadeOrMixtone", { shade: product.shade, mixtone: product.mixtone });
+}
+
+export function formatToneWarning(warning: ToneWarning, brand?: CorrectorBrand): string {
   return i18n.t("engine.toneWarning", {
     tone: formatToneName(warning.tone),
     pigment: formatPigmentName(warning.pigment),
-    recommended: (warning.recommendedTones ?? [warning.recommended]).map(formatToneName).join(" + "),
+    recommended: (warning.recommendedTones ?? [warning.recommended])
+      .map(tone => formatCorrectorName(tone, brand))
+      .join(" + "),
   });
 }
 
@@ -36,14 +56,14 @@ type CorrectorResult = Pick<FullFormula, "recommendedCorrectiveTone" | "correcto
 
 // The corrector to add, tone by tone: "1 g ash + 1 g violet". Null when the formula needs
 // none. A result saved before correctors could be blends has only the one tone.
-export function formatCorrectiveTones(result: CorrectorResult): string | null {
+export function formatCorrectiveTones(result: CorrectorResult, brand?: CorrectorBrand): string | null {
   if (result.recommendedCorrectiveTone === null) return null;
   const tones =
     result.correctiveTones !== undefined && result.correctiveTones.length > 0
       ? result.correctiveTones
       : [{ tone: result.recommendedCorrectiveTone, grams: result.correctorGrams }];
   return tones
-    .map(({ tone, grams }) => i18n.t("results.recommendedToneValue", { grams, tone: formatToneName(tone) }))
+    .map(({ tone, grams }) => i18n.t("results.recommendedToneValue", { grams, tone: formatCorrectorName(tone, brand) }))
     .join(" + ");
 }
 

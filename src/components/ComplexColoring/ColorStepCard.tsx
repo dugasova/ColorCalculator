@@ -281,7 +281,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         </>
       )}
       <LiftOutcome result={result} targetShade={targetShade} />
-      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} />
+      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} brand={{ brandId, line }} />
       <PorosityNotices result={result} targetShade={targetShade} porosity={porosity} />
 
       {grams !== null && (
@@ -305,7 +305,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         <div className="results__row">
           <span className="results__row-label">{t("results.recommendedTone")}</span>
           <span>
-            {formatCorrectiveTones(result)}
+            {formatCorrectiveTones(result, { brandId, line })}
             <label className="results__neutralization-toggle">
               <input
                 type="checkbox"

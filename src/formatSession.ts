@@ -110,6 +110,7 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
   }
 
   const targetColorText = formatFormulaText({
+    brandId: step.brandId,
     brandName: step.brandName,
     line: step.line,
     targetShade: step.targetShade,

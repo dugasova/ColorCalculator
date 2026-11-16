@@ -8,6 +8,7 @@ import {
   formatPorosityAdjustment,
   formatToneWarning,
 } from "../../format/formulaMessages";
+import type { CorrectorBrand } from "../../format/formulaMessages";
 
 // The notices a computed formula can carry, shared by the simple calculator's results
 // panel (FormulaResults) and a Complex Coloring step (ColorStepCard). Each group is its
@@ -73,9 +74,11 @@ export interface ToneWarningsProps {
   result: FullFormula;
   // The tone-mismatch warning is moot once the colorist opts into the corrector.
   neutralizationApplied: boolean;
+  // Names the corrector by the brand's own codes.
+  brand?: CorrectorBrand;
 }
 
-export function ToneWarnings({ result, neutralizationApplied }: ToneWarningsProps) {
+export function ToneWarnings({ result, neutralizationApplied, brand }: ToneWarningsProps) {
   // Subscribes to language changes: the format* helpers read the current language
   // directly, so without this the warnings wouldn't re-render when it switches.
   useTranslation();
@@ -83,7 +86,7 @@ export function ToneWarnings({ result, neutralizationApplied }: ToneWarningsProp
     <>
       {result.toneWarning !== null && !neutralizationApplied && (
         <p className="warning" role="alert">
-          {formatToneWarning(result.toneWarning)}
+          {formatToneWarning(result.toneWarning, brand)}
         </p>
       )}
       {result.eligibilityWarning !== null && (

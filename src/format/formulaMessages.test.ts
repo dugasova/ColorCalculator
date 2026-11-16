@@ -36,6 +36,39 @@ describe("formatCorrectiveTones", () => {
     expect(isBackgroundCoveredByShade({ ...saved, underlyingPigment: "yellow" })).toBe(false);
   });
 
+  it("names the corrector by the brand's own shade suffix and mixtone", () => {
+    const result = lift({ code: "8.3", level: 8, tone: "gold" });
+    const wella = { brandId: "wella", line: "koleston-perfect" };
+    expect(formatCorrectiveTones(result, wella)).toBe("2 g /8 or 0/88 + 2 g /6 or 0/66");
+    // L'Oréal's mixtones belong to one line each: Majirel Mix has no blue, Dia has none.
+    expect(formatCorrectiveTones(result, { brandId: "loreal", line: "inoa" })).toBe(
+      "2 g .1 or Mix Blue + 2 g .2 or Mix Violet",
+    );
+    expect(formatCorrectiveTones(result, { brandId: "loreal", line: "majirel" })).toBe("2 g .1 + 2 g .2 or Mix Violet");
+    expect(formatCorrectiveTones(result, { brandId: "loreal", line: "dia-color" })).toBe("2 g .1 + 2 g .2");
+    expect(formatToneWarning(result.toneWarning!, wella)).toContain("/8 or 0/88 + /6 or 0/66");
+  });
+
+  it("uses the line's own mixtones, and only the shade suffix where the line has none", () => {
+    const colorTouch = { brandId: "wella", line: "color-touch" };
+    expect(formatCorrectiveTones(lift({ code: "8.3", level: 8, tone: "gold" }), colorTouch)).toBe(
+      "2 g /8 or 0/88 + 2 g /6 or 0/68",
+    );
+    const dark = calculateFullFormula({
+      startLevel: 2,
+      targetShade: { code: "3.0", level: 3, tone: "natural" },
+      grayPercent: 0,
+      totalGrams: 60,
+    });
+    expect(formatCorrectiveTones(dark, colorTouch)).toMatch(/^\d+ g \/2$/);
+  });
+
+  it("falls back to the tone's name for a brand with no corrector table", () => {
+    expect(formatCorrectiveTones(lift({ code: "8.3", level: 8, tone: "gold" }), { brandId: "igora", line: null })).toBe(
+      "2 g ash + 2 g violet",
+    );
+  });
+
   it("names the tones in the current language", () => {
     void i18n.changeLanguage("uk");
     expect(formatCorrectiveTones(lift({ code: "8.3", level: 8, tone: "gold" }))).toBe(
