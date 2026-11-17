@@ -27,6 +27,7 @@ const resultsDefaults = {
   applicationZone: "full-head",
   neutralizationApplied: false,
   onNeutralizationAppliedChange: () => {},
+  onCorrectorSelectionChange: () => {},
   appliedBy: "stylist@example.com",
   onProcessingMinutesChange: () => {},
   pricing: {

@@ -2,6 +2,7 @@ import type { FullFormula, NaturalBase } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import type { Level } from "../../engine/levels";
 import type { BrandId } from "../../engine/brands";
+import type { CorrectorSelection } from "../../engine/correctorProducts";
 import type { HairCanvas } from "../../engine/canvas";
 import type { BlendSummary } from "../../format/formatFormula";
 
@@ -34,6 +35,8 @@ export interface FormulaMix {
   // The gray-coverage natural base, if opted in (see GrayNaturalField) -- already carved
   // out of `result.grams`, so it only changes the per-shade breakdown, not the totals.
   naturalBase: NaturalBase | null;
+  // Which tones of the corrector the colorist mixes in, and in what form.
+  correctorSelection?: CorrectorSelection;
 }
 
 // The figures of the pricing block. Each has a default the colorist can replace by hand

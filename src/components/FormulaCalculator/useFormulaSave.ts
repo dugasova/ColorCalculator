@@ -64,6 +64,7 @@ export function useFormulaSave(params: FormulaSaveParams): FormulaSave {
     blend: mix.blend,
     prePigmentation: prePigmentationResult,
     neutralizationApplied,
+    ...(mix.correctorSelection !== undefined && { correctorSelection: mix.correctorSelection }),
     naturalBase: mix.naturalBase,
     processingMinutes,
     pricePerGram: pricing.pricePerGram,

@@ -1,5 +1,6 @@
 import { LiftOutcome, PorosityNotices, ToneWarnings } from "../FormulaCalculator/FormulaNotices";
-import { formatCorrectiveTones } from "../../format/formulaMessages";
+import { buildMixCorrector, formatCorrectiveTones } from "../../format/formulaMessages";
+import { CorrectorChoiceField } from "../FormulaCalculator/fields/CorrectorChoiceField";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePalette } from "../../palette";
@@ -111,6 +112,8 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     setAdditionalShade2Grams,
     neutralizationApplied,
     setNeutralizationApplied,
+    correctorSelection,
+    setCorrectorSelection,
     grayNaturalApplied,
     setGrayNaturalApplied,
     naturalBaseShadeCode,
@@ -154,6 +157,8 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
       applyInheritedZoneState(inherited, { setStartingBase, setPorosity, setThickness, setChemicalHistory });
     }
   };
+
+  const mixCorrector = neutralizationApplied ? buildMixCorrector(result, { brandId, line }, correctorSelection) : null;
 
   return (
     <div className="step-card">
@@ -281,7 +286,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         </>
       )}
       <LiftOutcome result={result} targetShade={targetShade} />
-      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} brand={{ brandId, line }} />
+      <ToneWarnings result={result} neutralizationApplied={mixCorrector !== null} brand={{ brandId, line }} />
       <PorosityNotices result={result} targetShade={targetShade} porosity={porosity} />
 
       {grams !== null && (
@@ -296,6 +301,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
               additionalShade2,
               additionalShade2Grams,
               naturalBase,
+              mixCorrector,
             )}
           </span>
         </div>
@@ -314,6 +320,14 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
               />
               {t("results.applyNeutralization")}
             </label>
+            {neutralizationApplied && (
+              <CorrectorChoiceField
+                result={result}
+                brand={{ brandId, line }}
+                selection={correctorSelection}
+                onSelectionChange={setCorrectorSelection}
+              />
+            )}
           </span>
         </div>
       )}

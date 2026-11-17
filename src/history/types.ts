@@ -10,6 +10,7 @@ import type { FoilPlacement } from "../engine/foil";
 import type { StartingBase } from "../engine/startingBase";
 import type { HairCanvas } from "../engine/canvas";
 import type { BrandId } from "../engine/brands";
+import type { CorrectorSelection } from "../engine/correctorProducts";
 
 // One dye/tone step within a saved session (single-step for a simple color service,
 // multiple for complex work like balayage: one or more `BleachHistoryStep`s to lift
@@ -60,6 +61,9 @@ export interface ColorHistoryStep {
   // drop didn't warrant it.
   prePigmentation: PrePigmentationResult | null;
   neutralizationApplied: boolean;
+  // Which tones of the corrector were mixed in and in what form (shade or mixtone). Absent
+  // on steps saved before the colorist could choose: all of them, in the default form.
+  correctorSelection?: CorrectorSelection;
   // The gray-coverage natural shade the colorist opted to dose in (see GrayNaturalField),
   // carved out of the base color weight rather than added on top -- `result.grams` is
   // unchanged by it. Absent on every step saved before this option existed and null when

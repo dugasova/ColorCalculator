@@ -1,5 +1,6 @@
 import i18n from "../i18n";
 import type { BrandId } from "../engine/brands";
+import type { CorrectorSelection } from "../engine/correctorProducts";
 import type { Level } from "../engine/levels";
 import type { Shade } from "../engine/shades";
 import type { FullFormula, FormulaGrams, NaturalBase } from "../engine/formula";
@@ -9,10 +10,13 @@ import {
   formatPorosityAdjustment,
   formatToneWarning,
   formatCorrectiveTones,
+  buildMixCorrector,
+  formatMixCorrector,
   formatPigmentName,
   isBackgroundCoveredByShade,
   getGrayCoverageNote,
 } from "./formulaMessages";
+import type { MixCorrector } from "./formulaMessages";
 import type { ApplicationZone } from "../engine/applicationZone";
 import { formatBrandLineLabel } from "../engine/formatLineLabel";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
@@ -42,6 +46,8 @@ export interface FormatFormulaParams {
   // on top of that blend.
   blend: BlendSummary | null;
   neutralizationApplied: boolean;
+  // Which tones of the corrector go in, and in what form; absent, all of them by default.
+  correctorSelection?: CorrectorSelection;
   // The gray-coverage natural base, if the colorist opted in -- see NaturalBase. Optional
   // so callers formatting a step saved before this option existed can omit it.
   naturalBase?: NaturalBase | null;
@@ -52,6 +58,14 @@ export interface BlendSummary {
   shadeAGrams: number;
   shadeB: Shade;
   shadeBGrams: number;
+}
+
+// An applied corrector goes into the bowl on top of the shades, right before the developer,
+// whose weight then includes the corrector's own share (see getAppliedCorrector).
+function pushCorrector(parts: string[], corrector: MixCorrector | null | undefined): void {
+  for (const part of corrector?.parts ?? []) {
+    parts.push(i18n.t("format.mixShade", { code: part.name, grams: part.grams.toFixed(1) }));
+  }
 }
 
 // Mix breakdown for a substitute blend approximating a shade that's out of stock: the
@@ -67,6 +81,7 @@ export function buildBlendMixSummary(
   additionalShade2?: Shade | null,
   additionalShade2Grams?: number,
   naturalBase?: NaturalBase | null,
+  corrector?: MixCorrector | null,
 ): string {
   const hasAdditional = additionalShade != null && (additionalShadeGrams ?? 0) > 0;
   const hasAdditional2 = additionalShade2 != null && (additionalShade2Grams ?? 0) > 0;
@@ -89,7 +104,8 @@ export function buildBlendMixSummary(
       i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }),
     );
   }
-  parts.push(i18n.t("format.mixDeveloper", { grams: developerGrams.toFixed(1) }));
+  pushCorrector(parts, corrector);
+  parts.push(i18n.t("format.mixDeveloper", { grams: (developerGrams + (corrector?.developerGrams ?? 0)).toFixed(1) }));
   return parts.join(" ");
 }
 
@@ -109,6 +125,7 @@ export function buildMixSummary(
   additionalShade2?: Shade | null,
   additionalShade2Grams?: number,
   naturalBase?: NaturalBase | null,
+  corrector?: MixCorrector | null,
 ): string {
   const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
   const hasAdditional2 =
@@ -132,7 +149,10 @@ export function buildMixSummary(
       i18n.t("format.mixShade", { code: additionalShade2!.code, grams: (additionalShade2Grams ?? 0).toFixed(1) }),
     );
   }
-  parts.push(i18n.t("format.mixDeveloper", { grams: grams.developerGrams.toFixed(1) }));
+  pushCorrector(parts, corrector);
+  parts.push(
+    i18n.t("format.mixDeveloper", { grams: (grams.developerGrams + (corrector?.developerGrams ?? 0)).toFixed(1) }),
+  );
 
   return parts.join(" ");
 }
@@ -153,6 +173,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
     additionalShade2Grams,
     blend,
     neutralizationApplied,
+    correctorSelection,
     naturalBase = null,
   } = params;
 
@@ -162,9 +183,10 @@ export function formatFormulaText(params: FormatFormulaParams): string {
 
   const correctorBrand = brandId !== undefined ? { brandId, line } : undefined;
   const corrector = formatCorrectiveTones(result, correctorBrand);
-  const applyNeutralization = neutralizationApplied && corrector !== null;
+  const mixCorrector = neutralizationApplied ? buildMixCorrector(result, correctorBrand, correctorSelection) : null;
+  const applyNeutralization = mixCorrector !== null;
   const correctiveToneLine = applyNeutralization
-    ? i18n.t("format.neutralizationApplied", { value: corrector })
+    ? i18n.t("format.neutralizationApplied", { value: formatMixCorrector(mixCorrector) })
     : i18n.t("format.recommendedTone", {
         value:
           corrector ??
@@ -223,6 +245,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
                   additionalShade2,
                   additionalShade2Grams,
                   naturalBase,
+                  mixCorrector,
                 )
               : buildMixSummary(
                   targetShade,
@@ -232,6 +255,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
                   additionalShade2,
                   additionalShade2Grams,
                   naturalBase,
+                  mixCorrector,
                 ),
         })
       : i18n.t("format.mixFallback", {
