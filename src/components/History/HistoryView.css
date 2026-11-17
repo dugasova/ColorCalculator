@@ -140,6 +140,7 @@
 .history__entry-footer {
   margin-top: 8px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -150,6 +151,7 @@
 .history__entry-repeat {
   padding: 4px 10px;
   font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 .history__client-group {
@@ -367,9 +369,14 @@
   color: var(--brand-muted);
 }
 
+/* On a narrow screen the buttons wrap under the "applied by" line and stay right-aligned
+   instead of running past the card's edge (Ukrainian labels are the longest). */
 .history__entry-footer-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
+  margin-left: auto;
 }
 
 .history__edit-photo-actions {
