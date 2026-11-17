@@ -10,8 +10,10 @@ describe("ColorCorrectionCalculator", () => {
     expect(html).toContain('calculator__title-accent">Correction<');
     expect(html).toContain("6% (20 vol)"); // 2-level lift -> 20vol/6%
     expect(html).toContain("Lift + Tone");
-    expect(html).toContain("Blue ash");
-    expect(html).toContain(".1, .01");
+    // generic brand: the corrector is named by its tone, its grams an input to change
+    expect(html).toContain('aria-label="Amount of ash, g" value="2"');
+    expect(html).toContain("color- 30.0 g ash- 2.0 g developer 48.0 g"); // generic 1:1.5 on 32 g
+    expect(html).toContain("At level 8 the lightening background is usually yellow-orange.");
     expect(html).toContain("neutralizes Orange through chromatic opposition");
     expect(html).toContain("On dark bases"); // orange-specific tip
     expect(html).toContain("Always perform a strand test");
@@ -23,7 +25,18 @@ describe("ColorCorrectionCalculator", () => {
   it("renders every tone option and the level selects", () => {
     const html = renderToStaticMarkup(<ColorCorrectionCalculator />);
 
-    for (const tone of ["Red", "Orange", "Yellow", "Green", "Blue", "Violet"]) {
+    for (const tone of [
+      "Red",
+      "Red-orange",
+      "Orange-red",
+      "Orange",
+      "Orange-yellow",
+      "Yellow-orange",
+      "Yellow",
+      "Green",
+      "Blue",
+      "Violet",
+    ]) {
       expect(html).toContain(`>${tone}<`);
     }
     expect(html).toContain('id="currentLevel"');

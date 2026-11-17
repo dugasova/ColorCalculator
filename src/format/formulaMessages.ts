@@ -10,7 +10,7 @@ import { getAppliedCorrector } from "../engine/formula";
 import type { BrandId } from "../engine/brands";
 import { getCorrectorDeveloperParts, getCorrectorProduct, getDefaultCorrectorForm } from "../engine/correctorProducts";
 import type { CorrectorChoice, CorrectorSelection } from "../engine/correctorProducts";
-import type { UnderlyingPigment } from "../engine/levels";
+import type { Level, UnderlyingPigment } from "../engine/levels";
 import type { ToneFamily } from "../engine/shades";
 import { formatDeveloperVolume } from "./formatDeveloperVolume";
 
@@ -33,12 +33,15 @@ export function formatPigmentName(pigment: UnderlyingPigment): string {
 export interface CorrectorBrand {
   brandId: BrandId;
   line: string | null;
+  // The depth the corrector works at, for products that change with it (Wella's green
+  // corrector). Absent in the formula calculator, whose correctors do not.
+  level?: Level;
 }
 
 // A corrective tone as the colorist reaches for it: the brand's own code ("/8 or 0/88")
 // where the brand has one, the tone's name otherwise.
 function formatCorrectorName(tone: ToneFamily, brand?: CorrectorBrand): string {
-  const product = getCorrectorProduct(brand?.brandId, brand?.line, tone);
+  const product = getCorrectorProduct(brand?.brandId, brand?.line, tone, brand?.level);
   if (product === null) return formatToneName(tone);
   if (product.shade === undefined) return product.mixtone ?? formatToneName(tone);
   if (product.mixtone === undefined) return product.shade;
@@ -129,7 +132,7 @@ export interface MixCorrector {
 // The one product a tone is mixed in as: the form the colorist picked, or the line's
 // default. The tone's name where the brand has no product for it.
 export function formatChosenCorrectorName(tone: ToneFamily, brand?: CorrectorBrand, choice?: CorrectorChoice): string {
-  const product = getCorrectorProduct(brand?.brandId, brand?.line, tone);
+  const product = getCorrectorProduct(brand?.brandId, brand?.line, tone, brand?.level);
   if (product === null) return formatToneName(tone);
   const form = choice === "shade" || choice === "mixtone" ? choice : getDefaultCorrectorForm(product);
   return product[form] ?? product.mixtone ?? product.shade ?? formatToneName(tone);

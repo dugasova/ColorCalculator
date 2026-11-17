@@ -236,6 +236,8 @@ export const en = {
     recommendedTone: "Recommended corrective tone",
     recommendedToneValue: "{{grams}} g {{tone}}",
     correctorChoiceLabel: "Corrector to mix in",
+    correctorGramsAria: "Amount of {{tone}}, g",
+    gramsUnit: "g",
     correctorShadeOrMixtone: "{{shade}} or {{mixtone}}",
     correctorWithDeveloper: "{{corrector}} (+ {{grams}} g developer)",
     toneCoveredByShade: "not needed — the shade's own tone cancels the {{pigment}} background",
@@ -514,7 +516,13 @@ export const en = {
       green: "Green",
       blue: "Blue",
       violet: "Violet",
+      "red-orange": "Red-orange",
+      "orange-red": "Orange-red",
+      "orange-yellow": "Orange-yellow",
+      "yellow-orange": "Yellow-orange",
     },
+    expectedTone: "At level {{level}} the lightening background is usually {{tone}}.",
+    expectedToneUse: "Use it",
     qualifiers: {
       "ash-matte": "ash-matte",
       ash: "ash",
@@ -528,8 +536,11 @@ export const en = {
       developer: "Developer",
       technique: "Technique",
       corrector: "Corrector",
-      reflection: "Reflection",
     },
+    correctorNone: "not needed",
+    mixLabel: "Mix",
+    baseDye: "color",
+    neutralizingShadesLabel: "Line shades that neutralize on their own",
     developerValue: "{{percent}}% ({{volume}} vol)",
     techniques: {
       deposit: "Deposit / Toner",
@@ -548,6 +559,28 @@ export const en = {
       greenMultiStep: "Greens from chlorine are best treated with a red color bath first, then the final formula.",
       generic:
         "Add the corrective reflection to your formula and adjust the amount based on the intensity of the unwanted tone.",
+      wellaGreenShade:
+        "A light green cast (e.g. after an ash toner on porous blonde): instead of a mixtone it is safer to add 5–15 g of a ready shade {{shade}} at the same level.",
+      wellaVioletShade:
+        "Violet on porous bleached hair: instead of a mixtone it is safer to add 5–15 g of a ready warm-gold shade at the same level — /3, /03 (9/03, 9/3, 10/03) or /73, /37 (8/73, 9/73). The brown /7 base with gold steadies porous hair and turns a violet dip into a natural beige.",
+      wellaColorTouchVioletClear:
+        "On levels 9–10 the gold shade is often thinned with clear 0/00 to lower its density.",
+      lorealDiaColorShade:
+        "Dia Color has no boosters (only Clear): add 5–15 g of an intense palette shade at the same level, e.g. {{shade}}.",
+      lorealMajirelLightGreen:
+        "A light green on levels 8–10: instead of a booster it is safer to add 5–15 g of a ready red or mahogany shade (.6, .5), e.g. {{shade}}, so the result does not turn bright pink.",
+      wellaColorTouchBlueShade:
+        "Blue from an ash toner that failed on porous ends (blue-grey at levels 8–10): instead of a mixtone a ready warm shade at the same level is safer — /34, /43 (7/43, 8/34, 8/43, 9/43) turn the blue into warm beige or caramel; /73, /74 (7/73, 8/74) at levels 6–8 give a neutral brown without a ginger glint.",
+      matrixBlueWithoutCopper:
+        "SoBoost Copper is being phased out in some regions. Without it, mix SoBoost Red with SoBoost Yellow, or add a C shade (7CC, 8C, 8GC, 6BC).",
+      matrixVioletWithoutYellow:
+        "SoBoost Yellow is being phased out in some regions. Without it, add a G or W shade (8G, 9G, 8W, 9NW).",
+      matrixNoGreenBooster:
+        "SoBoost Green is no longer made: against red, use matt-green Jade (J) shades from the main palette (e.g. 4J, 6J), or mix 3 parts SoBoost Yellow + 1 part SoBoost Blue.",
+      matrixNoVioletBooster:
+        "SoBoost Violet is no longer made: against yellow, add V shades with a violet reflect (e.g. 8V, 10V in Color Sync, SPV in Super Sync, 9AV in SoColor Pre-Bonded), or mix SoBoost Blue + SoBoost Red.",
+      wellaBlueWithoutMixtone:
+        "No 0/43 at hand: mix 0/33 and 0/44 at about 2:1 (red pigment is much denser than yellow). Use 0/30 only for a blue-violet cast or a light ash dip on blonde.",
     },
     strandTest: "Always perform a strand test to verify the result before full application.",
     baseGrams: "Base color amount, g",
