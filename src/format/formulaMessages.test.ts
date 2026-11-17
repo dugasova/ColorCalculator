@@ -47,11 +47,13 @@ describe("formatCorrectiveTones", () => {
     const result = lift({ code: "8.3", level: 8, tone: "gold" });
     const wella = { brandId: "wella", line: "koleston-perfect" };
     expect(formatCorrectiveTones(result, wella)).toBe("2 g /8 or 0/88 + 2 g /6 or 0/66");
-    // L'Oréal's mixtones belong to one line each: Majirel Mix has no blue, Dia has none.
+    // L'Oréal's mixtones belong to one line each (INOA Mix, Majirel Booster); Dia has none.
     expect(formatCorrectiveTones(result, { brandId: "loreal", line: "inoa" })).toBe(
       "2 g .1 or Mix Blue + 2 g .2 or Mix Violet",
     );
-    expect(formatCorrectiveTones(result, { brandId: "loreal", line: "majirel" })).toBe("2 g .1 + 2 g .2 or Mix Violet");
+    expect(formatCorrectiveTones(result, { brandId: "loreal", line: "majirel" })).toBe(
+      "2 g .1 or Booster Blue + 2 g .2 or Booster Violet",
+    );
     expect(formatCorrectiveTones(result, { brandId: "loreal", line: "dia-color" })).toBe("2 g .1 + 2 g .2");
     expect(formatToneWarning(result.toneWarning!, wella)).toContain("/8 or 0/88 + /6 or 0/66");
   });
@@ -74,7 +76,7 @@ describe("formatCorrectiveTones", () => {
     const matrix = { brandId: "matrix", line: "socolor" };
     const cap = { line: "socolor", maxCorrectorShareOfColor: 0.25 };
     expect(formatCorrectiveTones(lift({ code: "8G", level: 8, tone: "gold", ...cap }), matrix)).toBe(
-      "2 g SoBoost Blue + 2 g SoBoost Violet (+ 4 g developer)",
+      "2 g SoBoost Blue + 2 g V (+ 4 g developer)",
     );
     // The Rule of 10 asks for 14 g on a 2 -> 3 lift; 30 g of dye takes 7.5 g at most.
     const dark = calculateFullFormula({
@@ -85,7 +87,8 @@ describe("formatCorrectiveTones", () => {
       mixingRatioStrategy: () => ({ colorParts: 1, developerParts: 1 }),
     });
     expect(dark.correctorGrams).toBe(7.5);
-    expect(formatCorrectiveTones(dark, matrix)).toBe("7.5 g SoBoost Green (+ 7.5 g developer)");
+    // SoBoost Green is no longer sold: a Jade (J) shade instead.
+    expect(formatCorrectiveTones(dark, matrix)).toBe("7.5 g J (+ 7.5 g developer)");
     // Super Sync has no boosters.
     expect(
       formatCorrectiveTones(lift({ code: "8.3", level: 8, tone: "gold" }), { brandId: "matrix", line: "super-sync" }),
@@ -167,7 +170,7 @@ describe("an applied corrector in the mix", () => {
     // nothing left to mix in once every tone is skipped
     expect(buildMixCorrector(result, wella, { ash: "skip", violet: "skip" })).toBeNull();
     // a line with no mixtone for the tone falls back to its shade
-    expect(buildMixCorrector(result, { brandId: "loreal", line: "majirel" }, { ash: "mixtone" })?.parts[0].name).toBe(
+    expect(buildMixCorrector(result, { brandId: "loreal", line: "dia-color" }, { ash: "mixtone" })?.parts[0].name).toBe(
       ".1",
     );
   });

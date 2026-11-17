@@ -1,13 +1,19 @@
 import { useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { getComplementaryCorrector, type UnwantedTone } from "../../engine/correction";
+import {
+  getComplementaryCorrector,
+  getDominantWheelTone,
+  type UnwantedTone,
+  type WheelTone,
+} from "../../engine/correction";
 
 export interface NeutralizationWheelProps {
-  tones: UnwantedTone[];
-  toneColors: Record<UnwantedTone, string>;
+  tones: WheelTone[];
+  toneColors: Record<WheelTone, string>;
+  // A blend is shown on the wheel by the color it leans to.
   selectedTone: UnwantedTone;
-  onSelectTone: (tone: UnwantedTone) => void;
+  onSelectTone: (tone: WheelTone) => void;
 }
 
 const WHEEL_SIZE = 220;
@@ -43,12 +49,12 @@ function wedgePath(centerAngle: number): string {
 // a wedge is still wired to the same selection as a convenience for pointer users.
 export function NeutralizationWheel({ tones, toneColors, selectedTone, onSelectTone }: NeutralizationWheelProps) {
   const { t } = useTranslation();
-  const [hoveredTone, setHoveredTone] = useState<UnwantedTone | null>(null);
-  const activeTone = hoveredTone ?? selectedTone;
+  const [hoveredTone, setHoveredTone] = useState<WheelTone | null>(null);
+  const activeTone = hoveredTone ?? getDominantWheelTone(selectedTone);
   const activeCorrector = getComplementaryCorrector(activeTone);
   const complementTone = activeCorrector.color;
 
-  const angleOf = (tone: UnwantedTone) => tones.indexOf(tone) * WEDGE_SPAN_DEG;
+  const angleOf = (tone: WheelTone) => tones.indexOf(tone) * WEDGE_SPAN_DEG;
 
   const activeToneName = t(`correction.tones.${activeTone}`);
   const complementColorName = t(`correction.tones.${complementTone}`);

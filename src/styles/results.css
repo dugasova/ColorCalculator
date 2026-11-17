@@ -227,6 +227,18 @@
   gap: 4px 16px;
 }
 
+.corrector-choice__grams {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.corrector-choice__grams input {
+  width: 4.5rem;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
 .corrector-choice__option {
   display: inline-flex;
   align-items: center;

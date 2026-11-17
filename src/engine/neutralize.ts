@@ -59,6 +59,10 @@ const CORRECTIVE_TONE: Record<NeutralizingColor, ToneFamily> = {
   violet: "violet",
 };
 
+export function getCorrectiveTone(color: NeutralizingColor): ToneFamily {
+  return CORRECTIVE_TONE[color];
+}
+
 // Which neutralizing colors a shade's own tone already brings. Warm and natural families
 // bring none.
 const TONE_NEUTRALIZING_COLORS: Partial<Record<ToneFamily, NeutralizingColor[]>> = {
@@ -75,14 +79,14 @@ const TONE_NEUTRALIZING_COLORS: Partial<Record<ToneFamily, NeutralizingColor[]>>
 // as plain blue until the colorist confirms them.
 const WELLA_LINES: ReadonlySet<string> = new Set(["koleston-perfect", "color-touch"]);
 
-type NeutralizingShade = Pick<Shade, "tone" | "secondaryTone" | "line">;
+export type NeutralizingShade = Pick<Shade, "tone" | "secondaryTone" | "line">;
 
 function getToneNeutralizingColors(tone: ToneFamily, line: string | undefined): NeutralizingColor[] {
   if (tone === "slate-grey" && line !== undefined && WELLA_LINES.has(line)) return ["blue", "violet"];
   return TONE_NEUTRALIZING_COLORS[tone] ?? [];
 }
 
-function getShadeNeutralizingColors(shade: NeutralizingShade): Set<NeutralizingColor> {
+export function getShadeNeutralizingColors(shade: NeutralizingShade): Set<NeutralizingColor> {
   return new Set([
     ...getToneNeutralizingColors(shade.tone, shade.line),
     ...(shade.secondaryTone !== undefined ? getToneNeutralizingColors(shade.secondaryTone, shade.line) : []),

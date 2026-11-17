@@ -11,7 +11,9 @@
 
 .tone-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Ten tones, the blends with long names ("Помаранчево-червоний"): as many columns as
+     fit, so a phone gets two and a wide screen more. */
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
   gap: 8px;
 }
 
@@ -19,6 +21,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  /* A blend's name breaks after its hyphen rather than running out of the button. */
+  text-align: left;
   padding: 10px 12px;
   border: 1px solid var(--brand-border);
   border-radius: 0.5rem;
@@ -130,6 +135,22 @@
 
 .correction__stat-value--small {
   font-size: 1.05rem;
+}
+
+.correction__expected {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  font-size: 0.85rem;
+  color: var(--brand-muted);
+}
+
+.correction__mix {
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .correction__explanation {

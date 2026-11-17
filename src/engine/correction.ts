@@ -1,17 +1,59 @@
 import {
+  getUnderlyingPigment,
   pickDeveloperVolume,
   DEVELOPER_VOLUME_PERCENT,
   type DeveloperVolume,
   type Level,
   type LiftTable,
 } from "./levels";
+import type { Brand } from "./brands";
+import type { CorrectiveToneGrams } from "./formula";
+import { getCorrectiveTone, getNeutralizer, getShadeNeutralizingColors } from "./neutralize";
+import type { MixingRatio, Shade, ToneFamily } from "./shades";
 
-export type UnwantedTone = "red" | "orange" | "yellow" | "green" | "blue" | "violet";
+// The six colors of the wheel.
+export type WheelTone = "red" | "orange" | "yellow" | "green" | "blue" | "violet";
+
+// What the hair shows that the colorist wants gone: a color of the wheel, or one of the
+// warm blends lifting reveals between them (the same blends as the background table in
+// levels.ts, so "yellow-orange" here is cancelled exactly like a level-8 background).
+export type UnwantedTone = WheelTone | "red-orange" | "orange-red" | "orange-yellow" | "yellow-orange";
+
+export const UNWANTED_TONES: UnwantedTone[] = [
+  "red",
+  "red-orange",
+  "orange-red",
+  "orange",
+  "orange-yellow",
+  "yellow-orange",
+  "yellow",
+  "green",
+  "blue",
+  "violet",
+];
+
+// The wheel color a blend leans to (its first-named, dominant color).
+const DOMINANT_WHEEL_TONE: Record<UnwantedTone, WheelTone> = {
+  red: "red",
+  "red-orange": "red",
+  "orange-red": "orange",
+  orange: "orange",
+  "orange-yellow": "orange",
+  "yellow-orange": "yellow",
+  yellow: "yellow",
+  green: "green",
+  blue: "blue",
+  violet: "violet",
+};
+
+export function getDominantWheelTone(tone: UnwantedTone): WheelTone {
+  return DOMINANT_WHEEL_TONE[tone];
+}
 
 export type CorrectionTechnique = "deposit" | "lift-tone" | "multi-step";
 
 export interface Corrector {
-  color: UnwantedTone;
+  color: WheelTone;
   qualifier: string;
   reflections: string[];
 }
@@ -19,7 +61,7 @@ export interface Corrector {
 // The Oswald color star: each unwanted tone is neutralized by its direct
 // opposite. Reflection codes and qualifiers follow the professional
 // nomenclature used across brand charts (e.g. Wella's .1 ash, .2 violet).
-const COMPLEMENTARY_CORRECTORS: Record<UnwantedTone, Corrector> = {
+const COMPLEMENTARY_CORRECTORS: Record<WheelTone, Corrector> = {
   red: { color: "green", qualifier: "ash-matte", reflections: [".13", ".31"] },
   orange: { color: "blue", qualifier: "ash", reflections: [".1", ".01"] },
   yellow: { color: "violet", qualifier: "iridescent", reflections: [".2"] },
@@ -29,7 +71,7 @@ const COMPLEMENTARY_CORRECTORS: Record<UnwantedTone, Corrector> = {
 };
 
 export function getComplementaryCorrector(tone: UnwantedTone): Corrector {
-  return COMPLEMENTARY_CORRECTORS[tone];
+  return COMPLEMENTARY_CORRECTORS[getDominantWheelTone(tone)];
 }
 
 const LIFT_MODERATE_MAX_DIFF = 2;
@@ -121,4 +163,131 @@ export function calculateCorrectorGrams(level: Level, baseGrams: number): number
   const gramsPer30g =
     level >= RULE_OF_TEN_BASE_LEVEL ? RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G : RULE_OF_TEN_BASE_LEVEL - level;
   return Math.round(gramsPer30g * (baseGrams / RULE_OF_TEN_BASE_GRAMS) * 10) / 10;
+}
+
+// Over-corrected hair (green, blue or violet) is warmed back with the opposite warm tone.
+// The other unwanted tones are a lightening background, cancelled by the same blended
+// neutralizer the formula calculator uses (neutralize.ts).
+const WARM_CORRECTIVE_TONE: Partial<Record<UnwantedTone, ToneFamily>> = {
+  green: "red",
+  blue: "copper",
+  violet: "gold",
+};
+
+export interface CorrectionTonePart {
+  tone: ToneFamily;
+  // This tone's part of the whole corrector; the parts add up to 1.
+  share: number;
+}
+
+// The corrective tones for an unwanted tone, dominant first.
+export function getCorrectionTones(unwanted: UnwantedTone): CorrectionTonePart[] {
+  const warm = WARM_CORRECTIVE_TONE[unwanted];
+  if (warm !== undefined) return [{ tone: warm, share: 1 }];
+  // Every remaining UnwantedTone is also an UnderlyingPigment.
+  return getNeutralizer(unwanted as Exclude<UnwantedTone, "green" | "blue" | "violet">).map(part => ({
+    tone: getCorrectiveTone(part.color),
+    share: part.share,
+  }));
+}
+
+// The tone a lightening background usually shows at `level`: the warm tone to expect, and
+// the colorist's starting guess. The palest backgrounds are plain yellow here.
+export function getExpectedUnwantedTone(level: Level): UnwantedTone {
+  const pigment = getUnderlyingPigment(level);
+  return pigment === "pale-yellow" || pigment === "very-light-yellow" ? "yellow" : pigment;
+}
+
+// The corrector by the Rule of 10 at the level being colored, split by the tones' shares.
+// `maxShareOfColor` is a manufacturer cap on corrector weight against the dye (Matrix
+// SoColor 25%): every tone is scaled by the same factor, so the blend keeps its proportions.
+export function calculateCorrectionTones(
+  unwanted: UnwantedTone,
+  level: Level,
+  baseGrams: number,
+  maxShareOfColor?: number,
+): CorrectiveToneGrams[] {
+  const wholeGrams = calculateCorrectorGrams(level, baseGrams);
+  const maxGrams = maxShareOfColor !== undefined ? baseGrams * maxShareOfColor : Infinity;
+  const scale = wholeGrams > maxGrams ? maxGrams / wholeGrams : 1;
+  return getCorrectionTones(unwanted).map(part => ({
+    tone: part.tone,
+    grams: Math.round(wholeGrams * part.share * scale * 10) / 10,
+  }));
+}
+
+// The tone families whose shades warm back over-corrected hair. Green is cancelled by red,
+// and mahogany (red-violet) does it too (Wella /5, /65).
+const WARM_SHADE_TONES: Partial<Record<UnwantedTone, ToneFamily[]>> = {
+  green: ["red", "mahogany"],
+  blue: ["copper"],
+  violet: ["gold"],
+};
+
+// Tone families that strengthen a wheel color: a shade carrying one of them deepens the
+// very tone being corrected, whatever else it brings (colorist, 2026-11-17: 8/41 turns
+// orange stronger, 8/38 the yellow of a yellow-orange background). Wella's /4 is charted
+// red, so red counts against orange too.
+const AMPLIFYING_TONES: Record<WheelTone, ToneFamily[]> = {
+  red: ["red", "mahogany", "copper"],
+  orange: ["copper", "red"],
+  yellow: ["gold"],
+  green: ["matt"],
+  blue: ["ash"],
+  violet: ["violet"],
+};
+
+// The wheel colors an unwanted tone is made of: both for a blend.
+const UNWANTED_TONE_COLORS: Record<UnwantedTone, WheelTone[]> = {
+  red: ["red"],
+  "red-orange": ["red", "orange"],
+  "orange-red": ["orange", "red"],
+  orange: ["orange"],
+  "orange-yellow": ["orange", "yellow"],
+  "yellow-orange": ["yellow", "orange"],
+  yellow: ["yellow"],
+  green: ["green"],
+  blue: ["blue"],
+  violet: ["violet"],
+};
+
+function cancelsUnwantedTone(shade: Shade, unwanted: UnwantedTone): boolean {
+  const shadeTones = [shade.tone, ...(shade.secondaryTone !== undefined ? [shade.secondaryTone] : [])];
+  const amplifying = UNWANTED_TONE_COLORS[unwanted].flatMap(color => AMPLIFYING_TONES[color]);
+  if (shadeTones.some(tone => amplifying.includes(tone))) return false;
+  const warm = WARM_SHADE_TONES[unwanted];
+  if (warm !== undefined) return shadeTones.some(tone => warm.includes(tone));
+  const carried = getShadeNeutralizingColors(shade);
+  return getNeutralizer(unwanted as Exclude<UnwantedTone, "green" | "blue" | "violet">).every(part =>
+    carried.has(part.color),
+  );
+}
+
+function getLineShades(brand: Brand, line: string | null): Shade[] {
+  return brand.shades.filter(shade => (shade.line ?? null) === line);
+}
+
+// Shades of the line at `level` whose own tone already cancels the unwanted one, and none
+// of whose tones strengthens it: a toner that needs no corrector at all.
+export function findNeutralizingShades(
+  brand: Brand,
+  line: string | null,
+  unwanted: UnwantedTone,
+  level: Level,
+): Shade[] {
+  return getLineShades(brand, line).filter(shade => shade.level === level && cancelsUnwantedTone(shade, unwanted));
+}
+
+// The line's mixing ratio at `level`: a shade's own fixed ratio where the line has one
+// (Color Touch 1:2, Koleston's 12 series), the brand's strategy otherwise.
+export function getLineMixingRatio(brand: Brand, line: string | null, startLevel: Level, level: Level): MixingRatio {
+  const shades = getLineShades(brand, line);
+  const atLevel = shades.find(shade => shade.level === level) ?? shades[0];
+  return atLevel?.fixedMixingRatio ?? brand.mixingRatio(startLevel, level);
+}
+
+// The manufacturer's cap on corrector weight against the dye in this line, if any.
+export function getLineCorrectorCap(brand: Brand, line: string | null): number | undefined {
+  return getLineShades(brand, line).find(shade => shade.maxCorrectorShareOfColor !== undefined)
+    ?.maxCorrectorShareOfColor;
 }
