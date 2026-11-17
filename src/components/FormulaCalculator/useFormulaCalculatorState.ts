@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getAppliedCorrector } from "../../engine/formula";
 import { getPrePigmentationNeed, calculatePrePigmentation } from "../../engine/prePigmentation";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { RepeatFormulaRequest } from "../../history";
@@ -54,7 +55,12 @@ export function useFormulaCalculatorState(
   // plus any pre-pigmentation filler mixed on top (also never its diluent).
   const totalProductGrams =
     effectiveResult.grams !== null
-      ? effectiveResult.grams.colorGrams + (prePigmentationResult?.grams?.fillerGrams ?? 0)
+      ? effectiveResult.grams.colorGrams +
+        (prePigmentationResult?.grams?.fillerGrams ?? 0) +
+        // ...and the corrector, once the colorist mixes it in.
+        (base.neutralizationApplied
+          ? (getAppliedCorrector(effectiveResult, base.correctorSelection)?.correctorGrams ?? 0)
+          : 0)
       : null;
   const pricing = usePricing(brands[brandId].pricePerGram, totalProductGrams);
 

@@ -2,7 +2,14 @@ import { describe, it, expect, afterEach } from "vitest";
 import i18n from "../i18n";
 import { calculateFullFormula } from "../engine/formula";
 import type { Shade } from "../engine/shades";
-import { formatCorrectiveTones, formatToneWarning, isBackgroundCoveredByShade } from "./formulaMessages";
+import {
+  buildMixCorrector,
+  formatMixCorrector,
+  formatCorrectiveTones,
+  formatToneWarning,
+  isBackgroundCoveredByShade,
+} from "./formulaMessages";
+import { buildMixSummary } from "./formatFormula";
 
 afterEach(() => i18n.changeLanguage("en"));
 
@@ -117,6 +124,51 @@ describe("formatToneWarning", () => {
     void i18n.changeLanguage("uk");
     expect(formatToneWarning({ tone: "gold", pigment: "yellow", recommended: "violet" })).toBe(
       "Обраний тон «золотистий» не нейтралізує жовтий фон освітлення; додайте коректор «фіолетовий»",
+    );
+  });
+});
+
+describe("an applied corrector in the mix", () => {
+  it("goes on top of the dye and brings developer of its own at the formula's ratio", () => {
+    const shade: Shade = { code: "8/3", level: 8, tone: "gold" };
+    const result = calculateFullFormula({
+      startLevel: 6,
+      targetShade: shade,
+      grayPercent: 0,
+      totalGrams: 60,
+      mixingRatioStrategy: () => ({ colorParts: 1, developerParts: 2 }),
+    });
+    const corrector = buildMixCorrector(result, { brandId: "wella", line: "koleston-perfect" });
+    expect(corrector).toEqual({
+      parts: [
+        { name: "0/88", grams: 2 },
+        { name: "0/66", grams: 2 },
+      ],
+      developerGrams: 8,
+    });
+    // 20 g of dye and 40 g of developer without it
+    expect(buildMixSummary(shade, result.grams!, null, 0)).toBe("8/3- 20.0 g developer 40.0 g");
+    expect(buildMixSummary(shade, result.grams!, null, 0, null, 0, null, corrector)).toBe(
+      "8/3- 20.0 g 0/88- 2.0 g 0/66- 2.0 g developer 48.0 g",
+    );
+  });
+
+  it("is null when the formula calls for no corrector", () => {
+    expect(buildMixCorrector(lift({ code: "6.1", level: 6, tone: "ash" }))).toBeNull();
+  });
+
+  it("takes each tone in the form the colorist picked and leaves out the ones skipped", () => {
+    const result = lift({ code: "8/3", level: 8, tone: "gold" });
+    const wella = { brandId: "wella", line: "koleston-perfect" };
+    // the blue part as an ordinary /8 shade, the violet part not at all
+    const corrector = buildMixCorrector(result, wella, { ash: "shade", violet: "skip" });
+    expect(corrector?.parts).toEqual([{ name: "/8", grams: 2 }]);
+    expect(formatMixCorrector(corrector!)).toBe("2 g /8");
+    // nothing left to mix in once every tone is skipped
+    expect(buildMixCorrector(result, wella, { ash: "skip", violet: "skip" })).toBeNull();
+    // a line with no mixtone for the tone falls back to its shade
+    expect(buildMixCorrector(result, { brandId: "loreal", line: "majirel" }, { ash: "mixtone" })?.parts[0].name).toBe(
+      ".1",
     );
   });
 });

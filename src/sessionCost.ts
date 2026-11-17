@@ -1,3 +1,4 @@
+import { getAppliedCorrector } from "./engine/formula";
 import { calculateProductCost } from "./engine/pricing";
 import type { ColorHistoryStep, HistoryStep } from "./history";
 
@@ -30,7 +31,12 @@ export function stepTotalGrams(step: HistoryStep): number {
   const scale = actualGramsScale(step);
   const colorGrams = scale === 1 ? grams.colorGrams : Math.round(grams.colorGrams * scale * 10) / 10;
   const fillerGrams = step.prePigmentation?.grams?.fillerGrams ?? 0;
-  return colorGrams + fillerGrams;
+  // An applied corrector is dye too; it is not scaled by the weighed-out figure, which
+  // records the main shade alone.
+  const correctorGrams = step.neutralizationApplied
+    ? (getAppliedCorrector(step.result, step.correctorSelection)?.correctorGrams ?? 0)
+    : 0;
+  return colorGrams + fillerGrams + correctorGrams;
 }
 
 // Null for an empty session, same as the callers' existing `steps.length > 0 ? ... : null`.

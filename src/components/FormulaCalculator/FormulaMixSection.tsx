@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import {
+  buildMixCorrector,
   formatCorrectiveTones,
   formatPigmentName,
   getGrayCoverageNote,
@@ -13,6 +14,8 @@ import type { StockShortage } from "../../stock";
 import { StockShortageWarnings } from "../common/StockShortageWarnings";
 import { LiftOutcome, PorosityNotices, ToneWarnings } from "./FormulaNotices";
 import type { FormulaMix, FormulaProduct } from "./formulaResultsModel";
+import type { CorrectorSelection } from "../../engine/correctorProducts";
+import { CorrectorChoiceField } from "./fields/CorrectorChoiceField";
 
 export interface FormulaMixSectionProps {
   product: FormulaProduct;
@@ -22,6 +25,7 @@ export interface FormulaMixSectionProps {
   shortages: StockShortage[];
   neutralizationApplied: boolean;
   onNeutralizationAppliedChange: (applied: boolean) => void;
+  onCorrectorSelectionChange: (selection: CorrectorSelection) => void;
 }
 
 // The first block of the results panel: developer and ratio, the mix to weigh out, and
@@ -34,6 +38,7 @@ export function FormulaMixSection({
   shortages,
   neutralizationApplied,
   onNeutralizationAppliedChange,
+  onCorrectorSelectionChange,
 }: FormulaMixSectionProps) {
   const { t } = useTranslation();
   const {
@@ -45,7 +50,10 @@ export function FormulaMixSection({
     additionalShade2Grams,
     blend,
     naturalBase,
+    correctorSelection = {},
   } = mix;
+
+  const mixCorrector = neutralizationApplied ? buildMixCorrector(result, product, correctorSelection) : null;
 
   return (
     <>
@@ -81,6 +89,7 @@ export function FormulaMixSection({
                   additionalShade2,
                   additionalShade2Grams,
                   naturalBase,
+                  mixCorrector,
                 )
               : buildMixSummary(
                   targetShade,
@@ -90,6 +99,7 @@ export function FormulaMixSection({
                   additionalShade2,
                   additionalShade2Grams,
                   naturalBase,
+                  mixCorrector,
                 )}
           </span>
         </div>
@@ -144,8 +154,16 @@ export function FormulaMixSection({
           {t("results.applyNeutralization")}
         </label>
       )}
+      {neutralizationApplied && (
+        <CorrectorChoiceField
+          result={result}
+          brand={product}
+          selection={correctorSelection}
+          onSelectionChange={onCorrectorSelectionChange}
+        />
+      )}
 
-      <ToneWarnings result={result} neutralizationApplied={neutralizationApplied} brand={product} />
+      <ToneWarnings result={result} neutralizationApplied={mixCorrector !== null} brand={product} />
     </>
   );
 }

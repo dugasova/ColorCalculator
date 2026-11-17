@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { applyAdditionalShade, calculateFullFormula, resolveShadeMixingRatio } from "../../engine/formula";
 import type { DeveloperVolume, Level } from "../../engine/levels";
 import type { Brand, BrandId } from "../../engine/brands";
+import type { CorrectorSelection } from "../../engine/correctorProducts";
 import type { MixingRatio, Shade } from "../../engine/shades";
 import type { HairCanvas, Porosity } from "../../engine/canvas";
 import type { ColorStepSeed } from "../../history";
@@ -116,6 +117,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   const [startLevel, setStartLevel] = useState<Level>(initial?.startLevel ?? 10);
   const [grayPercent, setGrayPercent] = useState(initial?.grayPercent ?? 0);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
+  const [correctorSelection, setCorrectorSelection] = useState<CorrectorSelection>({});
 
   const selection = useShadeSelection(brands, initial);
   const { brandId, lineShades, targetShade } = selection;
@@ -152,6 +154,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   function resetShadeDependentOverrides() {
     overrides.resetManualOverrides();
     setNeutralizationApplied(false);
+    setCorrectorSelection({});
     // Only the picked natural shade is shade-dependent; whether to dose a natural base at
     // all follows the client's gray %, not the target, so grayNaturalApplied carries over.
     grayNatural.setNaturalBaseShadeCode(null);
@@ -193,6 +196,8 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     setChemicalHistory,
     neutralizationApplied,
     setNeutralizationApplied,
+    correctorSelection,
+    setCorrectorSelection,
 
     // brand / line / shade
     brandId,

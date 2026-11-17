@@ -235,6 +235,7 @@ export const en = {
     afterPhotoLabel: "After photo",
     recommendedTone: "Recommended corrective tone",
     recommendedToneValue: "{{grams}} g {{tone}}",
+    correctorChoiceLabel: "Corrector to mix in",
     correctorShadeOrMixtone: "{{shade}} or {{mixtone}}",
     correctorWithDeveloper: "{{corrector}} (+ {{grams}} g developer)",
     toneCoveredByShade: "not needed — the shade's own tone cancels the {{pigment}} background",

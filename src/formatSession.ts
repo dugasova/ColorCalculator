@@ -130,6 +130,7 @@ function formatStepText(step: HistoryStep, previousStep: HistoryStep | undefined
     additionalShade2Grams: step.additionalShade2Grams ?? 0,
     blend: step.blend ?? null,
     neutralizationApplied: step.neutralizationApplied,
+    correctorSelection: step.correctorSelection,
     naturalBase: step.naturalBase ?? null,
   });
 

@@ -87,6 +87,8 @@ export default function FormulaCalculator({
     setBlendPrimaryPercent,
     neutralizationApplied,
     setNeutralizationApplied,
+    correctorSelection,
+    setCorrectorSelection,
     grayNaturalApplied,
     setGrayNaturalApplied,
     naturalBaseShadeCode,
@@ -287,11 +289,13 @@ export default function FormulaCalculator({
           additionalShade2Grams,
           blend,
           naturalBase,
+          correctorSelection,
         }}
         applicationZone={applicationZone}
         prePigmentationResult={prePigmentationResult}
         neutralizationApplied={neutralizationApplied}
         onNeutralizationAppliedChange={setNeutralizationApplied}
+        onCorrectorSelectionChange={setCorrectorSelection}
         appliedBy={appliedBy}
         processingMinutes={processingMinutes}
         onProcessingMinutesChange={setManualProcessingMinutes}

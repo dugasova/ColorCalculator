@@ -4,6 +4,7 @@ import type { ApplicationZone } from "../../engine/applicationZone";
 import { formatFillerStepText } from "../../format/formatPrePigmentation";
 import { formatBrandLineLabel } from "../../engine/formatLineLabel";
 import type { PrePigmentationResult } from "../../engine/prePigmentation";
+import type { CorrectorSelection } from "../../engine/correctorProducts";
 import type { RepeatFormulaRequest } from "../../history";
 import { PrePigmentationStep } from "./PrePigmentationStep";
 import { SessionDetailsPanel } from "./SessionDetailsPanel";
@@ -29,6 +30,7 @@ export interface FormulaResultsProps {
   prePigmentationResult: PrePigmentationResult | null;
   neutralizationApplied: boolean;
   onNeutralizationAppliedChange: (applied: boolean) => void;
+  onCorrectorSelectionChange: (selection: CorrectorSelection) => void;
   appliedBy: string;
   processingMinutes: number;
   onProcessingMinutesChange: (minutes: number) => void;
@@ -55,6 +57,7 @@ export function FormulaResults({
   prePigmentationResult,
   neutralizationApplied,
   onNeutralizationAppliedChange,
+  onCorrectorSelectionChange,
   appliedBy,
   processingMinutes,
   onProcessingMinutesChange,
@@ -124,6 +127,7 @@ export function FormulaResults({
         shortages={shortages}
         neutralizationApplied={neutralizationApplied}
         onNeutralizationAppliedChange={onNeutralizationAppliedChange}
+        onCorrectorSelectionChange={onCorrectorSelectionChange}
       />
       <TimingPricingSection
         recommendedProcessingMinutes={mix.result.recommendedProcessingMinutes}

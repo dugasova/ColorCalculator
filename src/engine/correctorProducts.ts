@@ -85,3 +85,14 @@ export function getCorrectorDeveloperParts(
 ): number | null {
   return brandId === "matrix" && line === "socolor" ? 1 : null;
 }
+
+// What the colorist decided for one tone of the corrector: take it as an ordinary shade,
+// as a mixtone, or leave it out. A tone with no entry is taken, in its default form.
+export type CorrectorChoice = "shade" | "mixtone" | "skip";
+export type CorrectorSelection = Partial<Record<ToneFamily, CorrectorChoice>>;
+
+// The form a tone is mixed in when the colorist has not picked one: the mixtone where the
+// line has it, since it is the purer corrector.
+export function getDefaultCorrectorForm(product: CorrectorProduct): "shade" | "mixtone" {
+  return product.mixtone !== undefined ? "mixtone" : "shade";
+}

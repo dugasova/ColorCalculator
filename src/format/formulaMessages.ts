@@ -6,8 +6,10 @@ import type {
   LiftUnsupportedWarning,
   ToneWarning,
 } from "../engine/formula";
+import { getAppliedCorrector } from "../engine/formula";
 import type { BrandId } from "../engine/brands";
-import { getCorrectorDeveloperParts, getCorrectorProduct } from "../engine/correctorProducts";
+import { getCorrectorDeveloperParts, getCorrectorProduct, getDefaultCorrectorForm } from "../engine/correctorProducts";
+import type { CorrectorChoice, CorrectorSelection } from "../engine/correctorProducts";
 import type { UnderlyingPigment } from "../engine/levels";
 import type { ToneFamily } from "../engine/shades";
 import { formatDeveloperVolume } from "./formatDeveloperVolume";
@@ -115,4 +117,43 @@ export function formatPorosityAdjustment(
     from: formatDeveloperVolume(adjustment.fromDeveloperVolume, developerPercentOverride),
     to: formatDeveloperVolume(result.developerVolume, developerPercentOverride),
   });
+}
+
+// The corrector as lines of the mix: each tone under the name the colorist reaches for,
+// and the developer it adds to the bowl. Null when the formula calls for no corrector.
+export interface MixCorrector {
+  parts: { name: string; grams: number }[];
+  developerGrams: number;
+}
+
+// The one product a tone is mixed in as: the form the colorist picked, or the line's
+// default. The tone's name where the brand has no product for it.
+export function formatChosenCorrectorName(tone: ToneFamily, brand?: CorrectorBrand, choice?: CorrectorChoice): string {
+  const product = getCorrectorProduct(brand?.brandId, brand?.line, tone);
+  if (product === null) return formatToneName(tone);
+  const form = choice === "shade" || choice === "mixtone" ? choice : getDefaultCorrectorForm(product);
+  return product[form] ?? product.mixtone ?? product.shade ?? formatToneName(tone);
+}
+
+export function buildMixCorrector(
+  result: CorrectorResult & Pick<FullFormula, "mixingRatio">,
+  brand?: CorrectorBrand,
+  selection?: CorrectorSelection,
+): MixCorrector | null {
+  const applied = getAppliedCorrector(result, selection);
+  if (applied === null) return null;
+  return {
+    parts: applied.tones.map(({ tone, grams }) => ({
+      name: formatChosenCorrectorName(tone, brand, selection?.[tone]),
+      grams,
+    })),
+    developerGrams: applied.developerGrams,
+  };
+}
+
+// The corrector actually mixed in, as one phrase: "4 g 0/88 + 4 g 0/66".
+export function formatMixCorrector(corrector: MixCorrector): string {
+  return corrector.parts
+    .map(part => i18n.t("results.recommendedToneValue", { grams: part.grams, tone: part.name }))
+    .join(" + ");
 }

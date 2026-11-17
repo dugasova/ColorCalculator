@@ -58,6 +58,7 @@ export function useColorStepReport({
     additionalShade2,
     additionalShade2Grams,
     neutralizationApplied,
+    correctorSelection,
     processingMinutes,
     naturalBase,
   } = formula;
@@ -108,6 +109,7 @@ export function useColorStepReport({
       blend: null,
       prePigmentation: prePigmentationResult,
       neutralizationApplied,
+      correctorSelection,
       naturalBase,
       processingMinutes,
       pricePerGram,
@@ -133,6 +135,7 @@ export function useColorStepReport({
       additionalShade2Grams,
       prePigmentationResult,
       neutralizationApplied,
+      correctorSelection,
       naturalBase,
       processingMinutes,
       pricePerGram,

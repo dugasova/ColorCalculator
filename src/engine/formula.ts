@@ -7,6 +7,7 @@ import {
 } from "./levels";
 import { assessNeutralization } from "./neutralize";
 import { calculateCorrectorGrams } from "./correction";
+import type { CorrectorSelection } from "./correctorProducts";
 import type { Porosity } from "./canvas";
 import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
 import {
@@ -429,5 +430,40 @@ export function calculateFullFormula({
     liftUnsupportedWarning,
     grams,
     porosityAdjustment,
+  };
+}
+
+// The corrector once the colorist decides to mix it in: it goes on top of the dye, and
+// takes developer of its own at the formula's ratio, so the bowl grows by both.
+export interface AppliedCorrector {
+  tones: CorrectiveToneGrams[];
+  correctorGrams: number;
+  developerGrams: number;
+}
+
+// The corrector tone by tone. A result saved before correctors could be blends has only
+// the one tone.
+export function getCorrectiveToneGrams(
+  result: Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones">,
+): CorrectiveToneGrams[] {
+  if (result.recommendedCorrectiveTone === null) return [];
+  return result.correctiveTones !== undefined && result.correctiveTones.length > 0
+    ? result.correctiveTones
+    : [{ tone: result.recommendedCorrectiveTone, grams: result.correctorGrams ?? 0 }];
+}
+
+// `selection` leaves out the tones the colorist skipped; without one, every tone is taken.
+export function getAppliedCorrector(
+  result: Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones" | "mixingRatio">,
+  selection?: CorrectorSelection,
+): AppliedCorrector | null {
+  const tones = getCorrectiveToneGrams(result).filter(part => selection?.[part.tone] !== "skip");
+  const correctorGrams = Math.round(tones.reduce((sum, part) => sum + part.grams, 0) * 10) / 10;
+  if (correctorGrams <= 0) return null;
+  const { colorParts, developerParts } = result.mixingRatio;
+  return {
+    tones,
+    correctorGrams,
+    developerGrams: Math.round(((correctorGrams * developerParts) / colorParts) * 10) / 10,
   };
 }

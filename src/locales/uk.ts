@@ -242,6 +242,7 @@ export const uk: typeof en = {
     afterPhotoLabel: "Фото «після»",
     recommendedTone: "Рекомендований коригувальний тон",
     recommendedToneValue: "{{grams}} г {{tone}}",
+    correctorChoiceLabel: "Коректор у суміш",
     correctorShadeOrMixtone: "{{shade}} або {{mixtone}}",
     correctorWithDeveloper: "{{corrector}} (+ {{grams}} г окисника)",
     toneCoveredByShade: "не потрібен — тон самого відтінку гасить {{pigment}} фон",
