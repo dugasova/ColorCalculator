@@ -9,7 +9,7 @@ import {
 import type { Brand } from "./brands";
 import type { CorrectiveToneGrams } from "./formula";
 import { getCorrectiveTone, getNeutralizer, getShadeNeutralizingColors } from "./neutralize";
-import type { MixingRatio, Shade, ToneFamily } from "./shades";
+import type { CorrectorRule, MixingRatio, Shade, ToneFamily } from "./shades";
 
 // The six colors of the wheel.
 export type WheelTone = "red" | "orange" | "yellow" | "green" | "blue" | "violet";
@@ -159,10 +159,27 @@ const RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G = 0.5;
 // actual amount used. Traditionally read off as a length (cm) of corrector/microtone
 // squeezed from the tube; measured out on a scale instead, the standard colorist
 // convention treats 1cm of tube as ~1g, so the same number of grams is used directly.
-export function calculateCorrectorGrams(level: Level, baseGrams: number): number {
-  const gramsPer30g =
-    level >= RULE_OF_TEN_BASE_LEVEL ? RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G : RULE_OF_TEN_BASE_LEVEL - level;
-  return Math.round(gramsPer30g * (baseGrams / RULE_OF_TEN_BASE_GRAMS) * 10) / 10;
+//
+// Igora doses its mixtones by its own Rule of 11 instead (colorist, 2026-11-17): 11 minus
+// the level gives centimetres of mixtone per 30 g of color, 1 cm being 0.5 g; on levels
+// 8–10 the result is cut by 30–50% so the cool pigment does not oversaturate (40% here,
+// the middle). Above 10 it stays at level 10's amount.
+const RULE_OF_ELEVEN_BASE_LEVEL = 11;
+const RULE_OF_ELEVEN_GRAMS_PER_CM = 0.5;
+const RULE_OF_ELEVEN_LIGHT_FROM_LEVEL = 8;
+const RULE_OF_ELEVEN_LIGHT_REDUCTION = 0.4;
+
+function getCorrectorGramsPer30g(level: Level, rule: CorrectorRule): number {
+  if (rule === "rule-of-11") {
+    const cm = RULE_OF_ELEVEN_BASE_LEVEL - Math.min(level, 10);
+    const reduction = level >= RULE_OF_ELEVEN_LIGHT_FROM_LEVEL ? 1 - RULE_OF_ELEVEN_LIGHT_REDUCTION : 1;
+    return cm * RULE_OF_ELEVEN_GRAMS_PER_CM * reduction;
+  }
+  return level >= RULE_OF_TEN_BASE_LEVEL ? RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G : RULE_OF_TEN_BASE_LEVEL - level;
+}
+
+export function calculateCorrectorGrams(level: Level, baseGrams: number, rule: CorrectorRule = "rule-of-10"): number {
+  return Math.round(getCorrectorGramsPer30g(level, rule) * (baseGrams / RULE_OF_TEN_BASE_GRAMS) * 10) / 10;
 }
 
 // Over-corrected hair (green, blue or violet) is warmed back with the opposite warm tone.
@@ -206,14 +223,27 @@ export function calculateCorrectionTones(
   level: Level,
   baseGrams: number,
   maxShareOfColor?: number,
+  rule: CorrectorRule = "rule-of-10",
 ): CorrectiveToneGrams[] {
-  const wholeGrams = calculateCorrectorGrams(level, baseGrams);
+  const wholeGrams = calculateCorrectorGrams(level, baseGrams, rule);
   const maxGrams = maxShareOfColor !== undefined ? baseGrams * maxShareOfColor : Infinity;
   const scale = wholeGrams > maxGrams ? maxGrams / wholeGrams : 1;
-  return getCorrectionTones(unwanted).map(part => ({
-    tone: part.tone,
-    grams: Math.round(wholeGrams * part.share * scale * 10) / 10,
-  }));
+  return roundCorrectorGrams(
+    getCorrectionTones(unwanted).map(part => ({ tone: part.tone, grams: wholeGrams * scale * part.share })),
+  );
+}
+
+// Rounds each tone's grams to 0.1 g so the parts still add up to their rounded sum: 0.9 g
+// half and half is 0.5 + 0.4, not 0.5 + 0.5. The last tone takes what the rounding of the
+// others leaves.
+export function roundCorrectorGrams(parts: CorrectiveToneGrams[]): CorrectiveToneGrams[] {
+  const roundedTotal = Math.round(parts.reduce((sum, part) => sum + part.grams, 0) * 10);
+  let assigned = 0;
+  return parts.map((part, index) => {
+    const tenths = index === parts.length - 1 ? roundedTotal - assigned : Math.round(part.grams * 10);
+    assigned += tenths;
+    return { tone: part.tone, grams: tenths / 10 };
+  });
 }
 
 // The tone families whose shades warm back over-corrected hair. Green is cancelled by red,
@@ -290,4 +320,16 @@ export function getLineMixingRatio(brand: Brand, line: string | null, startLevel
 export function getLineCorrectorCap(brand: Brand, line: string | null): number | undefined {
   return getLineShades(brand, line).find(shade => shade.maxCorrectorShareOfColor !== undefined)
     ?.maxCorrectorShareOfColor;
+}
+
+// The line's own corrector dosing rule (Igora's Rule of 11), the Rule of 10 otherwise.
+export function getLineCorrectorRule(brand: Brand, line: string | null): CorrectorRule {
+  return getLineShades(brand, line).find(shade => shade.correctorRule !== undefined)?.correctorRule ?? "rule-of-10";
+}
+
+// Whether the line's shades at `level` all carry their own neutralization and take no
+// corrector (Igora Royal's 12- series).
+export function isLineSelfNeutralizingAt(brand: Brand, line: string | null, level: Level): boolean {
+  const atLevel = getLineShades(brand, line).filter(shade => shade.level === level);
+  return atLevel.length > 0 && atLevel.every(shade => shade.selfNeutralizing === true);
 }

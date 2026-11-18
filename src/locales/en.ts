@@ -579,6 +579,12 @@ export const en = {
         "SoBoost Green is no longer made: against red, use matt-green Jade (J) shades from the main palette (e.g. 4J, 6J), or mix 3 parts SoBoost Yellow + 1 part SoBoost Blue.",
       matrixNoVioletBooster:
         "SoBoost Violet is no longer made: against yellow, add V shades with a violet reflect (e.g. 8V, 10V in Color Sync, SPV in Super Sync, 9AV in SoColor Pre-Bonded), or mix SoBoost Blue + SoBoost Red.",
+      igoraPearl:
+        "0-11 gives a cool ash or steel on blonde. For a clean pearl or pearl beige on porous yellow blonde (levels 9–10) with no risk of green, add 0-99 — together with 0-11 (the amount is shared half and half) or instead of it.",
+      igoraGreen:
+        "0-89 removes a green or swampy cast and gives a juicy cool red or berry (levels 4–7). On levels 8–10 use it only in micro-doses. For a straight red, pick 0-88.",
+      igoraSelfNeutralizing:
+        "0- mixtones are not added to the 12- Special Blonde high-lift series or to Igora Royal Absolutes for resistant grey: both have their own neutralization built in.",
       wellaBlueWithoutMixtone:
         "No 0/43 at hand: mix 0/33 and 0/44 at about 2:1 (red pigment is much denser than yellow). Use 0/30 only for a blue-violet cast or a light ash dip on blonde.",
     },
@@ -589,6 +595,11 @@ export const en = {
       value: "{{correctorGrams}} g of corrector per {{baseGrams}} g of base color",
       explanation:
         "10 minus the level you are coloring at ({{level}}) gives the amount of corrector, in grams (~1 g per cm of tube), to blend into 30 g of base color. From level 10 up this settles at a fixed 0.5 g floor rather than zero, since even very light blondes still carry a faint yellow undertone that needs a touch of violet.",
+    },
+    ruleOfEleven: {
+      label: "Mixtone amount (Rule of 11, Igora)",
+      explanation:
+        "In Igora, 11 minus the level ({{level}}) gives centimetres of mixtone per 30 g of color, 1 cm = 0.5 g. On levels 8–10 the amount is cut by 40% (the brand advises 30–50%) so the cool pigment does not oversaturate. The mixtone takes developer 1:1 and adds to the color's weight.",
     },
     disclaimer: "Basic guidance — does not replace a complete color diagnosis.",
   },

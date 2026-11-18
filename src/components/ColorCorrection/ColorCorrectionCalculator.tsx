@@ -11,6 +11,8 @@ import {
   getDominantWheelTone,
   getExpectedUnwantedTone,
   getLineCorrectorCap,
+  getLineCorrectorRule,
+  isLineSelfNeutralizingAt,
   getLineMixingRatio,
   UNWANTED_TONES,
   type UnwantedTone,
@@ -104,6 +106,19 @@ function getMatrixTip(
   return null;
 }
 
+// When to take Igora's alternative mixtone (colorist, 2026-11-18).
+function getIgoraTip(
+  brand: CorrectorBrand,
+  unwanted: UnwantedTone,
+  level: Level,
+  tones: readonly ToneFamily[],
+): { key: string; shade?: string } | null {
+  if (brand.brandId !== "igora") return null;
+  if (unwanted === "green") return { key: "correction.tips.igoraGreen" };
+  if (tones.includes("violet") && level >= 9) return { key: "correction.tips.igoraPearl" };
+  return null;
+}
+
 export function ColorCorrectionCalculator() {
   const { t } = useTranslation();
   const brands = usePalette();
@@ -149,12 +164,13 @@ export function ColorCorrectionCalculator() {
 
   const result = calculateColorCorrection(currentLevel, targetLevel, unwantedTone);
   const correctorBrand: CorrectorBrand = { brandId, line, level: targetLevel };
-  const recommendedTones = calculateCorrectionTones(
-    unwantedTone,
-    targetLevel,
-    baseGrams,
-    getLineCorrectorCap(brand, line),
-  );
+  const correctorRule = getLineCorrectorRule(brand, line);
+  // Igora Royal's 12- series neutralizes on its own: no mixtone goes into it.
+  const selfNeutralizing = isLineSelfNeutralizingAt(brand, line, targetLevel);
+  const recommendedTones = selfNeutralizing
+    ? []
+    : calculateCorrectionTones(unwantedTone, targetLevel, baseGrams, getLineCorrectorCap(brand, line), correctorRule);
+  const ruleKey = correctorRule === "rule-of-11" ? "correction.ruleOfEleven" : "correction.ruleOfTen";
   // The Rule of 10 row keeps the recommendation; the mix takes what the colorist typed.
   const recommendedGrams = Math.round(recommendedTones.reduce((sum, part) => sum + part.grams, 0) * 10) / 10;
   const correctiveTones = recommendedTones.map(part => ({ ...part, grams: amounts[part.tone] ?? part.grams }));
@@ -177,14 +193,21 @@ export function ColorCorrectionCalculator() {
   const expectedTone = getExpectedUnwantedTone(targetLevel);
   const unwantedToneName = t(`correction.tones.${unwantedTone}`);
   const tipKey = getTipKey(unwantedTone, result.technique);
-  const brandTip =
-    getWellaTip(correctorBrand, unwantedTone, targetLevel) ??
-    getLorealTip(correctorBrand, unwantedTone, targetLevel, correctiveTones[0]?.tone) ??
-    getMatrixTip(
-      correctorBrand,
-      unwantedTone,
-      correctiveTones.map(part => part.tone),
-    );
+  const brandTip = selfNeutralizing
+    ? { key: "correction.tips.igoraSelfNeutralizing", shade: undefined }
+    : (getWellaTip(correctorBrand, unwantedTone, targetLevel) ??
+      getLorealTip(correctorBrand, unwantedTone, targetLevel, correctiveTones[0]?.tone) ??
+      getMatrixTip(
+        correctorBrand,
+        unwantedTone,
+        correctiveTones.map(part => part.tone),
+      ) ??
+      getIgoraTip(
+        correctorBrand,
+        unwantedTone,
+        targetLevel,
+        correctiveTones.map(part => part.tone),
+      ));
 
   return (
     <div className="calculator calculator--wide">
@@ -278,7 +301,7 @@ export function ColorCorrectionCalculator() {
         </div>
 
         <div className="results__row">
-          <span className="results__row-label">{t("correction.ruleOfTen.label")}</span>
+          <span className="results__row-label">{t(`${ruleKey}.label`)}</span>
           <span>{t("correction.ruleOfTen.value", { correctorGrams: recommendedGrams, baseGrams })}</span>
         </div>
         <CorrectorChoiceField
@@ -298,11 +321,13 @@ export function ColorCorrectionCalculator() {
             <span>{neutralizingShades.map(shade => shade.code).join(", ")}</span>
           </div>
         )}
-        <p className="correction__explanation">{t("correction.ruleOfTen.explanation", { level: targetLevel })}</p>
+        <p className="correction__explanation">{t(`${ruleKey}.explanation`, { level: targetLevel })}</p>
 
-        <p className="correction__explanation">
-          {t("correction.explanation", { corrector: wheelCorrectorName, tone: unwantedToneName })}
-        </p>
+        {wheelCorrectorName !== "" && (
+          <p className="correction__explanation">
+            {t("correction.explanation", { corrector: wheelCorrectorName, tone: unwantedToneName })}
+          </p>
+        )}
 
         {brandTip !== null && <p className="correction__note">{t(brandTip.key, { shade: brandTip.shade })}</p>}
         {result.technique === "multi-step" && <p className="correction__note">{t("correction.tips.multiStep")}</p>}

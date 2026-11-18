@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
 import i18n from "../i18n";
+import { BRANDS } from "../engine/brands";
 import { calculateFullFormula } from "../engine/formula";
 import type { Shade } from "../engine/shades";
 import {
@@ -15,6 +16,40 @@ afterEach(() => i18n.changeLanguage("en"));
 
 const lift = (targetShade: Shade, startLevel: 6 | 7 = 6) =>
   calculateFullFormula({ startLevel, targetShade, grayPercent: 0, totalGrams: 60 });
+
+describe("Igora correctors in the formula calculator", () => {
+  const igora = { brandId: "igora", line: "royal" };
+  const royal = { line: "royal", correctorRule: "rule-of-11" as const };
+
+  it("doses by the Rule of 11, keeps 0-22 for the blue part, and adds developer 1:1", () => {
+    // 6 -> 8 over 60 g: 3 cm = 1.5 g per 30 g, less 40% = 0.9 g, doubled = 1.8 g, half each.
+    const result = lift({ code: "8-5", level: 8, tone: "gold", ...royal });
+    expect(formatCorrectiveTones(result, igora)).toBe("0.9 g 0-22 + 0.9 g 0-11 (+ 1.8 g developer)");
+  });
+
+  it("shares a tone's grams between 0-11 and 0-99 when the colorist takes both", () => {
+    // 8 -> 9 over 60 g: 2 cm = 1 g per 30 g, less 40% = 0.6 g, doubled = 1.2 g of violet.
+    const result = lift({ code: "9-0", level: 9, tone: "natural", ...royal }, 7);
+    expect(buildMixCorrector(result, igora)?.parts).toEqual([{ name: "0-11", grams: 1.2 }]);
+    expect(buildMixCorrector(result, igora, { violet: "shade" })?.parts).toEqual([{ name: "0-99", grams: 1.2 }]);
+    expect(buildMixCorrector(result, igora, { violet: "both" })?.parts).toEqual([
+      { name: "0-11", grams: 0.6 },
+      { name: "0-99", grams: 0.6 },
+    ]);
+  });
+
+  it("adds nothing to a self-neutralizing 12- shade, and does not warn about its tone", () => {
+    const special = BRANDS.igora.shades.find(shade => shade.line === "royal" && shade.code === "12-0")!;
+    const run = (targetShade: Shade) =>
+      calculateFullFormula({ startLevel: 7, targetShade, grayPercent: 0, totalGrams: 60 });
+    const result = run(special);
+    expect(result.achievedLevel).not.toBeNull();
+    expect(result.recommendedCorrectiveTone).toBeNull();
+    expect(result.toneWarning).toBeNull();
+    // The same lift on a shade without its own neutralization does take a corrector.
+    expect(run({ ...special, selfNeutralizing: undefined }).recommendedCorrectiveTone).not.toBeNull();
+  });
+});
 
 describe("formatCorrectiveTones", () => {
   it("lists a blended corrector tone by tone", () => {

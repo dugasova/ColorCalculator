@@ -10,6 +10,9 @@ export interface CorrectorProduct {
   // Absent where the brand corrects with a dedicated product only (Matrix SoBoost).
   shade?: string;
   mixtone?: string;
+  // The two forms may also go in together, the tone's grams shared between them, rather
+  // than one or the other (Igora's 0-11 with 0-99 on light blonde).
+  combinable?: boolean;
 }
 
 // Some correctors change with depth: what cancels green at levels 4–7 is too strong (or
@@ -113,6 +116,26 @@ const MATRIX_SOCOLOR: CorrectorTable = {
   gold: { shade: "G", mixtone: "SoBoost Yellow" },
 };
 
+// Schwarzkopf Igora: the 0- mixtones carry the same codes in Royal and Vibrance but are
+// mixed only within their own line (colorist, 2026-11-17/18). 0-22 anti-orange (blue) on
+// levels 6–7; 0-33 anti-red (matt green); 0-11 anti-yellow, a blue-violet cendré with blue
+// leading, works on 7–10 against yellow-orange and yellow; warm: 0-77 copper, 0-55 gold.
+// 0-00 is clear; E-1 cendré extract is not listed. The blue part of a blend stays 0-22, so
+// a yellow-orange background takes 0-22 + 0-11 (colorist, 2026-11-18).
+//
+// Igora has no shade suffixes to offer, so the `shade` slot carries the colorist's
+// alternative mixtone instead: 0-99 pure violet for a pearl beige on porous yellow blonde
+// at 9–10 (no green risk), which may also go in together with 0-11; and 0-88 red against
+// green next to the default 0-89 red-violet.
+const IGORA: CorrectorTable = {
+  matt: { mixtone: "0-33" },
+  ash: { mixtone: "0-22" },
+  violet: { mixtone: "0-11", light: { fromLevel: 9, shade: "0-99", mixtone: "0-11", combinable: true } },
+  red: { shade: "0-88", mixtone: "0-89" },
+  copper: { mixtone: "0-77" },
+  gold: { mixtone: "0-55" },
+};
+
 function lorealTable(line: string | null | undefined): CorrectorTable {
   if (line === "majirel") return LOREAL_MAJIREL;
   if (line === "inoa") return LOREAL_INOA;
@@ -123,6 +146,7 @@ function getCorrectorTable(brandId: BrandId | undefined, line: string | null | u
   if (brandId === "wella") return line === "color-touch" ? WELLA_COLOR_TOUCH : WELLA_KOLESTON;
   if (brandId === "loreal") return lorealTable(line);
   if (brandId === "matrix" && line === "socolor") return MATRIX_SOCOLOR;
+  if (brandId === "igora" && (line === "royal" || line === "vibrance")) return IGORA;
   return null;
 }
 
@@ -140,22 +164,27 @@ export function getCorrectorProduct(
   return {
     ...(light.shade !== undefined && { shade: light.shade }),
     ...(light.mixtone !== undefined && { mixtone: light.mixtone }),
+    ...(light.combinable === true && { combinable: true }),
   };
 }
 
 // How much developer the corrector itself needs, in parts per part of corrector, where the
 // manufacturer asks for it on top of the formula's own: Matrix mixes Cream Developer 1:1
-// with the summed weight of color and booster. Null where nothing extra is prescribed.
+// with the summed weight of color and booster, Igora its mixtones 1:1 too (30 g color +
+// 3 g mixtone + 33 g developer). Null where nothing extra is prescribed.
 export function getCorrectorDeveloperParts(
   brandId: BrandId | undefined,
   line: string | null | undefined,
 ): number | null {
-  return brandId === "matrix" && line === "socolor" ? 1 : null;
+  if (brandId === "matrix" && line === "socolor") return 1;
+  if (brandId === "igora" && (line === "royal" || line === "vibrance")) return 1;
+  return null;
 }
 
 // What the colorist decided for one tone of the corrector: take it as an ordinary shade,
-// as a mixtone, or leave it out. A tone with no entry is taken, in its default form.
-export type CorrectorChoice = "shade" | "mixtone" | "skip";
+// as a mixtone, both together where the product is combinable, or leave it out. A tone
+// with no entry is taken, in its default form.
+export type CorrectorChoice = "shade" | "mixtone" | "both" | "skip";
 export type CorrectorSelection = Partial<Record<ToneFamily, CorrectorChoice>>;
 
 // The form a tone is mixed in when the colorist has not picked one: the mixtone where the

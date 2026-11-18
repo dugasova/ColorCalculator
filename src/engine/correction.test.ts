@@ -12,6 +12,8 @@ import {
   getExpectedUnwantedTone,
   getLineCorrectorCap,
   getLineMixingRatio,
+  getLineCorrectorRule,
+  isLineSelfNeutralizingAt,
 } from "./correction";
 import { BRANDS } from "./brands";
 import { getCorrectorProduct } from "./correctorProducts";
@@ -164,9 +166,10 @@ describe("calculateCorrectionTones", () => {
 
   it("scales every tone down to a manufacturer cap", () => {
     // Level 4, 30 g: 6 g by the Rule of 10, capped at 10% of the dye = 3 g.
+    // 2.25 + 0.75 rounds to 2.3 + 0.7, so the blend stays at the 3 g cap, not 3.1 g.
     expect(calculateCorrectionTones("red-orange", 4, 30, 0.1)).toEqual([
       { tone: "matt", grams: 2.3 },
-      { tone: "ash", grams: 0.8 },
+      { tone: "ash", grams: 0.7 },
     ]);
   });
 });
@@ -253,5 +256,69 @@ describe("line helpers", () => {
   it("knows Matrix SoColor caps the corrector at 25% of the dye", () => {
     expect(getLineCorrectorCap(BRANDS.matrix, "socolor")).toBe(0.25);
     expect(getLineCorrectorCap(BRANDS.wella, "koleston-perfect")).toBeUndefined();
+  });
+});
+
+describe("Igora's Rule of 11", () => {
+  it("gives 0.5 g per cm, 11 minus the level, per 30 g of color", () => {
+    expect(calculateCorrectorGrams(6, 30, "rule-of-11")).toBe(2.5);
+    expect(calculateCorrectorGrams(1, 30, "rule-of-11")).toBe(5);
+    expect(calculateCorrectorGrams(6, 60, "rule-of-11")).toBe(5);
+  });
+
+  it("cuts the amount by 40% on levels 8–10 and stays at level 10's above it", () => {
+    expect(calculateCorrectorGrams(8, 30, "rule-of-11")).toBe(0.9); // 3 cm = 1.5 g, less 40%
+    expect(calculateCorrectorGrams(10, 30, "rule-of-11")).toBe(0.3);
+    expect(calculateCorrectorGrams(12, 30, "rule-of-11")).toBe(0.3);
+  });
+
+  it("is the rule of both Igora lines, the Rule of 10 elsewhere", () => {
+    expect(getLineCorrectorRule(BRANDS.igora, "royal")).toBe("rule-of-11");
+    expect(getLineCorrectorRule(BRANDS.igora, "vibrance")).toBe("rule-of-11");
+    expect(getLineCorrectorRule(BRANDS.wella, "koleston-perfect")).toBe("rule-of-10");
+  });
+
+  it("adds no mixtone to Royal's 12- series", () => {
+    expect(isLineSelfNeutralizingAt(BRANDS.igora, "royal", 12)).toBe(true);
+    expect(isLineSelfNeutralizingAt(BRANDS.igora, "royal", 10)).toBe(false);
+    expect(calculateCorrectionTones("yellow", 8, 30, undefined, "rule-of-11")).toEqual([
+      { tone: "violet", grams: 0.9 },
+    ]);
+  });
+});
+
+describe("Igora mixtones", () => {
+  it("are the same 0- codes in Royal and Vibrance", () => {
+    for (const line of ["royal", "vibrance"]) {
+      expect(getCorrectorProduct("igora", line, "ash", 6)).toEqual({ mixtone: "0-22" });
+      expect(getCorrectorProduct("igora", line, "violet", 9)).toEqual({
+        shade: "0-99",
+        mixtone: "0-11",
+        combinable: true,
+      });
+      expect(getCorrectorProduct("igora", line, "matt", 4)).toEqual({ mixtone: "0-33" });
+      expect(getCorrectorProduct("igora", line, "copper", 7)).toEqual({ mixtone: "0-77" });
+      expect(getCorrectorProduct("igora", line, "gold", 7)).toEqual({ mixtone: "0-55" });
+    }
+  });
+
+  it("cancels yellow with 0-11, offering 0-99 for a pearl beige from level 9", () => {
+    expect(getCorrectorProduct("igora", "royal", "violet", 7)).toEqual({ mixtone: "0-11" });
+    expect(getCorrectorProduct("igora", "royal", "violet", 8)).toEqual({ mixtone: "0-11" });
+    // From level 9 the colorist may take 0-99 too, alone or with 0-11.
+    expect(getCorrectorProduct("igora", "royal", "violet", 9)).toEqual({
+      shade: "0-99",
+      mixtone: "0-11",
+      combinable: true,
+    });
+  });
+
+  it("keeps 0-22 for the blue part on every level", () => {
+    expect(getCorrectorProduct("igora", "royal", "ash", 7)).toEqual({ mixtone: "0-22" });
+    expect(getCorrectorProduct("igora", "royal", "ash", 8)).toEqual({ mixtone: "0-22" });
+  });
+
+  it("cancels green with 0-89, or 0-88 if the colorist picks it", () => {
+    expect(getCorrectorProduct("igora", "royal", "red", 5)).toEqual({ shade: "0-88", mixtone: "0-89" });
   });
 });

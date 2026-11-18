@@ -3,6 +3,7 @@ import type { Porosity } from "../../engine/canvas";
 import type { FullFormula } from "../../engine/formula";
 import type { Shade } from "../../engine/shades";
 import {
+  atResultLevel,
   formatEligibilityWarning,
   formatLiftUnsupportedWarning,
   formatPorosityAdjustment,
@@ -86,7 +87,7 @@ export function ToneWarnings({ result, neutralizationApplied, brand }: ToneWarni
     <>
       {result.toneWarning !== null && !neutralizationApplied && (
         <p className="warning" role="alert">
-          {formatToneWarning(result.toneWarning, brand)}
+          {formatToneWarning(result.toneWarning, atResultLevel(brand, result))}
         </p>
       )}
       {result.eligibilityWarning !== null && (

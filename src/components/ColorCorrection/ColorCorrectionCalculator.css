@@ -45,7 +45,7 @@
 
 .tone-btn--active {
   border-color: var(--tone-color);
-  background: color-mix(in srgb, var(--tone-color) 14%, white);
+  background: color-mix(in srgb, var(--tone-color) 14%, var(--brand-field));
 }
 
 .tone-btn--active .tone-dot {

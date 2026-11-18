@@ -46,6 +46,56 @@ describe("IGORA_VIBRANCE_CHART", () => {
   });
 });
 
+describe("IGORA_ROYAL_CHART range", () => {
+  it("matches the current shade card: 133 shades, pastel 9,5- toners counted as level 10, discontinued shades gone", () => {
+    expect(IGORA_ROYAL_CHART.length).toBe(133);
+    expect(IGORA_ROYAL_CHART.find(s => s.code === "9,5-29")).toMatchObject({
+      level: 10,
+      tone: "ash",
+      secondaryTone: "violet",
+    });
+    expect(IGORA_ROYAL_CHART.find(s => s.code === "8-46")).toMatchObject({ tone: "beige", secondaryTone: "chocolate" });
+    for (const gone of ["2-0", "5-13", "5-16", "5-57", "8-88"]) {
+      expect(IGORA_ROYAL_CHART.find(s => s.code === gone)).toBeUndefined();
+    }
+  });
+});
+
+describe("IGORA_ROYAL_CHART pastel 9,5- toners", () => {
+  const pastel = IGORA_ROYAL_CHART.find(s => s.code === "9,5-1")!;
+
+  it("mixes 1:1 with 3%, offering 1.9% for porous ends", () => {
+    expect(pastel.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
+    expect(pastel.developerVolumeChoices).toEqual([10, 6]);
+  });
+
+  it("tones a level-9 yellow blonde without a can't-lift warning", () => {
+    const result = calculateFullFormula({
+      startLevel: 9,
+      targetShade: pastel,
+      grayPercent: 0,
+      totalGrams: 60,
+      manualDeveloperVolume: 10,
+    });
+    expect(result.liftUnsupportedWarning).toBeNull();
+    expect(result.eligibilityWarning).toBeNull();
+    expect(result.developerVolume).toBe(10);
+    expect(result.grams).toMatchObject({ colorGrams: 30, developerGrams: 30 });
+  });
+
+  it("warns below a level-9 pre-lightened base", () => {
+    const result = calculateFullFormula({
+      startLevel: 8,
+      targetShade: pastel,
+      grayPercent: 0,
+      totalGrams: 60,
+      manualDeveloperVolume: 10,
+    });
+    expect(result.eligibilityWarning).toEqual({ code: "9,5-1", minLevel: 9, startLevel: 8 });
+    expect(result.liftUnsupportedWarning).not.toBeNull();
+  });
+});
+
 describe("IGORA_ROYAL_CHART Highlifts 12-series overrides", () => {
   it("recommends 45 min for every Highlifts 12-series shade", () => {
     const highlifts12Shades = IGORA_ROYAL_CHART.filter(s => s.level === 12);
