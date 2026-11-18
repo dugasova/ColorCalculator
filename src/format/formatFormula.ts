@@ -15,6 +15,7 @@ import {
   formatPigmentName,
   isBackgroundCoveredByShade,
   getGrayCoverageNote,
+  atResultLevel,
 } from "./formulaMessages";
 import type { MixCorrector } from "./formulaMessages";
 import type { ApplicationZone } from "../engine/applicationZone";
@@ -181,7 +182,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
 
   const developer = formatDeveloperVolumeLine(result.developerVolume, targetShade.developerPercentOverride);
 
-  const correctorBrand = brandId !== undefined ? { brandId, line } : undefined;
+  const correctorBrand = atResultLevel(brandId !== undefined ? { brandId, line } : undefined, result);
   const corrector = formatCorrectiveTones(result, correctorBrand);
   const mixCorrector = neutralizationApplied ? buildMixCorrector(result, correctorBrand, correctorSelection) : null;
   const applyNeutralization = mixCorrector !== null;

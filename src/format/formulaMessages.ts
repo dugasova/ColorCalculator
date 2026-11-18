@@ -9,7 +9,7 @@ import type {
 import { getAppliedCorrector } from "../engine/formula";
 import type { BrandId } from "../engine/brands";
 import { getCorrectorDeveloperParts, getCorrectorProduct, getDefaultCorrectorForm } from "../engine/correctorProducts";
-import type { CorrectorChoice, CorrectorSelection } from "../engine/correctorProducts";
+import type { CorrectorChoice, CorrectorProduct, CorrectorSelection } from "../engine/correctorProducts";
 import type { Level, UnderlyingPigment } from "../engine/levels";
 import type { ToneFamily } from "../engine/shades";
 import { formatDeveloperVolume } from "./formatDeveloperVolume";
@@ -49,27 +49,54 @@ function formatCorrectorName(tone: ToneFamily, brand?: CorrectorBrand): string {
 }
 
 export function formatToneWarning(warning: ToneWarning, brand?: CorrectorBrand): string {
+  const names = (warning.recommendedTones ?? [warning.recommended]).map(tone => formatCorrectorName(tone, brand));
   return i18n.t("engine.toneWarning", {
     tone: formatToneName(warning.tone),
     pigment: formatPigmentName(warning.pigment),
-    recommended: (warning.recommendedTones ?? [warning.recommended])
-      .map(tone => formatCorrectorName(tone, brand))
-      .join(" + "),
+    recommended: [...new Set(names)].join(" + "),
   });
 }
 
-type CorrectorResult = Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones">;
+// One product can stand for two tones of a blend (Igora's 0-11 is both the blue and the
+// violet of a yellow-orange background): it is named once, with the tones' grams summed.
+function mergeByName<T extends { name: string; grams: number }>(parts: T[]): T[] {
+  const merged: T[] = [];
+  for (const part of parts) {
+    const same = merged.find(other => other.name === part.name);
+    if (same === undefined) merged.push({ ...part });
+    else same.grams = Math.round((same.grams + part.grams) * 10) / 10;
+  }
+  return merged;
+}
+
+type CorrectorResult = Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones"> & {
+  achievedLevel?: Level | null;
+};
+
+// The brand at the level the formula reaches, so products that change with depth (Igora's
+// 0-99 → 0-11) are named right; a level the caller set already wins.
+export function atResultLevel(
+  brand: CorrectorBrand | undefined,
+  result: { achievedLevel?: Level | null },
+): CorrectorBrand | undefined {
+  if (brand === undefined || brand.level !== undefined) return brand;
+  const level = result.achievedLevel;
+  return level !== null && level !== undefined ? { ...brand, level } : brand;
+}
 
 // The corrector to add, tone by tone: "1 g ash + 1 g violet". Null when the formula needs
 // none. A result saved before correctors could be blends has only the one tone.
-export function formatCorrectiveTones(result: CorrectorResult, brand?: CorrectorBrand): string | null {
+export function formatCorrectiveTones(result: CorrectorResult, resultBrand?: CorrectorBrand): string | null {
   if (result.recommendedCorrectiveTone === null) return null;
+  const brand = atResultLevel(resultBrand, result);
   const tones =
     result.correctiveTones !== undefined && result.correctiveTones.length > 0
       ? result.correctiveTones
       : [{ tone: result.recommendedCorrectiveTone, grams: result.correctorGrams }];
-  const corrector = tones
-    .map(({ tone, grams }) => i18n.t("results.recommendedToneValue", { grams, tone: formatCorrectorName(tone, brand) }))
+  const corrector = mergeByName(
+    tones.map(({ tone, grams }) => ({ name: formatCorrectorName(tone, brand), grams: grams ?? 0 })),
+  )
+    .map(({ name, grams }) => i18n.t("results.recommendedToneValue", { grams, tone: name }))
     .join(" + ");
   // Where the brand mixes developer with the corrector too, say how much more to add.
   const developerParts = getCorrectorDeveloperParts(brand?.brandId, brand?.line);
@@ -129,27 +156,47 @@ export interface MixCorrector {
   developerGrams: number;
 }
 
+// The two product names, mixtone first, when the colorist takes both forms of a
+// combinable product; null otherwise.
+function getCombinedForms(product: CorrectorProduct, choice: CorrectorChoice | undefined): [string, string] | null {
+  if (choice !== "both" || product.combinable !== true) return null;
+  if (product.mixtone === undefined || product.shade === undefined) return null;
+  return [product.mixtone, product.shade];
+}
+
 // The one product a tone is mixed in as: the form the colorist picked, or the line's
 // default. The tone's name where the brand has no product for it.
 export function formatChosenCorrectorName(tone: ToneFamily, brand?: CorrectorBrand, choice?: CorrectorChoice): string {
   const product = getCorrectorProduct(brand?.brandId, brand?.line, tone, brand?.level);
   if (product === null) return formatToneName(tone);
+  const both = getCombinedForms(product, choice);
+  if (both !== null) return both.join(" + ");
   const form = choice === "shade" || choice === "mixtone" ? choice : getDefaultCorrectorForm(product);
   return product[form] ?? product.mixtone ?? product.shade ?? formatToneName(tone);
 }
 
 export function buildMixCorrector(
   result: CorrectorResult & Pick<FullFormula, "mixingRatio">,
-  brand?: CorrectorBrand,
+  resultBrand?: CorrectorBrand,
   selection?: CorrectorSelection,
 ): MixCorrector | null {
+  const brand = atResultLevel(resultBrand, result);
   const applied = getAppliedCorrector(result, selection);
   if (applied === null) return null;
   return {
-    parts: applied.tones.map(({ tone, grams }) => ({
-      name: formatChosenCorrectorName(tone, brand, selection?.[tone]),
-      grams,
-    })),
+    parts: mergeByName(
+      applied.tones.flatMap(({ tone, grams }) => {
+        const product = getCorrectorProduct(brand?.brandId, brand?.line, tone, brand?.level);
+        const both = product !== null ? getCombinedForms(product, selection?.[tone]) : null;
+        if (both === null) return [{ name: formatChosenCorrectorName(tone, brand, selection?.[tone]), grams }];
+        // Both forms share the tone's grams, half each, still adding up to the whole.
+        const first = Math.round(grams * 5) / 10;
+        return [
+          { name: both[0], grams: first },
+          { name: both[1], grams: Math.round((grams - first) * 10) / 10 },
+        ];
+      }),
+    ),
     developerGrams: applied.developerGrams,
   };
 }

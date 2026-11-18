@@ -84,7 +84,15 @@ export interface Shade {
   // weight -- e.g. Matrix SoBoost's "up to 25% of the color" (see brands/matrix.ts). The
   // recommended corrector is scaled down to it; unset, the Rule of 10 alone decides.
   maxCorrectorShareOfColor?: number;
+  // How the corrector is dosed, where the manufacturer has its own rule: Igora's Rule of 11
+  // (see correction.ts's calculateCorrectorGrams). Unset, the Rule of 10.
+  correctorRule?: CorrectorRule;
+  // The shade carries its own neutralization and takes no corrector at all (Igora Royal's
+  // 12- Special Blonde series).
+  selfNeutralizing?: boolean;
 }
+
+export type CorrectorRule = "rule-of-10" | "rule-of-11";
 
 export const mixingRatioSchema = z.object({
   colorParts: z.number(),

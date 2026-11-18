@@ -5,11 +5,13 @@ import type { CorrectorSelection } from "../../../engine/correctorProducts";
 import { getCorrectiveToneGrams } from "../../../engine/formula";
 import type { FullFormula } from "../../../engine/formula";
 import type { ToneFamily } from "../../../engine/shades";
-import { formatChosenCorrectorName } from "../../../format/formulaMessages";
+import { atResultLevel, formatChosenCorrectorName } from "../../../format/formulaMessages";
 import type { CorrectorBrand } from "../../../format/formulaMessages";
 
 export interface CorrectorChoiceFieldProps {
-  result: Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones">;
+  result: Pick<FullFormula, "recommendedCorrectiveTone" | "correctorGrams" | "correctiveTones"> & {
+    achievedLevel?: FullFormula["achievedLevel"];
+  };
   brand: CorrectorBrand;
   selection: CorrectorSelection;
   onSelectionChange: (selection: CorrectorSelection) => void;
@@ -56,13 +58,14 @@ function GramsInput({ grams, disabled, label, onChange }: GramsInputProps) {
 
 export function CorrectorChoiceField({
   result,
-  brand,
+  brand: resultBrand,
   selection,
   onSelectionChange,
   onAmountChange,
 }: CorrectorChoiceFieldProps) {
   const { t } = useTranslation();
   const groupId = useId();
+  const brand = atResultLevel(resultBrand, result) ?? resultBrand;
   const tones = getCorrectiveToneGrams(result);
   if (tones.length === 0) return null;
 
@@ -73,12 +76,21 @@ export function CorrectorChoiceField({
         const choice = selection[tone];
         const included = choice !== "skip";
         const hasBothForms = product !== null && product.shade !== undefined && product.mixtone !== undefined;
+        const combinable = hasBothForms && product.combinable === true;
         const form =
-          choice === "shade" || choice === "mixtone"
+          choice === "shade" || choice === "mixtone" || (choice === "both" && combinable)
             ? choice
             : product !== null
               ? getDefaultCorrectorForm(product)
               : "shade";
+        // With a combinable product each form is its own checkbox: one, the other, or both
+        // (never neither -- that is the tone's own checkbox).
+        const takesForm = (option: "shade" | "mixtone") => form === "both" || form === option;
+        const toggleForm = (option: "shade" | "mixtone", checked: boolean) => {
+          const other = option === "shade" ? "mixtone" : "shade";
+          const next = checked ? (takesForm(other) ? "both" : option) : other;
+          onSelectionChange({ ...selection, [tone]: next });
+        };
         const name = hasBothForms ? "" : formatChosenCorrectorName(tone, brand, choice);
         return (
           <div className="corrector-choice__row" key={tone}>
@@ -99,18 +111,31 @@ export function CorrectorChoiceField({
               />
             )}
             {hasBothForms &&
-              (["mixtone", "shade"] as const).map(option => (
-                <label className="corrector-choice__option" key={option}>
-                  <input
-                    type="radio"
-                    name={`${groupId}-${tone}`}
-                    checked={included && form === option}
-                    disabled={!included}
-                    onChange={() => onSelectionChange({ ...selection, [tone]: option })}
-                  />
-                  {product[option]}
-                </label>
-              ))}
+              (["mixtone", "shade"] as const).map(option =>
+                combinable ? (
+                  <label className="corrector-choice__option" key={option}>
+                    <input
+                      type="checkbox"
+                      checked={included && takesForm(option)}
+                      // The last form taken stays: unticking it would leave the tone empty.
+                      disabled={!included || (takesForm(option) && form !== "both")}
+                      onChange={e => toggleForm(option, e.target.checked)}
+                    />
+                    {product[option]}
+                  </label>
+                ) : (
+                  <label className="corrector-choice__option" key={option}>
+                    <input
+                      type="radio"
+                      name={`${groupId}-${tone}`}
+                      checked={included && form === option}
+                      disabled={!included}
+                      onChange={() => onSelectionChange({ ...selection, [tone]: option })}
+                    />
+                    {product[option]}
+                  </label>
+                ),
+              )}
           </div>
         );
       })}

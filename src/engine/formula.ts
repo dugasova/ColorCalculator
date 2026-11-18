@@ -6,7 +6,7 @@ import {
   type UnderlyingPigment,
 } from "./levels";
 import { assessNeutralization } from "./neutralize";
-import { calculateCorrectorGrams } from "./correction";
+import { calculateCorrectorGrams, roundCorrectorGrams } from "./correction";
 import type { CorrectorSelection } from "./correctorProducts";
 import type { Porosity } from "./canvas";
 import { sameMixingRatio, type MixingRatio, type Shade, type ToneFamily } from "./shades";
@@ -272,7 +272,9 @@ function deriveCorrectiveGuidance(
     };
   }
   const { background, coverage, missing } = assessNeutralization(targetShade, achievedLevel);
-  if (missing.length === 0) {
+  // A shade with its own neutralization built in takes no corrector, and its tone is not
+  // a mismatch to warn about.
+  if (missing.length === 0 || targetShade.selfNeutralizing === true) {
     return {
       underlyingPigment: background,
       recommendedCorrectiveTone: null,
@@ -283,7 +285,7 @@ function deriveCorrectiveGuidance(
   }
   // The Rule of 10 gives the weight of a whole neutralizer; a shade that brings part of
   // it itself takes only the rest.
-  const wholeCorrectorGrams = calculateCorrectorGrams(achievedLevel, totalGrams);
+  const wholeCorrectorGrams = calculateCorrectorGrams(achievedLevel, totalGrams, targetShade.correctorRule);
   // ...unless the manufacturer caps the corrector (Shade.maxCorrectorShareOfColor): then
   // every tone is scaled down by the same factor so the blend keeps its proportions.
   const neededGrams = missing.reduce((sum, part) => sum + wholeCorrectorGrams * part.share, 0);
@@ -292,10 +294,9 @@ function deriveCorrectiveGuidance(
       ? colorGrams * targetShade.maxCorrectorShareOfColor
       : Infinity;
   const scale = neededGrams > maxGrams ? maxGrams / neededGrams : 1;
-  const correctiveTones = missing.map(part => ({
-    tone: part.tone,
-    grams: Math.round(wholeCorrectorGrams * part.share * scale * 10) / 10,
-  }));
+  const correctiveTones = roundCorrectorGrams(
+    missing.map(part => ({ tone: part.tone, grams: wholeCorrectorGrams * part.share * scale })),
+  );
   const recommendedTones = missing.map(part => part.tone);
   return {
     underlyingPigment: background,
@@ -358,7 +359,13 @@ export function calculateFullFormula({
   colorGramsOverride,
   porosity = "normal",
 }: FullFormulaInput): FullFormula {
-  const isLifting = targetShade.level > startLevel;
+  // A deposit-only shade put on the base it is made for (at or above its minStartLevel,
+  // e.g. Igora's pastel 9,5- toners on a level-9 yellow blonde) tones, it is not asked to lift.
+  const isOnOwnDepositBase =
+    targetShade.developerVolumeChoices !== undefined &&
+    targetShade.minStartLevel !== undefined &&
+    startLevel >= targetShade.minStartLevel;
+  const isLifting = targetShade.level > startLevel && !isOnOwnDepositBase;
   const mixingRatio = resolveShadeMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
