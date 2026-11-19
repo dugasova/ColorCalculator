@@ -469,6 +469,22 @@ export const uk: typeof en = {
     eligibilityWarning:
       "Відтінок «{{code}}» вимагає початкового рівня {{minLevel}} або вище (натуральна база); поточний початковий рівень — {{startLevel}}",
   },
+  comparison: {
+    start: "Порівняти з іншою формулою",
+    startHint: "Поточна формула стане A. Змініть відтінок, бренд чи лінію — поруч з'явиться B.",
+    title: "Порівняння формул",
+    row: "Рядок",
+    formulaA: "A (зафіксована)",
+    formulaB: "B (поточна)",
+    legend: "▶ — рядки, що відрізняються.",
+    repin: "Зробити поточну формулою A",
+    clear: "Завершити порівняння",
+    shade: "Відтінок",
+    background: "Фон освітлення",
+    processingTime: "Час витримки",
+    minutes: "{{minutes}} хв",
+    warnings: "Попередження",
+  },
   format: {
     startingLevel: "Початковий рівень: {{start}} → Ціль: {{target}}",
     startingLevelRange: "Початковий рівень: {{start}}–{{end}} → Ціль: {{target}}",

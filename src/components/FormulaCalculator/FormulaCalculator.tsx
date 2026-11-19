@@ -26,6 +26,9 @@ import { GramsInputField } from "./fields/GramsInputField";
 import { CrossBrandMatchField } from "./fields/CrossBrandMatchField";
 import { FormulaResults } from "./FormulaResults";
 import { SaveFavoriteButton } from "./SaveFavoriteButton";
+import { FormulaComparisonPanel } from "./FormulaComparisonPanel";
+import type { ComparedFormula } from "./formulaComparison";
+import type { FormulaHair, FormulaMix, FormulaProduct } from "./formulaResultsModel";
 
 export interface FormulaCalculatorProps {
   appliedBy: string;
@@ -35,12 +38,18 @@ export interface FormulaCalculatorProps {
   // App.tsx uses it to remount this whole calculator with a fresh key, resetting every
   // field (brand/shade/level down through the client-details panel) for the next client.
   onSaved?: () => void;
+  // Formula A of the side-by-side comparison, owned by the caller so it outlives this
+  // screen; without these props the comparison isn't offered.
+  pinnedFormula?: ComparedFormula | null;
+  onPinnedFormulaChange?: (formula: ComparedFormula | null) => void;
 }
 export default function FormulaCalculator({
   appliedBy,
   repeatRequest,
   favoriteRequest,
   onSaved,
+  pinnedFormula = null,
+  onPinnedFormulaChange,
 }: FormulaCalculatorProps) {
   const { t } = useTranslation();
   const brands = usePalette();
@@ -130,6 +139,29 @@ export default function FormulaCalculator({
     handleBlendModeChange,
     handleApplicationZoneChange,
   } = useFormulaCalculatorState(brands, repeatRequest, favoriteRequest);
+
+  const product: FormulaProduct = { brandId, brandName: brands[brandId].name, line };
+  const hair: FormulaHair = { startLevel, grayPercent, canvas: { porosity, thickness, chemicalHistory } };
+  const mix: FormulaMix = {
+    targetShade,
+    result: effectiveResult,
+    additionalShade,
+    additionalShadeGrams,
+    additionalShade2,
+    additionalShade2Grams,
+    blend,
+    naturalBase,
+    correctorSelection,
+  };
+  const currentFormula: ComparedFormula = {
+    product,
+    hair,
+    mix,
+    applicationZone,
+    neutralizationApplied,
+    processingMinutes,
+    productCost,
+  };
 
   return (
     <div className="calculator calculator--wide">
@@ -277,20 +309,18 @@ export default function FormulaCalculator({
           </div>
         </CollapsibleSection>
       </div>
+      {onPinnedFormulaChange !== undefined && (
+        <FormulaComparisonPanel
+          pinned={pinnedFormula}
+          current={currentFormula}
+          onPin={onPinnedFormulaChange}
+          onClear={() => onPinnedFormulaChange(null)}
+        />
+      )}
       <FormulaResults
-        product={{ brandId, brandName: brands[brandId].name, line }}
-        hair={{ startLevel, grayPercent, canvas: { porosity, thickness, chemicalHistory } }}
-        mix={{
-          targetShade,
-          result: effectiveResult,
-          additionalShade,
-          additionalShadeGrams,
-          additionalShade2,
-          additionalShade2Grams,
-          blend,
-          naturalBase,
-          correctorSelection,
-        }}
+        product={product}
+        hair={hair}
+        mix={mix}
         applicationZone={applicationZone}
         prePigmentationResult={prePigmentationResult}
         neutralizationApplied={neutralizationApplied}

@@ -460,6 +460,22 @@ export const en = {
     eligibilityWarning:
       "Shade '{{code}}' requires a starting level of {{minLevel}} or higher (natural base); current start level is {{startLevel}}",
   },
+  comparison: {
+    start: "Compare with another formula",
+    startHint: "The current formula becomes A. Change the shade, brand or line, and B appears next to it.",
+    title: "Formula comparison",
+    row: "Row",
+    formulaA: "A (pinned)",
+    formulaB: "B (current)",
+    legend: "▶ marks rows that differ.",
+    repin: "Make the current formula A",
+    clear: "End comparison",
+    shade: "Shade",
+    background: "Lightening background",
+    processingTime: "Processing time",
+    minutes: "{{minutes}} min",
+    warnings: "Warnings",
+  },
   format: {
     startingLevel: "Starting level: {{start}} → Target: {{target}}",
     startingLevelRange: "Starting level: {{start}}–{{end}} → Target: {{target}}",

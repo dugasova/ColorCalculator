@@ -13,6 +13,12 @@ test("the main screens fit a phone without horizontal scrolling", async ({ page 
 
   await expectNoHorizontalOverflow(page);
 
+  // The comparison table keeps its two columns within the screen.
+  await page.getByRole("button", { name: "Compare with another formula" }).click();
+  await chooseOption(page, "Shade", "8.1 ash");
+  await expect(page.locator(".comparison__row--differs").first()).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
   await nav.getByRole("button", { name: "Complex color" }).click();
   await page.getByRole("button", { name: "+ Add bleach step" }).click();
   const bleach = page.locator(".step-card");

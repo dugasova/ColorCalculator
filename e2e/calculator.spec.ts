@@ -36,3 +36,28 @@ test("a root touch-up is calculated, saved, found in History and repeated", asyn
   await expect(page.getByLabel("Application")).toHaveText("Root touch-up");
   await expect(page.getByText("8.1- 40.0 g developer 60.0 g")).toBeVisible();
 });
+
+// Two shades side by side: formula A is pinned, survives a trip to another screen, and the
+// live formula B next to it has its differing rows highlighted.
+test("two formulas are compared side by side, across leaving the calculator", async ({ page }) => {
+  await signInAsMember(page, STYLIST);
+
+  await chooseOption(page, "Starting level", "6");
+  await chooseOption(page, "Shade", "8.1 ash");
+  await page.getByRole("button", { name: "Compare with another formula" }).click();
+
+  await page.getByRole("tab", { name: "History" }).click();
+  await page.getByRole("tab", { name: "Calculator" }).click();
+
+  const table = page.locator(".comparison__table");
+  await expect(table.locator('tr[data-row="shade"] td').first()).toHaveText("Generic 8.1");
+
+  await chooseOption(page, "Starting level", "6");
+  await chooseOption(page, "Shade", "8.0 natural");
+  await expect(table.locator('tr[data-row="shade"] td')).toHaveText(["Generic 8.1", "Generic 8.0"]);
+  await expect(table.locator('tr[data-row="shade"]')).toHaveClass(/comparison__row--differs/);
+  await expect(table.locator('tr[data-row="developer"]')).not.toHaveClass(/comparison__row--differs/);
+
+  await page.getByRole("button", { name: "End comparison" }).click();
+  await expect(table).toHaveCount(0);
+});
