@@ -15,6 +15,7 @@ import {
   type RepeatSessionRequest,
 } from "./history";
 import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
+import type { ComparedFormula } from "./components/FormulaCalculator/formulaComparison";
 import { trackEvent } from "./productAnalytics";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
@@ -78,6 +79,9 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
   // and remount it from scratch (brand/shade/level state, session-panel client fields,
   // everything) instead of leaving the just-saved client's values in place.
   const [formResetKey, setFormResetKey] = useState(0);
+  // Formula A of the calculator's comparison: kept here, above the calculator, so it
+  // survives switching screens and the calculator's reset after a save.
+  const [pinnedFormula, setPinnedFormula] = useState<ComparedFormula | null>(null);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   // The brand cheat sheets and technique guides (ReferenceIndexPage, BrandCheatSheetPage,
@@ -213,6 +217,8 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                       repeatRequest={repeatRequest}
                       favoriteRequest={favoriteRequest}
                       onSaved={handleFormulaSaved}
+                      pinnedFormula={pinnedFormula}
+                      onPinnedFormulaChange={setPinnedFormula}
                     />
                   )}
                   {view === "correction" && <ColorCorrectionCalculator />}

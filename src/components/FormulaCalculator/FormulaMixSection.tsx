@@ -6,7 +6,6 @@ import {
   getGrayCoverageNote,
   isBackgroundCoveredByShade,
 } from "../../format/formulaMessages";
-import { buildMixSummary, buildBlendMixSummary } from "../../format/formatFormula";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import type { Porosity } from "../../engine/canvas";
 import type { ApplicationZone } from "../../engine/applicationZone";
@@ -16,6 +15,7 @@ import { LiftOutcome, PorosityNotices, ToneWarnings } from "./FormulaNotices";
 import type { FormulaMix, FormulaProduct } from "./formulaResultsModel";
 import type { CorrectorSelection } from "../../engine/correctorProducts";
 import { CorrectorChoiceField } from "./fields/CorrectorChoiceField";
+import { formatMixLine } from "./formulaComparison";
 
 export interface FormulaMixSectionProps {
   product: FormulaProduct;
@@ -41,19 +41,10 @@ export function FormulaMixSection({
   onCorrectorSelectionChange,
 }: FormulaMixSectionProps) {
   const { t } = useTranslation();
-  const {
-    targetShade,
-    result,
-    additionalShade,
-    additionalShadeGrams,
-    additionalShade2,
-    additionalShade2Grams,
-    blend,
-    naturalBase,
-    correctorSelection = {},
-  } = mix;
+  const { targetShade, result, naturalBase, correctorSelection = {} } = mix;
 
   const mixCorrector = neutralizationApplied ? buildMixCorrector(result, product, correctorSelection) : null;
+  const mixLine = formatMixLine(product, mix, neutralizationApplied);
 
   return (
     <>
@@ -76,32 +67,10 @@ export function FormulaMixSection({
 
       <LiftOutcome result={result} targetShade={targetShade} />
       <PorosityNotices result={result} targetShade={targetShade} porosity={porosity} />
-      {result.grams !== null && (
+      {mixLine !== null && (
         <div className="results__row results__row--mix">
           <span className="results__row-label">{t("results.mix")}</span>
-          <span className="results__mix-value">
-            {blend !== null
-              ? buildBlendMixSummary(
-                  blend,
-                  result.grams.developerGrams,
-                  additionalShade,
-                  additionalShadeGrams,
-                  additionalShade2,
-                  additionalShade2Grams,
-                  naturalBase,
-                  mixCorrector,
-                )
-              : buildMixSummary(
-                  targetShade,
-                  result.grams,
-                  additionalShade,
-                  additionalShadeGrams,
-                  additionalShade2,
-                  additionalShade2Grams,
-                  naturalBase,
-                  mixCorrector,
-                )}
-          </span>
+          <span className="results__mix-value">{mixLine}</span>
         </div>
       )}
 

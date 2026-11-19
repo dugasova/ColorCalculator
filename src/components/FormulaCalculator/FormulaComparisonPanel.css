@@ -1,0 +1,90 @@
+.comparison {
+  margin: 8px 0 20px;
+}
+
+.comparison--idle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.comparison__hint {
+  margin: 0;
+  color: var(--brand-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.comparison__shared {
+  margin: 0 0 10px;
+  color: var(--brand-muted);
+  font-size: 0.9rem;
+}
+
+/* Two value columns stay side by side on a phone; a very long row scrolls rather than
+   squeezing the columns unreadably narrow. */
+.comparison__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--brand-border);
+  border-radius: 0.75rem;
+  background: var(--brand-surface);
+}
+
+.comparison__table {
+  width: 100%;
+  min-width: 20rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  table-layout: fixed;
+}
+
+.comparison__table th,
+.comparison__table td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--brand-border-soft);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.comparison__table thead th {
+  color: var(--brand-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.comparison__table thead th:first-child,
+.comparison__table tbody th {
+  width: 28%;
+}
+
+.comparison__table tbody th {
+  color: var(--brand-muted);
+  font-weight: 500;
+}
+
+.comparison__table tbody tr:last-child th,
+.comparison__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison__row--differs td {
+  background: color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface));
+  font-weight: 600;
+}
+
+.comparison__row--differs th::before {
+  content: "▶ ";
+  color: var(--brand-accent);
+}
+
+.comparison__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
