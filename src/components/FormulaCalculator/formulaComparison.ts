@@ -15,6 +15,8 @@ import {
   getGrayCoverageNote,
   isBackgroundCoveredByShade,
 } from "../../format/formulaMessages";
+import type { Brand, BrandId } from "../../engine/brands";
+import { buildRepeatFormulaRequest, resolveStepBrand, type FormulaHistoryEntry } from "../../history";
 import type { FormulaHair, FormulaMix, FormulaProduct } from "./formulaResultsModel";
 
 // One formula as the comparison sees it: everything the simple calculator shows in its
@@ -22,6 +24,9 @@ import type { FormulaHair, FormulaMix, FormulaProduct } from "./formulaResultsMo
 // kept above the calculator screen (see AuthenticatedApp), so it survives leaving the
 // screen; formula B is the calculator's live result in the same shape.
 export interface ComparedFormula {
+  // Names column A when it isn't simply "the pinned formula" -- e.g. the visit it came
+  // from. Unset for a formula pinned from the calculator.
+  label?: string;
   product: FormulaProduct;
   hair: FormulaHair;
   mix: FormulaMix;
@@ -190,5 +195,45 @@ export function compareFormulas(a: ComparedFormula, b: ComparedFormula): Formula
   return {
     shared: hairRows.filter(row => !row.differs),
     rows: [...hairRows.filter(row => row.differs), ...FORMULA_ROWS.map(spec => toRow(spec, a, b))],
+  };
+}
+
+// A saved visit as formula A: what was mixed then, exactly as History recorded it. Only a
+// visit the simple calculator can repeat (one color step, no zones) has one -- the same
+// rule as buildRepeatFormulaRequest -- since B is that visit repeated into the
+// calculator. Null for a multi-step session or a brand no longer in the catalog.
+export function comparedFormulaFromHistory(
+  entry: FormulaHistoryEntry,
+  brands: Record<BrandId, Brand>,
+): ComparedFormula | null {
+  if (buildRepeatFormulaRequest(entry, brands) === null) return null;
+  const step = entry.steps[0];
+  if (step.kind !== "color") return null;
+  const brand = resolveStepBrand(step, brands);
+  if (brand === undefined) return null;
+  const date = entry.appliedAt?.toDate().toLocaleDateString();
+  return {
+    label: date !== undefined ? i18n.t("comparison.visitOn", { date }) : i18n.t("comparison.visit"),
+    product: { brandId: brand.id, brandName: step.brandName, line: step.line },
+    hair: {
+      startLevel: step.startLevel,
+      grayPercent: step.grayPercent,
+      canvas: step.canvas ?? { porosity: "normal", thickness: "medium", chemicalHistory: [] },
+    },
+    mix: {
+      targetShade: step.targetShade,
+      result: step.result,
+      additionalShade: step.additionalShade ?? null,
+      additionalShadeGrams: step.additionalShadeGrams ?? 0,
+      additionalShade2: step.additionalShade2 ?? null,
+      additionalShade2Grams: step.additionalShade2Grams ?? 0,
+      blend: step.blend ?? null,
+      naturalBase: step.naturalBase ?? null,
+      correctorSelection: step.correctorSelection,
+    },
+    applicationZone: step.applicationZone ?? "full-head",
+    neutralizationApplied: step.neutralizationApplied,
+    processingMinutes: step.processingMinutes,
+    productCost: entry.productCost,
   };
 }

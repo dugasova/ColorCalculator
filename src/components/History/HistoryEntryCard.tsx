@@ -12,6 +12,9 @@ export interface HistoryEntryCardProps {
   onEdit: () => void;
   onOpenPhoto: (photo: { url: string; label: string }) => void;
   onRepeat: () => void;
+  // The saved formula as comparison A, repeated into the calculator as B. Offered only on
+  // a visit the simple calculator can repeat.
+  onCompare?: () => void;
 }
 
 function FormattedSessionText({ text }: { text: string }) {
@@ -34,12 +37,19 @@ function FormattedSessionText({ text }: { text: string }) {
 }
 
 // One saved visit inside a client's visit-list modal (see ClientVisitsModal).
-export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRepeat }: HistoryEntryCardProps) {
+export function HistoryEntryCard({
+  entry,
+  gramsEditor,
+  onEdit,
+  onOpenPhoto,
+  onRepeat,
+  onCompare,
+}: HistoryEntryCardProps) {
   const { t } = useTranslation();
   const brands = usePalette();
   const { gramsDrafts, savingGramsKey, handleActualGramsChange, handleActualGramsBlur } = gramsEditor;
-  const canRepeat =
-    buildRepeatFormulaRequest(entry, brands) !== null || buildRepeatSessionRequest(entry, brands) !== null;
+  const isSimpleRepeat = buildRepeatFormulaRequest(entry, brands) !== null;
+  const canRepeat = isSimpleRepeat || buildRepeatSessionRequest(entry, brands) !== null;
 
   return (
     <li className="history__entry">
@@ -158,6 +168,11 @@ export function HistoryEntryCard({ entry, gramsEditor, onEdit, onOpenPhoto, onRe
           {canRepeat && (
             <button type="button" className="button button--secondary history__entry-repeat" onClick={onRepeat}>
               {t("history.repeat")}
+            </button>
+          )}
+          {isSimpleRepeat && onCompare !== undefined && (
+            <button type="button" className="button button--secondary history__entry-repeat" onClick={onCompare}>
+              {t("comparison.compareVisit")}
             </button>
           )}
         </div>

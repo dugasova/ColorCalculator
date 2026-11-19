@@ -44,7 +44,7 @@ export function FormulaComparisonPanel({ pinned, current, onPin, onClear }: Form
               <th scope="col">
                 <span className="sr-only">{t("comparison.row")}</span>
               </th>
-              <th scope="col">{t("comparison.formulaA")}</th>
+              <th scope="col">{pinned.label ?? t("comparison.formulaA")}</th>
               <th scope="col">{t("comparison.formulaB")}</th>
             </tr>
           </thead>

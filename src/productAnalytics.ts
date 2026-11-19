@@ -14,6 +14,7 @@ export type ProductEventName =
   | "formula_copied"
   | "formula_shared"
   | "formula_repeated"
+  | "formula_compared"
   | "favorite_applied";
 
 type Loaded = { analytics: Analytics; logEvent: typeof LogEvent };
