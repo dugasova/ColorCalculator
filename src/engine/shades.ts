@@ -97,6 +97,10 @@ export interface Shade {
   // The shade carries its own neutralization and takes no corrector at all (Igora Royal's
   // 12- Special Blonde series, Redken Color Gels Oils).
   selfNeutralizing?: boolean;
+  // A lifting blonde that is not a special blonde by its own mixing (no
+  // acceptsPartialLift), e.g. Igora Royal's 10- Ultra Blonde Highlifts. Like the special
+  // blondes, never offered as a toner after powder (colorist, 2026-11-19).
+  highLift?: boolean;
 }
 
 export type CorrectorRule = "rule-of-10" | "rule-of-11";

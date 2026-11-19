@@ -213,6 +213,9 @@ export const IGORA_ROYAL_CHART: Shade[] = igoraRoyalShades.map(shade => ({
   correctorRule: "rule-of-11" as const,
   ...(shade.level === 12 ? { selfNeutralizing: true } : {}),
   ...(shade.code.startsWith("9,5-") ? PASTEL_TONER : {}),
+  // The whole 10- row but its plain natural 10-0 is the Ultra Blonde Highlifts series
+  // (colorist, 2026-11-19); the 9,5- pastels, though counted as level 10, are toners.
+  ...(shade.code.startsWith("10-") && shade.code !== "10-0" ? { highLift: true } : {}),
   // Highlifts "Special Blonde" 12-series shares this exact override set across every
   // shade in the sub-range -- centralized here, once, instead of repeated on each of the
   // 10 individual shade literals above, where a future addition could silently miss one

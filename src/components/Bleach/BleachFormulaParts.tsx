@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { BleachFormula } from "../../engine/bleach";
+import type { Brand } from "../../engine/brands";
+import { findBleachToners } from "../../engine/correction";
 import { formatBleachToning } from "../../format/formatBleach";
 
 // The pieces of a bleach formula that read the same on the standalone BleachCalculator
@@ -68,12 +70,24 @@ export function BleachMixRow({ result }: BleachResultProps) {
   );
 }
 
+export interface BleachToner {
+  brand: Brand;
+  line: string | null;
+}
+
+interface BleachToningRowsProps extends BleachResultProps {
+  // The toner's brand and line, when the colorist picked one: its shades at the target
+  // level that cancel the background are listed after the generic recommendation.
+  toner?: BleachToner;
+}
+
 // What the lightening leaves behind and what to tone it with. Renders nothing when there
 // is no formula.
-export function BleachToningRows({ result }: BleachResultProps) {
+export function BleachToningRows({ result, toner }: BleachToningRowsProps) {
   const { t } = useTranslation();
   if (result.grams === null) return null;
   const toning = formatBleachToning(result.targetLevel);
+  const tonerShades = toner !== undefined ? findBleachToners(toner.brand, toner.line, result.targetLevel) : null;
   return (
     <>
       <div className="results__row">
@@ -84,6 +98,16 @@ export function BleachToningRows({ result }: BleachResultProps) {
         <span className="results__row-label">{t("bleach.toningLabel")}</span>
         <span>{toning.toner}</span>
       </div>
+      {tonerShades !== null && (
+        <div className="results__row" data-row="tonerShades">
+          <span className="results__row-label">{t("bleach.tonerShadesLabel")}</span>
+          <span>
+            {tonerShades.length > 0
+              ? tonerShades.map(shade => shade.code).join(", ")
+              : t("bleach.tonerShadesNone", { level: result.targetLevel })}
+          </span>
+        </div>
+      )}
     </>
   );
 }

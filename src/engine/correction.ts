@@ -308,6 +308,16 @@ export function findNeutralizingShades(
   return getLineShades(brand, line).filter(shade => shade.level === level && cancelsUnwantedTone(shade, unwanted));
 }
 
+// Shades of the line that tone hair lightened to `level`: those at that level whose own
+// tone cancels the background the lightening leaves (see getExpectedUnwantedTone). Never
+// a special blonde or another lifting blonde (Shade.acceptsPartialLift, Shade.highLift):
+// applying one after powder is dangerous (colorist, 2026-11-19).
+export function findBleachToners(brand: Brand, line: string | null, level: Level): Shade[] {
+  return findNeutralizingShades(brand, line, getExpectedUnwantedTone(level), level).filter(
+    shade => shade.acceptsPartialLift !== true && shade.highLift !== true,
+  );
+}
+
 // The line's mixing ratio at `level`: a shade's own fixed ratio where the line has one
 // (Color Touch 1:2, Koleston's 12 series), the brand's strategy otherwise.
 export function getLineMixingRatio(brand: Brand, line: string | null, startLevel: Level, level: Level): MixingRatio {

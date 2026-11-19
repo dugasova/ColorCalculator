@@ -16,6 +16,12 @@ import type { DeveloperVolume, Level } from "./levels";
 // option) can deliver requires a separate multi-step session, with 1-2
 // weeks of scalp recovery in between.
 
+// The lightest target a colorist lightens to: 10. Levels 11-12 exist only as the
+// special-blonde (high-lift) shades' nominal depth, never as a goal after powder
+// (colorist, 2026-11-19).
+export const MAX_BLEACH_TARGET_LEVEL: Level = 10;
+export const BLEACH_TARGET_LEVELS: Level[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 const BLEACH_LIFT_TABLE: Record<DeveloperVolume, number> = {
   6: 3,
   10: 4,

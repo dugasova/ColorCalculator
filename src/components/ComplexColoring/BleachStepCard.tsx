@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
+import { BLEACH_TARGET_LEVELS } from "../../engine/bleach";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
@@ -157,6 +158,7 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
         <LevelField
           id={`bleachTargetLevel${idSuffix}`}
           label={t("bleach.targetLevel")}
+          levels={BLEACH_TARGET_LEVELS}
           value={targetLevel}
           onChange={setTargetLevel}
         />
