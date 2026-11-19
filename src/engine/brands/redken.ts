@@ -175,169 +175,124 @@ export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
   developerPercentOverride: 2,
 }));
 
-// Chromatics (Prismatic) -- Redken's ammonia-free PERMANENT oxidative color, in the
-// same catalog as a second Redken line alongside the demi Shades EQ above but a
-// fundamentally different chemistry (real lift, graded developer, longer processing --
-// see LINE_PERMANENCE in shadeMatch.ts, which is why the two lines are kept separate
-// under one brand rather than merged). Chromatics Ultra Rich (a richer-pigment,
-// flatter-reflect formulation) and Chromatics Beyond Cover (pre-blended for 75%+ gray)
-// share this exact same level+letter-code notation and codes -- they're the same
-// catalog entries under a different formulation, not new shades, so they aren't
-// modeled as separate entries here (same reasoning `formatBleach.ts`'s single chart
-// covers every application style rather than branching per technique).
-//
-// Code format: LEVEL + two-letter reflect pair, no leading zero and no separator (e.g.
-// "6RR", "10NA") -- distinct from Shades EQ's own zero-padded, longer-combo notation
-// above ("06ABn"). Redken always writes the second letter lowercase in its own catalog
-// styling (e.g. "6Rv", "8Aa") regardless of whether it's a distinct family or the same
-// one repeated -- this is purely stylistic, not a meaningful signal, so it's not
-// preserved in `code` here (written uppercase for consistency with every other line in
-// this file). A repeated family (Aa, NN, RR) means intensified/doubled, not a blend --
-// same convention as Shades EQ's own AA/GG/CC/RR and Igora's repeated-digit shades.
-// Redken doesn't give Chromatics shades unique proper names the way Shades EQ does --
-// instead each letter-family has a descriptive name (e.g. "Ash Gold") that functions as
-// the shade's display name; that's what `name` holds here.
-//
-// Letter reading (Chromatics' own two-letter shorthand -- confirmed distinct from
-// Shades EQ's letter conventions above despite sharing some individual letters): N
-// natural, NN natural/natural (intensified), NW "Natural Warm" -> natural/copper, NA
-// "Natural Ash" -> natural/ash, A/Ax "Ash" (the 'x' is a filler when there's no second
-// letter, not a real reflect) -> ash, Ab "Ash Blue" -> ash/slate-grey (same blue
-// approximation used for Igora's own AB and Shades EQ's VB/AB), Av "Ash Violet" ->
-// ash/violet, Ag "Ash Green" -> ash/matt (green -> matt, same reading Igora's own
-// digit-3 uses), Ago "Ash Gold" -> ash/gold, Aa "Ash/Ash" (intensified) -> ash/ash, Gi
-// "Gold Iridescent" -> gold/pearl (iridescent -> pearl, same reading Shades EQ's own GI
-// uses), WG "Warm Gold" -> gold/copper, CR "Copper Red" -> copper/red, RR "Red Red"
-// (intensified) -> red/red, RV/Rv "Red Violet" -> red/violet, Br "Brown Red" ->
-// chocolate/red (brown, no dedicated `ToneFamily`, approximates to chocolate -- same
-// reading Shades EQ's own "Brown" second-letter codes use).
-//
-// Mixing: fixed 1:1 with Chromatics Oil-in-Cream Developer (`redkenMixingRatio` in
-// brands.ts already covers this brand-wide -- no per-shade override needed, unlike
-// Wella/Igora's Highlift exceptions). Chromatics' own Oil-in-Cream Developer line only
-// goes up to 30 volume (10/20/30 -- there's no 40 volume product for this system,
-// unlike the generic 10/20/30/40 the engine defaults to for every other permanent
-// line), so every shade below sets `chromaticsLiftTable`, capping the engine's
-// auto-picked developer at 30vol/2 levels of lift rather than fabricating a 40vol
-// option Redken doesn't sell. No `developerVolumeChoices` here -- unlike the demi
-// Shades EQ chart above, Chromatics genuinely lifts, so it goes through the same
-// auto-picked-volume path as Wella Koleston Perfect/Igora Royal (30/45-minute
-// permanent-color processing, not the demi 20-minute one) -- Redken's own official
-// standard processing time for Chromatics is 35 minutes, in between those two, but the
-// engine has no third processing-time tier and 35 is close enough to the existing
-// 30-minute standard tier that introducing one would be a bigger change than this
-// chart warrants on its own.
-//
-// Deliberately excluded: the "Clear" diluter shade (no depth `level` of its own, same
-// reasoning Shades EQ's own Crystal Clear and Igora's 0-series concentrates were left
-// out); levels 2 and below beyond the two confirmed naturals (Chromatics' working
-// range is concentrated in levels 4-10, per Redken's own materials).
-const chromaticsLiftTable: LiftTable = volume => {
+// Color Gels Oils -- Redken's ammonia-free permanent line that replaced Chromatics
+// (colorist, 2026-11-18). Mixes 1:1 with Redken Pro-Oxide Cream Developer on every level
+// (`redkenMixingRatio` in brands.ts), 10/20/30/40 vol. Lifts on a natural base up to 1
+// level at 10 vol, 2 at 20, 3 at 30 and up to 4 at 40 (3+, as far as 4 on fine light
+// bases). Processing follows the developer, not gray coverage, always without heat: 20
+// min at 10 vol, 30 at 20, 40 at 30, 45 at 40. Every shade carries a balanced brown-beige
+// base and covers gray in 30 min at 20 vol; on gray the manufacturer advises lifting no
+// more than 2 levels. Letter reading (colorist's names): N natural, NN intense natural,
+// NA natural ash, NCh natural chocolate, NW natural warm -> natural/gold (W "warm golden
+// brown"), AV ash violet, ABn ash brown (same as Shades EQ's), P pearl, G gold, IG
+// intense gold, GB gold brown, GI gold iridescent -> gold/pearl, CC intense copper, RR
+// intense red, BR brown red, BC brown copper, RV red violet. Clear (the ammonia-free
+// diluent) is left out: it has no level of its own. The line has no mixtones: its
+// pigmented shades are already balanced against the lightening background and for 100%
+// gray, so it takes no corrector (`selfNeutralizing`, colorist 2026-11-19).
+const colorGelsOilsLiftTable: LiftTable = volume => {
   switch (volume) {
     case 10:
-      return 0;
-    case 20:
       return 1;
-    case 30:
+    case 20:
       return 2;
+    case 30:
+      return 3;
+    case 40:
+      return 4;
     default:
-      return 0; // 6/13/40 -- not sold for this system, never reachable.
+      return 0; // 6/13 vol -- not sold for this line.
   }
 };
 
-const chromaticsShades: Shade[] = [
+const colorGelsOilsShades: Shade[] = [
   // Level 1
-  { code: "1N", level: 1, tone: "natural", name: "Natural" },
-  { code: "1Ab", level: 1, tone: "ash", secondaryTone: "slate-grey", name: "Ash Blue" },
+  { code: "1NN", level: 1, tone: "natural", secondaryTone: "natural", name: "French Roast" },
+  { code: "1N", level: 1, tone: "natural", name: "Onyx" },
 
   // Level 2
-  { code: "2N", level: 2, tone: "natural", name: "Natural" },
-  { code: "2NW", level: 2, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
+  { code: "2ABn", level: 2, tone: "ash", secondaryTone: "chocolate", name: "Cool Ebony" },
 
   // Level 3
-  { code: "3N", level: 3, tone: "natural", name: "Natural" },
-  { code: "3NN", level: 3, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "3NW", level: 3, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
+  { code: "3NN", level: 3, tone: "natural", secondaryTone: "natural", name: "Black Coffee" },
+  { code: "3N", level: 3, tone: "natural", name: "Espresso" },
 
   // Level 4
-  { code: "4N", level: 4, tone: "natural", name: "Natural" },
-  { code: "4NN", level: 4, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "4Ax", level: 4, tone: "ash", name: "Ash" },
-  { code: "4Ag", level: 4, tone: "ash", secondaryTone: "matt", name: "Ash Green" },
-  { code: "4NW", level: 4, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
-  { code: "4NA", level: 4, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "4RR", level: 4, tone: "red", secondaryTone: "red", name: "Red Red" },
-  { code: "4RV", level: 4, tone: "red", secondaryTone: "violet", name: "Red Violet" },
+  { code: "4ABn", level: 4, tone: "ash", secondaryTone: "chocolate", name: "Dark Roast" },
+  { code: "4NA", level: 4, tone: "natural", secondaryTone: "ash", name: "Storm Cloud" },
+  { code: "4NCh", level: 4, tone: "natural", secondaryTone: "chocolate", name: "Dark Chocolate" },
+  { code: "4NN", level: 4, tone: "natural", secondaryTone: "natural", name: "Coffee Ground" },
+  { code: "4N", level: 4, tone: "natural", name: "Chicory" },
+  { code: "4NW", level: 4, tone: "natural", secondaryTone: "gold", name: "Maple" },
+  { code: "4BC", level: 4, tone: "chocolate", secondaryTone: "copper", name: "Allspice" },
+  { code: "4RV", level: 4, tone: "red", secondaryTone: "violet", name: "Velvet Wine" },
 
   // Level 5
-  { code: "5N", level: 5, tone: "natural", name: "Natural" },
-  { code: "5NN", level: 5, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "5Ax", level: 5, tone: "ash", name: "Ash" },
-  { code: "5Ab", level: 5, tone: "ash", secondaryTone: "slate-grey", name: "Ash Blue" },
-  { code: "5Ago", level: 5, tone: "ash", secondaryTone: "gold", name: "Ash Gold" },
-  { code: "5NW", level: 5, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
-  { code: "5NA", level: 5, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "5Gi", level: 5, tone: "gold", secondaryTone: "pearl", name: "Gold Iridescent" },
-  { code: "5CR", level: 5, tone: "copper", secondaryTone: "red", name: "Copper Red" },
-  { code: "5RR", level: 5, tone: "red", secondaryTone: "red", name: "Red Red" },
-  { code: "5RV", level: 5, tone: "red", secondaryTone: "violet", name: "Red Violet" },
-  { code: "5Br", level: 5, tone: "chocolate", secondaryTone: "red", name: "Brown Red" },
+  { code: "5NA", level: 5, tone: "natural", secondaryTone: "ash", name: "Smoke" },
+  { code: "5NCh", level: 5, tone: "natural", secondaryTone: "chocolate", name: "Truffle" },
+  { code: "5NN", level: 5, tone: "natural", secondaryTone: "natural", name: "Café Mocha" },
+  { code: "5N", level: 5, tone: "natural", name: "Walnut" },
+  { code: "5BR", level: 5, tone: "chocolate", secondaryTone: "red", name: "Brownstone" },
+  { code: "5CC", level: 5, tone: "copper", secondaryTone: "copper", name: "Electric Shock" },
+  { code: "5RV", level: 5, tone: "red", secondaryTone: "violet", name: "Sangria" },
 
   // Level 6
-  { code: "6N", level: 6, tone: "natural", name: "Natural" },
-  { code: "6NN", level: 6, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "6Ax", level: 6, tone: "ash", name: "Ash" },
-  { code: "6Ab", level: 6, tone: "ash", secondaryTone: "slate-grey", name: "Ash Blue" },
-  { code: "6Ag", level: 6, tone: "ash", secondaryTone: "matt", name: "Ash Green" },
-  { code: "6Aa", level: 6, tone: "ash", secondaryTone: "ash", name: "Ash/Ash" },
-  { code: "6NA", level: 6, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "6Gi", level: 6, tone: "gold", secondaryTone: "pearl", name: "Gold Iridescent" },
-  { code: "6WG", level: 6, tone: "gold", secondaryTone: "copper", name: "Warm Gold" },
-  { code: "6CR", level: 6, tone: "copper", secondaryTone: "red", name: "Copper Red" },
-  { code: "6RR", level: 6, tone: "red", secondaryTone: "red", name: "Red Red" },
-  { code: "6Rv", level: 6, tone: "red", secondaryTone: "violet", name: "Red Violet" },
-  { code: "6Br", level: 6, tone: "chocolate", secondaryTone: "red", name: "Brown Red" },
+  { code: "6ABn", level: 6, tone: "ash", secondaryTone: "chocolate", name: "Brown Smoke" },
+  { code: "6NA", level: 6, tone: "natural", secondaryTone: "ash", name: "Granite" },
+  { code: "6NCh", level: 6, tone: "natural", secondaryTone: "chocolate", name: "Ganache" },
+  { code: "6NN", level: 6, tone: "natural", secondaryTone: "natural", name: "Chocolate Mousse" },
+  { code: "6N", level: 6, tone: "natural", name: "Moroccan Sand" },
+  { code: "6NW", level: 6, tone: "natural", secondaryTone: "gold", name: "Brandy" },
+  { code: "6BR", level: 6, tone: "chocolate", secondaryTone: "red", name: "Rusted Ruby" },
+  { code: "6BC", level: 6, tone: "chocolate", secondaryTone: "copper", name: "Sumac" },
+  { code: "6IG", level: 6, tone: "gold", secondaryTone: "gold", name: "Vintage Gold" },
+  { code: "6GI", level: 6, tone: "gold", secondaryTone: "pearl", name: "Tenerife" },
+  { code: "6G", level: 6, tone: "gold", name: "St Tropez" },
+  { code: "6RR", level: 6, tone: "red", secondaryTone: "red", name: "Blaze" },
 
   // Level 7
-  { code: "7N", level: 7, tone: "natural", name: "Natural" },
-  { code: "7NN", level: 7, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "7Ax", level: 7, tone: "ash", name: "Ash" },
-  { code: "7Ab", level: 7, tone: "ash", secondaryTone: "slate-grey", name: "Ash Blue" },
-  { code: "7Ago", level: 7, tone: "ash", secondaryTone: "gold", name: "Ash Gold" },
-  { code: "7NW", level: 7, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
-  { code: "7NA", level: 7, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "7Gi", level: 7, tone: "gold", secondaryTone: "pearl", name: "Gold Iridescent" },
+  { code: "7NA", level: 7, tone: "natural", secondaryTone: "ash", name: "Pewter" },
+  { code: "7NCh", level: 7, tone: "natural", secondaryTone: "chocolate", name: "Fondue" },
+  { code: "7NN", level: 7, tone: "natural", secondaryTone: "natural", name: "Cocoa Powder" },
+  { code: "7N", level: 7, tone: "natural", name: "Mirage" },
+  { code: "7NW", level: 7, tone: "natural", secondaryTone: "gold", name: "Milk Tea" },
+  { code: "7GB", level: 7, tone: "gold", secondaryTone: "chocolate", name: "Butterscotch" },
+  { code: "7CC", level: 7, tone: "copper", secondaryTone: "copper", name: "Urban Fever" },
 
   // Level 8
-  { code: "8NN", level: 8, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "8Ab", level: 8, tone: "ash", secondaryTone: "slate-grey", name: "Ash Blue" },
-  { code: "8Av", level: 8, tone: "ash", secondaryTone: "violet", name: "Ash Violet" },
-  { code: "8Ago", level: 8, tone: "ash", secondaryTone: "gold", name: "Ash Gold" },
-  { code: "8Aa", level: 8, tone: "ash", secondaryTone: "ash", name: "Ash/Ash" },
-  { code: "8NA", level: 8, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "8Gi", level: 8, tone: "gold", secondaryTone: "pearl", name: "Gold Iridescent" },
+  { code: "8P", level: 8, tone: "pearl", name: "Misty Pearl" },
+  { code: "8NA", level: 8, tone: "natural", secondaryTone: "ash", name: "Volcanic" },
+  { code: "8NCh", level: 8, tone: "natural", secondaryTone: "chocolate", name: "Chocolate Soufflé" },
+  { code: "8NN", level: 8, tone: "natural", secondaryTone: "natural", name: "Crème Brûlée" },
+  { code: "8N", level: 8, tone: "natural", name: "Mojave" },
+  { code: "8NW", level: 8, tone: "natural", secondaryTone: "gold", name: "Safari" },
+  { code: "8IG", level: 8, tone: "gold", secondaryTone: "gold", name: "Gold Faithful" },
+  { code: "8G", level: 8, tone: "gold", name: "Almond Sugar" },
 
   // Level 9
-  { code: "9NN", level: 9, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "9Ab", level: 9, tone: "ash", secondaryTone: "slate-grey", name: "Ash Blue" },
-  { code: "9Av", level: 9, tone: "ash", secondaryTone: "violet", name: "Ash Violet" },
-  { code: "9Ago", level: 9, tone: "ash", secondaryTone: "gold", name: "Ash Gold" },
-  { code: "9NW", level: 9, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
-  { code: "9NA", level: 9, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "9Gi", level: 9, tone: "gold", secondaryTone: "pearl", name: "Gold Iridescent" },
+  { code: "9AV", level: 9, tone: "ash", secondaryTone: "violet", name: "Glacier" },
+  { code: "9P", level: 9, tone: "pearl", name: "Opal Glow" },
+  { code: "9NA", level: 9, tone: "natural", secondaryTone: "ash", name: "Mist" },
+  { code: "9NCh", level: 9, tone: "natural", secondaryTone: "chocolate", name: "Chocolate Milk" },
+  { code: "9NN", level: 9, tone: "natural", secondaryTone: "natural", name: "Cortado" },
+  { code: "9N", level: 9, tone: "natural", name: "Café au Lait" },
+  { code: "9NW", level: 9, tone: "natural", secondaryTone: "gold", name: "Cream Soda" },
+  { code: "9G", level: 9, tone: "gold", name: "Vanilla Bean" },
 
   // Level 10
-  { code: "10N", level: 10, tone: "natural", name: "Natural" },
-  { code: "10NN", level: 10, tone: "natural", secondaryTone: "natural", name: "Natural/Natural" },
-  { code: "10Av", level: 10, tone: "ash", secondaryTone: "violet", name: "Ash Violet" },
-  { code: "10Ago", level: 10, tone: "ash", secondaryTone: "gold", name: "Ash Gold" },
-  { code: "10NW", level: 10, tone: "natural", secondaryTone: "copper", name: "Natural Warm" },
-  { code: "10NA", level: 10, tone: "natural", secondaryTone: "ash", name: "Natural Ash" },
-  { code: "10Gi", level: 10, tone: "gold", secondaryTone: "pearl", name: "Gold Iridescent" },
+  { code: "10AV", level: 10, tone: "ash", secondaryTone: "violet", name: "Winter Morning" },
+  { code: "10P", level: 10, tone: "pearl", name: "Ivory Pearl" },
+  { code: "10NA", level: 10, tone: "natural", secondaryTone: "ash", name: "Marble" },
+  { code: "10NN", level: 10, tone: "natural", secondaryTone: "natural", name: "Affogato" },
+  { code: "10N", level: 10, tone: "natural", name: "Delicate Natural" },
+  { code: "10G", level: 10, tone: "gold", name: "Sheer Gold" },
 ];
 
-export const REDKEN_CHROMATICS_CHART: Shade[] = chromaticsShades.map(shade => ({
+export const REDKEN_COLOR_GELS_OILS_CHART: Shade[] = colorGelsOilsShades.map(shade => ({
   ...shade,
-  line: "chromatics",
-  developerLiftTable: chromaticsLiftTable,
+  line: "color-gels-oils",
+  developerLiftTable: colorGelsOilsLiftTable,
+  processingMinutesByVolume: { 10: 20, 20: 30, 30: 40, 40: 45 },
+  maxGrayLift: 2,
+  selfNeutralizing: true,
 }));

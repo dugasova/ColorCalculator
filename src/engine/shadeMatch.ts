@@ -11,7 +11,7 @@ export interface ShadeMatch {
 
 export type PermanenceCategory = "permanent" | "semi-permanent";
 
-// Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, Redken Chromatics, and
+// Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, Redken Color Gels Oils, and
 // Matrix SoColor Pre-Bonded are permanent oxidative dyes; Wella Color Touch, L'Oréal Dia
 // Light/Dia Color, Igora Vibrance, Redken Shades EQ, and Matrix Super Sync are
 // semi-permanent (demi) dyes -- a fundamentally different chemistry (little to no
@@ -25,7 +25,7 @@ const LINE_PERMANENCE: Record<string, PermanenceCategory> = {
   inoa: "permanent",
   majirel: "permanent",
   royal: "permanent",
-  chromatics: "permanent",
+  "color-gels-oils": "permanent",
   "color-touch": "semi-permanent",
   "dia-light": "semi-permanent",
   "dia-color": "semi-permanent",

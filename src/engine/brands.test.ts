@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { calculateFullFormula } from "./formula";
 import { IGORA_VIBRANCE_CHART, IGORA_ROYAL_CHART } from "./brands/igora";
+import { REDKEN_COLOR_GELS_OILS_CHART } from "./brands/redken";
 import { WELLA_SHADE_CHART, WELLA_COLOR_TOUCH_CHART } from "./brands/wella";
 import { LOREAL_MAJIREL_CHART } from "./brands/loreal";
 import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
 import { BRANDS } from "./brands";
+import type { Level } from "./levels";
 
 describe("BRANDS.matrix", () => {
   it("has the full 62-shade SoColor Pre-Bonded Blended Natural range, every shade tagged with the socolor line", () => {
@@ -43,6 +45,54 @@ describe("IGORA_VIBRANCE_CHART", () => {
     for (const shade of IGORA_VIBRANCE_CHART) {
       expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
     }
+  });
+});
+
+describe("REDKEN_COLOR_GELS_OILS_CHART", () => {
+  const shade = (code: string) => REDKEN_COLOR_GELS_OILS_CHART.find(s => s.code === code)!;
+  const formula = (code: string, startLevel: number, grayPercent = 0) =>
+    calculateFullFormula({
+      startLevel: startLevel as Level,
+      targetShade: shade(code),
+      grayPercent,
+      totalGrams: 60,
+    });
+
+  it("has the 61-shade range, mixing 1:1 on every level, Chromatics gone", () => {
+    expect(REDKEN_COLOR_GELS_OILS_CHART.length).toBe(61);
+    expect(BRANDS.redken.shades.some(s => s.line === "chromatics")).toBe(false);
+    expect(BRANDS.redken.mixingRatio(4, 10)).toEqual({ colorParts: 1, developerParts: 1 });
+    expect(shade("6GI")).toMatchObject({ tone: "gold", secondaryTone: "pearl", name: "Tenerife" });
+    expect(shade("7NW")).toMatchObject({ tone: "natural", secondaryTone: "gold" });
+  });
+
+  it("lifts 1/2/3/4 levels at 10/20/30/40 vol, processing 20/30/40/45 min", () => {
+    expect(formula("6N", 5)).toMatchObject({ developerVolume: 10, recommendedProcessingMinutes: 20 });
+    expect(formula("7N", 5)).toMatchObject({ developerVolume: 20, recommendedProcessingMinutes: 30 });
+    expect(formula("8N", 5)).toMatchObject({ developerVolume: 30, recommendedProcessingMinutes: 40 });
+    expect(formula("9N", 5)).toMatchObject({ developerVolume: 40, recommendedProcessingMinutes: 45 });
+    expect(formula("10N", 5).developerVolume).toBeNull();
+  });
+
+  it("covers gray at 20 vol in 30 min, without the 45-minute extension", () => {
+    expect(formula("6N", 6, 80)).toMatchObject({
+      developerVolume: 20,
+      recommendedProcessingMinutes: 30,
+      grayLiftWarning: null,
+    });
+  });
+
+  it("takes no corrector and no tone warning: its shades are balanced against the background", () => {
+    const result = formula("9P", 6);
+    expect(result.underlyingPigment).not.toBeNull();
+    expect(result.recommendedCorrectiveTone).toBeNull();
+    expect(result.toneWarning).toBeNull();
+  });
+
+  it("warns when gray is lifted more than 2 levels", () => {
+    expect(formula("7N", 5, 50).grayLiftWarning).toBeNull();
+    expect(formula("8N", 5, 50).grayLiftWarning).toEqual({ code: "8N", maxLift: 2, lift: 3 });
+    expect(formula("8N", 5, 0).grayLiftWarning).toBeNull();
   });
 });
 

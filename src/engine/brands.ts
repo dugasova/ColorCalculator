@@ -9,7 +9,7 @@ import {
   LOREAL_DIA_COLOR_CHART,
 } from "./brands/loreal";
 import { IGORA_ROYAL_CHART, IGORA_VIBRANCE_CHART } from "./brands/igora";
-import { REDKEN_SHADES_EQ_CHART, REDKEN_CHROMATICS_CHART } from "./brands/redken";
+import { REDKEN_COLOR_GELS_OILS_CHART, REDKEN_SHADES_EQ_CHART } from "./brands/redken";
 import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
 import { getMixingRatio } from "./formula";
 
@@ -45,8 +45,8 @@ function igoraMixingRatio(): MixingRatio {
 }
 
 // Shades EQ Gloss mixes 1:1 with Shades EQ Processing Solution across the whole line,
-// no exceptions — unlike Wella/Igora above, there's no Highlift-style sub-range that
-// mixes differently, since Shades EQ never lifts (see brands/redken.ts).
+// and Color Gels Oils 1:1 with Pro-Oxide Cream Developer on every level -- neither has a
+// Highlift-style sub-range that mixes differently (see brands/redken.ts).
 function redkenMixingRatio(): MixingRatio {
   return { colorParts: 1, developerParts: 1 };
 }
@@ -94,7 +94,7 @@ export const BRANDS: Record<BrandId, Brand> = {
   redken: {
     id: "redken",
     name: "Redken",
-    shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_CHROMATICS_CHART],
+    shades: [...REDKEN_SHADES_EQ_CHART, ...REDKEN_COLOR_GELS_OILS_CHART],
     mixingRatio: redkenMixingRatio,
     pricePerGram: 0.2,
   },

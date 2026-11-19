@@ -27,15 +27,15 @@ describe("developerStockId / getBrandScopedDeveloperLines", () => {
     expect(getBrandScopedDeveloperLines("wella")).toEqual([]);
   });
 
-  it("scopes INOA and Chromatics to their own id, distinct from their brand's shared bucket", () => {
+  it("scopes INOA and Color Gels Oils to their own id, distinct from their brand's shared bucket", () => {
     expect(developerStockId("loreal", "inoa", 20)).not.toBe(developerStockId("loreal", null, 20));
-    expect(developerStockId("redken", "chromatics", 20)).not.toBe(developerStockId("redken", null, 20));
     expect(getBrandScopedDeveloperLines("loreal")).toEqual(["inoa"]);
-    expect(getBrandScopedDeveloperLines("redken")).toEqual(["chromatics"]);
+    expect(developerStockId("redken", "color-gels-oils", 20)).not.toBe(developerStockId("redken", null, 20));
+    expect(getBrandScopedDeveloperLines("redken")).toEqual(["color-gels-oils"]);
   });
 
-  it("restricts a scoped line's developer to the volumes its real product ships in -- no 6/13/40 vol for INOA or Chromatics", () => {
+  it("restricts a scoped line's developer to the volumes its real product ships in -- no 6/13/40 vol for INOA", () => {
     expect(getScopedDeveloperVolumes("loreal", "inoa")).toEqual([10, 20, 30]);
-    expect(getScopedDeveloperVolumes("redken", "chromatics")).toEqual([10, 20, 30]);
+    expect(getScopedDeveloperVolumes("redken", "color-gels-oils")).toEqual([10, 20, 30, 40]);
   });
 });

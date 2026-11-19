@@ -38,17 +38,16 @@ export const DEVELOPER_BOTTLE_SIZE_GRAMS = 1000;
 // Lines whose developer is a chemically distinct product from the rest of their brand's
 // other lines, not a shared bottle -- INOA's own Oxydant Crème (oil-delivery system)
 // isn't interchangeable with Majirel/Dia Light/Dia Color's regular Oxydant Crème, and
-// Chromatics' Oil-in-Cream Developer isn't the same product as Shades EQ's Processing
-// Solution (itself not even a real graded developer -- see redken.ts). The value is the
-// exact set of volumes that real product actually ships in -- both INOA Developer and
-// Chromatics Oil-in-Cream Developer are sold only in 10/20/30 vol, unlike the full
+// Color Gels Oils' Pro-Oxide Cream Developer isn't Shades EQ's Processing Solution. The
+// value is the exact set of volumes that real product actually ships in -- INOA
+// Developer 10/20/30 vol, Pro-Oxide 10/20/30/40 vol -- unlike the full
 // 6/10/13/20/30/40 vol range ALL_DEVELOPER_VOLUMES offers for a brand's shared bucket.
 // Every other line in this catalog still shares one developer-per-volume stock bucket
 // with the rest of its brand, same as before this distinction existed -- keyed
 // "<brandId>::<line>", same shape as SHADE_TUBE_SIZE_OVERRIDES_GRAMS above.
 const SEPARATE_DEVELOPER_LINES: Record<string, DeveloperVolume[]> = {
   "loreal::inoa": [10, 20, 30],
-  "redken::chromatics": [10, 20, 30],
+  "redken::color-gels-oils": [10, 20, 30, 40],
 };
 
 // The scoped-developer lines that exist within one brand (see SEPARATE_DEVELOPER_LINES

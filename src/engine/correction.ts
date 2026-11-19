@@ -149,7 +149,7 @@ const RULE_OF_TEN_BASE_LEVEL = 10;
 // undertone (see levels.ts's getUnderlyingPigment) that shows through without a touch of
 // violet correction. Every major brand's own chart confirms this: Wella (0/66, "1cm/0.5g"),
 // Igora Royal (0-99, "1cm/0.5g", per its own rule-of-12 for the Highlifts sub-range),
-// Majirel (Mix Violet, "0.2-0.3g"), and Chromatics (Remixed Violet, "0.5-1g") all specify a
+// and Majirel (Mix Violet, "0.2-0.3g") all specify a
 // small fixed amount at this depth rather than scaling it down to nothing -- so it never
 // diminishes further as the target climbs from 10 to 12.
 const RULE_OF_TEN_HIGH_LIFT_FLOOR_GRAMS_PER_30G = 0.5;
