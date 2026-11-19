@@ -59,6 +59,13 @@ export interface EligibilityWarning {
   startLevel: Level;
 }
 
+// Gray hair lifted further than the shade's manufacturer allows (Shade.maxGrayLift).
+export interface GrayLiftWarning {
+  code: string;
+  maxLift: number;
+  lift: number;
+}
+
 // A deposit-only line (Shade.developerVolumeChoices) was asked to lift.
 export interface LiftUnsupportedWarning {
   code: string;
@@ -91,6 +98,8 @@ export interface FullFormula {
   toneWarning: ToneWarning | null;
   eligibilityWarning: EligibilityWarning | null;
   liftUnsupportedWarning: LiftUnsupportedWarning | null;
+  // Absent on results saved before the gray lift limit existed.
+  grayLiftWarning?: GrayLiftWarning | null;
   grams: FormulaGrams | null;
   // Set when porosity changed what the level/gray rules alone would have recommended
   // (see applyPorosity). Absent on every result saved before porosity fed the formula.
@@ -180,10 +189,16 @@ function applyPorosity(
   return unchanged;
 }
 
-export function getRecommendedProcessingMinutes(targetShade: Shade, grayPercent: number): number {
+export function getRecommendedProcessingMinutes(
+  targetShade: Shade,
+  grayPercent: number,
+  developerVolume: DeveloperVolume | null = null,
+): number {
   if (targetShade.fixedProcessingMinutes !== undefined) {
     return targetShade.fixedProcessingMinutes;
   }
+  const byVolume = developerVolume !== null ? targetShade.processingMinutesByVolume?.[developerVolume] : undefined;
+  if (byVolume !== undefined) return byVolume;
   if (targetShade.developerVolumeChoices !== undefined) {
     return DEMI_PERMANENT_PROCESSING_MINUTES;
   }
@@ -394,7 +409,7 @@ export function calculateFullFormula({
     grayPercent,
     isLifting,
     levelDeveloperVolume,
-    getRecommendedProcessingMinutes(targetShade, grayPercent),
+    getRecommendedProcessingMinutes(targetShade, grayPercent, levelDeveloperVolume),
   );
 
   // No pigment is actually revealed if the line can't lift in the first place, or lifts
@@ -421,6 +436,11 @@ export function calculateFullFormula({
     targetShade.minStartLevel !== undefined && startLevel < targetShade.minStartLevel
       ? { code: targetShade.code, minLevel: targetShade.minStartLevel, startLevel }
       : null;
+  const grayLift = achievedLevel !== null ? achievedLevel - startLevel : 0;
+  const grayLiftWarning =
+    targetShade.maxGrayLift !== undefined && grayPercent >= GRAY_LIGHT_THRESHOLD && grayLift > targetShade.maxGrayLift
+      ? { code: targetShade.code, maxLift: targetShade.maxGrayLift, lift: grayLift }
+      : null;
 
   return {
     developerVolume,
@@ -434,6 +454,7 @@ export function calculateFullFormula({
     recommendedProcessingMinutes,
     toneWarning,
     eligibilityWarning,
+    grayLiftWarning,
     liftUnsupportedWarning,
     grams,
     porosityAdjustment,

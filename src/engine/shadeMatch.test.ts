@@ -56,12 +56,12 @@ const brands: Record<string, Brand> = {
 };
 
 describe("getLinePermanence", () => {
-  it("classifies Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, Redken Chromatics, and Matrix SoColor Pre-Bonded as permanent", () => {
+  it("classifies Wella Koleston Perfect, L'Oréal Inoa/Majirel, Igora Royal, Redken Color Gels Oils, and Matrix SoColor Pre-Bonded as permanent", () => {
     expect(getLinePermanence("koleston-perfect")).toBe("permanent");
     expect(getLinePermanence("inoa")).toBe("permanent");
     expect(getLinePermanence("majirel")).toBe("permanent");
     expect(getLinePermanence("royal")).toBe("permanent");
-    expect(getLinePermanence("chromatics")).toBe("permanent");
+    expect(getLinePermanence("color-gels-oils")).toBe("permanent");
     expect(getLinePermanence("socolor")).toBe("permanent");
   });
 

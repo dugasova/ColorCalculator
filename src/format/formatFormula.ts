@@ -6,6 +6,7 @@ import type { Shade } from "../engine/shades";
 import type { FullFormula, FormulaGrams, NaturalBase } from "../engine/formula";
 import {
   formatEligibilityWarning,
+  formatGrayLiftWarning,
   formatLiftUnsupportedWarning,
   formatPorosityAdjustment,
   formatToneWarning,
@@ -281,6 +282,9 @@ export function formatFormulaText(params: FormatFormulaParams): string {
   }
   if (result.eligibilityWarning !== null) {
     lines.push(i18n.t("format.warning", { message: formatEligibilityWarning(result.eligibilityWarning) }));
+  }
+  if (result.grayLiftWarning) {
+    lines.push(i18n.t("format.warning", { message: formatGrayLiftWarning(result.grayLiftWarning) }));
   }
 
   return lines.join("\n");

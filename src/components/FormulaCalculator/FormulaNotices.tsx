@@ -5,6 +5,7 @@ import type { Shade } from "../../engine/shades";
 import {
   atResultLevel,
   formatEligibilityWarning,
+  formatGrayLiftWarning,
   formatLiftUnsupportedWarning,
   formatPorosityAdjustment,
   formatToneWarning,
@@ -93,6 +94,11 @@ export function ToneWarnings({ result, neutralizationApplied, brand }: ToneWarni
       {result.eligibilityWarning !== null && (
         <p className="warning" role="alert">
           {formatEligibilityWarning(result.eligibilityWarning)}
+        </p>
+      )}
+      {result.grayLiftWarning && (
+        <p className="warning" role="alert">
+          {formatGrayLiftWarning(result.grayLiftWarning)}
         </p>
       )}
     </>

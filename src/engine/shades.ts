@@ -69,6 +69,13 @@ export interface Shade {
   // Blonde's "50-60 min without heat" (see brands/wella.ts), independent of this shade's
   // developerLiftTable/fixedMixingRatio overrides above.
   fixedProcessingMinutes?: number;
+  // Processing time set by the developer used rather than by gray coverage -- Redken Color
+  // Gels Oils: 20 min at 10 vol, 30 at 20, 40 at 30, 45 at 40 (see brands/redken.ts). A
+  // volume missing here falls back to the gray-percent default.
+  processingMinutesByVolume?: Partial<Record<DeveloperVolume, number>>;
+  // The most levels the manufacturer allows lifting gray hair (Redken Color Gels Oils: 2).
+  // Past it calculateFullFormula reports a GrayLiftWarning; unset, no limit is checked.
+  maxGrayLift?: number;
   // Marks this shade as a deliberate maximum-lift tool rather than a fixed target tone -
   // e.g. Wella Koleston Perfect Special Blonde, routinely selected purely to lift as many
   // levels as a single process safely allows (no bleach needed), accepting whatever level
@@ -88,7 +95,7 @@ export interface Shade {
   // (see correction.ts's calculateCorrectorGrams). Unset, the Rule of 10.
   correctorRule?: CorrectorRule;
   // The shade carries its own neutralization and takes no corrector at all (Igora Royal's
-  // 12- Special Blonde series).
+  // 12- Special Blonde series, Redken Color Gels Oils).
   selfNeutralizing?: boolean;
 }
 

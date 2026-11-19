@@ -75,7 +75,7 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
     }),
     // Every developer volume for the brand's shared bucket, plus (for the handful of
     // chemically-distinct-developer lines in stock/products.ts's SEPARATE_DEVELOPER_LINES,
-    // e.g. INOA, Chromatics) one more set of volume rows per such line, restricted to the
+    // e.g. INOA, Color Gels Oils) one more set of volume rows per such line, restricted to the
     // volumes that real product actually ships in -- `null` first so the shared bucket's
     // rows render before any scoped line's own rows.
     ...[null, ...getBrandScopedDeveloperLines(brandId)].flatMap(line =>

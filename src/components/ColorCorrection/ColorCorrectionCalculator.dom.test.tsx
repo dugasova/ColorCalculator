@@ -71,4 +71,14 @@ describe("ColorCorrectionCalculator with a brand", () => {
     expect(mixText()).not.toContain("0-");
     expect(screen.getByText(/not added to the 12- Special Blonde/)).toBeTruthy();
   });
+
+  it("adds no mixtone to Redken Color Gels Oils, pointing to its balanced shades instead", () => {
+    render(<ColorCorrectionCalculator />);
+    chooseOption("Brand", "redken");
+    chooseOption("Line", "color-gels-oils");
+    chooseOption("Target level", "9");
+    fireEvent.click(screen.getByRole("radio", { name: "Yellow" }));
+    expect(mixText()).toBe("color- 30.0 g developer 30.0 g");
+    expect(screen.getByText(/Color Gels Oils has no separate mixtones/)).toBeTruthy();
+  });
 });

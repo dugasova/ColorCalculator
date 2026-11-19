@@ -455,6 +455,8 @@ export const en = {
     },
     toneWarning:
       "The chosen tone '{{tone}}' won't neutralize the {{pigment}} background; add a '{{recommended}}' corrector",
+    grayLiftWarning:
+      "On gray hair the manufacturer advises lifting '{{code}}' no more than {{maxLift}} levels; this lifts {{lift}}",
     eligibilityWarning:
       "Shade '{{code}}' requires a starting level of {{minLevel}} or higher (natural base); current start level is {{startLevel}}",
   },
@@ -583,6 +585,8 @@ export const en = {
         "0-11 gives a cool ash or steel on blonde. For a clean pearl or pearl beige on porous yellow blonde (levels 9–10) with no risk of green, add 0-99 — together with 0-11 (the amount is shared half and half) or instead of it.",
       igoraGreen:
         "0-89 removes a green or swampy cast and gives a juicy cool red or berry (levels 4–7). On levels 8–10 use it only in micro-doses. For a straight red, pick 0-88.",
+      redkenNoMixtones:
+        "Redken Color Gels Oils has no separate mixtones: its pigmented shades are already balanced to neutralize the lightening background and cover 100% gray. Pick a shade with the reflect you need — see the list above.",
       igoraSelfNeutralizing:
         "0- mixtones are not added to the 12- Special Blonde high-lift series or to Igora Royal Absolutes for resistant grey: both have their own neutralization built in.",
       wellaBlueWithoutMixtone:
@@ -804,7 +808,7 @@ export const en = {
       title: "Redken",
       points: [
         "Shades EQ (demi gloss): always 1:1, never lifts -- no real developer-volume choice.",
-        "Chromatics (permanent): fixed 1:1 with its own Oil-in-Cream Developer -- different chemistry from Shades EQ despite sharing the brand.",
+        "Color Gels Oils (ammonia-free permanent): always 1:1 with Pro-Oxide Cream Developer 3–12%. Time follows the developer: 20 / 30 / 40 / 45 min, no heat; on gray, lift no more than 2 levels.",
       ],
     },
     matrix: {

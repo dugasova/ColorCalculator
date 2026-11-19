@@ -4,7 +4,7 @@ import type { Shade } from "../shades";
 // Blended Natural Collection -- SoColor Pre-Bonded is Matrix's PERMANENT oxidative line
 // (see LINE_PERMANENCE in shadeMatch.ts). It mixes 1:1 with Matrix Cream Developer
 // 10/20/30/40 vol, no exceptions -- see `matrixMixingRatio` in brands.ts, the same flat
-// ratio Redken Chromatics and Igora Royal use, not a level-based one. There's no per-shade
+// ratio Igora Royal uses, not a level-based one. There's no per-shade
 // `developerLiftTable` override here either: unlike Wella/Igora/L'Oréal's dedicated
 // Highlift/Special Blonde sub-ranges (double ratio, own lift table, fixed processing
 // time), SoColor's level 11 shades are ordinary Blended Natural entries that go through
@@ -30,7 +30,7 @@ import type { Shade } from "../shades";
 // Deliberately excluded: Color Sync (Matrix's demi line) and the separate Reflect and
 // Extra Coverage collections -- no complete verified public shade list for any of them at
 // time of writing; add them later as separate `line` values under this same brand, same
-// as Redken keeps Shades EQ and Chromatics apart (brands/redken.ts).
+// as Igora keeps Royal and Vibrance apart (brands/igora.ts).
 const socolorShades: Shade[] = [
   // Level 1
   { code: "1N", level: 1, tone: "natural" },
@@ -134,8 +134,8 @@ export const MATRIX_SOCOLOR_CHART: Shade[] = socolorShades.map(shade => ({
 // chart above but a fundamentally different chemistry (little to no ammonia, a single
 // 10 vol developer strength, 20-minute processing at room temperature -- see
 // LINE_PERMANENCE in shadeMatch.ts, which is why the two lines are kept separate under
-// one brand rather than merged, the same split Redken keeps between its own Chromatics
-// and Shades EQ). Transcribed from Matrix's official "Decoding Super Sync" EU shade
+// one brand rather than merged, the same split Igora keeps between its own Royal
+// and Vibrance). Transcribed from Matrix's official "Decoding Super Sync" EU shade
 // chart (matrix.com, shade-chart-pdfs/matrix-2024-eu-dmi-education-sync-shade-chart),
 // which documents its own numeric-suffix reflect system (".0" natural through ".9"
 // pearl) alongside the plain letter codes printed on the tubes themselves -- this
@@ -155,7 +155,7 @@ export const MATRIX_SOCOLOR_CHART: Shade[] = socolorShades.map(shade => ({
 // M "Mocha" -> chocolate (same chocolate approximation B and M already share on the
 // Pre-Bonded chart above), P pearl, T "Titanium" (a cool metallic ash, not one of the
 // legend's own ten columns) -> slate-grey, the same approximation Redken's own
-// Chromatics/Shades EQ Titanium reflects use (brands/redken.ts).
+// Shades EQ Titanium reflects use (brands/redken.ts).
 //
 // Mixing: fixed 1:1 with Matrix Cream Developer 10 Volume (3%) -- the only developer
 // strength Super Sync's own instructions call for, expressed here as a single-entry

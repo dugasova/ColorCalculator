@@ -3,6 +3,7 @@ import type {
   EligibilityWarning,
   FullFormula,
   GrayCoverageStrategy,
+  GrayLiftWarning,
   LiftUnsupportedWarning,
   ToneWarning,
 } from "../engine/formula";
@@ -117,6 +118,10 @@ export function isBackgroundCoveredByShade(result: CorrectorResult & Pick<FullFo
 
 export function formatEligibilityWarning(warning: EligibilityWarning): string {
   return i18n.t("engine.eligibilityWarning", { ...warning });
+}
+
+export function formatGrayLiftWarning(warning: GrayLiftWarning): string {
+  return i18n.t("engine.grayLiftWarning", { ...warning });
 }
 
 export function formatLiftUnsupportedWarning(warning: LiftUnsupportedWarning): string {

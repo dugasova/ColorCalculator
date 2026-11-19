@@ -24,7 +24,7 @@ import { stockById } from "./reorder";
 //  - Developer is charged by (brandId, line, developerVolume) whenever a developer volume
 //    was actually used -- `line` only changes the resulting bucket for the handful of
 //    chemically-distinct-developer lines in products.ts's SEPARATE_DEVELOPER_LINES (INOA,
-//    Chromatics); every other line still charges the same brand-wide bucket as before.
+//    Color Gels Oils); every other line still charges the same brand-wide bucket as before.
 //  - A step with a recorded actualColorGrams (see history/types.ts) charges that figure
 //    instead of the computed colorGrams, scaling developer and every shade share by the
 //    same ratio.

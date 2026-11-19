@@ -194,7 +194,10 @@ export function ColorCorrectionCalculator() {
   const unwantedToneName = t(`correction.tones.${unwantedTone}`);
   const tipKey = getTipKey(unwantedTone, result.technique);
   const brandTip = selfNeutralizing
-    ? { key: "correction.tips.igoraSelfNeutralizing", shade: undefined }
+    ? {
+        key: brandId === "redken" ? "correction.tips.redkenNoMixtones" : "correction.tips.igoraSelfNeutralizing",
+        shade: undefined,
+      }
     : (getWellaTip(correctorBrand, unwantedTone, targetLevel) ??
       getLorealTip(correctorBrand, unwantedTone, targetLevel, correctiveTones[0]?.tone) ??
       getMatrixTip(
