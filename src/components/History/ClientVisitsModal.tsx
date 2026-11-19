@@ -16,6 +16,7 @@ interface ClientVisitsModalProps {
   onEditEntry: (entryId: string) => void;
   onOpenPhoto: (photo: { url: string; label: string }) => void;
   onRepeat: (entry: FormulaHistoryEntry) => void;
+  onCompare?: (entry: FormulaHistoryEntry) => void;
 }
 
 // One client's full visit list, opened from a ClientGroupList card. Owns no state: the
@@ -30,6 +31,7 @@ export function ClientVisitsModal({
   onEditEntry,
   onOpenPhoto,
   onRepeat,
+  onCompare,
 }: ClientVisitsModalProps) {
   const { t } = useTranslation();
 
@@ -51,6 +53,7 @@ export function ClientVisitsModal({
             onEdit={() => onEditEntry(entry.id)}
             onOpenPhoto={onOpenPhoto}
             onRepeat={() => onRepeat(entry)}
+            onCompare={onCompare !== undefined ? () => onCompare(entry) : undefined}
           />
         ))}
       </ul>

@@ -475,6 +475,9 @@ export const en = {
     processingTime: "Processing time",
     minutes: "{{minutes}} min",
     warnings: "Warnings",
+    visitOn: "A (visit {{date}})",
+    visit: "A (visit)",
+    compareVisit: "Compare",
   },
   format: {
     startingLevel: "Starting level: {{start}} → Target: {{target}}",

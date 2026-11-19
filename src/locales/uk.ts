@@ -484,6 +484,9 @@ export const uk: typeof en = {
     processingTime: "Час витримки",
     minutes: "{{minutes}} хв",
     warnings: "Попередження",
+    visitOn: "A (візит {{date}})",
+    visit: "A (візит)",
+    compareVisit: "Порівняти",
   },
   format: {
     startingLevel: "Початковий рівень: {{start}} → Ціль: {{target}}",

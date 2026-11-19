@@ -15,7 +15,7 @@ import {
   type RepeatSessionRequest,
 } from "./history";
 import type { FavoriteFormulaRecipe } from "./favoriteFormulas";
-import type { ComparedFormula } from "./components/FormulaCalculator/formulaComparison";
+import { comparedFormulaFromHistory, type ComparedFormula } from "./components/FormulaCalculator/formulaComparison";
 import { trackEvent } from "./productAnalytics";
 import { LanguageSwitcher } from "./components/LanguageSwitcher/LanguageSwitcher";
 import { ThemeSwitcher } from "./components/ThemeSwitcher/ThemeSwitcher";
@@ -138,6 +138,19 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
     trackEvent("formula_repeated", { kind: "session" });
   };
 
+  // The visit becomes comparison A; repeating it into the calculator makes the same
+  // formula B, which the colorist then changes (more gray, another shade...).
+  const handleCompare = (entry: FormulaHistoryEntry) => {
+    const visit = comparedFormulaFromHistory(entry, brands);
+    const request = buildRepeatFormulaRequest(entry, brands);
+    if (visit === null || request === null) return;
+    setPinnedFormula(visit);
+    setRepeatRequest(request);
+    navigate("/");
+    setView("calculator");
+    trackEvent("formula_compared", { source: "history" });
+  };
+
   // Mirrors handleRepeat above: FavoritesPage only picks which recipe, the actual
   // insertion into the live calculator form happens back on "/" (see
   // FormulaCalculator's favoriteRequest prop + useFormulaCalculatorState's replay).
@@ -233,7 +246,12 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                   )}
                   {view === "prepigment" && <PrePigmentationCalculator />}
                   {view === "history" && (
-                    <HistoryView onRepeat={handleRepeat} isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />
+                    <HistoryView
+                      onRepeat={handleRepeat}
+                      onCompare={handleCompare}
+                      isAdmin={isAdmin}
+                      currentUserEmail={user.email ?? ""}
+                    />
                   )}
                   {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
                   {view === "favorites" && (

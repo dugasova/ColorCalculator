@@ -61,3 +61,29 @@ test("two formulas are compared side by side, across leaving the calculator", as
   await page.getByRole("button", { name: "End comparison" }).click();
   await expect(table).toHaveCount(0);
 });
+
+// A saved visit compared with today's formula: the visit is A, repeated into the
+// calculator as B, which the colorist then changes.
+test("a visit from History is compared with a new calculation", async ({ page }) => {
+  await signInAsMember(page, STYLIST);
+
+  await chooseOption(page, "Starting level", "6");
+  await chooseOption(page, "Shade", "8.1 ash");
+  await saveForClient(page, "Clara Compare");
+
+  const visits = await openClientVisits(page, "Clara Compare");
+  await visits.getByRole("button", { name: "Compare" }).click();
+
+  await expect(page.getByRole("tab", { name: "Calculator" })).toHaveAttribute("aria-selected", "true");
+  const table = page.locator(".comparison__table");
+  await expect(table.getByRole("columnheader", { name: /^A \(visit / })).toBeVisible();
+  // Straight after repeating, today's formula is the visit's own.
+  await expect(table.locator('tr[data-row="shade"] td')).toHaveText(["Generic 8.1", "Generic 8.1"]);
+  await expect(page.locator(".comparison__row--differs")).toHaveCount(0);
+
+  const gray = page.getByLabel("Gray percentage");
+  await gray.fill("40");
+  await gray.blur();
+  await expect(table.locator('tr[data-row="grayPercent"] td')).toHaveText(["0%", "40%"]);
+  await expect(table.locator('tr[data-row="grayPercent"]')).toHaveClass(/comparison__row--differs/);
+});
