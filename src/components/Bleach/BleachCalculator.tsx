@@ -1,16 +1,20 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { BleachFormula } from "../../engine/bleach";
+import { BLEACH_TARGET_LEVELS, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
-import { useSalonMarkupMultiplier } from "../../palette";
+import { usePalette, useSalonMarkupMultiplier } from "../../palette";
+import type { BrandId } from "../../engine/brands";
+import { BrandField } from "../FormulaCalculator/fields/BrandField";
+import { LineField } from "../FormulaCalculator/fields/LineField";
 import {
   BleachMixRow,
   BleachSafetyNotes,
   BleachToningRows,
   BleachTotalGramsField,
   BleachWarnings,
+  type BleachToner,
 } from "./BleachFormulaParts";
 import { useBleachFormulaState } from "./useBleachFormulaState";
 import "./BleachCalculator.css";
@@ -23,6 +27,7 @@ export interface BleachResultsProps {
   onMarkupMultiplierChange: (value: number) => void;
   productCost: number | null;
   recommendedServicePrice: number | null;
+  toner?: BleachToner;
 }
 
 // Presentational results panel, kept separate from BleachCalculator's level
@@ -38,6 +43,7 @@ export function BleachResults({
   onMarkupMultiplierChange,
   productCost,
   recommendedServicePrice,
+  toner,
 }: BleachResultsProps) {
   const { t } = useTranslation();
 
@@ -67,7 +73,7 @@ export function BleachResults({
             <span className="results__row-label">{t("bleach.processingTimeLabel")}</span>
             <span>{t("results.processingTimeHint", { minutes: result.recommendedProcessingMinutes })}</span>
           </div>
-          <BleachToningRows result={result} />
+          <BleachToningRows result={result} toner={toner} />
           <BleachSafetyNotes result={result} />
           <p className="bleach__note bleach__note--strand">{t("bleach.strandTestNote")}</p>
 
@@ -131,6 +137,12 @@ export function BleachCalculator() {
   const salonMarkupMultiplier = useSalonMarkupMultiplier();
   const [manualMarkupMultiplier, setManualMarkupMultiplier] = useState<number | undefined>(undefined);
   const markupMultiplier = manualMarkupMultiplier ?? salonMarkupMultiplier;
+  const brands = usePalette();
+  const [tonerBrandId, setTonerBrandId] = useState<BrandId>("generic");
+  const [tonerLineState, setTonerLine] = useState<string | null>(null);
+  const tonerBrand = brands[tonerBrandId] ?? brands.generic;
+  const tonerLines = Array.from(new Set(tonerBrand.shades.map(shade => shade.line ?? null)));
+  const tonerLine = tonerLines.includes(tonerLineState) ? tonerLineState : (tonerLines[0] ?? null);
 
   // Priced product weight: the bleach powder alone -- a salon buys and prices developer
   // completely separately (see sessionCost.ts's stepTotalGrams), so charging it at the
@@ -149,9 +161,28 @@ export function BleachCalculator() {
 
       <div className="calculator__form">
         <LevelField id="currentLevel" label={t("bleach.currentLevel")} value={startLevel} onChange={setStartLevel} />
-        <LevelField id="targetLevel" label={t("bleach.targetLevel")} value={targetLevel} onChange={setTargetLevel} />
+        <LevelField
+          id="targetLevel"
+          label={t("bleach.targetLevel")}
+          levels={BLEACH_TARGET_LEVELS}
+          value={targetLevel}
+          onChange={setTargetLevel}
+        />
 
         <BleachTotalGramsField id="totalGrams" totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} />
+        <BrandField
+          brandId={tonerBrand.id}
+          onBrandIdChange={setTonerBrandId}
+          idSuffix="Toner"
+          label={t("bleach.tonerBrand")}
+        />
+        <LineField
+          availableLines={tonerLines}
+          line={tonerLine}
+          onLineChange={setTonerLine}
+          idSuffix="Toner"
+          label={t("bleach.tonerLine")}
+        />
       </div>
 
       <BleachResults
@@ -162,6 +193,8 @@ export function BleachCalculator() {
         onMarkupMultiplierChange={setManualMarkupMultiplier}
         productCost={productCost}
         recommendedServicePrice={recommendedServicePrice}
+        // The generic brand stands for "no brand picked": the generic toner row says it all.
+        toner={tonerBrand.id !== "generic" ? { brand: tonerBrand, line: tonerLine } : undefined}
       />
     </div>
   );

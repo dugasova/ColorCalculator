@@ -7,9 +7,11 @@ export interface LineFieldProps {
   line: string | null;
   onLineChange: (line: string | null) => void;
   idSuffix?: string;
+  // Overrides the plain "Brand"/"Line" label, e.g. for the toner on the Bleach screen.
+  label?: string;
 }
 
-export function LineField({ availableLines, line, onLineChange, idSuffix = "" }: LineFieldProps) {
+export function LineField({ availableLines, line, onLineChange, idSuffix = "", label }: LineFieldProps) {
   const { t } = useTranslation();
   if (availableLines.length <= 1) {
     return null;
@@ -17,7 +19,7 @@ export function LineField({ availableLines, line, onLineChange, idSuffix = "" }:
 
   return (
     <div className="field">
-      <label htmlFor={`line${idSuffix}`}>{t("fields.line")}</label>
+      <label htmlFor={`line${idSuffix}`}>{label ?? t("fields.line")}</label>
       <Select
         id={`line${idSuffix}`}
         value={line ?? ""}

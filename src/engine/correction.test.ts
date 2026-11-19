@@ -6,6 +6,7 @@ import {
   calculateColorCorrection,
   calculateCorrectorGrams,
   calculateCorrectionTones,
+  findBleachToners,
   findNeutralizingShades,
   getCorrectionTones,
   getDominantWheelTone,
@@ -320,5 +321,27 @@ describe("Igora mixtones", () => {
 
   it("cancels green with 0-89, or 0-88 if the colorist picks it", () => {
     expect(getCorrectorProduct("igora", "royal", "red", 5)).toEqual({ shade: "0-88", mixtone: "0-89" });
+  });
+});
+
+describe("findBleachToners", () => {
+  it("picks the line's shades at the target level that cancel the lightened background", () => {
+    // Level 9 leaves pale yellow: the violet-carrying Igora Vibrance shades tone it.
+    expect(findBleachToners(BRANDS.igora, "vibrance", 9).map(shade => shade.code)).toEqual(["9-1", "9-12"]);
+  });
+
+  it("never offers a special blonde, even at its own level", () => {
+    expect(findNeutralizingShades(BRANDS.wella, "koleston-perfect", "yellow", 12).length).toBeGreaterThan(0);
+    expect(findBleachToners(BRANDS.wella, "koleston-perfect", 12)).toEqual([]);
+  });
+
+  it("leaves out Igora Royal's 10- Ultra Blonde Highlifts but keeps the 9,5- pastels", () => {
+    const codes = findBleachToners(BRANDS.igora, "royal", 10).map(shade => shade.code);
+    expect(codes.some(code => code.startsWith("10-"))).toBe(false);
+    expect(codes).toContain("9,5-1");
+  });
+
+  it("is empty when the line has no such shade at that level", () => {
+    expect(findBleachToners(BRANDS.igora, "vibrance", 8)).toEqual([]);
   });
 });

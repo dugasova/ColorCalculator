@@ -680,6 +680,11 @@ export const en = {
     backgroundLabel: "Background after lightening",
     toningLabel: "Toning",
     toningValue: "level {{level}} toner, {{tones}}",
+    tonerBrand: "Toner brand",
+    tonerLine: "Toner line",
+    tonerShadesLabel: "Toner shades",
+    tonerShadesNone:
+      "this line has no level {{level}} shade that cancels the background on its own: use a level {{level}} toner with a corrector",
   },
   complexColoring: {
     titlePrefix: "Complex",

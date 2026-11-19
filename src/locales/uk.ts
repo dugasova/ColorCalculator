@@ -690,6 +690,11 @@ export const uk: typeof en = {
     backgroundLabel: "Фон після освітлення",
     toningLabel: "Тонування",
     toningValue: "тонер рівня {{level}}, {{tones}}",
+    tonerBrand: "Бренд тонера",
+    tonerLine: "Лінія тонера",
+    tonerShadesLabel: "Відтінки для тонування",
+    tonerShadesNone:
+      "у цій лінії немає відтінку рівня {{level}}, який сам нейтралізує фон: тонер рівня {{level}} з коректором",
   },
   complexColoring: {
     titlePrefix: "Складне",

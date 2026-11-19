@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import "../../i18n";
 import { calculateBleachFormula } from "../../engine/bleach";
+import { BRANDS } from "../../engine/brands";
 import { BleachCalculator, BleachResults } from "./BleachCalculator";
 
 const noPricing = {
@@ -49,5 +50,39 @@ describe("BleachCalculator", () => {
     expect(html).toContain("choose a target level above your current level");
     expect(html).not.toContain("cannot be done in a single session");
     expect(html).not.toContain("g bleach powder"); // no grams — no lift, no formula
+  });
+
+  it("offers a toner brand and line on the page", () => {
+    const html = renderToStaticMarkup(<BleachCalculator />);
+    expect(html).toContain('id="brandIdToner"');
+    expect(html).toContain("Toner brand");
+  });
+
+  it("lists the toner line's shades that cancel the background", () => {
+    const html = renderToStaticMarkup(
+      <BleachResults
+        result={calculateBleachFormula(6, 9, 60)}
+        {...noPricing}
+        toner={{ brand: BRANDS.igora, line: "vibrance" }}
+      />,
+    );
+    expect(html).toContain("Toner shades");
+    expect(html).toContain("9-1, 9-12");
+  });
+
+  it("says when the toner line has no shade for the background", () => {
+    const html = renderToStaticMarkup(
+      <BleachResults
+        result={calculateBleachFormula(6, 8, 60)}
+        {...noPricing}
+        toner={{ brand: BRANDS.igora, line: "vibrance" }}
+      />,
+    );
+    expect(html).toContain("this line has no level 8 shade");
+  });
+
+  it("shows no toner shades row without a toner", () => {
+    const html = renderToStaticMarkup(<BleachResults result={calculateBleachFormula(6, 9, 60)} {...noPricing} />);
+    expect(html).not.toContain("Toner shades");
   });
 });

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Level } from "../../engine/levels";
-import { calculateBleachFormula } from "../../engine/bleach";
+import { calculateBleachFormula, MAX_BLEACH_TARGET_LEVEL } from "../../engine/bleach";
 
 // Rough per-gram cost of generic bleach powder; fully editable on both screens, mirrors
 // FormulaCalculator's generic-brand default.
@@ -19,7 +19,10 @@ export interface BleachFormulaSeed {
 // starting base, canvas and processing time. `seed` is read once, at mount.
 export function useBleachFormulaState(seed?: BleachFormulaSeed) {
   const [startLevel, setStartLevel] = useState<Level>(seed?.startLevel ?? 6);
-  const [targetLevel, setTargetLevel] = useState<Level>(seed?.targetLevel ?? 8);
+  // A visit saved before targets stopped at 10 may still carry 11 or 12.
+  const [targetLevel, setTargetLevel] = useState<Level>(
+    Math.min(seed?.targetLevel ?? 8, MAX_BLEACH_TARGET_LEVEL) as Level,
+  );
   const [totalGrams, setTotalGrams] = useState(seed?.totalGrams ?? 60);
   const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_BLEACH_PRICE_PER_GRAM);
 
