@@ -15,6 +15,8 @@ export interface HistoryEntryCardProps {
   // The saved formula as comparison A, repeated into the calculator as B. Offered only on
   // a visit the simple calculator can repeat.
   onCompare?: () => void;
+  // A comparison is on: Compare puts this visit next to formula A as B ("Compare with A").
+  isComparing?: boolean;
 }
 
 function FormattedSessionText({ text }: { text: string }) {
@@ -44,6 +46,7 @@ export function HistoryEntryCard({
   onOpenPhoto,
   onRepeat,
   onCompare,
+  isComparing = false,
 }: HistoryEntryCardProps) {
   const { t } = useTranslation();
   const brands = usePalette();
@@ -172,7 +175,7 @@ export function HistoryEntryCard({
           )}
           {isSimpleRepeat && onCompare !== undefined && (
             <button type="button" className="button button--secondary history__entry-repeat" onClick={onCompare}>
-              {t("comparison.compareVisit")}
+              {t(isComparing ? "comparison.compareWithA" : "comparison.compareVisit")}
             </button>
           )}
         </div>

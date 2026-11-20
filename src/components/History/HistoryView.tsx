@@ -15,11 +15,13 @@ export interface HistoryViewProps {
   onRepeat: (entry: FormulaHistoryEntry) => void;
   // A visit as comparison A, repeated into the calculator as B (see ClientVisitsModal).
   onCompare?: (entry: FormulaHistoryEntry) => void;
+  // A comparison is on (formula A pinned): Compare then makes the visit formula B.
+  isComparing?: boolean;
   isAdmin: boolean;
   currentUserEmail: string;
 }
 
-export function HistoryView({ onRepeat, onCompare, isAdmin, currentUserEmail }: HistoryViewProps) {
+export function HistoryView({ onRepeat, onCompare, isComparing = false, isAdmin, currentUserEmail }: HistoryViewProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [nowMs] = useState(() => Date.now());
@@ -127,6 +129,7 @@ export function HistoryView({ onRepeat, onCompare, isAdmin, currentUserEmail }: 
           onOpenPhoto={setPhotoLightbox}
           onRepeat={onRepeat}
           onCompare={onCompare}
+          isComparing={isComparing}
         />
       )}
 

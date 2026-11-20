@@ -3,7 +3,13 @@ import "../../i18n";
 import { BRANDS } from "../../engine/brands";
 import { calculateFullFormula } from "../../engine/formula";
 import type { Level } from "../../engine/levels";
-import { compareFormulas, comparedFormulaFromHistory, type ComparedFormula } from "./formulaComparison";
+import {
+  compareFormulas,
+  comparedFormulaFromHistory,
+  comparisonColumnLabel,
+  isSameFormula,
+  type ComparedFormula,
+} from "./formulaComparison";
 import type { FormulaHistoryEntry } from "../../history";
 import { makeBleachStep, makeColorStep, makeEntry } from "../../testFixtures";
 
@@ -71,7 +77,9 @@ describe("comparedFormulaFromHistory", () => {
     });
     const visit = comparedFormulaFromHistory(entry, BRANDS)!;
 
-    expect(visit.label).toBe(`A (visit ${new Date(2026, 10, 12).toLocaleDateString()})`);
+    expect(visit.visitDate).toBe(new Date(2026, 10, 12).toLocaleDateString());
+    expect(comparisonColumnLabel("A", visit)).toBe(`A (visit ${visit.visitDate})`);
+    expect(comparisonColumnLabel("B", visit)).toBe(`B (visit ${visit.visitDate})`);
     expect(visit).toMatchObject({
       product: { brandId: "generic", brandName: "Generic", line: null },
       hair: { startLevel: 7, grayPercent: 0 },
@@ -85,5 +93,23 @@ describe("comparedFormulaFromHistory", () => {
   it("has none for a multi-step session", () => {
     const entry = makeEntry({ clientName: "Anna K.", steps: [makeBleachStep(), makeColorStep()] });
     expect(comparedFormulaFromHistory(entry, BRANDS)).toBeNull();
+  });
+});
+
+describe("comparisonColumnLabel", () => {
+  it("names a formula from the calculator by its column alone", () => {
+    expect(comparisonColumnLabel("A", wella("7/1", 6))).toBe("A (pinned)");
+    expect(comparisonColumnLabel("B", wella("7/1", 6))).toBe("B (current)");
+  });
+
+  it("names a visit without a date as a visit", () => {
+    expect(comparisonColumnLabel("B", wella("7/1", 6, { visitDate: null }))).toBe("B (visit)");
+  });
+});
+
+describe("isSameFormula", () => {
+  it("is true while every row reads the same, false once one differs", () => {
+    expect(isSameFormula(wella("7/1", 6), wella("7/1", 6))).toBe(true);
+    expect(isSameFormula(wella("7/1", 6), wella("7/0", 6))).toBe(false);
   });
 });

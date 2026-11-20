@@ -24,9 +24,9 @@ import type { FormulaHair, FormulaMix, FormulaProduct } from "./formulaResultsMo
 // kept above the calculator screen (see AuthenticatedApp), so it survives leaving the
 // screen; formula B is the calculator's live result in the same shape.
 export interface ComparedFormula {
-  // Names column A when it isn't simply "the pinned formula" -- e.g. the visit it came
-  // from. Unset for a formula pinned from the calculator.
-  label?: string;
+  // Set when the formula is a saved visit: the day it was applied, null if History has no
+  // date. Unset for a formula taken from the calculator.
+  visitDate?: string | null;
   product: FormulaProduct;
   hair: FormulaHair;
   mix: FormulaMix;
@@ -211,9 +211,8 @@ export function comparedFormulaFromHistory(
   if (step.kind !== "color") return null;
   const brand = resolveStepBrand(step, brands);
   if (brand === undefined) return null;
-  const date = entry.appliedAt?.toDate().toLocaleDateString();
   return {
-    label: date !== undefined ? i18n.t("comparison.visitOn", { date }) : i18n.t("comparison.visit"),
+    visitDate: entry.appliedAt?.toDate().toLocaleDateString() ?? null,
     product: { brandId: brand.id, brandName: step.brandName, line: step.line },
     hair: {
       startLevel: step.startLevel,
@@ -236,4 +235,21 @@ export function comparedFormulaFromHistory(
     processingMinutes: step.processingMinutes,
     productCost: entry.productCost,
   };
+}
+
+// A column's header: "A (visit 12.11.2026)" for a saved visit, "A (pinned)" / "B (current)"
+// otherwise.
+export function comparisonColumnLabel(column: "A" | "B", formula: ComparedFormula): string {
+  if (formula.visitDate === undefined) {
+    return i18n.t(column === "A" ? "comparison.formulaA" : "comparison.formulaB");
+  }
+  return formula.visitDate !== null
+    ? i18n.t("comparison.visitColumn", { column, date: formula.visitDate })
+    : i18n.t("comparison.visitColumnNoDate", { column });
+}
+
+// Whether the live formula is still exactly the saved visit it was repeated from: every
+// row reads the same. Once the colorist changes anything it is no longer that visit.
+export function isSameFormula(a: ComparedFormula, b: ComparedFormula): boolean {
+  return compareFormulas(a, b).rows.every(row => !row.differs);
 }

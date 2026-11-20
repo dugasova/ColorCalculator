@@ -17,6 +17,7 @@ interface ClientVisitsModalProps {
   onOpenPhoto: (photo: { url: string; label: string }) => void;
   onRepeat: (entry: FormulaHistoryEntry) => void;
   onCompare?: (entry: FormulaHistoryEntry) => void;
+  isComparing?: boolean;
 }
 
 // One client's full visit list, opened from a ClientGroupList card. Owns no state: the
@@ -32,6 +33,7 @@ export function ClientVisitsModal({
   onOpenPhoto,
   onRepeat,
   onCompare,
+  isComparing = false,
 }: ClientVisitsModalProps) {
   const { t } = useTranslation();
 
@@ -54,6 +56,7 @@ export function ClientVisitsModal({
             onOpenPhoto={onOpenPhoto}
             onRepeat={() => onRepeat(entry)}
             onCompare={onCompare !== undefined ? () => onCompare(entry) : undefined}
+            isComparing={isComparing}
           />
         ))}
       </ul>
