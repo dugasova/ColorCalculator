@@ -49,17 +49,26 @@ test("two formulas are compared side by side, across leaving the calculator", as
   await page.getByRole("tab", { name: "History" }).click();
   await page.getByRole("tab", { name: "Calculator" }).click();
 
-  const table = page.locator(".comparison__table");
-  await expect(table.locator('tr[data-row="shade"] td').first()).toHaveText("Generic 8.1");
+  const bar = page.getByRole("button", { name: /^A: / });
+  await expect(bar).toContainText("A: Generic 8.1");
+  await expect(bar).toContainText("same");
 
   await chooseOption(page, "Starting level", "6");
   await chooseOption(page, "Shade", "8.0 natural");
+  await expect(bar).toContainText("differences: ");
+
+  await bar.click();
+  const table = page.locator(".comparison__table");
+  // Only the differing rows by default.
   await expect(table.locator('tr[data-row="shade"] td')).toHaveText(["Generic 8.1", "Generic 8.0"]);
+  await expect(table.locator('tr[data-row="developer"]')).toHaveCount(0);
+  await page.getByLabel("Differences only").uncheck();
   await expect(table.locator('tr[data-row="shade"]')).toHaveClass(/comparison__row--differs/);
   await expect(table.locator('tr[data-row="developer"]')).not.toHaveClass(/comparison__row--differs/);
 
   await page.getByRole("button", { name: "End comparison" }).click();
   await expect(table).toHaveCount(0);
+  await expect(bar).toHaveCount(0);
 });
 
 // A saved visit compared with today's formula: the visit is A, repeated into the
@@ -75,15 +84,18 @@ test("a visit from History is compared with a new calculation", async ({ page })
   await visits.getByRole("button", { name: "Compare" }).click();
 
   await expect(page.getByRole("tab", { name: "Calculator" })).toHaveAttribute("aria-selected", "true");
-  const table = page.locator(".comparison__table");
-  await expect(table.getByRole("columnheader", { name: /^A \(visit / })).toBeVisible();
+  const bar = page.getByRole("button", { name: /^A: / });
   // Straight after repeating, today's formula is the visit's own.
-  await expect(table.locator('tr[data-row="shade"] td')).toHaveText(["Generic 8.1", "Generic 8.1"]);
-  await expect(page.locator(".comparison__row--differs")).toHaveCount(0);
+  await expect(bar).toContainText("same");
 
   const gray = page.getByLabel("Gray percentage");
   await gray.fill("40");
   await gray.blur();
+  await expect(bar).toContainText("differences: ");
+
+  await bar.click();
+  const table = page.locator(".comparison__table");
+  await expect(table.getByRole("columnheader", { name: /^A \(visit / })).toBeVisible();
   await expect(table.locator('tr[data-row="grayPercent"] td')).toHaveText(["0%", "40%"]);
   await expect(table.locator('tr[data-row="grayPercent"]')).toHaveClass(/comparison__row--differs/);
 });

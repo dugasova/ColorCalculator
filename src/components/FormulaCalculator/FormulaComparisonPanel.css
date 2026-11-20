@@ -1,5 +1,9 @@
 .comparison {
-  margin: 8px 0 20px;
+  margin: 0;
+}
+
+.comparison--idle {
+  margin: 16px 0 0;
 }
 
 .comparison--idle {
@@ -72,14 +76,23 @@
   border-bottom: none;
 }
 
-.comparison__row--differs td {
+.comparison:not(.comparison--differences-only) .comparison__row--differs td {
   background: color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface));
   font-weight: 600;
 }
 
-.comparison__row--differs th::before {
-  content: "▶ ";
-  color: var(--brand-accent);
+.comparison__row--differs th {
+  box-shadow: inset 3px 0 0 var(--brand-accent);
+  color: var(--brand-ink);
+}
+
+.comparison__filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .comparison__actions {
@@ -87,4 +100,117 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
+}
+
+/* The bar fixed to the bottom of the screen while a comparison is on: above the bottom
+   tab bar on a phone, at the very bottom on wider screens. */
+.comparison-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  z-index: 11;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 10px;
+  pointer-events: none;
+}
+
+.comparison-bar__open {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 640px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid var(--brand-border);
+  border-radius: 999px;
+  background: var(--brand-header-bg);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--brand-shadow-md);
+  color: var(--brand-ink);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.comparison-bar__a {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.comparison-bar__count {
+  flex-shrink: 0;
+  color: var(--brand-muted);
+}
+
+.comparison-bar__count--differs {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-accent) 16%, transparent);
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+
+.comparison-bar__chevron {
+  flex-shrink: 0;
+  width: 12px;
+  height: 8px;
+  color: var(--brand-muted);
+}
+
+.comparison-bar__spacer {
+  height: 72px;
+}
+
+@media (max-width: 767px) {
+  .comparison-bar {
+    bottom: calc(64px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+/* A phone: each row's label on its own line above the two values, so neither the label
+   nor the values are squeezed into a narrow column. */
+@media (max-width: 520px) {
+  .comparison__table {
+    min-width: 0;
+  }
+
+  .comparison__table thead tr,
+  .comparison__table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--brand-border-soft);
+  }
+
+  .comparison__table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .comparison__table th,
+  .comparison__table td {
+    border-bottom: none;
+  }
+
+  .comparison__table thead th:first-child {
+    display: none;
+  }
+
+  .comparison__table thead th:first-child,
+  .comparison__table tbody th {
+    width: auto;
+  }
+
+  .comparison__table tbody th {
+    grid-column: 1 / -1;
+    padding-bottom: 0;
+    font-size: 0.8rem;
+  }
 }

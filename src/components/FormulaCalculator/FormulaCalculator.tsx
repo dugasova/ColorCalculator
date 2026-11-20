@@ -309,14 +309,6 @@ export default function FormulaCalculator({
           </div>
         </CollapsibleSection>
       </div>
-      {onPinnedFormulaChange !== undefined && (
-        <FormulaComparisonPanel
-          pinned={pinnedFormula}
-          current={currentFormula}
-          onPin={onPinnedFormulaChange}
-          onClear={() => onPinnedFormulaChange(null)}
-        />
-      )}
       <FormulaResults
         product={product}
         hair={hair}
@@ -339,6 +331,14 @@ export default function FormulaCalculator({
         repeatRequest={repeatRequest}
       />
       <SaveFavoriteButton appliedBy={appliedBy} brands={brands} currentRecipe={favoriteRecipe} />
+      {onPinnedFormulaChange !== undefined && (
+        <FormulaComparisonPanel
+          pinned={pinnedFormula}
+          current={currentFormula}
+          onPin={onPinnedFormulaChange}
+          onClear={() => onPinnedFormulaChange(null)}
+        />
+      )}
     </div>
   );
 }
