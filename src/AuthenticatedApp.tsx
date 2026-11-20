@@ -82,6 +82,8 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
   // Formula A of the calculator's comparison: kept here, above the calculator, so it
   // survives switching screens and the calculator's reset after a save.
   const [pinnedFormula, setPinnedFormula] = useState<ComparedFormula | null>(null);
+  // The saved visit formula B was repeated from (History's Compare), so B shows its date.
+  const [comparedVisit, setComparedVisit] = useState<ComparedFormula | null>(null);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   // The brand cheat sheets and technique guides (ReferenceIndexPage, BrandCheatSheetPage,
@@ -138,17 +140,25 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
     trackEvent("formula_repeated", { kind: "session" });
   };
 
-  // The visit becomes comparison A; repeating it into the calculator makes the same
-  // formula B, which the colorist then changes (more gray, another shade...).
+  // With no comparison on, the visit becomes A, and repeating it into the calculator makes
+  // the same formula B, which the colorist then changes (more gray, another shade...).
+  // With A already pinned, the visit is repeated as B instead: two visits side by side.
   const handleCompare = (entry: FormulaHistoryEntry) => {
     const visit = comparedFormulaFromHistory(entry, brands);
     const request = buildRepeatFormulaRequest(entry, brands);
     if (visit === null || request === null) return;
-    setPinnedFormula(visit);
+    const asB = pinnedFormula !== null;
+    if (!asB) setPinnedFormula(visit);
+    setComparedVisit(visit);
     setRepeatRequest(request);
     navigate("/");
     setView("calculator");
-    trackEvent("formula_compared", { source: "history" });
+    trackEvent("formula_compared", { source: asB ? "history_b" : "history" });
+  };
+
+  const handlePinnedFormulaChange = (formula: ComparedFormula | null) => {
+    setPinnedFormula(formula);
+    if (formula === null) setComparedVisit(null);
   };
 
   // Mirrors handleRepeat above: FavoritesPage only picks which recipe, the actual
@@ -231,7 +241,8 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                       favoriteRequest={favoriteRequest}
                       onSaved={handleFormulaSaved}
                       pinnedFormula={pinnedFormula}
-                      onPinnedFormulaChange={setPinnedFormula}
+                      onPinnedFormulaChange={handlePinnedFormulaChange}
+                      comparedVisit={comparedVisit}
                     />
                   )}
                   {view === "correction" && <ColorCorrectionCalculator />}
@@ -249,6 +260,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
                     <HistoryView
                       onRepeat={handleRepeat}
                       onCompare={handleCompare}
+                      isComparing={pinnedFormula !== null}
                       isAdmin={isAdmin}
                       currentUserEmail={user.email ?? ""}
                     />

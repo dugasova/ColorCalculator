@@ -3,13 +3,22 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Modal } from "../common/Modal";
 import "./FormulaComparisonPanel.css";
-import { compareFormulas, type ComparedFormula, type FormulaComparison } from "./formulaComparison";
+import {
+  compareFormulas,
+  comparisonColumnLabel,
+  isSameFormula,
+  type ComparedFormula,
+  type FormulaComparison,
+} from "./formulaComparison";
 
 export interface FormulaComparisonPanelProps {
   // Formula A, pinned earlier; null until the colorist starts a comparison.
   pinned: ComparedFormula | null;
   // The calculator's live result: formula B once A is pinned.
   current: ComparedFormula;
+  // The saved visit B was repeated from (History's Compare), if any: B carries its date
+  // for as long as the live formula still is that visit.
+  visit?: ComparedFormula | null;
   onPin: (formula: ComparedFormula) => void;
   onClear: () => void;
 }
@@ -18,7 +27,7 @@ export interface FormulaComparisonPanelProps {
 // under the results. Once A is pinned, a bar fixed to the bottom of the screen names A and
 // counts what differs from the live formula B; it opens the full table in a sheet, so the
 // form and its results stay where they are while the colorist changes the formula.
-export function FormulaComparisonPanel({ pinned, current, onPin, onClear }: FormulaComparisonPanelProps) {
+export function FormulaComparisonPanel({ pinned, current, visit = null, onPin, onClear }: FormulaComparisonPanelProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [differencesOnly, setDifferencesOnly] = useState(true);
@@ -34,9 +43,18 @@ export function FormulaComparisonPanel({ pinned, current, onPin, onClear }: Form
     );
   }
 
-  const comparison = compareFormulas(pinned, current);
+  // B as the colorist knows it: the visit itself while nothing has been changed, so it
+  // keeps the visit's date in the headers and when made A.
+  const formulaB = visit !== null && isSameFormula(visit, current) ? visit : current;
+  const comparison = compareFormulas(pinned, formulaB);
   const differenceCount = comparison.rows.filter(row => row.differs).length;
-  const shadeA = comparison.rows.find(row => row.id === "shade")?.a ?? "";
+  const barA = t("comparison.barFormulaA", {
+    shade: pinned.visitDate ?? comparison.rows.find(row => row.id === "shade")?.a ?? "",
+  });
+  const barText =
+    typeof formulaB.visitDate === "string"
+      ? `${barA} · ${t("comparison.barFormulaB", { date: formulaB.visitDate })}`
+      : barA;
 
   return (
     <>
@@ -53,7 +71,7 @@ export function FormulaComparisonPanel({ pinned, current, onPin, onClear }: Form
             title={t("comparison.barAriaLabel")}
             onClick={() => setIsOpen(true)}
           >
-            <span className="comparison-bar__a">{t("comparison.barFormulaA", { shade: shadeA })}</span>
+            <span className="comparison-bar__a">{barText}</span>
             <span
               className={
                 differenceCount > 0 ? "comparison-bar__count comparison-bar__count--differs" : "comparison-bar__count"
@@ -80,12 +98,13 @@ export function FormulaComparisonPanel({ pinned, current, onPin, onClear }: Form
         <Modal title={t("comparison.title")} onClose={() => setIsOpen(false)} size="large">
           <ComparisonTable
             comparison={comparison}
-            labelA={pinned.label ?? t("comparison.formulaA")}
+            labelA={comparisonColumnLabel("A", pinned)}
+            labelB={comparisonColumnLabel("B", formulaB)}
             differencesOnly={differencesOnly}
             onDifferencesOnlyChange={setDifferencesOnly}
           />
           <div className="comparison__actions">
-            <button type="button" className="button button--secondary" onClick={() => onPin(current)}>
+            <button type="button" className="button button--secondary" onClick={() => onPin(formulaB)}>
               {t("comparison.repin")}
             </button>
             <button
@@ -108,11 +127,18 @@ export function FormulaComparisonPanel({ pinned, current, onPin, onClear }: Form
 interface ComparisonTableProps {
   comparison: FormulaComparison;
   labelA: string;
+  labelB: string;
   differencesOnly: boolean;
   onDifferencesOnlyChange: (value: boolean) => void;
 }
 
-function ComparisonTable({ comparison, labelA, differencesOnly, onDifferencesOnlyChange }: ComparisonTableProps) {
+function ComparisonTable({
+  comparison,
+  labelA,
+  labelB,
+  differencesOnly,
+  onDifferencesOnlyChange,
+}: ComparisonTableProps) {
   const { t } = useTranslation();
   const { shared, rows } = comparison;
   const shownRows = differencesOnly ? rows.filter(row => row.differs) : rows;
@@ -137,7 +163,7 @@ function ComparisonTable({ comparison, labelA, differencesOnly, onDifferencesOnl
                   <span className="sr-only">{t("comparison.row")}</span>
                 </th>
                 <th scope="col">{labelA}</th>
-                <th scope="col">{t("comparison.formulaB")}</th>
+                <th scope="col">{labelB}</th>
               </tr>
             </thead>
             <tbody>

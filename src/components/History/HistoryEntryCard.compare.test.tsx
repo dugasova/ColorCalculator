@@ -16,7 +16,7 @@ const gramsEditor = {
   handleActualGramsBlur: vi.fn(),
 } as unknown as ActualGramsEditor;
 
-function renderCard(entry: ReturnType<typeof makeEntry>, onCompare = vi.fn()) {
+function renderCard(entry: ReturnType<typeof makeEntry>, onCompare = vi.fn(), isComparing = false) {
   render(
     <HistoryEntryCard
       entry={entry}
@@ -25,6 +25,7 @@ function renderCard(entry: ReturnType<typeof makeEntry>, onCompare = vi.fn()) {
       onOpenPhoto={vi.fn()}
       onRepeat={vi.fn()}
       onCompare={onCompare}
+      isComparing={isComparing}
     />,
   );
   return onCompare;
@@ -40,6 +41,13 @@ describe("HistoryEntryCard comparison", () => {
   it("leaves Compare out of a multi-step session, which can still be repeated", () => {
     renderCard(makeEntry({ clientName: "Anna K.", steps: [makeBleachStep(), makeColorStep()] }));
     expect(screen.getByRole("button", { name: "Repeat formula" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Compare" })).toBeNull();
+  });
+
+  it("offers Compare with A while a comparison is on", () => {
+    const onCompare = renderCard(makeEntry({ clientName: "Anna K." }), vi.fn(), true);
+    fireEvent.click(screen.getByRole("button", { name: "Compare with A" }));
+    expect(onCompare).toHaveBeenCalledOnce();
     expect(screen.queryByRole("button", { name: "Compare" })).toBeNull();
   });
 });

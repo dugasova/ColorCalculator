@@ -99,3 +99,37 @@ test("a visit from History is compared with a new calculation", async ({ page })
   await expect(table.locator('tr[data-row="grayPercent"] td')).toHaveText(["0%", "40%"]);
   await expect(table.locator('tr[data-row="grayPercent"]')).toHaveClass(/comparison__row--differs/);
 });
+
+// Two saved visits side by side (here of two clients): the first is A, the second,
+// compared while A is pinned, becomes B -- both columns named after their visits until B
+// is changed.
+test("two visits from History are compared with each other", async ({ page }) => {
+  await signInAsMember(page, STYLIST);
+
+  await chooseOption(page, "Starting level", "6");
+  await chooseOption(page, "Shade", "8.1 ash");
+  await saveForClient(page, "Dana First");
+  await chooseOption(page, "Starting level", "6");
+  await chooseOption(page, "Shade", "8.0 natural");
+  await saveForClient(page, "Erin Second");
+
+  await (await openClientVisits(page, "Dana First")).getByRole("button", { name: "Compare" }).click();
+  await (await openClientVisits(page, "Erin Second")).getByRole("button", { name: "Compare with A" }).click();
+
+  const bar = page.getByRole("button", { name: /^A: / });
+  await expect(bar).toContainText(" · B: ");
+  await bar.click();
+  const table = page.locator(".comparison__table");
+  await expect(table.getByRole("columnheader", { name: /^A \(visit / })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: /^B \(visit / })).toBeVisible();
+  await expect(table.locator('tr[data-row="shade"] td')).toHaveText(["Generic 8.1", "Generic 8.0"]);
+  await page.getByRole("button", { name: "Close" }).click();
+
+  // Changed, B is no longer the visit.
+  const gray = page.getByLabel("Gray percentage");
+  await gray.fill("40");
+  await gray.blur();
+  await expect(bar).not.toContainText(" · B: ");
+  await bar.click();
+  await expect(table.getByRole("columnheader", { name: "B (current)" })).toBeVisible();
+});

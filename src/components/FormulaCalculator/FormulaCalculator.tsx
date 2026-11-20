@@ -42,6 +42,8 @@ export interface FormulaCalculatorProps {
   // screen; without these props the comparison isn't offered.
   pinnedFormula?: ComparedFormula | null;
   onPinnedFormulaChange?: (formula: ComparedFormula | null) => void;
+  // The saved visit the current formula was repeated from for a comparison (History).
+  comparedVisit?: ComparedFormula | null;
 }
 export default function FormulaCalculator({
   appliedBy,
@@ -50,6 +52,7 @@ export default function FormulaCalculator({
   onSaved,
   pinnedFormula = null,
   onPinnedFormulaChange,
+  comparedVisit = null,
 }: FormulaCalculatorProps) {
   const { t } = useTranslation();
   const brands = usePalette();
@@ -335,6 +338,7 @@ export default function FormulaCalculator({
         <FormulaComparisonPanel
           pinned={pinnedFormula}
           current={currentFormula}
+          visit={comparedVisit}
           onPin={onPinnedFormulaChange}
           onClear={() => onPinnedFormulaChange(null)}
         />
