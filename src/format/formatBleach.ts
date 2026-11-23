@@ -6,9 +6,10 @@ import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 import { formatPigmentName, formatToneName } from "./formulaMessages";
 
 // The background a lightening to `level` leaves and the toner that cancels it, worded for
-// the results panel and the copied text alike.
-export function formatBleachToning(level: Level): { background: string; toner: string } {
-  const { background, tones } = getToningRecommendation(level);
+// the results panel and the copied text alike. `tonerLine` is the toner the colorist
+// picked, whose manufacturer may chart its own background and balance (Matrix).
+export function formatBleachToning(level: Level, tonerLine?: string | null): { background: string; toner: string } {
+  const { background, tones } = getToningRecommendation(level, tonerLine);
   return {
     background: formatPigmentName(background),
     toner: i18n.t("bleach.toningValue", { level, tones: tones.map(formatToneName).join(" + ") }),

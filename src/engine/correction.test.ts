@@ -154,6 +154,13 @@ describe("getExpectedUnwantedTone", () => {
     expect(getExpectedUnwantedTone(10)).toBe("yellow");
     expect(getExpectedUnwantedTone(12)).toBe("yellow");
   });
+
+  it("follows Matrix's own chart on a Matrix line", () => {
+    // the European card's dark orange at 5 takes blue alone
+    expect(getExpectedUnwantedTone(5, "socolor")).toBe("orange");
+    expect(getExpectedUnwantedTone(5, "koleston-perfect")).toBe("orange-red");
+    expect(getExpectedUnwantedTone(7, "super-sync")).toBe("orange-yellow");
+  });
 });
 
 describe("calculateCorrectionTones", () => {
@@ -216,10 +223,13 @@ describe("L'Oréal correctors for over-corrected hair", () => {
 });
 
 describe("Matrix SoColor correctors for over-corrected hair", () => {
-  it("offers a SoBoost booster or a shade named by its letter", () => {
-    expect(getCorrectorProduct("matrix", "socolor", "red", 7)).toEqual({ shade: "R", mixtone: "SoBoost Red" });
-    expect(getCorrectorProduct("matrix", "socolor", "copper", 7)).toEqual({ shade: "C", mixtone: "SoBoost Copper" });
-    expect(getCorrectorProduct("matrix", "socolor", "gold", 9)).toEqual({ shade: "G", mixtone: "SoBoost Yellow" });
+  it("offers a SoRed booster or a shade named by its letter, never SoBoost", () => {
+    expect(getCorrectorProduct("matrix", "socolor", "red", 7)).toEqual({ shade: "R", mixtone: "SR-R" });
+    expect(getCorrectorProduct("matrix", "socolor", "copper", 7)).toEqual({ shade: "C", mixtone: "SR-C" });
+    expect(getCorrectorProduct("matrix", "socolor", "gold", 9)).toEqual({ shade: "G" });
+    expect(getCorrectorProduct("matrix", "socolor", "ash", 6)).toEqual({ shade: "A" });
+    expect(getCorrectorProduct("matrix", "socolor", "violet", 8)).toEqual({ shade: "AV" });
+    expect(getCorrectorProduct("matrix", "socolor", "violet", 9)).toEqual({ shade: "P" });
   });
 });
 
@@ -254,8 +264,8 @@ describe("line helpers", () => {
     expect(getLineMixingRatio(BRANDS.wella, "koleston-perfect", 6, 8)).toEqual({ colorParts: 1, developerParts: 1 });
   });
 
-  it("knows Matrix SoColor caps the corrector at 25% of the dye", () => {
-    expect(getLineCorrectorCap(BRANDS.matrix, "socolor")).toBe(0.25);
+  it("caps no line's corrector now that SoBoost's 25% is gone", () => {
+    expect(getLineCorrectorCap(BRANDS.matrix, "socolor")).toBeUndefined();
     expect(getLineCorrectorCap(BRANDS.wella, "koleston-perfect")).toBeUndefined();
   });
 });
@@ -339,6 +349,24 @@ describe("findBleachToners", () => {
     const codes = findBleachToners(BRANDS.igora, "royal", 10).map(shade => shade.code);
     expect(codes.some(code => code.startsWith("10-"))).toBe(false);
     expect(codes).toContain("9,5-1");
+  });
+
+  it("never offers Matrix's Titanium against orange, and needs violet and blue on Matrix's yellow", () => {
+    const orange = findNeutralizingShades(BRANDS.matrix, "super-sync", "orange", 6).map(shade => shade.code);
+    expect(orange).toContain("6A");
+    expect(orange).not.toContain("6T");
+    const yellow = findNeutralizingShades(BRANDS.matrix, "socolor", "yellow", 10).map(shade => shade.code);
+    expect(yellow).toEqual(expect.arrayContaining(["10P", "10AV"]));
+    expect(yellow).not.toContain("10N");
+  });
+
+  it("tones a Matrix pale yellow with violet shades, without asking for the 10% blue", () => {
+    const codes = findBleachToners(BRANDS.matrix, "super-sync", 10).map(shade => shade.code);
+    // the colorist's level-10 Super Sync toners: 10NV or 10P
+    expect(codes).toEqual(expect.arrayContaining(["10NV", "10P", "10V"]));
+    expect(codes).not.toContain("10A");
+    // gold strengthens the yellow
+    expect(codes).not.toContain("10AG");
   });
 
   it("is empty when the line has no such shade at that level", () => {

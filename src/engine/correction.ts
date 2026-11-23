@@ -1,5 +1,4 @@
 import {
-  getUnderlyingPigment,
   pickDeveloperVolume,
   DEVELOPER_VOLUME_PERCENT,
   type DeveloperVolume,
@@ -8,7 +7,13 @@ import {
 } from "./levels";
 import type { Brand } from "./brands";
 import type { CorrectiveToneGrams } from "./formula";
-import { getCorrectiveTone, getNeutralizer, getShadeNeutralizingColors } from "./neutralize";
+import {
+  assessNeutralization,
+  getBackground,
+  getCorrectiveTone,
+  getNeutralizer,
+  getShadeNeutralizingColors,
+} from "./neutralize";
 import type { CorrectorRule, MixingRatio, Shade, ToneFamily } from "./shades";
 
 // The six colors of the wheel.
@@ -198,20 +203,22 @@ export interface CorrectionTonePart {
 }
 
 // The corrective tones for an unwanted tone, dominant first.
-export function getCorrectionTones(unwanted: UnwantedTone): CorrectionTonePart[] {
+// `line` picks the manufacturer's own pigment balance where it has one (Matrix).
+export function getCorrectionTones(unwanted: UnwantedTone, line?: string | null): CorrectionTonePart[] {
   const warm = WARM_CORRECTIVE_TONE[unwanted];
   if (warm !== undefined) return [{ tone: warm, share: 1 }];
   // Every remaining UnwantedTone is also an UnderlyingPigment.
-  return getNeutralizer(unwanted as Exclude<UnwantedTone, "green" | "blue" | "violet">).map(part => ({
+  return getNeutralizer(unwanted as Exclude<UnwantedTone, "green" | "blue" | "violet">, line).map(part => ({
     tone: getCorrectiveTone(part.color),
     share: part.share,
   }));
 }
 
 // The tone a lightening background usually shows at `level`: the warm tone to expect, and
-// the colorist's starting guess. The palest backgrounds are plain yellow here.
-export function getExpectedUnwantedTone(level: Level): UnwantedTone {
-  const pigment = getUnderlyingPigment(level);
+// the colorist's starting guess, as the line's manufacturer charts it. The palest
+// backgrounds are plain yellow here.
+export function getExpectedUnwantedTone(level: Level, line?: string | null): UnwantedTone {
+  const pigment = getBackground(level, line);
   return pigment === "pale-yellow" || pigment === "very-light-yellow" ? "yellow" : pigment;
 }
 
@@ -224,12 +231,13 @@ export function calculateCorrectionTones(
   baseGrams: number,
   maxShareOfColor?: number,
   rule: CorrectorRule = "rule-of-10",
+  line?: string | null,
 ): CorrectiveToneGrams[] {
   const wholeGrams = calculateCorrectorGrams(level, baseGrams, rule);
   const maxGrams = maxShareOfColor !== undefined ? baseGrams * maxShareOfColor : Infinity;
   const scale = wholeGrams > maxGrams ? maxGrams / wholeGrams : 1;
   return roundCorrectorGrams(
-    getCorrectionTones(unwanted).map(part => ({ tone: part.tone, grams: wholeGrams * scale * part.share })),
+    getCorrectionTones(unwanted, line).map(part => ({ tone: part.tone, grams: wholeGrams * scale * part.share })),
   );
 }
 
@@ -281,14 +289,22 @@ const UNWANTED_TONE_COLORS: Record<UnwantedTone, WheelTone[]> = {
   violet: ["violet"],
 };
 
-function cancelsUnwantedTone(shade: Shade, unwanted: UnwantedTone): boolean {
-  const shadeTones = [shade.tone, ...(shade.secondaryTone !== undefined ? [shade.secondaryTone] : [])];
+function getShadeTones(shade: Shade): ToneFamily[] {
+  return [shade.tone, ...(shade.secondaryTone !== undefined ? [shade.secondaryTone] : [])];
+}
+
+function amplifiesUnwantedTone(shade: Shade, unwanted: UnwantedTone): boolean {
   const amplifying = UNWANTED_TONE_COLORS[unwanted].flatMap(color => AMPLIFYING_TONES[color]);
-  if (shadeTones.some(tone => amplifying.includes(tone))) return false;
+  return getShadeTones(shade).some(tone => amplifying.includes(tone));
+}
+
+function cancelsUnwantedTone(shade: Shade, unwanted: UnwantedTone): boolean {
+  if (amplifiesUnwantedTone(shade, unwanted)) return false;
+  const shadeTones = getShadeTones(shade);
   const warm = WARM_SHADE_TONES[unwanted];
   if (warm !== undefined) return shadeTones.some(tone => warm.includes(tone));
   const carried = getShadeNeutralizingColors(shade);
-  return getNeutralizer(unwanted as Exclude<UnwantedTone, "green" | "blue" | "violet">).every(part =>
+  return getNeutralizer(unwanted as Exclude<UnwantedTone, "green" | "blue" | "violet">, shade.line).every(part =>
     carried.has(part.color),
   );
 }
@@ -309,12 +325,20 @@ export function findNeutralizingShades(
 }
 
 // Shades of the line that tone hair lightened to `level`: those at that level whose own
-// tone cancels the background the lightening leaves (see getExpectedUnwantedTone). Never
+// tone cancels the background the lightening leaves, judged as the formula calculator
+// judges it (assessNeutralization: the line's own background chart, a pale yellow taking
+// violet only), and none of whose tones strengthens it. Never
 // a special blonde or another lifting blonde (Shade.acceptsPartialLift, Shade.highLift):
 // applying one after powder is dangerous (colorist, 2026-11-19).
 export function findBleachToners(brand: Brand, line: string | null, level: Level): Shade[] {
-  return findNeutralizingShades(brand, line, getExpectedUnwantedTone(level), level).filter(
-    shade => shade.acceptsPartialLift !== true && shade.highLift !== true,
+  const unwanted = getExpectedUnwantedTone(level, line);
+  return getLineShades(brand, line).filter(
+    shade =>
+      shade.level === level &&
+      shade.acceptsPartialLift !== true &&
+      shade.highLift !== true &&
+      !amplifiesUnwantedTone(shade, unwanted) &&
+      assessNeutralization(shade, level).coverage === "full",
   );
 }
 

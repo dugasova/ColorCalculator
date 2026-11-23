@@ -9,15 +9,15 @@ import { BRANDS } from "./brands";
 import type { Level } from "./levels";
 
 describe("BRANDS.matrix", () => {
-  it("has the full 62-shade SoColor Pre-Bonded Blended Natural range, every shade tagged with the socolor line", () => {
-    expect(MATRIX_SOCOLOR_CHART.length).toBe(62);
+  it("has the 95-shade European SoColor Pre-Bonded range, every shade tagged with the socolor line", () => {
+    expect(MATRIX_SOCOLOR_CHART.length).toBe(95);
     for (const shade of MATRIX_SOCOLOR_CHART) {
       expect(shade.line).toBe("socolor");
     }
   });
 
-  it("has the full 50-shade Super Sync range, every shade tagged with the super-sync line and a fixed 1:1 single-developer-choice ratio", () => {
-    expect(MATRIX_SUPER_SYNC_CHART.length).toBe(50);
+  it("has the full 66-shade Super Sync range, every shade tagged with the super-sync line and a fixed 1:1 single-developer-choice ratio", () => {
+    expect(MATRIX_SUPER_SYNC_CHART.length).toBe(66);
     for (const shade of MATRIX_SUPER_SYNC_CHART) {
       expect(shade.line).toBe("super-sync");
       expect(shade.fixedMixingRatio).toEqual({ colorParts: 1, developerParts: 1 });
@@ -26,15 +26,135 @@ describe("BRANDS.matrix", () => {
   });
 
   it("decodes a two-letter reflect code into primary/secondary tone on both lines", () => {
-    const socolorShade = MATRIX_SOCOLOR_CHART.find(s => s.code === "3RV");
-    expect(socolorShade).toMatchObject({ level: 3, tone: "red", secondaryTone: "violet" });
+    const socolorShade = MATRIX_SOCOLOR_CHART.find(s => s.code === "6MA");
+    expect(socolorShade).toMatchObject({ level: 6, tone: "chocolate", secondaryTone: "ash" });
 
     const superSyncShade = MATRIX_SUPER_SYNC_CHART.find(s => s.code === "6WN");
     expect(superSyncShade).toMatchObject({ level: 6, tone: "gold", secondaryTone: "natural" });
   });
 
+  it("matches the current cards: SoColor by the European guide, Super Sync with the 2026 shades", () => {
+    const socolor = MATRIX_SOCOLOR_CHART.map(s => s.code);
+    // European range: mocha-ash, warm naturals, jade; none of the US-only shades
+    for (const code of ["1A", "4MA", "6MV", "8VM", "10NW", "4NJ", "7NJ", "6AJ", "8SP", "10P"]) {
+      expect(socolor).toContain(code);
+    }
+    for (const code of ["1N", "8A", "9P", "11P", "6NJ", "3AA", "8V", "9NA"]) expect(socolor).not.toContain(code);
+    // no "+" HD shade; UL-N+ and UL-A+ are Ultra Blondes
+    expect(socolor.filter(code => code.endsWith("+"))).toEqual(["UL-N+", "UL-NV+", "UL-A+", "UL-V+"]);
+    expect(MATRIX_SOCOLOR_CHART.find(s => s.code === "8SP")).toMatchObject({ tone: "pearl" });
+    expect(MATRIX_SUPER_SYNC_CHART.find(s => s.code === "6NNA")).toMatchObject({
+      level: 6,
+      tone: "natural",
+      secondaryTone: "ash",
+    });
+    expect(MATRIX_SUPER_SYNC_CHART.find(s => s.code === "10NNG")).toMatchObject({
+      level: 10,
+      tone: "natural",
+      secondaryTone: "gold",
+    });
+    expect(MATRIX_SUPER_SYNC_CHART.find(s => s.code === "8AG")).toMatchObject({ tone: "ash", secondaryTone: "gold" });
+    expect(MATRIX_SUPER_SYNC_CHART.find(s => s.code === "11VG")).toMatchObject({
+      tone: "violet",
+      secondaryTone: "gold",
+    });
+    // "+" HD-red shades stay out: they mix with nothing but Clear.
+    expect(MATRIX_SUPER_SYNC_CHART.some(s => s.code.endsWith("+"))).toBe(false);
+  });
+
+  it("lifts SoColor's High Lift row 1:1 on any developer and its Ultra Blondes 1:2 on 9% or 12%", () => {
+    const shade = (code: string) => MATRIX_SOCOLOR_CHART.find(s => s.code === code)!;
+    const run = (code: string, startLevel: Level) =>
+      calculateFullFormula({
+        startLevel,
+        targetShade: shade(code),
+        grayPercent: 0,
+        totalGrams: 60,
+        mixingRatioStrategy: BRANDS.matrix.mixingRatio,
+      });
+
+    // 11A: the developer follows the base, as the colorist's table gives it
+    expect(run("11A", 7)).toMatchObject({
+      developerVolume: 40,
+      achievedLevel: 11,
+      mixingRatio: { colorParts: 1, developerParts: 1 },
+      recommendedProcessingMinutes: 45,
+      eligibilityWarning: null,
+    });
+    expect(run("11A", 8)).toMatchObject({ developerVolume: 30, recommendedProcessingMinutes: 40 });
+    expect(run("11A", 9)).toMatchObject({ developerVolume: 20, recommendedProcessingMinutes: 40 });
+    // a toner on a bleached 11
+    expect(run("11N", 11)).toMatchObject({ developerVolume: 10, recommendedProcessingMinutes: 25 });
+    // from 6 it under-lifts and warns that it needs a natural 7
+    const fromSix = run("11N", 6);
+    expect(fromSix.achievedLevel).toBe(10);
+    expect(fromSix.eligibilityWarning).toEqual({ code: "11N", minLevel: 7, startLevel: 6 });
+
+    // Ultra Blonde: 9% lifts a natural 7–8 up to 4 levels, 12% (5 levels) is for a 6; 1:2
+    expect(run("UL-N", 6)).toMatchObject({
+      developerVolume: 40,
+      achievedLevel: 11,
+      mixingRatio: { colorParts: 1, developerParts: 2 },
+      recommendedProcessingMinutes: 50,
+      eligibilityWarning: null,
+    });
+    expect(run("UL-AA", 8)).toMatchObject({ developerVolume: 30, achievedLevel: 12 });
+    // from 7 the 12th level takes 5 levels: 12%
+    expect(run("UL-AA", 7)).toMatchObject({ developerVolume: 40, achievedLevel: 12 });
+    expect(run("UL-M", 11).developerVolume).toBe(30);
+    // high porosity never takes Ultra Blonde below 9%, but may soften 12% to 9%
+    const porous = (code: string, startLevel: Level) =>
+      calculateFullFormula({
+        startLevel,
+        targetShade: shade(code),
+        grayPercent: 0,
+        totalGrams: 60,
+        mixingRatioStrategy: BRANDS.matrix.mixingRatio,
+        porosity: "high",
+      });
+    expect(porous("UL-AA", 8).developerVolume).toBe(30);
+    expect(porous("UL-N", 6).developerVolume).toBe(30);
+    // never a toner after powder
+    expect(shade("11A").highLift).toBe(true);
+    expect(shade("UL-N").highLift).toBe(true);
+  });
+
+  it("lets Super Sync lift one level and asks for a base one level below the shade past that", () => {
+    const shade = MATRIX_SUPER_SYNC_CHART.find(s => s.code === "11V")!;
+    const run = (startLevel: Level) =>
+      calculateFullFormula({
+        startLevel,
+        targetShade: shade,
+        grayPercent: 0,
+        totalGrams: 60,
+        mixingRatioStrategy: BRANDS.matrix.mixingRatio,
+        manualDeveloperVolume: 10,
+      });
+    expect(run(10)).toMatchObject({ liftUnsupportedWarning: null, achievedLevel: 11 });
+    const fromNine = run(9);
+    expect(fromNine.liftUnsupportedWarning).toEqual({ code: "11V", level: 11, startLevel: 9, minLevel: 10 });
+    expect(fromNine.achievedLevel).toBe(10);
+  });
+
+  it("lists only the Ultra Blondes on the European guide", () => {
+    const ultra = MATRIX_SOCOLOR_CHART.filter(s => s.code.startsWith("UL-")).map(s => s.code);
+    expect(ultra).toEqual([
+      "UL-N",
+      "UL-N+",
+      "UL-NV+",
+      "UL-A+",
+      "UL-AA",
+      "UL-V+",
+      "UL-VV",
+      "UL-Violet",
+      "UL-Silver",
+      "UL-M",
+      "UL-Clear",
+    ]);
+  });
+
   it("mixes 1:1 with developer regardless of level, on both lines combined in the catalog", () => {
-    expect(BRANDS.matrix.shades.length).toBe(112);
+    expect(BRANDS.matrix.shades.length).toBe(161);
     expect(BRANDS.matrix.mixingRatio(6, 7)).toEqual({ colorParts: 1, developerParts: 1 });
   });
 });

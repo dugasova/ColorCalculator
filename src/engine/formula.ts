@@ -71,6 +71,9 @@ export interface LiftUnsupportedWarning {
   code: string;
   level: Level;
   startLevel: Level;
+  // The lowest base the shade still reaches its level from, where its line lifts a little
+  // (Shade.depositLift). Absent when the line lifts nothing, and on older saved results.
+  minLevel?: Level;
 }
 
 export interface FullFormula {
@@ -147,8 +150,8 @@ function lowerDeveloperForHighPorosity(volume: DeveloperVolume, grayPercent: num
 // Applies porosity on top of the developer/time the level and gray rules produced. Leaves
 // alone whatever the product line or the colorist fixed rather than the calculator
 // picking it: a manually chosen developer (Shade.developerVolumeChoices), a line's own
-// no-lift developer (Shade.noLiftDeveloperVolume), and a manufacturer-fixed processing
-// time (Shade.fixedProcessingMinutes).
+// no-lift developer (Shade.noLiftDeveloperVolume), a developer its own lift table does not
+// lift with, and a manufacturer-fixed processing time (Shade.fixedProcessingMinutes).
 function applyPorosity(
   porosity: Porosity,
   targetShade: Shade,
@@ -171,6 +174,11 @@ function applyPorosity(
     if (developerIsFixed) return unchanged;
     const lowered = lowerDeveloperForHighPorosity(developerVolume, grayPercent);
     if (lowered === developerVolume) return unchanged;
+    // A line with its own lift table lifts with only some developers (Matrix Ultra Blonde:
+    // 9% or 12%; Wella Special Blonde likewise): never lower a lift to one it does not use.
+    if (isLifting && targetShade.developerLiftTable !== undefined && targetShade.developerLiftTable(lowered) <= 0) {
+      return unchanged;
+    }
     return {
       developerVolume: lowered,
       recommendedProcessingMinutes,
@@ -384,9 +392,15 @@ export function calculateFullFormula({
   const mixingRatio = resolveShadeMixingRatio(startLevel, targetShade, mixingRatioStrategy, manualMixingRatio);
   const grayCoverage = getGrayCoverageStrategy(grayPercent);
 
-  const liftUnsupportedWarning =
-    targetShade.developerVolumeChoices !== undefined && isLifting
-      ? { code: targetShade.code, level: targetShade.level, startLevel }
+  const depositLift = targetShade.developerVolumeChoices !== undefined ? (targetShade.depositLift ?? 0) : 0;
+  const liftUnsupportedWarning: LiftUnsupportedWarning | null =
+    targetShade.developerVolumeChoices !== undefined && isLifting && targetShade.level - startLevel > depositLift
+      ? {
+          code: targetShade.code,
+          level: targetShade.level,
+          startLevel,
+          ...(depositLift > 0 && { minLevel: (targetShade.level - depositLift) as Level }),
+        }
       : null;
 
   const pickedVolume = resolveDeveloperVolume(startLevel, targetShade, grayPercent, isLifting, manualDeveloperVolume);
@@ -397,8 +411,12 @@ export function calculateFullFormula({
     pickedVolume,
   );
   // A line that can't lift, mixed anyway with the developer the colorist picked, only
-  // deposits: the hair stays at its starting level rather than reaching the shade's own.
-  const achievedLevel = liftUnsupportedWarning !== null && levelDeveloperVolume !== null ? startLevel : reachableLevel;
+  // deposits: the hair stays at its starting level (plus the little its line lifts)
+  // rather than reaching the shade's own.
+  const achievedLevel =
+    liftUnsupportedWarning !== null && levelDeveloperVolume !== null
+      ? ((startLevel + depositLift) as Level)
+      : reachableLevel;
   const {
     developerVolume,
     recommendedProcessingMinutes,

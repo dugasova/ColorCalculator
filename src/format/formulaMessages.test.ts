@@ -7,6 +7,7 @@ import {
   buildMixCorrector,
   formatMixCorrector,
   formatCorrectiveTones,
+  formatLiftUnsupportedWarning,
   formatToneWarning,
   isBackgroundCoveredByShade,
 } from "./formulaMessages";
@@ -107,27 +108,40 @@ describe("formatCorrectiveTones", () => {
     expect(formatCorrectiveTones(dark, colorTouch)).toMatch(/^\d+ g \/2$/);
   });
 
-  it("names Matrix SoColor's boosters and the developer they take, capped at a quarter of the dye", () => {
+  it("names Matrix SoColor's correctors by their shade letters, with the developer they take", () => {
     const matrix = { brandId: "matrix", line: "socolor" };
-    const cap = { line: "socolor", maxCorrectorShareOfColor: 0.25 };
-    expect(formatCorrectiveTones(lift({ code: "8G", level: 8, tone: "gold", ...cap }), matrix)).toBe(
-      "2 g SoBoost Blue + 2 g V (+ 4 g developer)",
+    // No SoBoost in Ukraine: the blue is an A shade; SoColor has no V shade, so violet is
+    // its ready AV shade below level 9 (pearl P from 9).
+    expect(formatCorrectiveTones(lift({ code: "8G", level: 8, tone: "gold", line: "socolor" }), matrix)).toBe(
+      "2 g A + 2 g AV (+ 4 g developer)",
     );
-    // The Rule of 10 asks for 14 g on a 2 -> 3 lift; 30 g of dye takes 7.5 g at most.
     const dark = calculateFullFormula({
       startLevel: 2,
-      targetShade: { code: "3N", level: 3, tone: "natural", ...cap },
+      targetShade: { code: "3N", level: 3, tone: "natural", line: "socolor" },
       grayPercent: 0,
       totalGrams: 60,
       mixingRatioStrategy: () => ({ colorParts: 1, developerParts: 1 }),
     });
-    expect(dark.correctorGrams).toBe(7.5);
-    // SoBoost Green is no longer sold: a Jade (J) shade instead.
-    expect(formatCorrectiveTones(dark, matrix)).toBe("7.5 g J (+ 7.5 g developer)");
+    // The Rule of 10 asks for 14 g on a 2 -> 3 lift, uncapped now that SoBoost's 25% is gone.
+    expect(dark.correctorGrams).toBe(14);
+    // Against red: a Jade (J) shade.
+    expect(formatCorrectiveTones(dark, matrix)).toBe("14 g J (+ 14 g developer)");
     // Super Sync has no boosters.
     expect(
       formatCorrectiveTones(lift({ code: "8.3", level: 8, tone: "gold" }), { brandId: "matrix", line: "super-sync" }),
     ).toBe("2 g ash + 2 g violet");
+  });
+
+  it("scales the corrector down to a manufacturer's cap on its share of the dye", () => {
+    // 14 g by the Rule of 10; 30 g of dye at a 25% cap takes 7.5 g at most.
+    const capped = calculateFullFormula({
+      startLevel: 2,
+      targetShade: { code: "3N", level: 3, tone: "natural", maxCorrectorShareOfColor: 0.25 },
+      grayPercent: 0,
+      totalGrams: 60,
+      mixingRatioStrategy: () => ({ colorParts: 1, developerParts: 1 }),
+    });
+    expect(capped.correctorGrams).toBe(7.5);
   });
 
   it("falls back to the tone's name for a brand with no corrector table", () => {
@@ -208,5 +222,15 @@ describe("an applied corrector in the mix", () => {
     expect(buildMixCorrector(result, { brandId: "loreal", line: "dia-color" }, { ash: "mixtone" })?.parts[0].name).toBe(
       ".1",
     );
+  });
+});
+
+describe("formatLiftUnsupportedWarning", () => {
+  it("names the base range where the line lifts a little, and 'or higher' where it lifts nothing", async () => {
+    await i18n.changeLanguage("uk");
+    expect(formatLiftUnsupportedWarning({ code: "11V", level: 11, startLevel: 9, minLevel: 10 })).toBe(
+      "«11V» не може підняти рівень — він лише наносить колір, тому волосся вже має бути рівня 10–11, а початковий рівень — 9",
+    );
+    expect(formatLiftUnsupportedWarning({ code: "8/73", level: 8, startLevel: 6 })).toContain("рівня 8 або вище");
   });
 });

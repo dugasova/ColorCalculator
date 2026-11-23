@@ -86,7 +86,7 @@ interface BleachToningRowsProps extends BleachResultProps {
 export function BleachToningRows({ result, toner }: BleachToningRowsProps) {
   const { t } = useTranslation();
   if (result.grams === null) return null;
-  const toning = formatBleachToning(result.targetLevel);
+  const toning = formatBleachToning(result.targetLevel, toner?.line);
   const tonerShades = toner !== undefined ? findBleachToners(toner.brand, toner.line, result.targetLevel) : null;
   return (
     <>
