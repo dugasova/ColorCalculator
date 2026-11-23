@@ -3,6 +3,34 @@
 All notable changes to Formulist. Versions follow [SemVer](https://semver.org/); see
 "Releasing" in the README for the process.
 
+## 0.12.0 — 2026-11-23
+
+- Formula comparison:
+  - "Compare with another formula" pins the current formula as A; the live formula is B.
+    A stays while the app is open, across screens and after a save.
+  - A bar at the bottom names A and counts the differences; the table opens in a sheet,
+    showing the differing rows first.
+  - From History: compare a saved visit with a new calculation, or two saved visits
+    (single-formula visits).
+- Bleach: pick the toner's brand and line; its shades that tone the background at the
+  target level are listed. Special blondes and high-lift series are never offered after
+  powder. The bleach target level stops at 10.
+- Matrix follows the European card (the range sold in Ukraine):
+  - SoColor Pre-Bonded: the European palette, 95 shades, including the mocha series, warm
+    naturals, Jade and the Reflect shades;
+  - High Lift 11A / 11N: 1:1, the developer by the base (3% tones a bleached 10–11, 12%
+    from a natural 7), with a warning below 7;
+  - Ultra Blonde (UL-): 1:2, 9% up to 4 levels, 12% beyond;
+  - Super Sync: 16 shades from the 2026 card; lifts one level (11V from a 10);
+  - neutralization by Matrix's own background chart and the colorist's pigment balance;
+    Titanium (6T) is not counted as a neutralizer;
+  - no SoBoost (no longer sold in Ukraine): SoColor corrects with A, AV / P, J, G shades
+    and SoRed.
+- Fixes:
+  - high porosity no longer lowers a lifting shade to a developer it does not lift with
+    (Ultra Blonde, Wella Special Blonde);
+  - the line name reads "SoColor".
+
 ## 0.11.0 — 2026-11-19
 
 - Neutralization follows the lightening background:
