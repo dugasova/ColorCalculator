@@ -47,6 +47,11 @@ export interface Shade {
   minStartLevel?: Level;
   developerLiftTable?: LiftTable;
   developerVolumeChoices?: DeveloperVolume[];
+  // How many levels a deposit-only line (one with `developerVolumeChoices`) still lifts as
+  // a side effect of its own chemistry -- Matrix Super Sync's "up to 1 level". Within it a
+  // lighter shade is no lift warning; past it the warning names the base the shade needs
+  // (its level minus this, up to its level). Unset, such a line lifts nothing.
+  depositLift?: number;
   // Overrides the engine's default 3% (10 vol) "gentlest" developer pick for same-depth-
   // or-darker work with no significant gray to cover - e.g. Wella Koleston Perfect's own
   // "4% Welloxon Perfect... 30-40 min without heat" alternative (see brands/wella.ts). No
@@ -88,7 +93,8 @@ export interface Shade {
   // within.
   acceptsPartialLift?: boolean;
   // The most corrector the manufacturer allows in this shade, as a share of the dye's own
-  // weight -- e.g. Matrix SoBoost's "up to 25% of the color" (see brands/matrix.ts). The
+  // weight -- e.g. Matrix SoBoost's "up to 25% of the color" (no chart uses it since SoBoost
+  // left the Ukrainian range, 2026-11-23). The
   // recommended corrector is scaled down to it; unset, the Rule of 10 alone decides.
   maxCorrectorShareOfColor?: number;
   // How the corrector is dosed, where the manufacturer has its own rule: Igora's Rule of 11

@@ -1,4 +1,11 @@
+// Line names whose manufacturer spells them in a way word-by-word capitalization of the id
+// cannot produce.
+const LINE_LABELS: Readonly<Record<string, string>> = {
+  socolor: "SoColor",
+};
+
 export const formatLineLabel = (line: string) =>
+  LINE_LABELS[line] ??
   line
     .split("-")
     .map(word => word[0].toUpperCase() + word.slice(1))

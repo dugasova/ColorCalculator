@@ -91,18 +91,19 @@ function getLorealTip(
   return null;
 }
 
-// SoBoost Copper and Yellow are being phased out in some regions (Matrix 2026 chart), and
-// Green and Violet are no longer sold: what to use instead.
+// SoBoost is no longer sold in Ukraine (colorist, 2026-11-23); SoRed is the only booster
+// left. What SoColor corrects with instead, tone by tone.
 function getMatrixTip(
   brand: CorrectorBrand,
   unwanted: UnwantedTone,
   tones: readonly ToneFamily[],
 ): { key: string; shade?: string } | null {
   if (brand.brandId !== "matrix" || brand.line !== "socolor") return null;
-  if (unwanted === "blue") return { key: "correction.tips.matrixBlueWithoutCopper" };
-  if (unwanted === "violet") return { key: "correction.tips.matrixVioletWithoutYellow" };
-  if (tones.includes("matt")) return { key: "correction.tips.matrixNoGreenBooster" };
-  if (tones.includes("violet")) return { key: "correction.tips.matrixNoVioletBooster" };
+  if (unwanted === "blue") return { key: "correction.tips.matrixCopperShade" };
+  if (unwanted === "violet") return { key: "correction.tips.matrixGoldShade" };
+  if (tones.includes("matt")) return { key: "correction.tips.matrixJadeShade" };
+  if (tones.includes("violet")) return { key: "correction.tips.matrixVioletShade" };
+  if (tones.includes("ash")) return { key: "correction.tips.matrixAshShade" };
   return null;
 }
 
@@ -169,7 +170,14 @@ export function ColorCorrectionCalculator() {
   const selfNeutralizing = isLineSelfNeutralizingAt(brand, line, targetLevel);
   const recommendedTones = selfNeutralizing
     ? []
-    : calculateCorrectionTones(unwantedTone, targetLevel, baseGrams, getLineCorrectorCap(brand, line), correctorRule);
+    : calculateCorrectionTones(
+        unwantedTone,
+        targetLevel,
+        baseGrams,
+        getLineCorrectorCap(brand, line),
+        correctorRule,
+        line,
+      );
   const ruleKey = correctorRule === "rule-of-11" ? "correction.ruleOfEleven" : "correction.ruleOfTen";
   // The Rule of 10 row keeps the recommendation; the mix takes what the colorist typed.
   const recommendedGrams = Math.round(recommendedTones.reduce((sum, part) => sum + part.grams, 0) * 10) / 10;
@@ -190,7 +198,7 @@ export function ColorCorrectionCalculator() {
     .map(part => formatChosenCorrectorName(part.tone, correctorBrand, selection[part.tone]))
     .join(" + ");
   const neutralizingShades = findNeutralizingShades(brand, line, unwantedTone, targetLevel);
-  const expectedTone = getExpectedUnwantedTone(targetLevel);
+  const expectedTone = getExpectedUnwantedTone(targetLevel, line);
   const unwantedToneName = t(`correction.tones.${unwantedTone}`);
   const tipKey = getTipKey(unwantedTone, result.technique);
   const brandTip = selfNeutralizing

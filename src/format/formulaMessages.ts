@@ -125,7 +125,11 @@ export function formatGrayLiftWarning(warning: GrayLiftWarning): string {
 }
 
 export function formatLiftUnsupportedWarning(warning: LiftUnsupportedWarning): string {
-  return i18n.t("engine.liftUnsupportedWarning", { ...warning });
+  const key =
+    warning.minLevel !== undefined && warning.minLevel < warning.level
+      ? "engine.liftUnsupportedWarningRange"
+      : "engine.liftUnsupportedWarning";
+  return i18n.t(key, { ...warning });
 }
 
 export function getGrayCoverageNote(strategy: Pick<GrayCoverageStrategy, "naturalRatio">): string {

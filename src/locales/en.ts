@@ -448,6 +448,8 @@ export const en = {
     },
     liftUnsupportedWarning:
       "'{{code}}' can't lift level — it only deposits color, so the hair must already be at level {{level}} or higher, but the starting level is {{startLevel}}",
+    liftUnsupportedWarningRange:
+      "'{{code}}' can't lift level — it only deposits color, so the hair must already be at level {{minLevel}}–{{level}}, but the starting level is {{startLevel}}",
     porosity: {
       developerLowered: "High porosity: developer lowered from {{from}} to {{to}} — porous hair lifts more easily",
       processingExtended:
@@ -601,14 +603,14 @@ export const en = {
         "A light green on levels 8–10: instead of a booster it is safer to add 5–15 g of a ready red or mahogany shade (.6, .5), e.g. {{shade}}, so the result does not turn bright pink.",
       wellaColorTouchBlueShade:
         "Blue from an ash toner that failed on porous ends (blue-grey at levels 8–10): instead of a mixtone a ready warm shade at the same level is safer — /34, /43 (7/43, 8/34, 8/43, 9/43) turn the blue into warm beige or caramel; /73, /74 (7/73, 8/74) at levels 6–8 give a neutral brown without a ginger glint.",
-      matrixBlueWithoutCopper:
-        "SoBoost Copper is being phased out in some regions. Without it, mix SoBoost Red with SoBoost Yellow, or add a C shade (7CC, 8C, 8GC, 6BC).",
-      matrixVioletWithoutYellow:
-        "SoBoost Yellow is being phased out in some regions. Without it, add a G or W shade (8G, 9G, 8W, 9NW).",
-      matrixNoGreenBooster:
-        "SoBoost Green is no longer made: against red, use matt-green Jade (J) shades from the main palette (e.g. 4J, 6J), or mix 3 parts SoBoost Yellow + 1 part SoBoost Blue.",
-      matrixNoVioletBooster:
-        "SoBoost Violet is no longer made: against yellow, add V shades with a violet reflect (e.g. 8V, 10V in Color Sync, SPV in Super Sync, 9AV in SoColor Pre-Bonded), or mix SoBoost Blue + SoBoost Red.",
+      matrixCopperShade:
+        "SoBoost is no longer sold in Ukraine: warm the blue back with SoRed SR-C or a C shade (5C, 7C, 8C, 8CC, 6BC).",
+      matrixGoldShade: "There is no yellow booster in Ukraine: against violet, add a G or W shade (8G, 9G, 7W, 9W).",
+      matrixJadeShade: "There is no green booster: against red, use matt-green Jade (J) shades (4NJ, 7NJ, 6AJ).",
+      matrixVioletShade:
+        "There is no violet booster and SoColor has no V shades: against yellow, take the ready ash-violet AV shades (8AV, 10AV) while orange still shows, and pearl P (8P, 10P) on a clean yellow from level 9.",
+      matrixAshShade:
+        "SoBoost Blue is no longer sold in Ukraine: against orange, add an A shade; for a dense orange, AA (4AA, 6AA).",
       igoraPearl:
         "0-11 gives a cool ash or steel on blonde. For a clean pearl or pearl beige on porous yellow blonde (levels 9–10) with no risk of green, add 0-99 — together with 0-11 (the amount is shared half and half) or instead of it.",
       igoraGreen:
@@ -848,6 +850,9 @@ export const en = {
       title: "Matrix",
       points: [
         "SoColor Pre-Bonded (permanent): always 1:1 with Matrix Cream Developer 10/20/30/40 vol.",
+        "SoColor High Lift (11A, 11N): 1:1 with any developer — 3% tones a bleached 10–11 base (15–35 min), 6% lifts 1–2 levels from 9–10, 9% 2–3 from 8–9 (35–45 min), 12% 3–4 from 7–8 (45 min). From 6 it stops at 8–9 on a warm yellow-orange background, so take Ultra Blonde there.",
+        "SoColor Ultra Blonde (UL-): 1:2 with 9% or 12% only, 50 min (mid-lengths and ends 15 min, then the roots). 9% lifts 3–4 levels from a natural 7–8 to a clean 10–11, with the most neutralization; 12% is for a natural 6.",
+        "Both lifting series lift natural, never colored, hair only: color does not lift color.",
         "Super Sync (ammonia-free demi): always 1:1 with 10 vol Matrix Cream Developer only -- no real developer-volume choice, 20 min at room temperature.",
         "Reflect letters: N natural, A ash, G gold, C copper, R red, V violet, P pearl, M mocha, B brown, W warm, J jade, T titanium (Super Sync only).",
       ],

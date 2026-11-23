@@ -7,7 +7,7 @@ import type { ToneFamily } from "./shades";
 // ("0/88"). The colorist's working table, 2026-11-16. Brands and tones not listed here
 // are named by the generic tone ("ash", "violet").
 export interface CorrectorProduct {
-  // Absent where the brand corrects with a dedicated product only (Matrix SoBoost).
+  // Absent where the brand corrects with a dedicated product only.
   shade?: string;
   mixtone?: string;
   // The two forms may also go in together, the tone's grams shared between them, rather
@@ -96,24 +96,25 @@ const LOREAL_SHADES_ONLY: CorrectorTable = {
   gold: { shade: ".3" },
 };
 
-// Matrix SoColor is corrected with SoBoost boosters. Super Sync is not listed: SoBoost is
-// documented for SoColor only.
+// Matrix SoColor, as sold in Ukraine: SoBoost boosters are no longer sold there; the only
+// boosters on the European card are SoRed (SR-RV, SR-R, SR-RC, SR-C; colorist,
+// 2026-11-23). So most tones are corrected with a shade named by its letter: orange with
+// an A shade (AA, 4AA / 6AA, for a dense orange), red with a matt-green Jade shade (J:
+// 4NJ, 7NJ, 6AJ). Super Sync is not listed: no boosters of its own in Ukraine either.
 //
-// Against over-corrected hair (colorist, 2026-11-17): green ← SoBoost Red or R / .6 shades
-// (6R, 7R, 6VR, 8RV); blue ← SoBoost Copper or C / .4 shades (7CC, 8C, 8GC, 6BC); violet ←
-// SoBoost Yellow or G / W shades (8G, 9G, 8W, 9NW). The shade is named by its letter.
-// Matrix's 2026 chart: Blue and Red are current; Yellow and Copper are classic boosters
-// being phased out in some regions (see the Color Correction tips). SoBoost Green and
-// Violet are no longer sold (colorist, 2026-11-17): red is cancelled with a matt-green
-// Jade shade (J, e.g. 4J, 6J), yellow with a violet V shade (8V, 10V; 9AV in SoColor
-// Pre-Bonded), or with booster blends the tips name.
+// Against over-corrected hair (colorist, 2026-11-17): green ← SoRed SR-R or R shades
+// (4RR, 7RR, 8RC); blue ← SoRed SR-C or C shades (5C, 7C, 8C, 8CC); violet ← G / W
+// shades (8G, 9G, 7W, 9W). SoColor has no plain V shade
+// (colorist, 2026-11-23; neither card lists one): yellow is cancelled with the ready
+// balanced AV shades (7AV, 8AV, 10AV) while orange still shows in the background, and with
+// pearl P (8P, 10P) on a clean yellow from level 9, where blue could turn greenish grey.
 const MATRIX_SOCOLOR: CorrectorTable = {
   matt: { shade: "J" },
-  ash: { mixtone: "SoBoost Blue" },
-  violet: { shade: "V" },
-  red: { shade: "R", mixtone: "SoBoost Red" },
-  copper: { shade: "C", mixtone: "SoBoost Copper" },
-  gold: { shade: "G", mixtone: "SoBoost Yellow" },
+  ash: { shade: "A" },
+  violet: { shade: "AV", light: { fromLevel: 9, shade: "P" } },
+  red: { shade: "R", mixtone: "SR-R" },
+  copper: { shade: "C", mixtone: "SR-C" },
+  gold: { shade: "G" },
 };
 
 // Schwarzkopf Igora: the 0- mixtones carry the same codes in Royal and Vibrance but are

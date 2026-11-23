@@ -48,9 +48,67 @@ const NEUTRALIZERS: Record<UnderlyingPigment, NeutralizerPart[]> = {
   "very-light-yellow": [{ color: "violet", share: 1 }],
 };
 
-export function getNeutralizer(pigment: UnderlyingPigment): NeutralizerPart[] {
-  return NEUTRALIZERS[pigment];
+// Matrix charts its own background per level (European SoColor Pre-Bonded Technical
+// Guide V4, the range sold in Ukraine): red at 3, red-orange at 4, dark orange at 5,
+// orange at 6, light orange at 7, gold at 8, then yellow, pale yellow and palest yellow.
+// That is the generic table above but for level 5, whose dark orange the colorist
+// neutralizes with blue alone (2026-11-23), so it reads as orange here. (Matrix's US card
+// sits a level darker: 6 dark orange, 7 orange, 8 dark yellow; the app follows the
+// European one.)
+const MATRIX_LINES: ReadonlySet<string> = new Set(["socolor", "super-sync"]);
+
+const MATRIX_BACKGROUNDS: Partial<Record<Level, UnderlyingPigment>> = {
+  5: "orange",
+};
+
+// Matrix's pigment balance per background (colorist, 2026-11-23), keyed by the
+// background's color, not its level: red-orange green and blue about equal; orange-yellow
+// (the European light orange at 7) blue 60 + violet 40; yellow violet 80 + blue 20; pale
+// yellow violet 90 + blue 10; palest yellow "violet 90–95%, blue 5–10%", the 95/5 end
+// taken, since excess blue there turns porous blonde greenish grey. Gold (yellow-orange)
+// at 8 had no balance of its own and keeps the generic half and half.
+const MATRIX_NEUTRALIZERS: Partial<Record<UnderlyingPigment, NeutralizerPart[]>> = {
+  "red-orange": [
+    { color: "green", share: 0.5 },
+    { color: "blue", share: 0.5 },
+  ],
+  "orange-yellow": [
+    { color: "blue", share: 0.6 },
+    { color: "violet", share: 0.4 },
+  ],
+  yellow: [
+    { color: "violet", share: 0.8 },
+    { color: "blue", share: 0.2 },
+  ],
+  "pale-yellow": [
+    { color: "violet", share: 0.9 },
+    { color: "blue", share: 0.1 },
+  ],
+  "very-light-yellow": [
+    { color: "violet", share: 0.95 },
+    { color: "blue", share: 0.05 },
+  ],
+};
+
+function isMatrixLine(line: string | null | undefined): boolean {
+  return line !== undefined && line !== null && MATRIX_LINES.has(line);
 }
+
+// The background lifting to `level` reveals, as the line's manufacturer charts it.
+// Pre-pigmentation keeps levels.ts's generic table: Matrix's chart was given for
+// neutralization only.
+export function getBackground(level: Level, line?: string | null): UnderlyingPigment {
+  return (isMatrixLine(line) ? MATRIX_BACKGROUNDS[level] : undefined) ?? getUnderlyingPigment(level);
+}
+
+export function getNeutralizer(pigment: UnderlyingPigment, line?: string | null): NeutralizerPart[] {
+  return (isMatrixLine(line) ? MATRIX_NEUTRALIZERS[pigment] : undefined) ?? NEUTRALIZERS[pigment];
+}
+
+// A part of the neutralizer this small (Matrix's 10% and 5% blue on the palest
+// backgrounds) is below what a colorist doses on its own: it is neither asked of the
+// shade nor added as a corrector. Claude's threshold, not the colorist's.
+const NEGLIGIBLE_SHARE = 0.15;
 
 // The retail tone family a colorist reaches for to get each neutralizing color.
 const CORRECTIVE_TONE: Record<NeutralizingColor, ToneFamily> = {
@@ -75,14 +133,17 @@ const TONE_NEUTRALIZING_COLORS: Partial<Record<ToneFamily, NeutralizingColor[]>>
 };
 
 // Wella's /9 (cendré) is charted as slate-grey (see brands/wella.ts) but is grey with
-// violet, so in Wella's lines that tone brings violet too. Other brands' greys are left
-// as plain blue until the colorist confirms them.
+// violet, so in Wella's lines that tone brings violet too. Matrix's T (Titanium, Super
+// Sync 6T) is a dense blue-violet grey made to show silver on an already clean base: on
+// an orange background it turns muddy, so it cancels nothing (colorist, 2026-11-23).
+// Other greys (Redken's T) are blue.
 const WELLA_LINES: ReadonlySet<string> = new Set(["koleston-perfect", "color-touch"]);
 
 export type NeutralizingShade = Pick<Shade, "tone" | "secondaryTone" | "line">;
 
 function getToneNeutralizingColors(tone: ToneFamily, line: string | undefined): NeutralizingColor[] {
   if (tone === "slate-grey" && line !== undefined && WELLA_LINES.has(line)) return ["blue", "violet"];
+  if (tone === "slate-grey" && isMatrixLine(line)) return [];
   return TONE_NEUTRALIZING_COLORS[tone] ?? [];
 }
 
@@ -114,8 +175,8 @@ export interface Neutralization {
 
 // What a shade lifted to `achievedLevel` still needs to come out as the chart shows it.
 export function assessNeutralization(shade: NeutralizingShade, achievedLevel: Level): Neutralization {
-  const background = getUnderlyingPigment(achievedLevel);
-  const needed = getNeutralizer(background);
+  const background = getBackground(achievedLevel, shade.line);
+  const needed = getNeutralizer(background, shade.line).filter(part => part.share >= NEGLIGIBLE_SHARE);
   const carried = getShadeNeutralizingColors(shade);
   const missingParts = needed.filter(part => !carried.has(part.color));
 
@@ -134,7 +195,7 @@ export interface ToningRecommendation {
   tones: ToneFamily[];
 }
 
-export function getToningRecommendation(level: Level): ToningRecommendation {
-  const { background, missing } = assessNeutralization({ tone: "natural" }, level);
+export function getToningRecommendation(level: Level, line?: string | null): ToningRecommendation {
+  const { background, missing } = assessNeutralization({ tone: "natural", line: line ?? undefined }, level);
   return { background, tones: missing.map(part => part.tone) };
 }
