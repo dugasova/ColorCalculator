@@ -198,7 +198,9 @@ describe("REDKEN_COLOR_GELS_OILS_CHART", () => {
     const codes = REDKEN_COLOR_GELS_OILS_CHART.map(s => s.code);
     for (const gone of ["1N", "3N", "9P", "9AV", "10N", "2NA"]) expect(codes).not.toContain(gone);
     // confirmed by the colorist
-    for (const kept of ["2ABn", "6BR", "8P", "9NW", "10NW"]) expect(codes).toContain(kept);
+    for (const kept of ["2ABn", "6BR", "8P", "9NW", "10NW", "4AB", "5NA", "7NCh", "5GCh", "7GCh"]) {
+      expect(codes).toContain(kept);
+    }
     // Gold Chocolate, from L'Oréal Partner Shop UK
     expect(shade("5GCh")).toMatchObject({ level: 5, tone: "gold", secondaryTone: "chocolate" });
     expect(shade("7GCh")).toMatchObject({ level: 7, tone: "gold", secondaryTone: "chocolate" });
@@ -212,6 +214,9 @@ describe("REDKEN_COLOR_GELS_OILS_CHART", () => {
       expect(codes).toContain(code);
     for (const code of ["02M", "03V", "07V", "08V", "06GG", "07CC"]) expect(codes).not.toContain(code);
     expect(shadesEq.find(s => s.code === "010VV")).toMatchObject({ level: 10, tone: "violet", name: "Lavender Ice" });
+    expect(shadesEq.find(s => s.code === "010T")).toMatchObject({ tone: "slate-grey", name: "Platinum" });
+    expect(shadesEq.find(s => s.code === "010GI")).toMatchObject({ name: "Tahitian Sand" });
+    expect(shadesEq.filter(s => s.level === 10).every(s => s.name !== undefined)).toBe(true);
   });
 
   it("lifts 1/2/3/4 levels at 10/20/30/40 vol, processing 20/30/40/45 min", () => {

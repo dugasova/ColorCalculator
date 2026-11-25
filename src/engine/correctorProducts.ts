@@ -1,5 +1,6 @@
 import type { BrandId } from "./brands";
 import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
+import { REDKEN_SHADES_EQ_CHART } from "./brands/redken";
 import type { Level } from "./levels";
 import type { Shade, ToneFamily } from "./shades";
 
@@ -97,41 +98,75 @@ const LOREAL_SHADES_ONLY: CorrectorTable = {
   gold: { shade: ".3" },
 };
 
-// Matrix: no booster or mixtone is recommended (user, 2026-11-25; SoBoost and SoRed are
-// left out for now). A tone is corrected with a real shade of the line carrying that
-// pigment, at the formula's level. Where the line has none there, the nearest level
-// that has one: on levels 4–7 one level darker first, since the background there is
-// dense and harder to cover; from 8 one level lighter first, so the corrector does not
-// darken a blonde. A pigment the line lacks entirely keeps the tone's generic name.
+// Lines corrected with their own shades rather than a booster or mixtone: a tone is
+// corrected with a real shade of the line carrying that pigment, at the formula's level.
+// Where the line has none there, the nearest level that has one: on levels 4–7 one level
+// darker first, since the background there is dense and harder to cover; from 8 one level
+// lighter first, so the corrector does not darken a blonde (colorist's rule for Matrix,
+// 2026-11-25, applied to Redken Shades EQ too). A pigment the line lacks entirely keeps
+// the tone's generic name. Lifting shades (High Lift, Ultra Blonde) are never a corrector.
 //
-// Each tone lists the shade suffixes that carry it, preferred first. SoColor: blue A /
-// AA; violet the ready AV while orange still shows (below 9), pearl P on a clean yellow
-// from 9 (colorist, 2026-11-23: no plain V in SoColor); green the Jade NJ / AJ; yellow
-// G / W; copper C / CC; red RR / RC (colorist, 2026-11-17: against an unwanted green, R
-// shades; against blue, C shades; against violet, G / W). Super Sync: blue A, violet
-// V / P, yellow G; it has no green, copper or red shade.
-type MatrixSuffixes = Partial<Record<ToneFamily, (level: Level) => string[]>>;
+// Matrix: no booster (user, 2026-11-25; SoBoost and SoRed are left out for now). SoColor:
+// blue A / AA; violet the ready AV while orange still shows (below 9), pearl P on a clean
+// yellow from 9 (colorist, 2026-11-23: no plain V in SoColor); green the Jade NJ / AJ;
+// yellow G / W; copper C / CC; red RR / RC (colorist, 2026-11-17: against an unwanted
+// green, R shades; against blue, C shades; against violet, G / W). Super Sync: blue A,
+// violet V / P, yellow G; it has no green, copper or red shade.
+//
+// Redken Shades EQ has no mixtones: its denser shades do the job (colorist, 2026-11-25).
+// Blue titanium T, or 01B Onyx on the darkest levels; violet V / VV / VB; green matte M;
+// yellow G; copper C; red RR. Codes carry a leading zero (06T, 010VV).
+type CorrectorSuffixes = Partial<Record<ToneFamily, (level: Level) => string[]>>;
 
-const MATRIX_SOCOLOR_SUFFIXES: MatrixSuffixes = {
-  ash: () => ["A", "AA"],
-  violet: level => (level >= 9 ? ["P", "AV"] : ["AV", "P"]),
-  matt: () => ["NJ", "AJ"],
-  gold: () => ["G", "W"],
-  copper: () => ["C", "CC"],
-  red: () => ["RR", "RC"],
+interface ShadeCorrectorLine {
+  chart: Shade[];
+  suffixes: CorrectorSuffixes;
+  code: (level: number, suffix: string) => string;
+}
+
+const plainCode = (level: number, suffix: string) => `${level}${suffix}`;
+
+const SHADE_CORRECTOR_LINES: Partial<Record<string, ShadeCorrectorLine>> = {
+  "matrix::socolor": {
+    chart: MATRIX_SOCOLOR_CHART,
+    code: plainCode,
+    suffixes: {
+      ash: () => ["A", "AA"],
+      violet: level => (level >= 9 ? ["P", "AV"] : ["AV", "P"]),
+      matt: () => ["NJ", "AJ"],
+      gold: () => ["G", "W"],
+      copper: () => ["C", "CC"],
+      red: () => ["RR", "RC"],
+    },
+  },
+  "matrix::super-sync": {
+    chart: MATRIX_SUPER_SYNC_CHART,
+    code: plainCode,
+    suffixes: {
+      ash: () => ["A"],
+      violet: () => ["V", "P"],
+      gold: () => ["G"],
+    },
+  },
+  "redken::shades-eq": {
+    chart: REDKEN_SHADES_EQ_CHART,
+    code: (level, suffix) => `0${level}${suffix}`,
+    suffixes: {
+      ash: () => ["T", "B"],
+      violet: () => ["V", "VV", "VB"],
+      matt: () => ["M"],
+      gold: () => ["G"],
+      copper: () => ["C"],
+      red: () => ["RR"],
+    },
+  },
 };
 
-const MATRIX_SUPER_SYNC_SUFFIXES: MatrixSuffixes = {
-  ash: () => ["A"],
-  violet: () => ["V", "P"],
-  gold: () => ["G"],
-};
-
-const MATRIX_DENSE_BACKGROUND_TO_LEVEL = 7;
+const DENSE_BACKGROUND_TO_LEVEL = 7;
 
 // Levels to look at, nearest first, ties broken toward darker on 4–7 and lighter above.
-function matrixSearchOrder(level: Level): number[] {
-  const darkerFirst = level <= MATRIX_DENSE_BACKGROUND_TO_LEVEL;
+function correctorSearchOrder(level: Level): number[] {
+  const darkerFirst = level <= DENSE_BACKGROUND_TO_LEVEL;
   const order = [level as number];
   for (let step = 1; step <= 11; step++) {
     order.push(...(darkerFirst ? [level - step, level + step] : [level + step, level - step]));
@@ -139,29 +174,29 @@ function matrixSearchOrder(level: Level): number[] {
   return order.filter(candidate => candidate >= 1 && candidate <= 11);
 }
 
-function findMatrixCorrectorShade(chart: Shade[], suffixes: string[], level: Level): string | null {
-  const codes = new Set(chart.filter(shade => shade.highLift !== true).map(shade => shade.code));
-  for (const candidate of matrixSearchOrder(level)) {
-    const code = suffixes.map(suffix => `${candidate}${suffix}`).find(c => codes.has(c));
+function findCorrectorShade(entry: ShadeCorrectorLine, suffixes: string[], level: Level): string | null {
+  const codes = new Set(entry.chart.filter(shade => shade.highLift !== true).map(shade => shade.code));
+  for (const candidate of correctorSearchOrder(level)) {
+    const code = suffixes.map(suffix => entry.code(candidate, suffix)).find(c => codes.has(c));
     if (code !== undefined) return code;
   }
   return null;
 }
 
-function getMatrixCorrectorProduct(
+// Undefined for a line not corrected by its own shades; null when it lacks the pigment.
+function getShadeCorrectorProduct(
+  brandId: BrandId | undefined,
   line: string | null | undefined,
   tone: ToneFamily,
   level: Level | undefined,
 ): CorrectorProduct | null | undefined {
-  const table =
-    line === "socolor" ? MATRIX_SOCOLOR_SUFFIXES : line === "super-sync" ? MATRIX_SUPER_SYNC_SUFFIXES : null;
-  if (table === null) return undefined;
-  const suffixes = table[tone];
+  const entry = SHADE_CORRECTOR_LINES[`${brandId}::${line}`];
+  if (entry === undefined) return undefined;
+  const suffixes = entry.suffixes[tone];
   if (suffixes === undefined) return null;
   // Without a level, the shade family's letter.
   if (level === undefined) return { shade: suffixes(7)[0] };
-  const chart = line === "socolor" ? MATRIX_SOCOLOR_CHART : MATRIX_SUPER_SYNC_CHART;
-  const code = findMatrixCorrectorShade(chart, suffixes(level), level);
+  const code = findCorrectorShade(entry, suffixes(level), level);
   return code !== null ? { shade: code } : null;
 }
 
@@ -205,10 +240,8 @@ export function getCorrectorProduct(
   tone: ToneFamily,
   level?: Level,
 ): CorrectorProduct | null {
-  if (brandId === "matrix") {
-    const matrix = getMatrixCorrectorProduct(line, tone, level);
-    if (matrix !== undefined) return matrix;
-  }
+  const ownShade = getShadeCorrectorProduct(brandId, line, tone, level);
+  if (ownShade !== undefined) return ownShade;
   const entry = getCorrectorTable(brandId, line)?.[tone];
   if (entry === undefined) return null;
   const { light, ...product } = entry;
@@ -229,6 +262,8 @@ export function getCorrectorDeveloperParts(
   line: string | null | undefined,
 ): number | null {
   if (brandId === "matrix" && (line === "socolor" || line === "super-sync")) return 1;
+  // Shades EQ's Processing Solution goes 1:1 on the whole weight, correctors included.
+  if (brandId === "redken" && line === "shades-eq") return 1;
   if (brandId === "igora" && (line === "royal" || line === "vibrance")) return 1;
   return null;
 }
