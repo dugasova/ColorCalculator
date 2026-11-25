@@ -108,12 +108,12 @@ describe("formatCorrectiveTones", () => {
     expect(formatCorrectiveTones(dark, colorTouch)).toMatch(/^\d+ g \/2$/);
   });
 
-  it("names Matrix SoColor's correctors by their shade letters, with the developer they take", () => {
+  it("names Matrix's correctors by real shades of the line, with the developer they take", () => {
     const matrix = { brandId: "matrix", line: "socolor" };
-    // No SoBoost in Ukraine: the blue is an A shade; SoColor has no V shade, so violet is
-    // its ready AV shade below level 9 (pearl P from 9).
+    // No boosters: the blue is the nearest A shade (no 8A in SoColor, so 9A from 8 up),
+    // the violet the ready 8AV below level 9.
     expect(formatCorrectiveTones(lift({ code: "8G", level: 8, tone: "gold", line: "socolor" }), matrix)).toBe(
-      "2 g A + 2 g AV (+ 4 g developer)",
+      "2 g 9A + 2 g 8AV (+ 4 g developer)",
     );
     const dark = calculateFullFormula({
       startLevel: 2,
@@ -124,12 +124,12 @@ describe("formatCorrectiveTones", () => {
     });
     // The Rule of 10 asks for 14 g on a 2 -> 3 lift, uncapped now that SoBoost's 25% is gone.
     expect(dark.correctorGrams).toBe(14);
-    // Against red: a Jade (J) shade.
-    expect(formatCorrectiveTones(dark, matrix)).toBe("14 g J (+ 14 g developer)");
-    // Super Sync has no boosters.
+    // Against red: a Jade shade, one level darker first on 4–7 and none at 3 or 2, so 4NJ.
+    expect(formatCorrectiveTones(dark, matrix)).toBe("14 g 4NJ (+ 14 g developer)");
+    // Super Sync by its own shades, 1:1 with developer too.
     expect(
       formatCorrectiveTones(lift({ code: "8.3", level: 8, tone: "gold" }), { brandId: "matrix", line: "super-sync" }),
-    ).toBe("2 g ash + 2 g violet");
+    ).toBe("2 g 8A + 2 g 8V (+ 4 g developer)");
   });
 
   it("scales the corrector down to a manufacturer's cap on its share of the dye", () => {

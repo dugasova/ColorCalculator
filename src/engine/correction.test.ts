@@ -18,6 +18,8 @@ import {
 } from "./correction";
 import { BRANDS } from "./brands";
 import { getCorrectorProduct } from "./correctorProducts";
+import type { Level } from "./levels";
+import type { ToneFamily } from "./shades";
 
 describe("getComplementaryCorrector", () => {
   it("maps each unwanted tone to its opposite on the color star", () => {
@@ -223,13 +225,28 @@ describe("L'Oréal correctors for over-corrected hair", () => {
 });
 
 describe("Matrix SoColor correctors for over-corrected hair", () => {
-  it("offers a SoRed booster or a shade named by its letter, never SoBoost", () => {
-    expect(getCorrectorProduct("matrix", "socolor", "red", 7)).toEqual({ shade: "R", mixtone: "SR-R" });
-    expect(getCorrectorProduct("matrix", "socolor", "copper", 7)).toEqual({ shade: "C", mixtone: "SR-C" });
-    expect(getCorrectorProduct("matrix", "socolor", "gold", 9)).toEqual({ shade: "G" });
-    expect(getCorrectorProduct("matrix", "socolor", "ash", 6)).toEqual({ shade: "A" });
-    expect(getCorrectorProduct("matrix", "socolor", "violet", 8)).toEqual({ shade: "AV" });
-    expect(getCorrectorProduct("matrix", "socolor", "violet", 9)).toEqual({ shade: "P" });
+  it("names Matrix's corrector by a real shade of the line at the formula's level, never a booster", () => {
+    const product = (line: string, tone: ToneFamily, level: Level) => getCorrectorProduct("matrix", line, tone, level);
+    expect(product("socolor", "ash", 6)).toEqual({ shade: "6A" });
+    expect(product("socolor", "violet", 8)).toEqual({ shade: "8AV" });
+    expect(product("socolor", "gold", 9)).toEqual({ shade: "9G" });
+    expect(product("socolor", "red", 7)).toEqual({ shade: "7RR" });
+    expect(product("socolor", "copper", 8)).toEqual({ shade: "8C" });
+    // no 8A or 8AA in the European SoColor: from 8 one level lighter
+    expect(product("socolor", "ash", 8)).toEqual({ shade: "9A" });
+    // none at the level: on 4–7 one level darker first...
+    expect(product("socolor", "violet", 6)).toEqual({ shade: "7AV" }); // nothing at 6 or 5
+    expect(product("socolor", "matt", 5)).toEqual({ shade: "4NJ" });
+    expect(product("socolor", "copper", 6)).toEqual({ shade: "5C" });
+    // ...from 8 one level lighter first
+    expect(product("socolor", "violet", 9)).toEqual({ shade: "10P" });
+    expect(product("socolor", "ash", 10)).toEqual({ shade: "9A" }); // 11A is High Lift, never a corrector
+    expect(product("super-sync", "ash", 9)).toEqual({ shade: "10A" });
+    expect(product("super-sync", "violet", 8)).toEqual({ shade: "8V" });
+    // a pigment the line lacks keeps the tone's generic name
+    expect(product("super-sync", "matt", 4)).toBeNull();
+    // never a High Lift or Ultra Blonde shade
+    expect(product("socolor", "ash", 12)).toEqual({ shade: "9A" }); // 11A is High Lift
   });
 });
 

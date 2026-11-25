@@ -1,6 +1,7 @@
 import type { BrandId } from "./brands";
+import { MATRIX_SOCOLOR_CHART, MATRIX_SUPER_SYNC_CHART } from "./brands/matrix";
 import type { Level } from "./levels";
-import type { ToneFamily } from "./shades";
+import type { Shade, ToneFamily } from "./shades";
 
 // What a brand calls the corrector for a tone: the tone suffix of an ordinary shade to
 // add at the formula's level ("/8"), and the pure mixtone, where the line has one
@@ -96,26 +97,73 @@ const LOREAL_SHADES_ONLY: CorrectorTable = {
   gold: { shade: ".3" },
 };
 
-// Matrix SoColor, as sold in Ukraine: SoBoost boosters are no longer sold there; the only
-// boosters on the European card are SoRed (SR-RV, SR-R, SR-RC, SR-C; colorist,
-// 2026-11-23). So most tones are corrected with a shade named by its letter: orange with
-// an A shade (AA, 4AA / 6AA, for a dense orange), red with a matt-green Jade shade (J:
-// 4NJ, 7NJ, 6AJ). Super Sync is not listed: no boosters of its own in Ukraine either.
+// Matrix: no booster or mixtone is recommended (user, 2026-11-25; SoBoost and SoRed are
+// left out for now). A tone is corrected with a real shade of the line carrying that
+// pigment, at the formula's level. Where the line has none there, the nearest level
+// that has one: on levels 4–7 one level darker first, since the background there is
+// dense and harder to cover; from 8 one level lighter first, so the corrector does not
+// darken a blonde. A pigment the line lacks entirely keeps the tone's generic name.
 //
-// Against over-corrected hair (colorist, 2026-11-17): green ← SoRed SR-R or R shades
-// (4RR, 7RR, 8RC); blue ← SoRed SR-C or C shades (5C, 7C, 8C, 8CC); violet ← G / W
-// shades (8G, 9G, 7W, 9W). SoColor has no plain V shade
-// (colorist, 2026-11-23; neither card lists one): yellow is cancelled with the ready
-// balanced AV shades (7AV, 8AV, 10AV) while orange still shows in the background, and with
-// pearl P (8P, 10P) on a clean yellow from level 9, where blue could turn greenish grey.
-const MATRIX_SOCOLOR: CorrectorTable = {
-  matt: { shade: "J" },
-  ash: { shade: "A" },
-  violet: { shade: "AV", light: { fromLevel: 9, shade: "P" } },
-  red: { shade: "R", mixtone: "SR-R" },
-  copper: { shade: "C", mixtone: "SR-C" },
-  gold: { shade: "G" },
+// Each tone lists the shade suffixes that carry it, preferred first. SoColor: blue A /
+// AA; violet the ready AV while orange still shows (below 9), pearl P on a clean yellow
+// from 9 (colorist, 2026-11-23: no plain V in SoColor); green the Jade NJ / AJ; yellow
+// G / W; copper C / CC; red RR / RC (colorist, 2026-11-17: against an unwanted green, R
+// shades; against blue, C shades; against violet, G / W). Super Sync: blue A, violet
+// V / P, yellow G; it has no green, copper or red shade.
+type MatrixSuffixes = Partial<Record<ToneFamily, (level: Level) => string[]>>;
+
+const MATRIX_SOCOLOR_SUFFIXES: MatrixSuffixes = {
+  ash: () => ["A", "AA"],
+  violet: level => (level >= 9 ? ["P", "AV"] : ["AV", "P"]),
+  matt: () => ["NJ", "AJ"],
+  gold: () => ["G", "W"],
+  copper: () => ["C", "CC"],
+  red: () => ["RR", "RC"],
 };
+
+const MATRIX_SUPER_SYNC_SUFFIXES: MatrixSuffixes = {
+  ash: () => ["A"],
+  violet: () => ["V", "P"],
+  gold: () => ["G"],
+};
+
+const MATRIX_DENSE_BACKGROUND_TO_LEVEL = 7;
+
+// Levels to look at, nearest first, ties broken toward darker on 4–7 and lighter above.
+function matrixSearchOrder(level: Level): number[] {
+  const darkerFirst = level <= MATRIX_DENSE_BACKGROUND_TO_LEVEL;
+  const order = [level as number];
+  for (let step = 1; step <= 11; step++) {
+    order.push(...(darkerFirst ? [level - step, level + step] : [level + step, level - step]));
+  }
+  return order.filter(candidate => candidate >= 1 && candidate <= 11);
+}
+
+function findMatrixCorrectorShade(chart: Shade[], suffixes: string[], level: Level): string | null {
+  const codes = new Set(chart.filter(shade => shade.highLift !== true).map(shade => shade.code));
+  for (const candidate of matrixSearchOrder(level)) {
+    const code = suffixes.map(suffix => `${candidate}${suffix}`).find(c => codes.has(c));
+    if (code !== undefined) return code;
+  }
+  return null;
+}
+
+function getMatrixCorrectorProduct(
+  line: string | null | undefined,
+  tone: ToneFamily,
+  level: Level | undefined,
+): CorrectorProduct | null | undefined {
+  const table =
+    line === "socolor" ? MATRIX_SOCOLOR_SUFFIXES : line === "super-sync" ? MATRIX_SUPER_SYNC_SUFFIXES : null;
+  if (table === null) return undefined;
+  const suffixes = table[tone];
+  if (suffixes === undefined) return null;
+  // Without a level, the shade family's letter.
+  if (level === undefined) return { shade: suffixes(7)[0] };
+  const chart = line === "socolor" ? MATRIX_SOCOLOR_CHART : MATRIX_SUPER_SYNC_CHART;
+  const code = findMatrixCorrectorShade(chart, suffixes(level), level);
+  return code !== null ? { shade: code } : null;
+}
 
 // Schwarzkopf Igora: the 0- mixtones carry the same codes in Royal and Vibrance but are
 // mixed only within their own line (colorist, 2026-11-17/18). 0-22 anti-orange (blue) on
@@ -146,7 +194,6 @@ function lorealTable(line: string | null | undefined): CorrectorTable {
 function getCorrectorTable(brandId: BrandId | undefined, line: string | null | undefined): CorrectorTable | null {
   if (brandId === "wella") return line === "color-touch" ? WELLA_COLOR_TOUCH : WELLA_KOLESTON;
   if (brandId === "loreal") return lorealTable(line);
-  if (brandId === "matrix" && line === "socolor") return MATRIX_SOCOLOR;
   if (brandId === "igora" && (line === "royal" || line === "vibrance")) return IGORA;
   return null;
 }
@@ -158,6 +205,10 @@ export function getCorrectorProduct(
   tone: ToneFamily,
   level?: Level,
 ): CorrectorProduct | null {
+  if (brandId === "matrix") {
+    const matrix = getMatrixCorrectorProduct(line, tone, level);
+    if (matrix !== undefined) return matrix;
+  }
   const entry = getCorrectorTable(brandId, line)?.[tone];
   if (entry === undefined) return null;
   const { light, ...product } = entry;
@@ -171,13 +222,13 @@ export function getCorrectorProduct(
 
 // How much developer the corrector itself needs, in parts per part of corrector, where the
 // manufacturer asks for it on top of the formula's own: Matrix mixes Cream Developer 1:1
-// with the summed weight of color and booster, Igora its mixtones 1:1 too (30 g color +
+// with the summed weight of color and its corrector shade, Igora its mixtones 1:1 too (30 g color +
 // 3 g mixtone + 33 g developer). Null where nothing extra is prescribed.
 export function getCorrectorDeveloperParts(
   brandId: BrandId | undefined,
   line: string | null | undefined,
 ): number | null {
-  if (brandId === "matrix" && line === "socolor") return 1;
+  if (brandId === "matrix" && (line === "socolor" || line === "super-sync")) return 1;
   if (brandId === "igora" && (line === "royal" || line === "vibrance")) return 1;
   return null;
 }
