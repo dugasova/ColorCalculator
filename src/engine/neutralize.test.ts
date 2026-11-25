@@ -185,8 +185,8 @@ describe("Matrix's own background chart", () => {
       coverage: "none",
       missing: [{ tone: "ash", share: 1 }],
     });
-    // other brands' greys stay blue
-    expect(assessNeutralization({ tone: "slate-grey", line: "shades-eq" }, 6).coverage).toBe("full");
+    // other brands' greys stay blue (Redken's orange is at 7 on its own chart)
+    expect(assessNeutralization({ tone: "slate-grey", line: "shades-eq" }, 7).coverage).toBe("full");
     expect(assessNeutralization({ tone: "slate-grey" }, 6).coverage).toBe("full");
   });
 
@@ -194,5 +194,25 @@ describe("Matrix's own background chart", () => {
     expect(getToningRecommendation(5, "socolor")).toEqual({ background: "orange", tones: ["ash"] });
     expect(getToningRecommendation(9, "super-sync")).toEqual({ background: "yellow", tones: ["violet", "ash"] });
     expect(getToningRecommendation(9)).toEqual({ background: "yellow", tones: ["violet"] });
+  });
+});
+
+describe("Redken's own background chart", () => {
+  it("reads the background a level darker than the generic table, on Redken lines only", () => {
+    expect(getBackground(7, "color-gels-oils")).toBe("orange");
+    expect(getBackground(6, "shades-eq")).toBe("orange-red");
+    expect(getBackground(5, "shades-eq")).toBe("red");
+    expect(getBackground(4, "color-gels-oils")).toBe("red");
+    expect(getBackground(8, "shades-eq")).toBe("yellow-orange");
+    expect(getBackground(9, "shades-eq")).toBe("yellow");
+    expect(getBackground(3, "shades-eq")).toBe("red");
+    expect(getBackground(7)).toBe("orange-yellow");
+  });
+
+  it("neutralizes by it: blue at 7, blue and green at 6, green at 5", () => {
+    expect(getToningRecommendation(7, "shades-eq")).toEqual({ background: "orange", tones: ["ash"] });
+    expect(getToningRecommendation(6, "shades-eq").tones).toEqual(["ash", "matt"]);
+    expect(getToningRecommendation(5, "shades-eq")).toEqual({ background: "red", tones: ["matt"] });
+    expect(getToningRecommendation(8, "shades-eq").tones).toEqual(["ash", "violet"]);
   });
 });

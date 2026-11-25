@@ -90,15 +90,41 @@ const MATRIX_NEUTRALIZERS: Partial<Record<UnderlyingPigment, NeutralizerPart[]>>
   ],
 };
 
+// Redken charts the background a level darker than the generic table (its 2026 Color
+// Gels Oils & Lacquers card, "Traditional level system"; user's choice, 2026-11-25):
+// 10 pale yellow -> violet, 9 yellow -> violet, 8 yellow/orange -> blue/violet, 7 orange
+// -> blue, 6 red/orange -> blue green, 5 red -> green, 4 red/violet -> yellow green. So 7
+// reads as orange, 6 as orange-red (blue and green) and 5 as red. Level 4's red-violet
+// takes a yellow-green this model cannot hold (no yellow neutralizing color): it reads as
+// red, green alone. Levels 1–3 on the card are the natural undertone (violet, blue), not
+// a lifting background, and keep the generic red. Redken's balance is the generic one.
+const REDKEN_LINES: ReadonlySet<string> = new Set(["shades-eq", "color-gels-oils"]);
+
+const REDKEN_BACKGROUNDS: Partial<Record<Level, UnderlyingPigment>> = {
+  4: "red",
+  5: "red",
+  6: "orange-red",
+  7: "orange",
+};
+
+function isRedkenLine(line: string | null | undefined): boolean {
+  return line !== undefined && line !== null && REDKEN_LINES.has(line);
+}
+
 function isMatrixLine(line: string | null | undefined): boolean {
   return line !== undefined && line !== null && MATRIX_LINES.has(line);
 }
 
 // The background lifting to `level` reveals, as the line's manufacturer charts it.
-// Pre-pigmentation keeps levels.ts's generic table: Matrix's chart was given for
-// neutralization only.
+// Pre-pigmentation keeps levels.ts's generic table: the manufacturers' charts were taken
+// for neutralization only.
 export function getBackground(level: Level, line?: string | null): UnderlyingPigment {
-  return (isMatrixLine(line) ? MATRIX_BACKGROUNDS[level] : undefined) ?? getUnderlyingPigment(level);
+  const own = isMatrixLine(line)
+    ? MATRIX_BACKGROUNDS[level]
+    : isRedkenLine(line)
+      ? REDKEN_BACKGROUNDS[level]
+      : undefined;
+  return own ?? getUnderlyingPigment(level);
 }
 
 export function getNeutralizer(pigment: UnderlyingPigment, line?: string | null): NeutralizerPart[] {
