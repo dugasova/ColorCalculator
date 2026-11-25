@@ -3,6 +3,23 @@
 All notable changes to Formulist. Versions follow [SemVer](https://semver.org/); see
 "Releasing" in the README for the process.
 
+## 0.13.0 — 2026-11-25
+
+- Correctors named by real shades of the line, at the formula's level (the nearest level
+  where the line has none: one darker on levels 4–7, one lighter from 8):
+  - Matrix: no boosters. SoColor: A / AA, AV / P, NJ / AJ, G / W, C, RR; Super Sync now
+    names its own A, V / P, G shades;
+  - Redken Shades EQ: T or 01B, V / VV / VB, M, G, C, RR.
+- Redken follows the European range:
+  - Shades EQ: the European chart, 63 shades, with level 10 (010VV Lavender Ice, 010VG
+    Baby Blonde, 010T Platinum, 010P Ivory Pearl, 010GI Tahitian Sand, 010N Delicate
+    Natural); US-only shades removed;
+  - Color Gels Oils: 73 shades, including 6MO / 8MO mocha, 5GCh / 7GCh gold chocolate and
+    the AB, CR, WG, GI families; shades no longer sold removed.
+- Redken's lightening background follows its own card: 7 orange, 6 red-orange, 5 red.
+- CI: a pull-request check that starts after its PR is merged no longer cancels the
+  deploy on main.
+
 ## 0.12.0 — 2026-11-23
 
 - Formula comparison:
