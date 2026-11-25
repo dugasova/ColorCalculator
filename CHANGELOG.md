@@ -21,7 +21,7 @@ All notable changes to Formulist. Versions follow [SemVer](https://semver.org/);
   - High Lift 11A / 11N: 1:1, the developer by the base (3% tones a bleached 10–11, 12%
     from a natural 7), with a warning below 7;
   - Ultra Blonde (UL-): 1:2, 9% up to 4 levels, 12% beyond;
-  - Super Sync: 16 shades from the 2026 card; lifts one level (11V from a 10);
+  - Super Sync: the 2026 card, 16 new shades (66 in all); lifts one level (11V from a 10);
   - neutralization by Matrix's own background chart and the colorist's pigment balance;
     Titanium (6T) is not counted as a neutralizer;
   - no SoBoost (no longer sold in Ukraine): SoColor corrects with A, AV / P, J, G shades
