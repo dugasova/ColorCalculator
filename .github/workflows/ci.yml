@@ -10,7 +10,10 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # PR runs are grouped by PR number, never by ref: a PR run that starts after its PR is
+  # merged gets the base branch as its ref, and with a ref-based group it used to cancel
+  # the deploying run on main (PRs #36 and #37, 2026-11-25).
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   # Cancel superseded runs on PR branches only; a run on main may carry a deploy.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
