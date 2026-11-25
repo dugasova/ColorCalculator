@@ -91,8 +91,8 @@ function getLorealTip(
   return null;
 }
 
-// SoBoost is no longer sold in Ukraine (colorist, 2026-11-23); SoRed is the only booster
-// left. What SoColor corrects with instead, tone by tone.
+// Matrix is corrected with its own shades, not boosters (user, 2026-11-25): which ones
+// SoColor takes, tone by tone.
 function getMatrixTip(
   brand: CorrectorBrand,
   unwanted: UnwantedTone,

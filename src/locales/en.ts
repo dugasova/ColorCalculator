@@ -603,14 +603,12 @@ export const en = {
         "A light green on levels 8–10: instead of a booster it is safer to add 5–15 g of a ready red or mahogany shade (.6, .5), e.g. {{shade}}, so the result does not turn bright pink.",
       wellaColorTouchBlueShade:
         "Blue from an ash toner that failed on porous ends (blue-grey at levels 8–10): instead of a mixtone a ready warm shade at the same level is safer — /34, /43 (7/43, 8/34, 8/43, 9/43) turn the blue into warm beige or caramel; /73, /74 (7/73, 8/74) at levels 6–8 give a neutral brown without a ginger glint.",
-      matrixCopperShade:
-        "SoBoost is no longer sold in Ukraine: warm the blue back with SoRed SR-C or a C shade (5C, 7C, 8C, 8CC, 6BC).",
-      matrixGoldShade: "There is no yellow booster in Ukraine: against violet, add a G or W shade (8G, 9G, 7W, 9W).",
-      matrixJadeShade: "There is no green booster: against red, use matt-green Jade (J) shades (4NJ, 7NJ, 6AJ).",
+      matrixCopperShade: "Warm the blue back with a C shade (5C, 7C, 8C, 8CC, 6BC).",
+      matrixGoldShade: "Against violet, add a G or W shade (8G, 9G, 7W, 9W).",
+      matrixJadeShade: "Against red, use matt-green Jade (J) shades (4NJ, 7NJ, 6AJ).",
       matrixVioletShade:
-        "There is no violet booster and SoColor has no V shades: against yellow, take the ready ash-violet AV shades (8AV, 10AV) while orange still shows, and pearl P (8P, 10P) on a clean yellow from level 9.",
-      matrixAshShade:
-        "SoBoost Blue is no longer sold in Ukraine: against orange, add an A shade; for a dense orange, AA (4AA, 6AA).",
+        "SoColor has no V shades: against yellow, take the ready ash-violet AV shades (8AV, 10AV) while orange still shows, and pearl P (8P, 10P) on a clean yellow from level 9.",
+      matrixAshShade: "Against orange, add an A shade; for a dense orange, AA (4AA, 6AA).",
       igoraPearl:
         "0-11 gives a cool ash or steel on blonde. For a clean pearl or pearl beige on porous yellow blonde (levels 9–10) with no risk of green, add 0-99 — together with 0-11 (the amount is shared half and half) or instead of it.",
       igoraGreen:

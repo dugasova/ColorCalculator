@@ -216,8 +216,8 @@ const socolorShades: Shade[] = [
   { code: "UL-Clear", level: 12, tone: "natural", ...SOCOLOR_ULTRA_BLONDE },
 ];
 
-// SoColor has no corrector cap: the 25% of the dye was SoBoost's, and SoBoost is no
-// longer sold in Ukraine (see ../correctorProducts.ts).
+// SoColor has no corrector cap: the 25% of the dye was SoBoost's, and SoBoost is not
+// recommended for now; Matrix is corrected with its own shades (see ../correctorProducts.ts).
 export const MATRIX_SOCOLOR_CHART: Shade[] = socolorShades.map(shade => ({
   ...shade,
   line: "socolor",
