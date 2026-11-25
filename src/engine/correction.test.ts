@@ -225,6 +225,21 @@ describe("L'Oréal correctors for over-corrected hair", () => {
 });
 
 describe("Matrix SoColor correctors for over-corrected hair", () => {
+  it("names Shades EQ's corrector by a real European shade at the formula's level", () => {
+    const product = (tone: ToneFamily, level: Level) => getCorrectorProduct("redken", "shades-eq", tone, level);
+    expect(product("ash", 7)).toEqual({ shade: "07T" });
+    expect(product("violet", 9)).toEqual({ shade: "09V" });
+    expect(product("violet", 10)).toEqual({ shade: "010VV" });
+    expect(product("violet", 8)).toEqual({ shade: "08VB" });
+    expect(product("matt", 4)).toEqual({ shade: "04M" });
+    // none at the level: darker first on 4–7, lighter first from 8
+    expect(product("matt", 5)).toEqual({ shade: "04M" });
+    expect(product("ash", 5)).toEqual({ shade: "06T" });
+    expect(product("ash", 2)).toEqual({ shade: "01B" });
+    // Color Gels Oils keeps no corrector table: it neutralizes on its own
+    expect(getCorrectorProduct("redken", "color-gels-oils", "ash", 7)).toBeNull();
+  });
+
   it("names Matrix's corrector by a real shade of the line at the formula's level, never a booster", () => {
     const product = (line: string, tone: ToneFamily, level: Level) => getCorrectorProduct("matrix", line, tone, level);
     expect(product("socolor", "ash", 6)).toEqual({ shade: "6A" });

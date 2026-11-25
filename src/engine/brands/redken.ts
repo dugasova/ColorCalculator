@@ -130,13 +130,13 @@ const shadesEqShades: Shade[] = [
   { code: "09V", level: 9, tone: "violet", name: "Platinum Ice" },
   { code: "09VRo", level: 9, tone: "violet", secondaryTone: "red", name: "Rosé" },
 
-  // Level 10 (the European chart; names given only where confirmed)
+  // Level 10 (the European chart; names from the colorist, 2026-11-25)
   { code: "010VV", level: 10, tone: "violet", secondaryTone: "violet", name: "Lavender Ice" },
-  { code: "010VG", level: 10, tone: "violet", secondaryTone: "gold" },
-  { code: "010T", level: 10, tone: "slate-grey" },
-  { code: "010P", level: 10, tone: "pearl" },
-  { code: "010GI", level: 10, tone: "gold", secondaryTone: "pearl" },
-  { code: "010N", level: 10, tone: "natural" },
+  { code: "010VG", level: 10, tone: "violet", secondaryTone: "gold", name: "Baby Blonde" },
+  { code: "010T", level: 10, tone: "slate-grey", name: "Platinum" },
+  { code: "010P", level: 10, tone: "pearl", name: "Ivory Pearl" },
+  { code: "010GI", level: 10, tone: "gold", secondaryTone: "pearl", name: "Tahitian Sand" },
+  { code: "010N", level: 10, tone: "natural", name: "Delicate Natural" },
 ];
 
 export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
@@ -153,8 +153,9 @@ export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
 // Redken's US 2026 card both list, plus 2ABn, 6BR, 8P, 9NW and 10NW, which the colorist
 // confirmed (2026-11-25; she has no 2NA), plus 5GCh and 7GCh (Gold Chocolate) from
 // L'Oréal Partner Shop UK's list, the official European source (2026-11-25). That list
-// lacks 4AB, 5NA and 7NCh; kept until the colorist says. Against the US card it adds the
-// AB (ash blue), CR, WG, GI, GCh and more GB shades. Mixes 1:1 with Redken Pro-Oxide Cream Developer on every level
+// lacks 4AB, 5NA and 7NCh, which the colorist confirmed as sold in Ukraine along with
+// 5GCh and 7GCh (2026-11-25). Against the US card it adds the AB (ash blue), CR, WG, GI,
+// GCh and more GB shades. Mixes 1:1 with Redken Pro-Oxide Cream Developer on every level
 // (`redkenMixingRatio` in brands.ts), 10/20/30/40 vol. Lifts on a natural base up to 1
 // level at 10 vol, 2 at 20, 3 at 30 and up to 4 at 40 (3+, as far as 4 on fine light
 // bases). Processing follows the developer, not gray coverage, always without heat: 20
