@@ -1,9 +1,10 @@
 import type { LiftTable } from "../levels";
 import type { Shade } from "../shades";
 
-// Transcribed from Redken Professional's Shades EQ Gloss shade chart
-// (redkenpro.com, cross-checked against blendsor.com's chart converter and current
-// reseller listings). Unlike Wella/L'Oréal/Igora's digit-based tone codes, Shades EQ
+// Shades EQ Gloss follows Redken's European chart (UK distributor Salon Services' A5
+// booklet, checked 2026-11-23; 63 shades, levels 1–10), the range sold in Ukraine. It
+// replaced a US transcription (redkenpro.com) with 37 shades the European chart lacks,
+// such as 03V, 07V, 08V and the 02 / 03 fashion shades. Unlike Wella/L'Oréal/Igora's digit-based tone codes, Shades EQ
 // codes are level + one or more UPPERCASE reflect letters, e.g. "06ABn" = level 6,
 // "ABn" reflect -- plus an occasional trailing lowercase letter that's part of a named
 // family rather than a generic depth modifier (see below). Colorists also commonly
@@ -48,8 +49,7 @@ import type { Shade } from "../shades";
 // DEVELOPER_VOLUME_PERCENT in levels.ts) is Wella/Igora/L'Oréal's genuine 6vol product
 // label, not this one.
 //
-// Deliberately excluded: the "010-" (level 10) sub-range (name/code pairs disagree
-// across sources -- lower confidence than levels 1-9); Shades EQ Gloss Pastels (a
+// Deliberately excluded: Shades EQ Gloss Pastels (a
 // separate fashion-tone sub-line applied only to pre-lightened hair, not part of the
 // normal level+tone grid); Shades EQ Bonder Gloss (same codes/ratio/time as standard
 // Shades EQ, just reformulated with bonding technology -- nothing for the catalog to
@@ -59,52 +59,30 @@ import type { Shade } from "../shades";
 const shadesEqShades: Shade[] = [
   // Level 1-2
   { code: "01B", level: 1, tone: "slate-grey", name: "Onyx" },
-  { code: "02M", level: 2, tone: "matt", name: "Midnight Ash" },
-  { code: "02ABn", level: 2, tone: "ash", secondaryTone: "chocolate", name: "Cool Ebony" },
 
   // Level 3
   { code: "03N", level: 3, tone: "natural", name: "Espresso" },
-  { code: "03NB", level: 3, tone: "natural", secondaryTone: "gold", name: "Mocha Java" },
-  { code: "03NW", level: 3, tone: "natural", secondaryTone: "copper", name: "Cocoa Bean" },
-  { code: "03A", level: 3, tone: "ash", name: "Terra Cotta" },
-  { code: "03G", level: 3, tone: "gold", name: "Cinnamon" },
-  { code: "03R", level: 3, tone: "red", name: "Roxy Red" },
-  { code: "03RB", level: 3, tone: "red", secondaryTone: "chocolate", name: "Mahogany" },
-  { code: "03RV", level: 3, tone: "red", secondaryTone: "violet", name: "Merlot" },
-  { code: "03V", level: 3, tone: "violet", name: "Orchid" },
 
   // Level 4
-  { code: "04N", level: 4, tone: "natural", name: "Chicory" },
   { code: "04NA", level: 4, tone: "natural", secondaryTone: "ash", name: "Storm Cloud" },
   { code: "04NB", level: 4, tone: "natural", secondaryTone: "gold", name: "Maple" },
-  { code: "04CB", level: 4, tone: "copper", secondaryTone: "chocolate", name: "Clove" },
   { code: "04M", level: 4, tone: "matt", name: "Smoked Cedar" },
   { code: "04RV", level: 4, tone: "red", secondaryTone: "violet", name: "Cabernet" },
-  { code: "04VRo", level: 4, tone: "violet", secondaryTone: "red", name: "Violet Rose" },
   { code: "04WG", level: 4, tone: "gold", secondaryTone: "copper", name: "Sun Tea" },
   { code: "04ABn", level: 4, tone: "ash", secondaryTone: "chocolate", name: "Dark Roast" },
 
   // Level 5
   { code: "05N", level: 5, tone: "natural", name: "Walnut" },
-  { code: "05NA", level: 5, tone: "natural", secondaryTone: "ash", name: "Smoke" },
-  { code: "05NW", level: 5, tone: "natural", secondaryTone: "copper", name: "Macchiato" },
   { code: "05G", level: 5, tone: "gold", name: "Caramel" },
   { code: "05C", level: 5, tone: "copper", name: "Chili" },
-  { code: "05CC", level: 5, tone: "copper", secondaryTone: "copper", name: "Electric Shock" },
-  { code: "05RB", level: 5, tone: "red", secondaryTone: "chocolate", name: "Manzanita" },
-  { code: "05RV", level: 5, tone: "red", secondaryTone: "violet", name: "Sangria" },
   { code: "05V", level: 5, tone: "violet", name: "Cosmic Violet" },
   { code: "05CB", level: 5, tone: "copper", secondaryTone: "chocolate" },
 
   // Level 6
   { code: "06N", level: 6, tone: "natural", name: "Moroccan Sand" },
-  { code: "06NA", level: 6, tone: "natural", secondaryTone: "ash", name: "Granite" },
   { code: "06NB", level: 6, tone: "natural", secondaryTone: "gold", name: "Brandy" },
   { code: "06G", level: 6, tone: "gold", name: "St. Tropez" },
   { code: "06GB", level: 6, tone: "gold", secondaryTone: "natural", name: "Toffee" },
-  { code: "06GG", level: 6, tone: "gold", secondaryTone: "gold", name: "Midas Touch" },
-  { code: "06GI", level: 6, tone: "gold", secondaryTone: "pearl", name: "Tenerife" },
-  { code: "06GN", level: 6, tone: "gold", secondaryTone: "natural", name: "Moss" },
   { code: "06T", level: 6, tone: "slate-grey", name: "Iron" },
   { code: "06ABn", level: 6, tone: "ash", secondaryTone: "chocolate", name: "Brown Smoke" },
   { code: "06VB", level: 6, tone: "violet", secondaryTone: "slate-grey", name: "Violet Lagoon" },
@@ -112,26 +90,17 @@ const shadesEqShades: Shade[] = [
   { code: "06WG", level: 6, tone: "gold", secondaryTone: "copper", name: "Mango" },
   { code: "06AA", level: 6, tone: "ash", secondaryTone: "ash", name: "Bonfire" },
   { code: "06CB", level: 6, tone: "copper", secondaryTone: "chocolate", name: "Amber Glaze" },
-  { code: "06CR", level: 6, tone: "copper", secondaryTone: "red", name: "Sunset" },
-  { code: "06R", level: 6, tone: "red", name: "Rocket Fire" },
-  { code: "06RB", level: 6, tone: "red", secondaryTone: "chocolate", name: "Cherry Cola" },
   { code: "06RR", level: 6, tone: "red", secondaryTone: "red", name: "Blaze" },
 
   // Level 7
   { code: "07N", level: 7, tone: "natural", name: "Mirage" },
   { code: "07NA", level: 7, tone: "natural", secondaryTone: "ash", name: "Pewter" },
   { code: "07NB", level: 7, tone: "natural", secondaryTone: "gold", name: "Chestnut" },
-  { code: "07NW", level: 7, tone: "natural", secondaryTone: "copper", name: "Milk Tea" },
-  { code: "07NCh", level: 7, tone: "natural", secondaryTone: "chocolate", name: "Fondue" },
   { code: "07T", level: 7, tone: "slate-grey", name: "Steel" },
   { code: "07P", level: 7, tone: "pearl", name: "Mother of Pearl" },
   { code: "07VB", level: 7, tone: "violet", secondaryTone: "slate-grey", name: "Violet Star" },
-  { code: "07V", level: 7, tone: "violet", name: "Crushed Amethyst" },
-  { code: "07AG", level: 7, tone: "ash", secondaryTone: "gold", name: "Smokey Beige" },
   { code: "07G", level: 7, tone: "gold", name: "Saffron" },
   { code: "07GB", level: 7, tone: "gold", secondaryTone: "natural", name: "Butterscotch" },
-  { code: "07CB", level: 7, tone: "copper", secondaryTone: "chocolate", name: "Spicestone" },
-  { code: "07CC", level: 7, tone: "copper", secondaryTone: "copper", name: "Urban Fever" },
   { code: "07C", level: 7, tone: "copper", name: "Curry" },
   { code: "07M", level: 7, tone: "matt", name: "Driftwood" },
   { code: "07RR", level: 7, tone: "red", secondaryTone: "red", name: "Flame" },
@@ -139,19 +108,13 @@ const shadesEqShades: Shade[] = [
   // Level 8
   { code: "08N", level: 8, tone: "natural", name: "Mojave" },
   { code: "08NA", level: 8, tone: "natural", secondaryTone: "ash", name: "Volcanic" },
-  { code: "08NP", level: 8, tone: "natural", secondaryTone: "pearl", name: "Opal Shimmer" },
-  { code: "08NV", level: 8, tone: "natural", secondaryTone: "violet", name: "Lavender Jewel" },
   { code: "08T", level: 8, tone: "slate-grey", name: "Silver" },
   { code: "08VB", level: 8, tone: "violet", secondaryTone: "slate-grey", name: "Violet Frost" },
-  { code: "08V", level: 8, tone: "violet", name: "Iridescent Quartz" },
   { code: "08VG", level: 8, tone: "violet", secondaryTone: "gold", name: "Gilded Taupe" },
   { code: "08VRo", level: 8, tone: "violet", secondaryTone: "red", name: "Rose Quartz" },
   { code: "08GG", level: 8, tone: "gold", secondaryTone: "gold", name: "Gold Dip" },
-  { code: "08GI", level: 8, tone: "gold", secondaryTone: "pearl", name: "St. Barths" },
-  { code: "08GN", level: 8, tone: "gold", secondaryTone: "natural", name: "Ivy" },
   { code: "08WG", level: 8, tone: "gold", secondaryTone: "copper", name: "Golden Apricot" },
   { code: "08C", level: 8, tone: "copper", name: "Cayenne" },
-  { code: "08CR", level: 8, tone: "copper", secondaryTone: "red", name: "Sunrise" },
 
   // Level 9
   { code: "09N", level: 9, tone: "natural", name: "Café au Lait" },
@@ -166,6 +129,14 @@ const shadesEqShades: Shade[] = [
   { code: "09AA", level: 9, tone: "ash", secondaryTone: "ash", name: "Papaya" },
   { code: "09V", level: 9, tone: "violet", name: "Platinum Ice" },
   { code: "09VRo", level: 9, tone: "violet", secondaryTone: "red", name: "Rosé" },
+
+  // Level 10 (the European chart; names given only where confirmed)
+  { code: "010VV", level: 10, tone: "violet", secondaryTone: "violet", name: "Lavender Ice" },
+  { code: "010VG", level: 10, tone: "violet", secondaryTone: "gold" },
+  { code: "010T", level: 10, tone: "slate-grey" },
+  { code: "010P", level: 10, tone: "pearl" },
+  { code: "010GI", level: 10, tone: "gold", secondaryTone: "pearl" },
+  { code: "010N", level: 10, tone: "natural" },
 ];
 
 export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
@@ -176,7 +147,14 @@ export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
 }));
 
 // Color Gels Oils -- Redken's ammonia-free permanent line that replaced Chromatics
-// (colorist, 2026-11-18). Mixes 1:1 with Redken Pro-Oxide Cream Developer on every level
+// (colorist, 2026-11-18). The range follows the European market (user, 2026-11-25): no
+// official European chart is public, so it is the set two EU retailers' shade lists
+// agree on (cosmall.eu, pluricosmetica.com), plus 4N and 10NN, which one of them and
+// Redken's US 2026 card both list, plus 2ABn, 6BR, 8P, 9NW and 10NW, which the colorist
+// confirmed (2026-11-25; she has no 2NA), plus 5GCh and 7GCh (Gold Chocolate) from
+// L'Oréal Partner Shop UK's list, the official European source (2026-11-25). That list
+// lacks 4AB, 5NA and 7NCh; kept until the colorist says. Against the US card it adds the
+// AB (ash blue), CR, WG, GI, GCh and more GB shades. Mixes 1:1 with Redken Pro-Oxide Cream Developer on every level
 // (`redkenMixingRatio` in brands.ts), 10/20/30/40 vol. Lifts on a natural base up to 1
 // level at 10 vol, 2 at 20, 3 at 30 and up to 4 at 40 (3+, as far as 4 on fine light
 // bases). Processing follows the developer, not gray coverage, always without heat: 20
@@ -186,7 +164,10 @@ export const REDKEN_SHADES_EQ_CHART: Shade[] = shadesEqShades.map(shade => ({
 // NA natural ash, NCh natural chocolate, NW natural warm -> natural/gold (W "warm golden
 // brown"), AV ash violet, ABn ash brown (same as Shades EQ's), P pearl, G gold, IG
 // intense gold, GB gold brown, GI gold iridescent -> gold/pearl, CC intense copper, RR
-// intense red, BR brown red, BC brown copper, RV red violet. Clear (the ammonia-free
+// intense red, BR brown red, BC brown copper, RV red violet, MO mocha -> chocolate (6MO,
+// 8MO), AB ash blue -> ash (Redken's Lacquers card names the AB family "Ash Blue"), CR
+// copper red, WG warm gold -> gold/gold, GCh gold chocolate -> gold/chocolate. Shades
+// without a confirmed marketing name have no `name`. Clear (the ammonia-free
 // diluent) is left out: it has no level of its own. The line has no mixtones: its
 // pigmented shades are already balanced against the lightening background and for 100%
 // gray, so it takes no corrector (`selfNeutralizing`, colorist 2026-11-19).
@@ -208,14 +189,12 @@ const colorGelsOilsLiftTable: LiftTable = volume => {
 const colorGelsOilsShades: Shade[] = [
   // Level 1
   { code: "1NN", level: 1, tone: "natural", secondaryTone: "natural", name: "French Roast" },
-  { code: "1N", level: 1, tone: "natural", name: "Onyx" },
 
   // Level 2
   { code: "2ABn", level: 2, tone: "ash", secondaryTone: "chocolate", name: "Cool Ebony" },
 
   // Level 3
   { code: "3NN", level: 3, tone: "natural", secondaryTone: "natural", name: "Black Coffee" },
-  { code: "3N", level: 3, tone: "natural", name: "Espresso" },
 
   // Level 4
   { code: "4ABn", level: 4, tone: "ash", secondaryTone: "chocolate", name: "Dark Roast" },
@@ -225,16 +204,18 @@ const colorGelsOilsShades: Shade[] = [
   { code: "4N", level: 4, tone: "natural", name: "Chicory" },
   { code: "4NW", level: 4, tone: "natural", secondaryTone: "gold", name: "Maple" },
   { code: "4BC", level: 4, tone: "chocolate", secondaryTone: "copper", name: "Allspice" },
-  { code: "4RV", level: 4, tone: "red", secondaryTone: "violet", name: "Velvet Wine" },
+  { code: "4AB", level: 4, tone: "ash" },
 
   // Level 5
   { code: "5NA", level: 5, tone: "natural", secondaryTone: "ash", name: "Smoke" },
-  { code: "5NCh", level: 5, tone: "natural", secondaryTone: "chocolate", name: "Truffle" },
   { code: "5NN", level: 5, tone: "natural", secondaryTone: "natural", name: "Café Mocha" },
   { code: "5N", level: 5, tone: "natural", name: "Walnut" },
   { code: "5BR", level: 5, tone: "chocolate", secondaryTone: "red", name: "Brownstone" },
   { code: "5CC", level: 5, tone: "copper", secondaryTone: "copper", name: "Electric Shock" },
   { code: "5RV", level: 5, tone: "red", secondaryTone: "violet", name: "Sangria" },
+  { code: "5NW", level: 5, tone: "natural", secondaryTone: "gold" },
+  { code: "5GB", level: 5, tone: "gold", secondaryTone: "chocolate" },
+  { code: "5GCh", level: 5, tone: "gold", secondaryTone: "chocolate" },
 
   // Level 6
   { code: "6ABn", level: 6, tone: "ash", secondaryTone: "chocolate", name: "Brown Smoke" },
@@ -243,12 +224,17 @@ const colorGelsOilsShades: Shade[] = [
   { code: "6NN", level: 6, tone: "natural", secondaryTone: "natural", name: "Chocolate Mousse" },
   { code: "6N", level: 6, tone: "natural", name: "Moroccan Sand" },
   { code: "6NW", level: 6, tone: "natural", secondaryTone: "gold", name: "Brandy" },
-  { code: "6BR", level: 6, tone: "chocolate", secondaryTone: "red", name: "Rusted Ruby" },
   { code: "6BC", level: 6, tone: "chocolate", secondaryTone: "copper", name: "Sumac" },
+  { code: "6MO", level: 6, tone: "chocolate", name: "Iced Coffee" },
   { code: "6IG", level: 6, tone: "gold", secondaryTone: "gold", name: "Vintage Gold" },
   { code: "6GI", level: 6, tone: "gold", secondaryTone: "pearl", name: "Tenerife" },
   { code: "6G", level: 6, tone: "gold", name: "St Tropez" },
   { code: "6RR", level: 6, tone: "red", secondaryTone: "red", name: "Blaze" },
+  { code: "6AB", level: 6, tone: "ash" },
+  { code: "6GB", level: 6, tone: "gold", secondaryTone: "chocolate" },
+  { code: "6WG", level: 6, tone: "gold", secondaryTone: "gold" },
+  { code: "6CR", level: 6, tone: "copper", secondaryTone: "red" },
+  { code: "6BR", level: 6, tone: "chocolate", secondaryTone: "red", name: "Rusted Ruby" },
 
   // Level 7
   { code: "7NA", level: 7, tone: "natural", secondaryTone: "ash", name: "Pewter" },
@@ -257,35 +243,42 @@ const colorGelsOilsShades: Shade[] = [
   { code: "7N", level: 7, tone: "natural", name: "Mirage" },
   { code: "7NW", level: 7, tone: "natural", secondaryTone: "gold", name: "Milk Tea" },
   { code: "7GB", level: 7, tone: "gold", secondaryTone: "chocolate", name: "Butterscotch" },
+  { code: "7GCh", level: 7, tone: "gold", secondaryTone: "chocolate" },
   { code: "7CC", level: 7, tone: "copper", secondaryTone: "copper", name: "Urban Fever" },
 
   // Level 8
-  { code: "8P", level: 8, tone: "pearl", name: "Misty Pearl" },
   { code: "8NA", level: 8, tone: "natural", secondaryTone: "ash", name: "Volcanic" },
   { code: "8NCh", level: 8, tone: "natural", secondaryTone: "chocolate", name: "Chocolate Soufflé" },
   { code: "8NN", level: 8, tone: "natural", secondaryTone: "natural", name: "Crème Brûlée" },
   { code: "8N", level: 8, tone: "natural", name: "Mojave" },
   { code: "8NW", level: 8, tone: "natural", secondaryTone: "gold", name: "Safari" },
+  { code: "8MO", level: 8, tone: "chocolate", name: "Frosted Latte" },
   { code: "8IG", level: 8, tone: "gold", secondaryTone: "gold", name: "Gold Faithful" },
   { code: "8G", level: 8, tone: "gold", name: "Almond Sugar" },
+  { code: "8AB", level: 8, tone: "ash" },
+  { code: "8AV", level: 8, tone: "ash", secondaryTone: "violet" },
+  { code: "8GI", level: 8, tone: "gold", secondaryTone: "pearl" },
+  { code: "8WG", level: 8, tone: "gold", secondaryTone: "gold" },
+  { code: "8CR", level: 8, tone: "copper", secondaryTone: "red" },
+  { code: "8P", level: 8, tone: "pearl", name: "Misty Pearl" },
 
   // Level 9
-  { code: "9AV", level: 9, tone: "ash", secondaryTone: "violet", name: "Glacier" },
-  { code: "9P", level: 9, tone: "pearl", name: "Opal Glow" },
   { code: "9NA", level: 9, tone: "natural", secondaryTone: "ash", name: "Mist" },
   { code: "9NCh", level: 9, tone: "natural", secondaryTone: "chocolate", name: "Chocolate Milk" },
   { code: "9NN", level: 9, tone: "natural", secondaryTone: "natural", name: "Cortado" },
   { code: "9N", level: 9, tone: "natural", name: "Café au Lait" },
+  { code: "9GB", level: 9, tone: "gold", secondaryTone: "chocolate" },
+  { code: "9BC", level: 9, tone: "chocolate", secondaryTone: "copper" },
   { code: "9NW", level: 9, tone: "natural", secondaryTone: "gold", name: "Cream Soda" },
-  { code: "9G", level: 9, tone: "gold", name: "Vanilla Bean" },
 
   // Level 10
   { code: "10AV", level: 10, tone: "ash", secondaryTone: "violet", name: "Winter Morning" },
   { code: "10P", level: 10, tone: "pearl", name: "Ivory Pearl" },
   { code: "10NA", level: 10, tone: "natural", secondaryTone: "ash", name: "Marble" },
   { code: "10NN", level: 10, tone: "natural", secondaryTone: "natural", name: "Affogato" },
-  { code: "10N", level: 10, tone: "natural", name: "Delicate Natural" },
   { code: "10G", level: 10, tone: "gold", name: "Sheer Gold" },
+  { code: "10IG", level: 10, tone: "gold", secondaryTone: "gold" },
+  { code: "10NW", level: 10, tone: "natural", secondaryTone: "gold" },
 ];
 
 export const REDKEN_COLOR_GELS_OILS_CHART: Shade[] = colorGelsOilsShades.map(shade => ({
