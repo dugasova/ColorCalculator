@@ -178,12 +178,40 @@ describe("REDKEN_COLOR_GELS_OILS_CHART", () => {
       totalGrams: 60,
     });
 
-  it("has the 61-shade range, mixing 1:1 on every level, Chromatics gone", () => {
-    expect(REDKEN_COLOR_GELS_OILS_CHART.length).toBe(61);
+  it("has the 73-shade European range, mixing 1:1 on every level, Chromatics gone", () => {
+    expect(REDKEN_COLOR_GELS_OILS_CHART.length).toBe(73);
     expect(BRANDS.redken.shades.some(s => s.line === "chromatics")).toBe(false);
     expect(BRANDS.redken.mixingRatio(4, 10)).toEqual({ colorParts: 1, developerParts: 1 });
     expect(shade("6GI")).toMatchObject({ tone: "gold", secondaryTone: "pearl", name: "Tenerife" });
     expect(shade("7NW")).toMatchObject({ tone: "natural", secondaryTone: "gold" });
+  });
+
+  it("has the 2026 card's mocha shades", () => {
+    expect(shade("6MO")).toMatchObject({ level: 6, tone: "chocolate", name: "Iced Coffee" });
+    expect(shade("8MO")).toMatchObject({ level: 8, tone: "chocolate", name: "Frosted Latte" });
+  });
+
+  it("follows the European range: AB, CR, WG shades in, US-only shades out", () => {
+    expect(shade("6AB")).toMatchObject({ level: 6, tone: "ash" });
+    expect(shade("8CR")).toMatchObject({ tone: "copper", secondaryTone: "red" });
+    expect(shade("6WG")).toMatchObject({ tone: "gold", secondaryTone: "gold" });
+    const codes = REDKEN_COLOR_GELS_OILS_CHART.map(s => s.code);
+    for (const gone of ["1N", "3N", "9P", "9AV", "10N", "2NA"]) expect(codes).not.toContain(gone);
+    // confirmed by the colorist
+    for (const kept of ["2ABn", "6BR", "8P", "9NW", "10NW"]) expect(codes).toContain(kept);
+    // Gold Chocolate, from L'Oréal Partner Shop UK
+    expect(shade("5GCh")).toMatchObject({ level: 5, tone: "gold", secondaryTone: "chocolate" });
+    expect(shade("7GCh")).toMatchObject({ level: 7, tone: "gold", secondaryTone: "chocolate" });
+  });
+
+  it("follows the European Shades EQ chart: 63 shades, level 10 included, no US-only shades", () => {
+    const shadesEq = BRANDS.redken.shades.filter(s => s.line === "shades-eq");
+    const codes = shadesEq.map(s => s.code);
+    expect(shadesEq.length).toBe(63);
+    for (const code of ["01B", "04M", "05V", "08VB", "09V", "09P", "010VV", "010T", "010P"])
+      expect(codes).toContain(code);
+    for (const code of ["02M", "03V", "07V", "08V", "06GG", "07CC"]) expect(codes).not.toContain(code);
+    expect(shadesEq.find(s => s.code === "010VV")).toMatchObject({ level: 10, tone: "violet", name: "Lavender Ice" });
   });
 
   it("lifts 1/2/3/4 levels at 10/20/30/40 vol, processing 20/30/40/45 min", () => {
@@ -191,7 +219,7 @@ describe("REDKEN_COLOR_GELS_OILS_CHART", () => {
     expect(formula("7N", 5)).toMatchObject({ developerVolume: 20, recommendedProcessingMinutes: 30 });
     expect(formula("8N", 5)).toMatchObject({ developerVolume: 30, recommendedProcessingMinutes: 40 });
     expect(formula("9N", 5)).toMatchObject({ developerVolume: 40, recommendedProcessingMinutes: 45 });
-    expect(formula("10N", 5).developerVolume).toBeNull();
+    expect(formula("10NN", 5).developerVolume).toBeNull();
   });
 
   it("covers gray at 20 vol in 30 min, without the 45-minute extension", () => {
@@ -203,7 +231,7 @@ describe("REDKEN_COLOR_GELS_OILS_CHART", () => {
   });
 
   it("takes no corrector and no tone warning: its shades are balanced against the background", () => {
-    const result = formula("9P", 6);
+    const result = formula("10P", 7);
     expect(result.underlyingPigment).not.toBeNull();
     expect(result.recommendedCorrectiveTone).toBeNull();
     expect(result.toneWarning).toBeNull();
