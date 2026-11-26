@@ -87,7 +87,10 @@ export const en = {
     stepHair: "1. Client's hair",
     stepColor: "2. Target color",
     stepAmount: "3. Mix amount",
-    advanced: "More: equivalent, substitute, extra shade",
+    advanced: "Extra options",
+    advancedCrossBrand: "Equivalent in another brand",
+    advancedBlend: "Substitute blend",
+    advancedExtraShade: "Extra shade",
   },
   fields: {
     brand: "Brand",

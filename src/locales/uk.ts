@@ -91,7 +91,10 @@ export const uk: typeof en = {
     stepHair: "1. Волосся клієнта",
     stepColor: "2. Бажаний колір",
     stepAmount: "3. Кількість суміші",
-    advanced: "Додатково: аналог, заміна, додатковий відтінок",
+    advanced: "Додаткові можливості",
+    advancedCrossBrand: "Аналог іншого бренду",
+    advancedBlend: "Заміна сумішшю",
+    advancedExtraShade: "Додатковий відтінок",
   },
   fields: {
     brand: "Бренд",

@@ -113,3 +113,84 @@
     border-left: 1px solid var(--border-card);
   }
 }
+
+/* The "Extra options" toggle as a tinted card, so it reads as a button that opens more
+   tools rather than as one more step heading. */
+.calculator__advanced > .results__section-heading {
+  padding-top: 0;
+  border-top: none;
+}
+
+.calculator__advanced .collapsible-section__toggle {
+  padding: 14px 16px;
+  border: 1px solid rgba(124, 58, 237, 0.28);
+  border-radius: 14px;
+  background: var(--brand-gradient-soft);
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: normal;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.calculator__advanced .collapsible-section__toggle:hover:not(:disabled) {
+  border-color: var(--gold);
+  box-shadow: var(--brand-shadow-sm);
+}
+
+.calculator__advanced .collapsible-section__toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.calculator__advanced .collapsible-section__chevron {
+  color: var(--gold-ink);
+}
+
+.collapsible-section__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.collapsible-section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calculator__advanced .collapsible-section__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gold-ink);
+}
+
+.calculator__advanced-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.calculator__advanced-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.calculator__advanced-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border-field);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.calculator__advanced-chip--on {
+  border-color: var(--gold);
+  color: var(--gold-ink);
+  font-weight: 600;
+}

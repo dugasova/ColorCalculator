@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 import "./FormulaCalculator.css";
 import { usePalette } from "../../palette";
 import type { RepeatFormulaRequest } from "../../history";
@@ -247,7 +248,35 @@ export default function FormulaCalculator({
 
         <CollapsibleSection
           id="calculatorAdvanced"
-          title={t("calculator.advanced")}
+          title={
+            <>
+              <svg className="calculator__advanced-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"
+                  fill="currentColor"
+                />
+              </svg>
+              {t("calculator.advanced")}
+            </>
+          }
+          subtitle={
+            <span className="calculator__advanced-chips">
+              <span className="calculator__advanced-chip">{t("calculator.advancedCrossBrand")}</span>
+              <span className={clsx("calculator__advanced-chip", blendModeEnabled && "calculator__advanced-chip--on")}>
+                {blendModeEnabled && "✓ "}
+                {t("calculator.advancedBlend")}
+              </span>
+              <span
+                className={clsx(
+                  "calculator__advanced-chip",
+                  additionalShadeCode !== null && "calculator__advanced-chip--on",
+                )}
+              >
+                {additionalShadeCode !== null && "✓ "}
+                {t("calculator.advancedExtraShade")}
+              </span>
+            </span>
+          }
           defaultOpen={false}
           forceOpen={blendModeEnabled || additionalShadeCode !== null}
           className="calculator__advanced"
