@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent, within } from "@testing-library/react";
+import { BRANDS } from "../../engine/brands";
+import { chooseOption } from "../../testDom";
 import "../../i18n";
 import { BrandStockList } from "./BrandStockList";
 import { developerStockId, shadeStockId, restockOneTube } from "../../stock";
@@ -105,5 +107,22 @@ describe("BrandStockList restock button", () => {
     expect(screen.queryByText("1.9% (6 vol) · Inoa")).not.toBeInTheDocument();
     expect(screen.queryByText("4% (13 vol) · Inoa")).not.toBeInTheDocument();
     expect(screen.getByText("12% (40 vol)")).toBeInTheDocument();
+  });
+});
+
+describe("BrandStockList filter", () => {
+  it("narrows the shade rows by line and code, leaving the developer rows whole", () => {
+    vi.mocked(useStock).mockReturnValue([]);
+    render(<BrandStockList brandId="matrix" shades={BRANDS.matrix.shades} disabledKeys={new Set()} />);
+    const shadeRows = () => document.querySelectorAll(".palette-admin__stock-list")[0].querySelectorAll("li").length;
+    const developerRows = document.querySelectorAll(".palette-admin__stock-list")[1].querySelectorAll("li").length;
+    expect(shadeRows()).toBe(BRANDS.matrix.shades.length);
+
+    chooseOption("Line", "super-sync");
+    fireEvent.change(screen.getByLabelText("Find a shade"), { target: { value: "10a" } });
+    expect(shadeRows()).toBe(2); // 10A, 10AG
+    expect(document.querySelectorAll(".palette-admin__stock-list")[1].querySelectorAll("li")).toHaveLength(
+      developerRows,
+    );
   });
 });
