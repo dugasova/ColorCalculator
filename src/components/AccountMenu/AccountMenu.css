@@ -65,3 +65,23 @@
     transform: translateY(-4px);
   }
 }
+
+/* Theme and language inside the menu: only on a tablet, whose top bar has no room for
+   them beside the tabs. */
+.account-menu__prefs {
+  display: none;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .account-menu__prefs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--brand-border);
+  }
+
+  .account-menu__prefs .button {
+    width: auto;
+  }
+}

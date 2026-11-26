@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { Fragment, useId, type ReactNode } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { navItems } from "./navItems";
+import { navItems, MOBILE_PRIMARY_VIEWS, NAV_GROUP } from "./navItems";
+import { usePopup } from "./usePopup";
 import "./Nav.css";
 
 export type AppView =
@@ -123,25 +124,81 @@ export function NavIcon({ view, className }: { view: AppView; className: string 
   );
 }
 
+// Tablet-width (768–1023px, see Nav.css) top bar: the four MOBILE_PRIMARY_VIEWS as tabs,
+// every other view behind a "More" menu -- the same split as the phone's BottomNav. A
+// flat strip of nine to twelve tabs wrapped into two or three rows there. The desktop
+// gets SideNav instead.
 export function Nav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const items = navItems(isAdmin);
+  const { open, setOpen, rootRef, triggerRef } = usePopup();
+  const popupId = useId();
+  const moreViews = navItems(isAdmin).filter(v => !MOBILE_PRIMARY_VIEWS.includes(v));
+  const moreActive = moreViews.includes(view);
+  const firstAdminView = moreViews.find(v => NAV_GROUP[v] === "admin");
 
   return (
-    <div className="app-nav" role="tablist" aria-label={t("nav.ariaLabel")}>
-      {items.map(item => (
+    <div className="app-nav">
+      <div className="app-nav__tabs" role="tablist" aria-label={t("nav.ariaLabel")}>
+        {MOBILE_PRIMARY_VIEWS.map(item => (
+          <button
+            key={item}
+            type="button"
+            role="tab"
+            aria-selected={view === item}
+            className={clsx("app-nav__item", view === item && "app-nav__item--active")}
+            onClick={() => onViewChange(item)}
+          >
+            <NavIcon view={item} className="app-nav__icon" />
+            <span>{t(`nav.${item}`)}</span>
+          </button>
+        ))}
+      </div>
+      <div className="app-nav__more" ref={rootRef}>
         <button
-          key={item}
           type="button"
-          role="tab"
-          aria-selected={view === item}
-          className={clsx("app-nav__item", view === item && "app-nav__item--active")}
-          onClick={() => onViewChange(item)}
+          className={clsx("app-nav__item", moreActive && "app-nav__item--active")}
+          onClick={() => setOpen(o => !o)}
+          aria-haspopup="true"
+          aria-expanded={open}
+          aria-controls={popupId}
+          ref={triggerRef}
         >
-          <NavIcon view={item} className="app-nav__icon" />
-          <span>{t(`nav.${item}`)}</span>
+          <span>{moreActive ? t(`nav.${view}`) : t("nav.more")}</span>
+          <svg
+            className="app-nav__chevron"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
         </button>
-      ))}
+        {open && (
+          <div className="app-nav__popup" id={popupId}>
+            {moreViews.map(item => (
+              <Fragment key={item}>
+                {item === firstAdminView && <p className="app-nav__popup-heading">{t("nav.groups.admin")}</p>}
+                <button
+                  type="button"
+                  aria-current={view === item ? "page" : undefined}
+                  className={clsx("app-nav__popup-item", view === item && "app-nav__popup-item--active")}
+                  onClick={() => {
+                    setOpen(false);
+                    onViewChange(item);
+                  }}
+                >
+                  <NavIcon view={item} className="app-nav__icon" />
+                  <span>{t(`nav.${item}`)}</span>
+                </button>
+              </Fragment>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

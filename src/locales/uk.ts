@@ -40,6 +40,18 @@ export const uk: typeof en = {
     reference: "Довідка",
     ariaLabel: "Основна навігація",
     more: "Ще",
+    collapseMenu: "Згорнути меню",
+    expandMenu: "Розгорнути меню",
+    search: "Перейти до розділу…",
+    searchLabel: "Розділ",
+    searchPlaceholder: "Почни вводити: освітлення, історія…",
+    searchEmpty: "Нічого не знайдено",
+    groups: {
+      calculators: "Калькулятори",
+      clients: "Клієнти",
+      salon: "Салон",
+      admin: "Адміністрування",
+    },
   },
   team: {
     title: "Запити на доступ",
