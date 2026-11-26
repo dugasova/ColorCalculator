@@ -19,6 +19,7 @@ import { GrayNaturalField } from "./fields/GrayNaturalField";
 import { BlendModeField } from "./fields/BlendModeField";
 import { BlendComponentField } from "./fields/BlendComponentField";
 import { BlendRatioField } from "./fields/BlendRatioField";
+import { AshVioletRatioField } from "./fields/AshVioletRatioField";
 import { DeveloperVolumeField } from "./fields/DeveloperVolumeField";
 import { MixingRatioField } from "./fields/MixingRatioField";
 import { ApplicationZoneField } from "./fields/ApplicationZoneField";
@@ -81,6 +82,7 @@ export default function FormulaCalculator({
     setManualDeveloperVolume,
     manualMixingRatio,
     setManualMixingRatio,
+    setAshVioletRatio,
     setManualPricePerGram,
     markupMultiplier,
     setMarkupMultiplier,
@@ -228,6 +230,7 @@ export default function FormulaCalculator({
           manualMixingRatio={manualMixingRatio}
           onManualMixingRatioChange={setManualMixingRatio}
         />
+        <AshVioletRatioField mix={result.ashVioletMix} onRatioChange={setAshVioletRatio} />
 
         <h2 className="results__section-heading calculator__step-heading">{t("calculator.stepAmount")}</h2>
         <ApplicationZoneField applicationZone={applicationZone} onApplicationZoneChange={handleApplicationZoneChange} />

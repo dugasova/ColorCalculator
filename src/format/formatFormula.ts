@@ -22,6 +22,7 @@ import type { MixCorrector } from "./formulaMessages";
 import type { ApplicationZone } from "../engine/applicationZone";
 import { formatBrandLineLabel } from "../engine/formatLineLabel";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
+import { splitAshViolet, type AshVioletMix } from "../engine/ashVioletMix";
 
 export interface FormatFormulaParams {
   // Names the corrector by the brand's own codes; omitted, it is named by its tone.
@@ -128,6 +129,7 @@ export function buildMixSummary(
   additionalShade2Grams?: number,
   naturalBase?: NaturalBase | null,
   corrector?: MixCorrector | null,
+  ashVioletMix?: AshVioletMix | null,
 ): string {
   const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
   const hasAdditional2 =
@@ -139,7 +141,17 @@ export function buildMixSummary(
     (hasAdditional ? additionalShadeGrams : 0) -
     (hasAdditional2 ? (additionalShade2Grams ?? 0) : 0);
 
-  const parts = [i18n.t("format.mixShade", { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
+  // Matrix Super Sync's ash shade goes in with its violet one (see ashVioletMix.ts).
+  const parts =
+    ashVioletMix != null
+      ? (() => {
+          const { ashGrams, violetGrams } = splitAshViolet(primaryGrams, ashVioletMix.ratio);
+          return [
+            i18n.t("format.mixShade", { code: targetShade.code, grams: ashGrams.toFixed(1) }),
+            i18n.t("format.mixShade", { code: ashVioletMix.violetCode, grams: violetGrams.toFixed(1) }),
+          ];
+        })()
+      : [i18n.t("format.mixShade", { code: targetShade.code, grams: primaryGrams.toFixed(1) })];
   if (naturalBase != null) {
     parts.push(i18n.t("format.mixShade", { code: naturalBase.shade.code, grams: naturalGrams.toFixed(1) }));
   }
@@ -258,6 +270,7 @@ export function formatFormulaText(params: FormatFormulaParams): string {
                   additionalShade2Grams,
                   naturalBase,
                   mixCorrector,
+                  result.ashVioletMix,
                 ),
         })
       : i18n.t("format.mixFallback", {

@@ -70,6 +70,18 @@ describe("BleachCalculator", () => {
     expect(html).toContain("9-1, 9-12");
   });
 
+  it("names Matrix Super Sync's ash + violet toner mix", () => {
+    const html = renderToStaticMarkup(
+      <BleachResults
+        result={calculateBleachFormula(6, 10, 60)}
+        {...noPricing}
+        toner={{ brand: BRANDS.matrix, line: "super-sync" }}
+      />,
+    );
+    expect(html).toContain("Toner mix");
+    expect(html).toContain("10A + 10V, 1:2 or 1:3");
+  });
+
   it("says when the toner line has no shade for the background", () => {
     const html = renderToStaticMarkup(
       <BleachResults

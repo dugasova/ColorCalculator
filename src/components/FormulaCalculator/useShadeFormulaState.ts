@@ -4,6 +4,7 @@ import type { DeveloperVolume, Level } from "../../engine/levels";
 import type { Brand, BrandId } from "../../engine/brands";
 import type { CorrectorSelection } from "../../engine/correctorProducts";
 import type { MixingRatio, Shade } from "../../engine/shades";
+import type { AshVioletRatio } from "../../engine/ashVioletMix";
 import type { HairCanvas, Porosity } from "../../engine/canvas";
 import type { ColorStepSeed } from "../../history";
 import { useHairCanvasState } from "./useHairCanvasState";
@@ -34,6 +35,7 @@ function useComputedFullFormula(
   totalExtra: number,
   colorGramsOverride: number | undefined,
   porosity: Porosity,
+  ashVioletRatio: AshVioletRatio | null,
 ) {
   const result = useMemo(
     () =>
@@ -47,6 +49,7 @@ function useComputedFullFormula(
         manualMixingRatio,
         colorGramsOverride,
         porosity,
+        ashVioletRatio,
       }),
     [
       startLevel,
@@ -58,6 +61,7 @@ function useComputedFullFormula(
       manualMixingRatio,
       colorGramsOverride,
       porosity,
+      ashVioletRatio,
     ],
   );
   const grams = useMemo(
@@ -98,6 +102,7 @@ export type ShadeFormulaSeed = Pick<
   | "additionalShade2Grams"
   | "grayNaturalApplied"
   | "naturalBaseShadeCode"
+  | "ashVioletRatio"
 >;
 
 // The brand/line/shade selection, developer/application/gram overrides, additional-shade
@@ -118,6 +123,9 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
   const [grayPercent, setGrayPercent] = useState(initial?.grayPercent ?? 0);
   const [neutralizationApplied, setNeutralizationApplied] = useState(false);
   const [correctorSelection, setCorrectorSelection] = useState<CorrectorSelection>({});
+  // The A : V ratio of Matrix Super Sync's ash + violet mix (see ashVioletMix.ts); null
+  // takes the level's default.
+  const [ashVioletRatio, setAshVioletRatio] = useState<AshVioletRatio | null>(initial?.ashVioletRatio ?? null);
 
   const selection = useShadeSelection(brands, initial);
   const { brandId, lineShades, targetShade } = selection;
@@ -142,6 +150,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     additional.totalExtraGrams,
     gramsInput.colorGramsOverride,
     porosity,
+    ashVioletRatio,
   );
   const grayNatural = useGrayNaturalBase(targetShade, lineShades, result, initial);
   const { effectiveTotalGrams } = gramsInput;
@@ -155,6 +164,7 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     overrides.resetManualOverrides();
     setNeutralizationApplied(false);
     setCorrectorSelection({});
+    setAshVioletRatio(null);
     // Only the picked natural shade is shade-dependent; whether to dose a natural base at
     // all follows the client's gray %, not the target, so grayNaturalApplied carries over.
     grayNatural.setNaturalBaseShadeCode(null);
@@ -198,6 +208,8 @@ export function useShadeFormulaState({ brands, initialCanvas, initial }: UseShad
     setNeutralizationApplied,
     correctorSelection,
     setCorrectorSelection,
+    ashVioletRatio,
+    setAshVioletRatio,
 
     // brand / line / shade
     brandId,

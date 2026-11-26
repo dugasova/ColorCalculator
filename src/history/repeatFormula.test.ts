@@ -47,3 +47,33 @@ describe("buildRepeatSessionRequest brand resolution", () => {
     expect(request?.steps[0]).toMatchObject({ kind: "color", brandId: "generic" });
   });
 });
+
+describe("buildRepeatFormulaRequest ash + violet ratio", () => {
+  it("restores the A : V ratio a Matrix Super Sync visit was mixed with", () => {
+    const step = makeColorStep({
+      brandId: "matrix",
+      brandName: "Matrix",
+      line: "super-sync",
+      targetShade: { code: "10A", level: 10, tone: "ash", line: "super-sync" },
+      result: {
+        ...makeColorStep().result,
+        ashVioletMix: {
+          ashCode: "10A",
+          violetCode: "10V",
+          ratio: { ashParts: 1, violetParts: 3 },
+          choices: [
+            { ashParts: 1, violetParts: 2 },
+            { ashParts: 1, violetParts: 3 },
+          ],
+        },
+      },
+    });
+    expect(buildRepeatFormulaRequest(makeEntry({ clientName: "Anna", steps: [step] }), BRANDS)?.ashVioletRatio).toEqual(
+      {
+        ashParts: 1,
+        violetParts: 3,
+      },
+    );
+    expect(repeatSingleStep({})?.ashVioletRatio).toBeNull();
+  });
+});

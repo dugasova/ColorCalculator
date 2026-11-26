@@ -21,6 +21,29 @@ describe("computeStockConsumption", () => {
     expect(consumptions).toHaveLength(2);
   });
 
+  it("charges Matrix Super Sync's ash + violet mix to both shades by the ratio", () => {
+    const step = makeColorStep({
+      brandId: "matrix",
+      line: "super-sync",
+      targetShade: { code: "8A", level: 8, tone: "ash", line: "super-sync" },
+      result: {
+        ...COLOR_FULL_FORMULA,
+        mixingRatio: { colorParts: 1, developerParts: 1 },
+        grams: { colorGrams: 30, developerGrams: 30 },
+        developerVolume: 10,
+        ashVioletMix: {
+          ashCode: "8A",
+          violetCode: "8V",
+          ratio: { ashParts: 2, violetParts: 1 },
+          choices: [{ ashParts: 2, violetParts: 1 }],
+        },
+      },
+    });
+    const byId = new Map(computeStockConsumption([step]).map(c => [c.id, c]));
+    expect(byId.get(shadeStockId("matrix", "super-sync", "8A"))?.grams).toBe(20);
+    expect(byId.get(shadeStockId("matrix", "super-sync", "8V"))?.grams).toBe(10);
+  });
+
   it("subtracts a discretionary additional shade from the primary and charges it separately", () => {
     const additionalShade: Shade = { code: "0/11", level: 1, tone: "ash" };
     const step = makeColorStep({ additionalShade, additionalShadeGrams: 6 });

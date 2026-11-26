@@ -109,6 +109,10 @@ export const uk: typeof en = {
     blendRatioGrams: "{{primaryCode}}: {{primaryGrams}} г / {{secondaryCode}}: {{secondaryGrams}} г",
     developerVolume: "Об’єм окислювача",
     mixingRatio: "Пропорція змішування (фарба : окислювач)",
+    ashVioletRatio: "Пропорція {{ash}} + {{violet}}",
+    ashVioletRatioChoice: "{{ash}} : {{violet}} = {{ashParts}} : {{violetParts}}",
+    ashVioletRatioHint:
+      "Фіолетового коректора у Matrix немає: попелястий відтінок змішують із фіолетовим, фарба ділиться між ними. Більше фіолетового — для чистішого, блідішого жовтого.",
     applicationZone: "Зона нанесення",
     applicationZoneFullHead: "Все волосся",
     applicationZoneRootTouchUp: "Прикореневе фарбування",
@@ -701,6 +705,9 @@ export const uk: typeof en = {
     tonerBrand: "Бренд тонера",
     tonerLine: "Лінія тонера",
     tonerShadesLabel: "Відтінки для тонування",
+    tonerMixLabel: "Суміш для тонування",
+    tonerMixValue: "{{first}} + {{second}}, {{ratios}}",
+    tonerMixOr: " або ",
     tonerShadesNone:
       "у цій лінії немає відтінку рівня {{level}}, який сам нейтралізує фон: тонер рівня {{level}} з коректором",
   },

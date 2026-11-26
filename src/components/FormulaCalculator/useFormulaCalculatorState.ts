@@ -97,6 +97,7 @@ export function useFormulaCalculatorState(
     prePigmentationEnabled: setPrePigmentationEnabled,
     grayNaturalApplied: base.setGrayNaturalApplied,
     naturalBaseShadeCode: base.setNaturalBaseShadeCode,
+    ashVioletRatio: base.setAshVioletRatio,
   };
 
   // Replay a "Repeat formula" request from history right during render — this is React's

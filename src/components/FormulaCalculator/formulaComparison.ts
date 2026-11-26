@@ -80,6 +80,7 @@ export function formatMixLine(product: FormulaProduct, mix: FormulaMix, neutrali
         mix.additionalShade2Grams,
         naturalBase,
         corrector,
+        result.ashVioletMix,
       );
 }
 

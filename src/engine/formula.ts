@@ -6,6 +6,7 @@ import {
   type UnderlyingPigment,
 } from "./levels";
 import { assessNeutralization } from "./neutralize";
+import { getAshVioletMix, type AshVioletMix, type AshVioletRatio } from "./ashVioletMix";
 import { calculateCorrectorGrams, roundCorrectorGrams } from "./correction";
 import type { CorrectorSelection } from "./correctorProducts";
 import type { Porosity } from "./canvas";
@@ -107,6 +108,9 @@ export interface FullFormula {
   // Set when porosity changed what the level/gray rules alone would have recommended
   // (see applyPorosity). Absent on every result saved before porosity fed the formula.
   porosityAdjustment?: PorosityAdjustment | null;
+  // Matrix Super Sync's ash shade split with the violet one (see ashVioletMix.ts): the
+  // target shade's own grams go A and V by `ratio`. Absent on older saved results.
+  ashVioletMix?: AshVioletMix | null;
 }
 
 // How the hair's porosity changed the recommendation, reported as data like the warnings
@@ -369,6 +373,9 @@ export interface FullFormulaInput {
   // The hair's porosity (HairCanvas.porosity); "normal" leaves the formula as the level
   // and gray rules alone produce it. See applyPorosity.
   porosity?: Porosity;
+  // The colorist's A : V ratio where the shade takes Matrix's ash + violet mix; the
+  // level's first ratio otherwise.
+  ashVioletRatio?: AshVioletRatio | null;
 }
 
 export function calculateFullFormula({
@@ -381,7 +388,9 @@ export function calculateFullFormula({
   manualMixingRatio,
   colorGramsOverride,
   porosity = "normal",
+  ashVioletRatio,
 }: FullFormulaInput): FullFormula {
+  const ashVioletMix = getAshVioletMix(targetShade, ashVioletRatio);
   // A deposit-only shade put on the base it is made for (at or above its minStartLevel,
   // e.g. Igora's pastel 9,5- toners on a level-9 yellow blonde) tones, it is not asked to lift.
   const isOnOwnDepositBase =
@@ -444,7 +453,8 @@ export function calculateFullFormula({
     colorGramsOverride !== undefined && grams !== null ? grams.colorGrams + grams.developerGrams : totalGrams;
   const { underlyingPigment, recommendedCorrectiveTone, correctorGrams, correctiveTones, toneWarning } =
     deriveCorrectiveGuidance(
-      targetShade,
+      // The violet half of an ash + violet mix carries the violet the background takes.
+      ashVioletMix !== null ? { ...targetShade, secondaryTone: "violet" } : targetShade,
       isActuallyLifting,
       achievedLevel,
       correctorBaseGrams,
@@ -476,6 +486,7 @@ export function calculateFullFormula({
     liftUnsupportedWarning,
     grams,
     porosityAdjustment,
+    ashVioletMix,
   };
 }
 

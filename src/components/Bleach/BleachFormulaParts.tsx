@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { BleachFormula } from "../../engine/bleach";
 import type { Brand } from "../../engine/brands";
 import { findBleachToners } from "../../engine/correction";
+import { getAshVioletToningHint } from "../../engine/ashVioletMix";
 import { formatBleachToning } from "../../format/formatBleach";
 
 // The pieces of a bleach formula that read the same on the standalone BleachCalculator
@@ -88,6 +89,8 @@ export function BleachToningRows({ result, toner }: BleachToningRowsProps) {
   if (result.grams === null) return null;
   const toning = formatBleachToning(result.targetLevel, toner?.line);
   const tonerShades = toner !== undefined ? findBleachToners(toner.brand, toner.line, result.targetLevel) : null;
+  // Matrix Super Sync tones with an ash + violet mix (see engine/ashVioletMix.ts).
+  const tonerMix = toner !== undefined ? getAshVioletToningHint(toner.line, result.targetLevel) : null;
   return (
     <>
       <div className="results__row">
@@ -105,6 +108,20 @@ export function BleachToningRows({ result, toner }: BleachToningRowsProps) {
             {tonerShades.length > 0
               ? tonerShades.map(shade => shade.code).join(", ")
               : t("bleach.tonerShadesNone", { level: result.targetLevel })}
+          </span>
+        </div>
+      )}
+      {tonerMix !== null && (
+        <div className="results__row" data-row="tonerMix">
+          <span className="results__row-label">{t("bleach.tonerMixLabel")}</span>
+          <span>
+            {t("bleach.tonerMixValue", {
+              first: tonerMix.codes[0],
+              second: tonerMix.codes[1],
+              ratios: tonerMix.ratios
+                .map(ratio => `${ratio.ashParts}:${ratio.violetParts}`)
+                .join(t("bleach.tonerMixOr")),
+            })}
           </span>
         </div>
       )}
