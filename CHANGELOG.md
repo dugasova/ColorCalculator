@@ -3,6 +3,27 @@
 All notable changes to Formulist. Versions follow [SemVer](https://semver.org/); see
 "Releasing" in the README for the process.
 
+## 0.14.0 — 2026-11-26
+
+- Matrix Super Sync: on a light blonde the ash shade is mixed with the violet shade of the
+  same level instead of adding a violet corrector: 8A + 8V 2:1 (or 1:1), 10A + 10V 1:2
+  (or 1:3), 11A + 11V 1:3 (or 1:4), the first ratio by default.
+  - The ratio is picked next to the mixing ratio, in the calculator and in Complex
+    Coloring; it is saved with the visit, restored on Repeat, and stock is charged to
+    both shades.
+  - Bleach: with a Super Sync toner, a "Toner mix" row names the mix for the target level.
+- Repeat and Compare warn when the visit used a shade that is no longer in the palette
+  (e.g. after Matrix and Redken moved to their European cards), so the colorist picks a
+  replacement before saving; the History card notes it too.
+- Navigation:
+  - desktop: a side panel with every section, admin ones under their own heading; it
+    collapses to icons, and the choice is remembered;
+  - tablet: one row with four main tabs and "More"; theme and language are in the account
+    menu;
+  - Ctrl K / Cmd K: search for a section by name.
+- Palette admin: the shade and stock lists filter by line and by shade code or name, with
+  a "Showing N of M" count.
+
 ## 0.13.0 — 2026-11-25
 
 - Correctors named by real shades of the line, at the formula's level (the nearest level
