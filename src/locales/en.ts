@@ -105,6 +105,10 @@ export const en = {
     blendRatioGrams: "{{primaryCode}}: {{primaryGrams}} g / {{secondaryCode}}: {{secondaryGrams}} g",
     developerVolume: "Emulsion strength",
     mixingRatio: "Mixing ratio (color : developer)",
+    ashVioletRatio: "{{ash}} + {{violet}} ratio",
+    ashVioletRatioChoice: "{{ash}} : {{violet}} = {{ashParts}} : {{violetParts}}",
+    ashVioletRatioHint:
+      "Matrix has no violet corrector: the ash shade goes in with the violet one, the dye split between them. More violet for a cleaner, paler yellow.",
     applicationZone: "Application",
     applicationZoneFullHead: "Full head",
     applicationZoneRootTouchUp: "Root touch-up",
@@ -692,6 +696,9 @@ export const en = {
     tonerBrand: "Toner brand",
     tonerLine: "Toner line",
     tonerShadesLabel: "Toner shades",
+    tonerMixLabel: "Toner mix",
+    tonerMixValue: "{{first}} + {{second}}, {{ratios}}",
+    tonerMixOr: " or ",
     tonerShadesNone:
       "this line has no level {{level}} shade that cancels the background on its own: use a level {{level}} toner with a corrector",
   },

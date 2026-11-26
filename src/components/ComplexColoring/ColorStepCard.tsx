@@ -24,6 +24,7 @@ import { FoilPlacementField } from "../FormulaCalculator/fields/FoilPlacementFie
 import type { StartingBase } from "../../engine/startingBase";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { buildMixSummary } from "../../format/formatFormula";
+import { AshVioletRatioField } from "../FormulaCalculator/fields/AshVioletRatioField";
 import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
 import type { ColorHistoryStep, ColorStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
@@ -102,6 +103,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     setManualDeveloperVolume,
     manualMixingRatio,
     setManualMixingRatio,
+    setAshVioletRatio,
     setManualProcessingMinutes,
     additionalShadeCode,
     additionalShadeGrams,
@@ -243,6 +245,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
           onManualMixingRatioChange={setManualMixingRatio}
           idSuffix={idSuffix}
         />
+        <AshVioletRatioField mix={result.ashVioletMix} onRatioChange={setAshVioletRatio} idSuffix={idSuffix} />
         <GramsInputField
           gramsInputMode={gramsInputMode}
           onGramsInputModeChange={setGramsInputMode}
@@ -302,6 +305,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
               additionalShade2Grams,
               naturalBase,
               mixCorrector,
+              result.ashVioletMix,
             )}
           </span>
         </div>

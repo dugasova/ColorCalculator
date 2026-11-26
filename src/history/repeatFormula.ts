@@ -1,4 +1,5 @@
 import type { Brand, BrandId } from "../engine/brands";
+import type { AshVioletRatio } from "../engine/ashVioletMix";
 import type { DeveloperVolume, Level } from "../engine/levels";
 import { APPLICATION_ZONE_DEFAULT_COLOR_GRAMS, type ApplicationZone } from "../engine/applicationZone";
 import type { HairCanvas } from "../engine/canvas";
@@ -50,6 +51,8 @@ export interface RepeatFormulaRequest {
   // request built before this option existed still type-checks; absent means off.
   grayNaturalApplied?: boolean;
   naturalBaseShadeCode?: string | null;
+  // The A : V ratio of a Matrix Super Sync ash + violet mix; absent or null, the default.
+  ashVioletRatio?: AshVioletRatio | null;
 }
 
 // True for a plain single-color-step entry (FormulaCalculator never writes `strandZone`
@@ -143,6 +146,7 @@ export interface ColorStepSeed {
   // See RepeatFormulaRequest's own identical fields.
   grayNaturalApplied?: boolean;
   naturalBaseShadeCode?: string | null;
+  ashVioletRatio?: AshVioletRatio | null;
   canvas?: HairCanvas;
   strandZone?: StrandZone;
   foil?: FoilPlacement;
@@ -234,6 +238,7 @@ export function buildRepeatFormulaRequest(
     prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
     grayNaturalApplied: (step.naturalBase ?? null) !== null,
     naturalBaseShadeCode: step.naturalBase?.shade.code ?? null,
+    ashVioletRatio: step.result.ashVioletMix?.ratio ?? null,
     processingMinutes: step.processingMinutes,
     applicationZone,
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,
@@ -285,6 +290,7 @@ export function buildRepeatSessionRequest(
         prePigmentationEnabled: (step.prePigmentation ?? null) !== null,
         grayNaturalApplied: (step.naturalBase ?? null) !== null,
         naturalBaseShadeCode: step.naturalBase?.shade.code ?? null,
+        ashVioletRatio: step.result.ashVioletMix?.ratio ?? null,
         canvas: step.canvas,
         strandZone: step.strandZone,
         ...(step.foil !== undefined && { foil: step.foil }),

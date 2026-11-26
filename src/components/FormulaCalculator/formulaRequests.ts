@@ -7,6 +7,7 @@ import {
 } from "../../engine/applicationZone";
 import type { BrandId } from "../../engine/brands";
 import type { MixingRatio } from "../../engine/shades";
+import type { AshVioletRatio } from "../../engine/ashVioletMix";
 import type { RepeatFormulaRequest } from "../../history";
 import type { FavoriteFormulaRecipe } from "../../favoriteFormulas";
 
@@ -44,6 +45,7 @@ export interface FormulaFormValues {
   prePigmentationEnabled: boolean;
   grayNaturalApplied: boolean;
   naturalBaseShadeCode: string | null;
+  ashVioletRatio: AshVioletRatio | null;
 }
 
 export type FormulaFormSetters = { [K in keyof FormulaFormValues]: (value: FormulaFormValues[K]) => void };
@@ -84,6 +86,7 @@ export function repeatRequestToFormValues(request: RepeatFormulaRequest): Formul
     prePigmentationEnabled: request.prePigmentationEnabled,
     grayNaturalApplied: request.grayNaturalApplied ?? false,
     naturalBaseShadeCode: request.naturalBaseShadeCode ?? null,
+    ashVioletRatio: request.ashVioletRatio ?? null,
   };
 }
 

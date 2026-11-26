@@ -3,6 +3,7 @@ import { actualGramsScale } from "../sessionCost";
 import type { StockConsumption, StockRecord, StockShortage } from "./types";
 import { developerStockId, shadeStockId } from "./products";
 import { stockById } from "./reorder";
+import { splitAshViolet } from "../engine/ashVioletMix";
 
 // Attributes a saved session's grams to the exact products a colorist actually weighed
 // out, mirroring format/formatFormula.ts's buildMixSummary/buildBlendMixSummary:
@@ -18,6 +19,8 @@ import { stockById } from "./reorder";
 //    additional shade(s) were blended on top of it and any gray-coverage natural base
 //    carved out of it (those are charged separately to their own shade ids) -- the same
 //    subtraction buildMixSummary does to report the primary shade's own share.
+//  - Matrix Super Sync's ash shade mixed with its violet one (result.ashVioletMix) charges
+//    the primary share to both by the ratio, as buildMixSummary splits it.
 //  - A gray-coverage natural base the colorist opted into (`naturalBase`) is charged to its
 //    own natural shade, with or without a blend. Corrector grams are never charged: they
 //    aren't tied to a specific product code in the saved data.
@@ -85,12 +88,29 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
         (naturalBase?.grams ?? 0) -
         (hasAdditional ? additionalShadeGrams : 0) -
         (hasAdditional2 ? additionalShade2Grams : 0);
-      addScaled(
-        shadeStockId(brandId, targetShade.line ?? null, targetShade.code),
-        "shade",
-        targetShade.code,
-        primaryGrams,
-      );
+      const ashViolet = result.ashVioletMix ?? null;
+      if (ashViolet !== null) {
+        const { ashGrams, violetGrams } = splitAshViolet(primaryGrams, ashViolet.ratio);
+        addScaled(
+          shadeStockId(brandId, targetShade.line ?? null, targetShade.code),
+          "shade",
+          targetShade.code,
+          ashGrams,
+        );
+        addScaled(
+          shadeStockId(brandId, targetShade.line ?? null, ashViolet.violetCode),
+          "shade",
+          ashViolet.violetCode,
+          violetGrams,
+        );
+      } else {
+        addScaled(
+          shadeStockId(brandId, targetShade.line ?? null, targetShade.code),
+          "shade",
+          targetShade.code,
+          primaryGrams,
+        );
+      }
       if (hasAdditional) {
         addScaled(
           shadeStockId(brandId, additionalShade.line ?? null, additionalShade.code),
