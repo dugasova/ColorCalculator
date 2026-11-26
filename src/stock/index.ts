@@ -22,8 +22,9 @@ export {
   getScopedDeveloperVolumes,
   shadeStockId,
   developerStockId,
+  stockById,
 } from "./products";
-export { getStockStatus, stockById, suggestReorderPacks, buildReorderList } from "./reorder";
+export { getStockStatus, suggestReorderPacks, buildReorderList } from "./reorder";
 export { computeStockConsumption, findStockShortages } from "./consumption";
 export {
   subscribeToStock,

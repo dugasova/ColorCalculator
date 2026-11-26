@@ -9,6 +9,7 @@ import {
   getScopedDeveloperVolumes,
   getShadeTubeSizeGrams,
   shadeStockId,
+  stockById,
 } from "./products";
 
 export function getStockStatus(
@@ -18,10 +19,6 @@ export function getStockStatus(
   if (remainingGrams <= 0) return "out";
   if (remainingGrams <= thresholdGrams) return "low";
   return "ok";
-}
-
-export function stockById(records: StockRecord[]): Map<string, StockRecord> {
-  return new Map(records.map(record => [record.id, record]));
 }
 
 // Fewest packs (tubes/bottles) that lift a product strictly above its low-stock

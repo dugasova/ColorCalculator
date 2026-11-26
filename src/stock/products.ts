@@ -1,5 +1,6 @@
 import type { BrandId } from "../engine/brands";
 import { ALL_DEVELOPER_VOLUMES, type DeveloperVolume } from "../engine/levels";
+import type { StockRecord } from "./types";
 
 // Default tube size: most lines in this catalog ship a shade in a 60 g tube, so "below
 // one full tube left" is the point at which a colorist needs to reorder before the next
@@ -94,4 +95,9 @@ export function developerStockId(brandId: BrandId, line: string | null, volume: 
   return stockLine !== null
     ? `dev::${encodeURIComponent(brandId)}::${volume}::${encodeURIComponent(stockLine)}`
     : `dev::${encodeURIComponent(brandId)}::${volume}`;
+}
+
+// Looks a record up by the ids above (shadeStockId/developerStockId).
+export function stockById(records: StockRecord[]): Map<string, StockRecord> {
+  return new Map(records.map(record => [record.id, record]));
 }
