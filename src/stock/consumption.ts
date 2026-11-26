@@ -1,9 +1,9 @@
+import { splitAshViolet } from "../engine/ashVioletMix";
+import type { Shade } from "../engine/shades";
 import type { HistoryStep } from "../history";
 import { actualGramsScale } from "../sessionCost";
 import type { StockConsumption, StockRecord, StockShortage } from "./types";
-import { developerStockId, shadeStockId } from "./products";
-import { stockById } from "./reorder";
-import { splitAshViolet } from "../engine/ashVioletMix";
+import { developerStockId, shadeStockId, stockById } from "./products";
 
 // Attributes a saved session's grams to the exact products a colorist actually weighed
 // out, mirroring format/formatFormula.ts's buildMixSummary/buildBlendMixSummary:
@@ -55,31 +55,16 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
     const addScaled = (id: string, kind: "shade" | "developer", code: string, g: number) =>
       add(id, kind, code, scale === 1 ? g : Math.round(g * scale * 10) / 10);
     const { brandId, line, targetShade, blend, additionalShade, additionalShade2, result } = step;
+    const chargeShade = (shade: Pick<Shade, "code" | "line">, g: number) =>
+      addScaled(shadeStockId(brandId, shade.line ?? null, shade.code), "shade", shade.code, g);
     const additionalShadeGrams = step.additionalShadeGrams ?? 0;
     const additionalShade2Grams = step.additionalShade2Grams ?? 0;
     const naturalBase = step.naturalBase ?? null;
 
-    if (naturalBase !== null) {
-      addScaled(
-        shadeStockId(brandId, naturalBase.shade.line ?? null, naturalBase.shade.code),
-        "shade",
-        naturalBase.shade.code,
-        naturalBase.grams,
-      );
-    }
+    if (naturalBase !== null) chargeShade(naturalBase.shade, naturalBase.grams);
     if (blend !== null) {
-      addScaled(
-        shadeStockId(brandId, blend.shadeA.line ?? null, blend.shadeA.code),
-        "shade",
-        blend.shadeA.code,
-        blend.shadeAGrams,
-      );
-      addScaled(
-        shadeStockId(brandId, blend.shadeB.line ?? null, blend.shadeB.code),
-        "shade",
-        blend.shadeB.code,
-        blend.shadeBGrams,
-      );
+      chargeShade(blend.shadeA, blend.shadeAGrams);
+      chargeShade(blend.shadeB, blend.shadeBGrams);
     } else {
       const hasAdditional = additionalShade !== null && additionalShadeGrams > 0;
       const hasAdditional2 = additionalShade2 !== null && additionalShade2 !== undefined && additionalShade2Grams > 0;
@@ -91,42 +76,13 @@ export function computeStockConsumption(steps: HistoryStep[]): StockConsumption[
       const ashViolet = result.ashVioletMix ?? null;
       if (ashViolet !== null) {
         const { ashGrams, violetGrams } = splitAshViolet(primaryGrams, ashViolet.ratio);
-        addScaled(
-          shadeStockId(brandId, targetShade.line ?? null, targetShade.code),
-          "shade",
-          targetShade.code,
-          ashGrams,
-        );
-        addScaled(
-          shadeStockId(brandId, targetShade.line ?? null, ashViolet.violetCode),
-          "shade",
-          ashViolet.violetCode,
-          violetGrams,
-        );
+        chargeShade(targetShade, ashGrams);
+        chargeShade({ code: ashViolet.violetCode, line: targetShade.line }, violetGrams);
       } else {
-        addScaled(
-          shadeStockId(brandId, targetShade.line ?? null, targetShade.code),
-          "shade",
-          targetShade.code,
-          primaryGrams,
-        );
+        chargeShade(targetShade, primaryGrams);
       }
-      if (hasAdditional) {
-        addScaled(
-          shadeStockId(brandId, additionalShade.line ?? null, additionalShade.code),
-          "shade",
-          additionalShade.code,
-          additionalShadeGrams,
-        );
-      }
-      if (hasAdditional2 && additionalShade2 !== null && additionalShade2 !== undefined) {
-        addScaled(
-          shadeStockId(brandId, additionalShade2.line ?? null, additionalShade2.code),
-          "shade",
-          additionalShade2.code,
-          additionalShade2Grams,
-        );
-      }
+      if (hasAdditional) chargeShade(additionalShade, additionalShadeGrams);
+      if (hasAdditional2) chargeShade(additionalShade2, additionalShade2Grams);
     }
 
     if (result.developerVolume !== null) {
