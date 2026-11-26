@@ -20,6 +20,7 @@ import { BlendModeField } from "./fields/BlendModeField";
 import { BlendComponentField } from "./fields/BlendComponentField";
 import { BlendRatioField } from "./fields/BlendRatioField";
 import { AshVioletRatioField } from "./fields/AshVioletRatioField";
+import { MissingShadesNotice } from "../common/MissingShadesNotice";
 import { DeveloperVolumeField } from "./fields/DeveloperVolumeField";
 import { MixingRatioField } from "./fields/MixingRatioField";
 import { ApplicationZoneField } from "./fields/ApplicationZoneField";
@@ -174,6 +175,7 @@ export default function FormulaCalculator({
         {t("app.titlePrefix")} <span className="calculator__title-accent">{t("app.titleAccent")}</span>
       </h1>
       <p className="calculator__intro">{t("calculator.intro")}</p>
+      <MissingShadesNotice codes={repeatRequest?.missingShadeCodes} />
       <div className="calculator__form">
         <h2 className="results__section-heading calculator__step-heading">{t("calculator.stepHair")}</h2>
         <StartLevelField startLevel={startLevel} onStartLevelChange={setStartLevel} hint={t("fields.startLevelHint")} />

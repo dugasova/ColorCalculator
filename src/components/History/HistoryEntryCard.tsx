@@ -51,8 +51,12 @@ export function HistoryEntryCard({
   const { t } = useTranslation();
   const brands = usePalette();
   const { gramsDrafts, savingGramsKey, handleActualGramsChange, handleActualGramsBlur } = gramsEditor;
-  const isSimpleRepeat = buildRepeatFormulaRequest(entry, brands) !== null;
-  const canRepeat = isSimpleRepeat || buildRepeatSessionRequest(entry, brands) !== null;
+  const simpleRequest = buildRepeatFormulaRequest(entry, brands);
+  const sessionRequest = simpleRequest === null ? buildRepeatSessionRequest(entry, brands) : null;
+  const isSimpleRepeat = simpleRequest !== null;
+  const canRepeat = isSimpleRepeat || sessionRequest !== null;
+  // Shades the visit used that have left the palette: Repeat would swap them silently.
+  const missingShadeCodes = simpleRequest?.missingShadeCodes ?? sessionRequest?.missingShadeCodes ?? [];
 
   return (
     <li className="history__entry">
@@ -151,6 +155,11 @@ export function HistoryEntryCard({
             </button>
           )}
         </div>
+      )}
+      {canRepeat && missingShadeCodes.length > 0 && (
+        <p className="history__entry-missing">
+          {t("history.missingShadesOnCard", { codes: missingShadeCodes.join(", ") })}
+        </p>
       )}
       <div className="history__entry-footer">
         <span>

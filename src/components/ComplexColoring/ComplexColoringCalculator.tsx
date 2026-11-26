@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { MissingShadesNotice } from "../common/MissingShadesNotice";
 import { useTranslation } from "react-i18next";
 import { calculateRecommendedServicePrice } from "../../engine/pricing";
 import {
@@ -136,6 +137,7 @@ export default function ComplexColoringCalculator({
         <span className="calculator__title-accent">{t("complexColoring.titleAccent")}</span>
       </h1>
       <p className="complex-coloring__subtitle">{t("complexColoring.subtitle")}</p>
+      <MissingShadesNotice codes={repeatRequest?.missingShadeCodes} />
 
       {scaffold.length === 0 && <p className="complex-coloring__empty">{t("complexColoring.empty")}</p>}
 
