@@ -24,3 +24,16 @@
     transform: translateY(-4px);
   }
 }
+
+/* The repeated visit's shades that left the palette (MissingShadesNotice). */
+.missing-shades {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.missing-shades p {
+  margin: 0;
+}

@@ -350,6 +350,10 @@ export const en = {
     savedInVersion: "v{{version}}",
     patchTestOn: "Patch test: {{date}}",
     repeat: "Repeat formula",
+    missingShadesNotice:
+      "No longer in the palette: {{codes}}. The calculator put another shade in its place — pick the replacement before saving.",
+    missingShadesDismiss: "Got it",
+    missingShadesOnCard: "No longer in the palette: {{codes}}",
     stepLabel: "Step {{number}}",
     stepLabelWithZone: "Step {{number}} — {{zone}}",
     visitCount: "Visits: {{count}}",

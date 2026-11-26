@@ -32,6 +32,7 @@ export {
   buildRepeatFormulaRequest,
   buildRepeatSessionRequest,
   resolveStepBrand,
+  findMissingShadeCodes,
   type RepeatFormulaRequest,
   type RepeatSessionRequest,
   type StepSeed,

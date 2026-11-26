@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRepeatFormulaRequest, buildRepeatSessionRequest } from "./repeatFormula";
+import { buildRepeatFormulaRequest, buildRepeatSessionRequest, findMissingShadeCodes } from "./repeatFormula";
 import { BRANDS, type Brand, type BrandId } from "../engine/brands";
 import type { ColorHistoryStep } from "./types";
 import { makeColorStep, makeEntry } from "../testFixtures";
@@ -75,5 +75,38 @@ describe("buildRepeatFormulaRequest ash + violet ratio", () => {
       },
     );
     expect(repeatSingleStep({})?.ashVioletRatio).toBeNull();
+  });
+});
+
+describe("findMissingShadeCodes", () => {
+  const matrixStep = (overrides: Partial<ColorHistoryStep>) =>
+    makeColorStep({ brandId: "matrix", brandName: "Matrix", line: "socolor", ...overrides });
+
+  it("lists the visit's shades the line no longer has", () => {
+    const step = matrixStep({
+      targetShade: { code: "9P", level: 9, tone: "pearl", line: "socolor" },
+      additionalShade: { code: "8A", level: 8, tone: "ash", line: "socolor" },
+      additionalShadeGrams: 5,
+    });
+    expect(findMissingShadeCodes(step, BRANDS.matrix)).toEqual(["9P", "8A"]);
+  });
+
+  it("is empty when every shade is still in the palette", () => {
+    const step = matrixStep({ targetShade: { code: "9A", level: 9, tone: "ash", line: "socolor" } });
+    expect(findMissingShadeCodes(step, BRANDS.matrix)).toEqual([]);
+  });
+
+  it("checks the shade on the step's own line", () => {
+    // 10A exists in Super Sync but not in SoColor
+    const step = matrixStep({ targetShade: { code: "10A", level: 10, tone: "ash", line: "socolor" } });
+    expect(findMissingShadeCodes(step, BRANDS.matrix)).toEqual(["10A"]);
+  });
+
+  it("is carried by the repeat requests", () => {
+    const step = matrixStep({ targetShade: { code: "9P", level: 9, tone: "pearl", line: "socolor" } });
+    const entry = makeEntry({ clientName: "Anna", steps: [step] });
+    expect(buildRepeatFormulaRequest(entry, BRANDS)?.missingShadeCodes).toEqual(["9P"]);
+    const session = makeEntry({ clientName: "Anna", steps: [step, { ...step, strandZone: "ends" }] });
+    expect(buildRepeatSessionRequest(session, BRANDS)?.missingShadeCodes).toEqual(["9P"]);
   });
 });

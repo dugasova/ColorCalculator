@@ -358,6 +358,10 @@ export const uk: typeof en = {
     savedInVersion: "v{{version}}",
     patchTestOn: "Алергопроба: {{date}}",
     repeat: "Повторити формулу",
+    missingShadesNotice:
+      "Цих відтінків більше немає в палітрі: {{codes}}. Калькулятор підставив інший — обери заміну перед збереженням.",
+    missingShadesDismiss: "Зрозуміло",
+    missingShadesOnCard: "Вже немає в палітрі: {{codes}}",
     stepLabel: "Крок {{number}}",
     stepLabelWithZone: "Крок {{number}} — {{zone}}",
     visitCount: "Візитів: {{count}}",

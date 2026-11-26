@@ -53,6 +53,9 @@ export interface RepeatFormulaRequest {
   naturalBaseShadeCode?: string | null;
   // The A : V ratio of a Matrix Super Sync ash + violet mix; absent or null, the default.
   ashVioletRatio?: AshVioletRatio | null;
+  // Shades the visit used that the palette no longer has (see findMissingShadeCodes);
+  // the calculator warns about them. Absent on a request built elsewhere.
+  missingShadeCodes?: string[];
 }
 
 // True for a plain single-color-step entry (FormulaCalculator never writes `strandZone`
@@ -72,6 +75,27 @@ function isSimpleFormulaEntry(entry: FormulaHistoryEntry): boolean {
 export function resolveStepBrand(step: ColorHistoryStep, brands: Record<BrandId, Brand>): Brand | undefined {
   const byId = step.brandId !== undefined ? brands[step.brandId] : undefined;
   return byId ?? Object.values(brands).find(b => b.name === step.brandName);
+}
+
+// The shade codes a saved color step used (target, additional shades, blend components,
+// gray natural base) that its brand's live palette no longer has on the step's line --
+// discontinued or replaced since the visit (Matrix and Redken moved to their European
+// cards in 0.12 / 0.13). Repeating such a step silently falls back to the line's first
+// shade (see useShadeSelection), so the caller warns the colorist with this list.
+export function findMissingShadeCodes(step: ColorHistoryStep, brand: Brand): string[] {
+  const line = step.line ?? null;
+  const live = new Set(brand.shades.filter(shade => (shade.line ?? null) === line).map(shade => shade.code));
+  const blend = step.blend ?? null;
+  const used = [
+    step.targetShade,
+    blend === null ? (step.additionalShade ?? null) : null,
+    blend === null ? (step.additionalShade2 ?? null) : null,
+    blend?.shadeA ?? null,
+    blend?.shadeB ?? null,
+    step.naturalBase?.shade ?? null,
+  ];
+  const missing = used.filter((shade): shade is NonNullable<typeof shade> => shade !== null && !live.has(shade.code));
+  return [...new Set(missing.map(shade => shade.code))];
 }
 
 // Neither totalGrams nor colorGrams is stored directly on a saved step; both are
@@ -172,6 +196,8 @@ export interface RepeatSessionRequest {
   clientName: string;
   clientId: string | null;
   steps: StepSeed[];
+  // Across all color steps; see RepeatFormulaRequest's own field.
+  missingShadeCodes?: string[];
   markupMultiplier: number;
   servicePrice: number | undefined;
 }
@@ -239,6 +265,7 @@ export function buildRepeatFormulaRequest(
     grayNaturalApplied: (step.naturalBase ?? null) !== null,
     naturalBaseShadeCode: step.naturalBase?.shade.code ?? null,
     ashVioletRatio: step.result.ashVioletMix?.ratio ?? null,
+    missingShadeCodes: findMissingShadeCodes(step, brand),
     processingMinutes: step.processingMinutes,
     applicationZone,
     pricePerGram: step.pricePerGram ?? brand.pricePerGram,
@@ -262,10 +289,12 @@ export function buildRepeatSessionRequest(
   if (entry.steps.length === 0 || isSimpleFormulaEntry(entry)) return null;
 
   const steps: StepSeed[] = [];
+  const missingShadeCodes = new Set<string>();
   for (const step of entry.steps) {
     if (step.kind === "color") {
       const brand = resolveStepBrand(step, brands);
       if (brand === undefined) return null;
+      for (const code of findMissingShadeCodes(step, brand)) missingShadeCodes.add(code);
       const blend = step.blend ?? null;
       const additionalShadeGrams = step.additionalShadeGrams ?? 0;
       const additionalShade2Grams = step.additionalShade2Grams ?? 0;
@@ -322,6 +351,7 @@ export function buildRepeatSessionRequest(
     clientName: entry.clientName,
     clientId: entry.clientId,
     steps,
+    missingShadeCodes: [...missingShadeCodes],
     markupMultiplier: entry.markupMultiplier ?? DEFAULT_MARKUP_MULTIPLIER,
     servicePrice: entry.servicePrice ?? undefined,
   };
