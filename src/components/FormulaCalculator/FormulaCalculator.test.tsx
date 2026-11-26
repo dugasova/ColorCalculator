@@ -60,6 +60,13 @@ describe("FormulaCalculator", () => {
     expect(html).not.toContain('id="blendShadeB"');
   });
 
+  it("names what the collapsed extra-options card holds, none of it marked on", () => {
+    const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" />);
+    expect(html).toContain("calculator__advanced-chips");
+    expect(html.match(/calculator__advanced-chip"/g)).toHaveLength(3);
+    expect(html).not.toContain("calculator__advanced-chip--on");
+  });
+
   it("renders a collapsed cross-brand match trigger, with the results list absent until expanded", () => {
     const html = renderToStaticMarkup(<FormulaCalculator appliedBy="stylist@example.com" />);
     expect(html).toContain('aria-expanded="false"');

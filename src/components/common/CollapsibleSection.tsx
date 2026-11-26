@@ -16,6 +16,9 @@ export interface CollapsibleSectionProps {
   // active selection (e.g. FormulaCalculator's "Advanced" wrapper, forced open while a
   // repeat/favorite request has filled in a blend or additional shade).
   forceOpen?: boolean;
+  // Extra content inside the toggle, under the title (e.g. FormulaCalculator's chips
+  // naming what the "Advanced" card holds). Part of the button, so clicking it toggles too.
+  subtitle?: ReactNode;
 }
 
 const hasLocalStorage = typeof localStorage !== "undefined";
@@ -37,6 +40,7 @@ export function CollapsibleSection({
   children,
   className,
   forceOpen,
+  subtitle,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(() => {
     const stored = hasLocalStorage ? localStorage.getItem(storageKey(id)) : null;
@@ -65,10 +69,23 @@ export function CollapsibleSection({
           className="collapsible-section__toggle"
           aria-expanded={isOpen}
           aria-controls={panelId}
+          // With a subtitle, the button is named by its title alone and the subtitle
+          // becomes its description, so a screen reader doesn't run the two together.
+          aria-labelledby={subtitle === undefined ? undefined : `${id}-title`}
+          aria-describedby={subtitle === undefined ? undefined : `${id}-subtitle`}
           onClick={toggle}
           disabled={forceOpen === true}
         >
-          <span>{title}</span>
+          {subtitle === undefined ? (
+            <span>{title}</span>
+          ) : (
+            <span className="collapsible-section__text">
+              <span id={`${id}-title`} className="collapsible-section__title">
+                {title}
+              </span>
+              <span id={`${id}-subtitle`}>{subtitle}</span>
+            </span>
+          )}
           <svg className="collapsible-section__chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true">
             <path
               d="M1 1.5L6 6.5L11 1.5"

@@ -84,4 +84,16 @@ describe("CollapsibleSection", () => {
     expect(toggle).toBeDisabled();
     expect(document.getElementById("w-panel")).not.toHaveAttribute("hidden");
   });
+  it("renders the subtitle inside the toggle, so clicking it toggles too", () => {
+    render(
+      <CollapsibleSection id="sub" title="Title" subtitle={<span>Chip</span>} defaultOpen={false}>
+        <input aria-label="child" />
+      </CollapsibleSection>,
+    );
+
+    const toggle = screen.getByRole("button", { name: "Title" });
+    expect(toggle).toHaveAccessibleDescription("Chip");
+    fireEvent.click(screen.getByText("Chip"));
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+  });
 });
