@@ -7,9 +7,12 @@ import { shadeKey } from "../../engine/paletteOverrides";
 import type { Shade } from "../../engine/shades";
 import { shadeCalibrationId } from "../../engine/shadeCalibration";
 import { shadeToHexColor } from "../../engine/color";
+import { formatLineLabel } from "../../engine/formatLineLabel";
 import { deleteShadeCalibration } from "../../shadeCalibrations";
 import { Select } from "../common/Select";
 import { CollapsibleSection } from "../common/CollapsibleSection";
+import { ShadeFilterFields } from "./ShadeFilter";
+import { useShadeFilter } from "./useShadeFilter";
 import { ShadeCalibrationDialog } from "./ShadeCalibrationDialog";
 
 export interface BrandShadeListProps {
@@ -26,7 +29,7 @@ export interface BrandShadeListProps {
 
 // Brand selector plus that brand's full shade list (including discontinued shades, so
 // an admin can re-enable one) with a per-shade discontinued toggle and photo
-// calibration control.
+// calibration control, narrowed by line and code (see ShadeFilter).
 export function BrandShadeList({
   brands,
   brandIds,
@@ -40,6 +43,8 @@ export function BrandShadeList({
   const [pendingShadeKeys, setPendingShadeKeys] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [calibratingShade, setCalibratingShade] = useState<Shade | null>(null);
+  const filter = useShadeFilter(shades);
+  const { visibleShades } = filter;
 
   const handleRemoveCalibration = async (shade: Shade) => {
     const key = shadeKey(shade);
@@ -96,6 +101,7 @@ export function BrandShadeList({
             options={brandIds.map(id => ({ value: id, label: brands[id].name }))}
           />
         </div>
+        <ShadeFilterFields filter={filter} idPrefix="palette" />
         {error !== null && (
           <p className="warning" role="alert">
             {error}
@@ -106,9 +112,11 @@ export function BrandShadeList({
           <p className="history__status" aria-live="polite">
             {t("palette.noShades")}
           </p>
+        ) : visibleShades.length === 0 ? (
+          <p className="history__status">{t("palette.noMatchingShades")}</p>
         ) : (
           <ul className="palette-admin__shade-list">
-            {shades.map(shade => (
+            {visibleShades.map(shade => (
               <li
                 key={shadeKey(shade)}
                 className={clsx(
@@ -124,7 +132,7 @@ export function BrandShadeList({
                 <span className="palette-admin__shade-detail">
                   {t("palette.level")} {shade.level} · {t(`palette.toneFamily.${shade.tone}`)}
                   {shade.secondaryTone ? ` / ${t(`palette.toneFamily.${shade.secondaryTone}`)}` : ""}
-                  {shade.line ? ` · ${shade.line}` : ""}
+                  {shade.line ? ` · ${formatLineLabel(shade.line)}` : ""}
                 </span>
                 <label className="palette-admin__discontinued">
                   <input

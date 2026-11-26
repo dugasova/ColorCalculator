@@ -24,6 +24,8 @@ import {
   LOW_STOCK_THRESHOLD_GRAMS,
 } from "../../stock";
 import { CollapsibleSection } from "../common/CollapsibleSection";
+import { ShadeFilterFields } from "./ShadeFilter";
+import { useShadeFilter } from "./useShadeFilter";
 
 export interface BrandStockListProps {
   brandId: BrandId;
@@ -45,6 +47,8 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
   const [error, setError] = useState<string | null>(null);
 
   const activeShades = shades.filter(shade => !disabledKeys.has(shadeKey(shade)));
+  // Narrows only the shade rows; the developer rows below always show in full.
+  const filter = useShadeFilter(activeShades);
   // `thresholdGrams` drives the low-stock badge (one service's worth left); `restockGrams`
   // is the amount the "+1" button below adds and is sized to how the product is actually
   // sold -- a shade's tube (60 g, or 50 g for Majirel/Dia Light) vs. a
@@ -215,7 +219,16 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
         </p>
       )}
 
-      <ul className="palette-admin__stock-list">{rows.slice(0, activeShades.length).map(renderRow)}</ul>
+      <ShadeFilterFields filter={filter} idPrefix="stock" />
+      {filter.visibleShades.length === 0 && activeShades.length > 0 && (
+        <p className="history__status">{t("palette.noMatchingShades")}</p>
+      )}
+      <ul className="palette-admin__stock-list">
+        {rows
+          .slice(0, activeShades.length)
+          .filter((_, index) => filter.visibleShades.includes(activeShades[index]))
+          .map(renderRow)}
+      </ul>
 
       <h3 className="palette-admin__stock-subheading">{t("palette.stockDevelopersTitle")}</h3>
       <ul className="palette-admin__stock-list">{rows.slice(activeShades.length).map(renderRow)}</ul>

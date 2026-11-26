@@ -146,3 +146,18 @@
   background: rgba(234, 88, 12, 0.08);
   color: var(--status-warning-ink);
 }
+
+/* Line and code/name filter above a long shade list. */
+.palette-admin__shade-filter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+  gap: 8px 16px;
+  margin-top: 12px;
+}
+
+.palette-admin__shade-count {
+  margin: 0 0 10px;
+  color: var(--brand-muted);
+  font-size: 0.85rem;
+}
