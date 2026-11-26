@@ -26,3 +26,22 @@ export function navItems(isAdmin: boolean): AppView[] {
 // and Orders) live behind its "More" popup. Picked for how often a stylist reaches for
 // them day-to-day; Correction/Bleach/Pre-pigment are comparatively occasional.
 export const MOBILE_PRIMARY_VIEWS: AppView[] = ["calculator", "complex", "history", "reference"];
+
+// The family each view belongs to: the desktop side panel and the top bar's breadcrumb
+// name it, and the Ctrl K section search matches on it too.
+export type NavGroup = "calculators" | "clients" | "salon" | "admin";
+
+export const NAV_GROUP: Record<AppView, NavGroup> = {
+  calculator: "calculators",
+  complex: "calculators",
+  correction: "calculators",
+  bleach: "calculators",
+  prepigment: "calculators",
+  history: "clients",
+  favorites: "clients",
+  analytics: "salon",
+  reference: "salon",
+  palette: "admin",
+  orders: "admin",
+  team: "admin",
+};

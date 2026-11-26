@@ -1,8 +1,9 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { NavIcon, type NavProps } from "./Nav";
 import { navItems, MOBILE_PRIMARY_VIEWS } from "./navItems";
+import { usePopup } from "./usePopup";
 import "./Nav.css";
 
 // Phone-width (<=767px, see Nav.css) replacement for the top .app-nav tab strip: a fixed
@@ -11,34 +12,11 @@ import "./Nav.css";
 // eleven tabs doesn't fit a phone's width, but a stylist's day-to-day four do.
 export function BottomNav({ view, onViewChange, isAdmin = false }: NavProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const { open, setOpen, rootRef, triggerRef } = usePopup();
   const popupId = useId();
 
   const moreViews = navItems(isAdmin).filter(v => !MOBILE_PRIMARY_VIEWS.includes(v));
   const moreActive = moreViews.includes(view);
-
-  useEffect(() => {
-    if (!open) return;
-    function handlePointerDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    }
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
 
   return (
     <nav className="bottom-nav" aria-label={t("nav.ariaLabel")}>

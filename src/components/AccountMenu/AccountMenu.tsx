@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "./AccountMenu.css";
@@ -12,6 +12,9 @@ export interface AccountMenuProps {
   email: string | null;
   onChangePassword: () => void;
   onSignOut: () => void;
+  // Theme and language controls repeated inside the menu: the tablet top bar has no room
+  // for them beside its tabs (see index.css, .account-menu__prefs).
+  prefs?: ReactNode;
 }
 
 // Collapses the signed-in email plus the "Change password"/"Sign out" actions behind a
@@ -21,7 +24,7 @@ export interface AccountMenuProps {
 // (trigger + absolutely-positioned panel, closed on click-outside or Escape) but simpler:
 // this is a handful of plain buttons, not a listbox, so it skips Select's roving-focus/
 // typeahead machinery entirely.
-export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuProps) {
+export function AccountMenu({ email, onChangePassword, onSignOut, prefs }: AccountMenuProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -79,6 +82,7 @@ export function AccountMenu({ email, onChangePassword, onSignOut }: AccountMenuP
       {open && (
         <div className="account-menu__popup" id={popupId}>
           {email !== null && <p className="account-menu__email">{email}</p>}
+          {prefs !== undefined && <div className="account-menu__prefs">{prefs}</div>}
           <button
             type="button"
             className="button button--secondary"

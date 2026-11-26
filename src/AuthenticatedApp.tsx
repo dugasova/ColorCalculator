@@ -7,6 +7,9 @@ import { usePalette } from "./palette";
 import FormulaCalculator from "./components/FormulaCalculator/FormulaCalculator";
 import { Nav, type AppView } from "./components/Nav/Nav";
 import { BottomNav } from "./components/Nav/BottomNav";
+import { SideNav } from "./components/Nav/SideNav";
+import { SectionSearch } from "./components/Nav/SectionSearch";
+import { NAV_GROUP } from "./components/Nav/navItems";
 import {
   buildRepeatFormulaRequest,
   buildRepeatSessionRequest,
@@ -85,6 +88,7 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
   // The saved visit formula B was repeated from (History's Compare), so B shows its date.
   const [comparedVisit, setComparedVisit] = useState<ComparedFormula | null>(null);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // The brand cheat sheets and technique guides (ReferenceIndexPage, BrandCheatSheetPage,
   // GuideCheatSheetPage) are real routes, not part of the `view` state switch below --
@@ -113,6 +117,11 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
     }
     return false;
   });
+
+  const goHome = () => {
+    navigate("/");
+    setView("calculator");
+  };
 
   const handleViewChange = (next: AppView) => {
     if (next === "reference") {
@@ -186,98 +195,136 @@ export function AuthenticatedApp({ user, isAdmin }: { user: User; isAdmin: boole
       <a href="#main-content" className="skip-link">
         {t("app.skipToContent")}
       </a>
-      <header className="app-header">
-        <div className="app-topbar">
-          <button
-            type="button"
-            className="app-brand"
-            onClick={() => {
-              navigate("/");
-              setView("calculator");
-            }}
-            aria-label={t("nav.calculator")}
-          >
-            <img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />
-            {t("app.titlePrefix")}
-            <em>{t("app.titleAccent")}</em>
-          </button>
-          <Nav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} />
-          <div className="app-topbar__account">
-            <ThemeSwitcher />
-            <LanguageSwitcher />
-            <AccountMenu
-              email={user.email}
-              onChangePassword={() => setIsChangePasswordOpen(true)}
-              onSignOut={() => signOut(auth)}
-            />
-          </div>
+      <div className="app-shell">
+        <SideNav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} onBrandClick={goHome} />
+        <div className="app-shell__body">
+          <header className="app-header">
+            <div className="app-topbar">
+              <button type="button" className="app-brand" onClick={goHome} aria-label={t("nav.calculator")}>
+                <img className="app-brand__mark" src="/favicon.svg" alt="" width="22" height="22" />
+                <span className="app-brand__name">
+                  {t("app.titlePrefix")}
+                  <em>{t("app.titleAccent")}</em>
+                </span>
+              </button>
+              <p className="app-topbar__title">
+                <span className="app-topbar__group">{t(`nav.groups.${NAV_GROUP[activeView]}`)}</span>
+                <span className="app-topbar__separator" aria-hidden="true">
+                  /
+                </span>
+                <span>{t(`nav.${activeView}`)}</span>
+              </p>
+              <Nav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} />
+              <div className="app-topbar__account">
+                <button type="button" className="app-topbar__search" onClick={() => setIsSearchOpen(true)}>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M11 4a7 7 0 1 1 0 14a7 7 0 1 1 0-14zM20 20l-4-4" />
+                  </svg>
+                  <span className="app-topbar__search-text">{t("nav.search")}</span>
+                  <kbd>Ctrl K</kbd>
+                </button>
+                <div className="app-topbar__prefs">
+                  <ThemeSwitcher />
+                  <LanguageSwitcher />
+                </div>
+                <AccountMenu
+                  email={user.email}
+                  onChangePassword={() => setIsChangePasswordOpen(true)}
+                  onSignOut={() => signOut(auth)}
+                  prefs={
+                    <>
+                      <ThemeSwitcher />
+                      <LanguageSwitcher />
+                    </>
+                  }
+                />
+              </div>
+            </div>
+          </header>
+          <SectionSearch
+            open={isSearchOpen}
+            onOpenChange={setIsSearchOpen}
+            onViewChange={handleViewChange}
+            isAdmin={isAdmin}
+          />
+          {!isOnline && (
+            <p className="offline-banner" role="status">
+              {t("app.offlineBanner")}
+            </p>
+          )}
+          {isChangePasswordOpen && (
+            <Suspense fallback={null}>
+              <ChangePasswordModal user={user} onClose={() => setIsChangePasswordOpen(false)} />
+            </Suspense>
+          )}
+          <main className="app-main" id="main-content" tabIndex={-1}>
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/reference" element={<ReferenceIndexPage />} />
+                <Route path="/guides/:guideId" element={<GuideCheatSheetPage />} />
+                <Route path="/:brandId" element={<BrandCheatSheetPage />} />
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      {view === "calculator" && (
+                        <FormulaCalculator
+                          key={formResetKey}
+                          appliedBy={user.email ?? "unknown"}
+                          repeatRequest={repeatRequest}
+                          favoriteRequest={favoriteRequest}
+                          onSaved={handleFormulaSaved}
+                          pinnedFormula={pinnedFormula}
+                          onPinnedFormulaChange={handlePinnedFormulaChange}
+                          comparedVisit={comparedVisit}
+                        />
+                      )}
+                      {view === "correction" && <ColorCorrectionCalculator />}
+                      {view === "bleach" && <BleachCalculator />}
+                      {view === "complex" && (
+                        <ComplexColoringCalculator
+                          key={formResetKey}
+                          appliedBy={user.email ?? "unknown"}
+                          repeatRequest={repeatSessionRequest}
+                          onSaved={handleFormulaSaved}
+                        />
+                      )}
+                      {view === "prepigment" && <PrePigmentationCalculator />}
+                      {view === "history" && (
+                        <HistoryView
+                          onRepeat={handleRepeat}
+                          onCompare={handleCompare}
+                          isComparing={pinnedFormula !== null}
+                          isAdmin={isAdmin}
+                          currentUserEmail={user.email ?? ""}
+                        />
+                      )}
+                      {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
+                      {view === "favorites" && (
+                        <FavoritesPage
+                          appliedBy={user.email ?? "unknown"}
+                          brands={brands}
+                          onApply={handleApplyFavorite}
+                        />
+                      )}
+                      {view === "palette" && isAdmin && <PaletteAdminView />}
+                      {view === "orders" && isAdmin && <OrderListView />}
+                      {view === "team" && isAdmin && <TeamView />}
+                    </>
+                  }
+                />
+              </Routes>
+            </Suspense>
+          </main>
         </div>
-      </header>
-      {!isOnline && (
-        <p className="offline-banner" role="status">
-          {t("app.offlineBanner")}
-        </p>
-      )}
-      {isChangePasswordOpen && (
-        <Suspense fallback={null}>
-          <ChangePasswordModal user={user} onClose={() => setIsChangePasswordOpen(false)} />
-        </Suspense>
-      )}
-      <main className="app-main" id="main-content" tabIndex={-1}>
-        <Suspense fallback={null}>
-          <Routes>
-            <Route path="/reference" element={<ReferenceIndexPage />} />
-            <Route path="/guides/:guideId" element={<GuideCheatSheetPage />} />
-            <Route path="/:brandId" element={<BrandCheatSheetPage />} />
-            <Route
-              path="/"
-              element={
-                <>
-                  {view === "calculator" && (
-                    <FormulaCalculator
-                      key={formResetKey}
-                      appliedBy={user.email ?? "unknown"}
-                      repeatRequest={repeatRequest}
-                      favoriteRequest={favoriteRequest}
-                      onSaved={handleFormulaSaved}
-                      pinnedFormula={pinnedFormula}
-                      onPinnedFormulaChange={handlePinnedFormulaChange}
-                      comparedVisit={comparedVisit}
-                    />
-                  )}
-                  {view === "correction" && <ColorCorrectionCalculator />}
-                  {view === "bleach" && <BleachCalculator />}
-                  {view === "complex" && (
-                    <ComplexColoringCalculator
-                      key={formResetKey}
-                      appliedBy={user.email ?? "unknown"}
-                      repeatRequest={repeatSessionRequest}
-                      onSaved={handleFormulaSaved}
-                    />
-                  )}
-                  {view === "prepigment" && <PrePigmentationCalculator />}
-                  {view === "history" && (
-                    <HistoryView
-                      onRepeat={handleRepeat}
-                      onCompare={handleCompare}
-                      isComparing={pinnedFormula !== null}
-                      isAdmin={isAdmin}
-                      currentUserEmail={user.email ?? ""}
-                    />
-                  )}
-                  {view === "analytics" && <AnalyticsView isAdmin={isAdmin} currentUserEmail={user.email ?? ""} />}
-                  {view === "favorites" && (
-                    <FavoritesPage appliedBy={user.email ?? "unknown"} brands={brands} onApply={handleApplyFavorite} />
-                  )}
-                  {view === "palette" && isAdmin && <PaletteAdminView />}
-                  {view === "orders" && isAdmin && <OrderListView />}
-                  {view === "team" && isAdmin && <TeamView />}
-                </>
-              }
-            />
-          </Routes>
-        </Suspense>
-      </main>
+      </div>
       <BottomNav view={activeView} onViewChange={handleViewChange} isAdmin={isAdmin} />
     </div>
   );

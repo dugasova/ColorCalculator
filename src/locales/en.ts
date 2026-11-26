@@ -38,6 +38,18 @@ export const en = {
     reference: "Reference",
     ariaLabel: "Primary navigation",
     more: "More",
+    collapseMenu: "Collapse menu",
+    expandMenu: "Expand menu",
+    search: "Go to section…",
+    searchLabel: "Section",
+    searchPlaceholder: "Type a section: bleach, history…",
+    searchEmpty: "Nothing found",
+    groups: {
+      calculators: "Calculators",
+      clients: "Clients",
+      salon: "Salon",
+      admin: "Administration",
+    },
   },
   team: {
     title: "Access requests",
