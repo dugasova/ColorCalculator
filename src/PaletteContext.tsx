@@ -48,7 +48,10 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const brands = useMemo(() => buildBrandCatalog(BRANDS, customBrands, overrides), [customBrands, overrides]);
+  const brands = useMemo(
+    () => buildBrandCatalog(BRANDS, customBrands, overrides, pricingSettings.brandPricesPerGram),
+    [customBrands, overrides, pricingSettings.brandPricesPerGram],
+  );
   const calibrationIndex = useMemo(() => indexShadeCalibrations(calibrations), [calibrations]);
   const value = useMemo<PaletteState>(
     () => ({ brands, customBrands, overrides, stock, pricingSettings, calibrationIndex }),

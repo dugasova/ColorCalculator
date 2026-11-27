@@ -46,7 +46,7 @@ describe("ColorStepCard interaction", () => {
     expect(onChange).toHaveBeenCalled();
     expect(lastStep(onChange).brandName).toBe("Generic");
     expect(lastStep(onChange).targetShade.code).toBe("1.0");
-    expect(lastStep(onChange).pricePerGram).toBe(0.18);
+    expect(lastStep(onChange).pricePerGram).toBe(0.1); // the Generic brand's price
   });
 
   it("keeps the additional shade when the target shade changes within the same line", () => {

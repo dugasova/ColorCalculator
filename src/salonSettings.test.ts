@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { subscribeToPricingSettings, setSalonMarkupMultiplier, DEFAULT_PRICING_SETTINGS } from "./salonSettings";
+import {
+  subscribeToPricingSettings,
+  setSalonMarkupMultiplier,
+  setBrandPricePerGram,
+  DEFAULT_PRICING_SETTINGS,
+} from "./salonSettings";
 
 const docMock = vi.fn((...args: unknown[]) => ({ kind: "doc", args }));
 const setDocMock = vi.fn();
@@ -29,8 +34,16 @@ describe("subscribeToPricingSettings", () => {
     const onChange = vi.fn();
     subscribeToPricingSettings(onChange);
     const [, onNext] = onSnapshotMock.mock.calls[0];
+    onNext({ exists: () => true, data: () => ({ markupMultiplier: 3.5, brandPricesPerGram: { wella: 0.25 } }) });
+    expect(onChange).toHaveBeenCalledWith({ markupMultiplier: 3.5, brandPricesPerGram: { wella: 0.25 } });
+  });
+
+  it("reads a document saved before brand prices as having none", () => {
+    const onChange = vi.fn();
+    subscribeToPricingSettings(onChange);
+    const [, onNext] = onSnapshotMock.mock.calls[0];
     onNext({ exists: () => true, data: () => ({ markupMultiplier: 3.5 }) });
-    expect(onChange).toHaveBeenCalledWith({ markupMultiplier: 3.5 });
+    expect(onChange).toHaveBeenCalledWith({ markupMultiplier: 3.5, brandPricesPerGram: {} });
   });
 
   it("falls back to the built-in default for a malformed document instead of poisoning every calculator's markup", () => {
@@ -62,6 +75,15 @@ describe("subscribeToPricingSettings", () => {
 describe("setSalonMarkupMultiplier", () => {
   it("writes the markup to the well-known pricing settings document", async () => {
     await setSalonMarkupMultiplier(3);
-    expect(setDocMock).toHaveBeenCalledWith(expect.anything(), { markupMultiplier: 3 });
+    expect(setDocMock).toHaveBeenCalledWith(expect.anything(), { markupMultiplier: 3 }, { merge: true });
+  });
+
+  it("writes one brand's price without touching the rest of the document", async () => {
+    await setBrandPricePerGram("wella", 0.25);
+    expect(setDocMock).toHaveBeenCalledWith(
+      expect.anything(),
+      { brandPricesPerGram: { wella: 0.25 } },
+      { merge: true },
+    );
   });
 });

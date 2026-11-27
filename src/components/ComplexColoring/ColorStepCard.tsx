@@ -31,8 +31,6 @@ import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneStat
 import { useColorStepReport } from "./useColorStepReport";
 import { NumberInput } from "../common/NumberInput";
 
-const DEFAULT_PRICE_PER_GRAM = 0.18;
-
 export interface ColorStepCardProps {
   stepId: string;
   // Every already-computed step earlier in this session, in order -- lets this card
@@ -54,8 +52,8 @@ export interface ColorStepCardProps {
 // formula calculation with FormulaCalculator (see useShadeFormulaState), minus the parts
 // that only make sense once per session (substitute-blend mode, cross-brand match,
 // overall markup/service price) — those live at the session level in
-// ComplexColoringCalculator, aggregated across every step. `pricePerGram` here is a plain
-// flat field, unlike FormulaCalculator's manual-override-over-a-brand-default pattern.
+// ComplexColoringCalculator, aggregated across every step. `pricePerGram` follows the
+// brand's price until the colorist types one, as in FormulaCalculator.
 // Seeded once via `seed` for session repeat (see ColorStepCardProps); no render-time replay.
 export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRemove }: ColorStepCardProps) {
   const { t } = useTranslation();
@@ -67,7 +65,9 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
   // it as an effect both cascaded an extra render and tripped react-hooks/set-state-in-effect.
   const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
 
-  const [pricePerGram, setPricePerGram] = useState(seed?.pricePerGram ?? DEFAULT_PRICE_PER_GRAM);
+  // Undefined until the colorist types a price (or a repeated visit brings its own): the
+  // step then follows the picked brand's price per gram, as the calculator does.
+  const [manualPricePerGram, setPricePerGram] = useState<number | undefined>(seed?.pricePerGram);
   const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
   const [foil, setFoil] = useState<FoilPlacement | undefined>(seed?.foil);
   const [startingBase, setStartingBase] = useState<StartingBase>(
@@ -138,6 +138,7 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
     handleTargetShadeCodeChange,
     handleAdditionalShadeCodeChange,
   } = formula;
+  const pricePerGram = manualPricePerGram ?? brands[brandId].pricePerGram;
   const { prePigmentationNeed, prePigmentationResult } = useColorStepReport({
     brands,
     formula,
