@@ -3,6 +3,29 @@
 All notable changes to Formulist. Versions follow [SemVer](https://semver.org/); see
 "Releasing" in the README for the process.
 
+## 0.15.0 — 2026-11-27
+
+- Bleach: a lift too big for one session is planned over several (at most 3 levels per
+  session on the scalp, at most 9%, 1–2 weeks apart). The plan lists each session's
+  levels, developer and time; the mix, time and price are for the first session.
+  - Complex Coloring: an on-scalp bleach step does the same, and its preview shows the
+    level this visit reaches. Strands in foil and lengths only keep the old limits.
+  - A "Developer" field: Auto by default, or one picked by hand for every session (up to
+    9% on the scalp). Saved with the visit and restored on Repeat.
+- Palette → Pricing: every brand's price per gram can be set, or reset to the default.
+  New calculations start from it; Complex Coloring's color steps follow the brand's price
+  instead of a flat 0.18.
+- Order list:
+  - each product shows what is left, with − / + to change the quantity;
+  - no pack size on screen or in the order text ("1A · Super Sync — 2 pcs");
+  - the order's date follows the app's language;
+  - a developer bottle counts as low at 300 g instead of 60 g, so low bottles reach the
+    order (also in Palette's stock list).
+- The calculator's extra options (equivalent, substitute blend, extra shade) are a card
+  with chips, marked while in use.
+- Fix: price, markup, grams and minutes fields can be cleared and retyped, and take a
+  decimal comma; before, a cleared field snapped back to 0.
+
 ## 0.14.0 — 2026-11-26
 
 - Matrix Super Sync: on a light blonde the ash shade is mixed with the violet shade of the
