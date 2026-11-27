@@ -17,6 +17,7 @@ export {
 export {
   LOW_STOCK_THRESHOLD_GRAMS,
   DEVELOPER_BOTTLE_SIZE_GRAMS,
+  DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS,
   getShadeTubeSizeGrams,
   getBrandScopedDeveloperLines,
   getScopedDeveloperVolumes,

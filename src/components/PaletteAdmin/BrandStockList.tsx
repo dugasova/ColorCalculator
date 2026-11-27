@@ -21,7 +21,7 @@ import {
   shadeStockId,
   stockById,
   stopTrackingStock,
-  LOW_STOCK_THRESHOLD_GRAMS,
+  DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS,
 } from "../../stock";
 import { CollapsibleSection } from "../common/CollapsibleSection";
 import { ShadeFilterFields } from "./ShadeFilter";
@@ -87,7 +87,7 @@ export function BrandStockList({ brandId, shades, disabledKeys }: BrandStockList
         id: developerStockId(brandId, line, volume),
         label:
           line === null ? formatDeveloperVolume(volume) : `${formatDeveloperVolume(volume)} · ${formatLineLabel(line)}`,
-        thresholdGrams: LOW_STOCK_THRESHOLD_GRAMS,
+        thresholdGrams: DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS,
         restockGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
         unit: "bottle" as const,
         commit: (grams: number) => setDeveloperStockGrams(brandId, line, volume, grams),

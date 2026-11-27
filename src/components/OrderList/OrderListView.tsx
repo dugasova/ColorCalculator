@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { usePalette, useStock } from "../../palette";
-import { buildReorderList, type ReorderItem } from "../../stock";
+import { buildReorderList, DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS, type ReorderItem } from "../../stock";
 import { formatLineLabel } from "../../engine/formatLineLabel";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { buildWhatsAppReminderUrl, buildTelegramReminderUrl } from "../../reminder";
 import { Select } from "../common/Select";
 import "../PaletteAdmin/PaletteAdminView.css";
+import "./OrderListView.css";
+import { QtyStepper } from "./QtyStepper";
 
 const COPIED_FEEDBACK_MS = 1500;
 
@@ -17,7 +19,7 @@ const COPIED_FEEDBACK_MS = 1500;
 // subscription Palette's own BrandStockList reads (see stock/reorder.ts's buildReorderList).
 // Restocking itself still happens in Palette; this view is order-drafting only.
 export function OrderListView() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const brands = usePalette();
   const items = buildReorderList(brands, useStock());
   const [qtyDrafts, setQtyDrafts] = useState<Record<string, string>>({});
@@ -76,18 +78,12 @@ export function OrderListView() {
       ? []
       : selectedGroup.items
           .filter(item => qtyOf(item) > 0)
-          .map(item =>
-            t(item.unit === "bottle" ? "orders.textBottleLine" : "orders.textTubeLine", {
-              label: labelOf(item),
-              qty: qtyOf(item),
-              grams: item.packGrams,
-            }),
-          );
+          .map(item => t("orders.textLine", { label: labelOf(item), qty: qtyOf(item) }));
   const orderText =
     selectedGroup === null || orderLines.length === 0
       ? null
       : [
-          t("orders.textTitle", { date: new Date().toLocaleDateString() }),
+          t("orders.textTitle", { date: new Date().toLocaleDateString(i18n.language) }),
           `${brands[selectedGroup.brandId].name}\n${orderLines.join("\n")}`,
         ].join("\n\n");
 
@@ -114,7 +110,7 @@ export function OrderListView() {
       <h1 className="calculator__title">
         {t("orders.titlePrefix")} <span className="calculator__title-accent">{t("orders.titleAccent")}</span>
       </h1>
-      <p className="palette-admin__hint">{t("orders.hint")}</p>
+      <p className="palette-admin__hint">{t("orders.hint", { developerGrams: DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS })}</p>
 
       {items.length === 0 ? (
         <p className="palette-admin__hint">{t("orders.empty")}</p>
@@ -139,29 +135,24 @@ export function OrderListView() {
                   return (
                     <li
                       key={item.id}
-                      className={clsx(
-                        "palette-admin__stock-row",
-                        item.status === "out" && "palette-admin__stock-row--out",
-                      )}
+                      className={clsx("order-list__row", item.status === "out" && "order-list__row--out")}
                     >
-                      <span className="palette-admin__stock-label">{label}</span>
-                      <input
-                        type="number"
-                        min={0}
-                        step={1}
-                        aria-label={t("orders.qtyFor", { label })}
+                      <div className="order-list__info">
+                        <span className="order-list__label">{label}</span>
+                        <span className="order-list__meta">
+                          {t("orders.remaining", { remaining: Math.round(item.remainingGrams) })}
+                          <span className="palette-admin__stock-badge">
+                            {t(item.status === "out" ? "palette.stockOut" : "palette.stockLow")}
+                          </span>
+                        </span>
+                      </div>
+                      <QtyStepper
+                        id={`orderQty-${item.id}`}
+                        label={label}
                         value={qtyDrafts[item.id] ?? String(item.suggestedPacks)}
-                        onChange={e => setQtyDrafts(prev => ({ ...prev, [item.id]: e.target.value }))}
+                        quantity={qtyOf(item)}
+                        onChange={value => setQtyDrafts(prev => ({ ...prev, [item.id]: value }))}
                       />
-                      <span>
-                        {t(item.unit === "bottle" ? "orders.bottleDetail" : "orders.tubeDetail", {
-                          grams: item.packGrams,
-                          remaining: Math.round(item.remainingGrams),
-                        })}
-                      </span>
-                      <span className="palette-admin__stock-badge">
-                        {t(item.status === "out" ? "palette.stockOut" : "palette.stockLow")}
-                      </span>
                     </li>
                   );
                 })}
