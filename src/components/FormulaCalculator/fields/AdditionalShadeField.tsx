@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { shadeLabel, type Shade } from "../../../engine/shades";
 import { shadeToHexColor } from "../../../engine/color";
 import { Select } from "../../common/Select";
-import { useClampedNumberText } from "./useClampedNumberText";
+import { useClampedNumberText } from "../../common/useClampedNumberText";
 import "./fields.css";
 
 export interface AdditionalShadeFieldProps {

@@ -21,6 +21,7 @@ import { StockShortageWarnings } from "../common/StockShortageWarnings";
 import { findStockShortages } from "../../stock";
 import "../Bleach/BleachCalculator.css";
 import "./ComplexColoringCalculator.css";
+import { NumberInput } from "../common/NumberInput";
 
 export interface ComplexColoringCalculatorProps {
   appliedBy: string;
@@ -198,24 +199,22 @@ export default function ComplexColoringCalculator({
           <div className="results__control-grid">
             <div className="field">
               <label htmlFor="complexMarkupMultiplier">{t("results.markupMultiplier")}</label>
-              <input
+              <NumberInput
                 id="complexMarkupMultiplier"
-                type="number"
                 min={1}
-                step={0.1}
                 value={markupMultiplier}
-                onChange={e => setManualMarkupMultiplier(Number(e.target.value))}
+                onValueChange={setManualMarkupMultiplier}
+                decimals={1}
               />
             </div>
             <div className="field">
               <label htmlFor="complexServicePrice">{t("results.servicePrice")}</label>
-              <input
+              <NumberInput
                 id="complexServicePrice"
-                type="number"
                 min={0}
-                step={0.01}
-                value={servicePrice ?? ""}
-                onChange={e => setManualServicePrice(Number(e.target.value))}
+                value={servicePrice ?? null}
+                onValueChange={setManualServicePrice}
+                decimals={2}
               />
               {recommendedServicePrice !== null && (
                 <span className="processing-time-hint">

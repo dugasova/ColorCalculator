@@ -4,6 +4,7 @@ import type { Shade } from "../../../engine/shades";
 import { splitShadeBlend } from "../../../engine/formula";
 import { blendShadeHexColors } from "../../../engine/color";
 import "./fields.css";
+import { NumberInput } from "../../common/NumberInput";
 
 export interface BlendRatioFieldProps {
   shadeA: Shade;
@@ -45,14 +46,12 @@ export function BlendRatioField({
             {percent}/{100 - percent}
           </button>
         ))}
-        <input
+        <NumberInput
           id={`blendRatio${idSuffix}`}
-          type="number"
           min={0}
           max={100}
-          step={5}
           value={primaryPercent}
-          onChange={e => onPrimaryPercentChange(Number(e.target.value))}
+          onValueChange={onPrimaryPercentChange}
         />
         <span
           className="shade-swatch"

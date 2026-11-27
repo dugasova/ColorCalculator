@@ -28,6 +28,7 @@ import { LineField } from "../FormulaCalculator/fields/LineField";
 import "./ColorCorrectionCalculator.css";
 import { NeutralizationWheel } from "./NeutralizationWheel";
 import { TONES, TONE_COLORS } from "./toneColors";
+import { NumberInput } from "../common/NumberInput";
 
 function getTipKey(tone: UnwantedTone, technique: "deposit" | "lift-tone" | "multi-step"): string {
   const wheelTone = getDominantWheelTone(tone);
@@ -283,13 +284,7 @@ export function ColorCorrectionCalculator() {
 
         <div className="field">
           <label htmlFor="baseGrams">{t("correction.baseGrams")}</label>
-          <input
-            type="number"
-            id="baseGrams"
-            min={1}
-            value={baseGrams}
-            onChange={e => setBaseGrams(Number(e.target.value))}
-          />
+          <NumberInput id="baseGrams" min={1} value={baseGrams} onValueChange={setBaseGrams} />
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import type { Brand, BrandId } from "../../engine/brands";
 import type { MixingRatioConfig } from "../../engine/paletteOverrides";
 import { Select } from "../common/Select";
 import { CollapsibleSection } from "../common/CollapsibleSection";
+import { NumberInput } from "../common/NumberInput";
 
 export interface AddBrandFormProps {
   brands: Record<BrandId, Brand>;
@@ -118,13 +119,12 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
         </div>
         <div className="field">
           <label htmlFor="paletteBrandPrice">{t("palette.pricePerGram")}</label>
-          <input
+          <NumberInput
             id="paletteBrandPrice"
-            type="number"
             min={0}
-            step={0.01}
             value={pricePerGram}
-            onChange={e => setPricePerGram(Number(e.target.value))}
+            onValueChange={setPricePerGram}
+            decimals={2}
           />
         </div>
         <div className="field">
@@ -143,22 +143,22 @@ export function AddBrandForm({ brands, onBrandAdded }: AddBrandFormProps) {
           <>
             <div className="field">
               <label htmlFor="paletteColorParts">{t("palette.colorParts")}</label>
-              <input
+              <NumberInput
                 id="paletteColorParts"
-                type="number"
                 min={1}
                 value={colorParts}
-                onChange={e => setColorParts(Number(e.target.value))}
+                onValueChange={setColorParts}
+                decimals={1}
               />
             </div>
             <div className="field">
               <label htmlFor="paletteDeveloperParts">{t("palette.developerParts")}</label>
-              <input
+              <NumberInput
                 id="paletteDeveloperParts"
-                type="number"
                 min={1}
                 value={developerParts}
-                onChange={e => setDeveloperParts(Number(e.target.value))}
+                onValueChange={setDeveloperParts}
+                decimals={1}
               />
             </div>
           </>

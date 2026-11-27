@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { useClampedNumberText } from "./fields/useClampedNumberText";
+import { useClampedNumberText } from "../common/useClampedNumberText";
 import type { FormulaPricing, FormulaPricingHandlers } from "./formulaResultsModel";
+import { NumberInput } from "../common/NumberInput";
 
 const MAX_PROCESSING_MINUTES = 180;
 
@@ -49,35 +50,32 @@ export function TimingPricingSection({
         </div>
         <div className="field">
           <label htmlFor="pricePerGram">{t("results.pricePerGram")}</label>
-          <input
+          <NumberInput
             id="pricePerGram"
-            type="number"
             min={0}
-            step={0.01}
             value={pricePerGram}
-            onChange={e => onPricePerGramChange(Number(e.target.value))}
+            onValueChange={onPricePerGramChange}
+            decimals={2}
           />
         </div>
         <div className="field">
           <label htmlFor="markupMultiplier">{t("results.markupMultiplier")}</label>
-          <input
+          <NumberInput
             id="markupMultiplier"
-            type="number"
             min={1}
-            step={0.1}
             value={markupMultiplier}
-            onChange={e => onMarkupMultiplierChange(Number(e.target.value))}
+            onValueChange={onMarkupMultiplierChange}
+            decimals={1}
           />
         </div>
         <div className="field">
           <label htmlFor="servicePrice">{t("results.servicePrice")}</label>
-          <input
+          <NumberInput
             id="servicePrice"
-            type="number"
             min={0}
-            step={0.01}
-            value={servicePrice ?? ""}
-            onChange={e => onServicePriceChange(Number(e.target.value))}
+            value={servicePrice ?? null}
+            onValueChange={onServicePriceChange}
+            decimals={2}
           />
           {recommendedServicePrice !== null && (
             <span className="processing-time-hint">

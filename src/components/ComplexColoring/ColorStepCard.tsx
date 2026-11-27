@@ -29,6 +29,7 @@ import { PrePigmentationStep } from "../FormulaCalculator/PrePigmentationStep";
 import type { ColorHistoryStep, ColorStepSeed, HistoryStep } from "../../history";
 import { DEFAULT_STEP_STRAND_ZONE, applyInheritedZoneState, getInheritedZoneState } from "./stepInheritance";
 import { useColorStepReport } from "./useColorStepReport";
+import { NumberInput } from "../common/NumberInput";
 
 const DEFAULT_PRICE_PER_GRAM = 0.18;
 
@@ -257,23 +258,21 @@ export function ColorStepCard({ stepId, previousSteps = [], seed, onChange, onRe
         />
         <div className="field">
           <label htmlFor={`stepProcessingMinutes${idSuffix}`}>{t("results.processingTime")}</label>
-          <input
+          <NumberInput
             id={`stepProcessingMinutes${idSuffix}`}
-            type="number"
             min={1}
             value={processingMinutes}
-            onChange={e => setManualProcessingMinutes(Number(e.target.value))}
+            onValueChange={setManualProcessingMinutes}
           />
         </div>
         <div className="field">
           <label htmlFor={`stepPricePerGram${idSuffix}`}>{t("results.pricePerGram")}</label>
-          <input
+          <NumberInput
             id={`stepPricePerGram${idSuffix}`}
-            type="number"
             min={0}
-            step={0.01}
             value={pricePerGram}
-            onChange={e => setPricePerGram(Number(e.target.value))}
+            onValueChange={setPricePerGram}
+            decimals={2}
           />
         </div>
       </div>
