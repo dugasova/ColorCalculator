@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BLEACH_TARGET_LEVELS, type BleachFormula } from "../../engine/bleach";
+import { BLEACH_TARGET_LEVELS, planBleachSessions, type BleachFormula } from "../../engine/bleach";
 import { calculateProductCost, calculateRecommendedServicePrice } from "../../engine/pricing";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
@@ -12,6 +12,7 @@ import {
   BleachMixRow,
   BleachSafetyNotes,
   BleachToningRows,
+  BleachDeveloperField,
   BleachTotalGramsField,
   BleachWarnings,
   type BleachToner,
@@ -132,6 +133,8 @@ export function BleachCalculator() {
     setTotalGrams,
     pricePerGram,
     setPricePerGram,
+    manualDeveloperVolume,
+    setManualDeveloperVolume,
     result,
   } = useBleachFormulaState();
   const salonMarkupMultiplier = useSalonMarkupMultiplier();
@@ -170,6 +173,13 @@ export function BleachCalculator() {
         />
 
         <BleachTotalGramsField id="totalGrams" totalGrams={totalGrams} onTotalGramsChange={setTotalGrams} />
+        <BleachDeveloperField
+          id="bleachDeveloper"
+          onScalp={true}
+          manualDeveloperVolume={manualDeveloperVolume}
+          onManualDeveloperVolumeChange={setManualDeveloperVolume}
+          autoDeveloperVolume={planBleachSessions(startLevel, targetLevel)[0]?.developerVolume ?? null}
+        />
         <BrandField
           brandId={tonerBrand.id}
           onBrandIdChange={setTonerBrandId}

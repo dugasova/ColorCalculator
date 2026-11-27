@@ -90,11 +90,13 @@ describe("BleachStepCard", () => {
   it("warns that a lift too large for one session needs several", () => {
     renderStep();
 
-    chooseOption("Current level", "1");
+    chooseOption("Current level", "4");
     chooseOption("Target level", "10");
 
-    expect(screen.getByRole("alert")).toHaveTextContent("cannot be done in a single session");
-    expect(screen.queryByText(/g bleach powder/)).toBeNull();
+    expect(screen.getByRole("alert")).toHaveTextContent("Today, lift to level 7");
+    expect(screen.getByText(/Session 2: 7 → 10/)).toBeInTheDocument();
+    // This visit's mix is the first session's.
+    expect(screen.getByText(/g bleach powder/)).toBeInTheDocument();
   });
 
   it("starts from a repeated visit's values", () => {
@@ -117,6 +119,23 @@ describe("BleachStepCard", () => {
       pricePerGram: 0.3,
       strandZone: "roots",
     });
+  });
+
+  it("restores a hand-picked developer from a repeated visit, and lets it go back to Auto", () => {
+    const { onChange } = renderStep({
+      kind: "bleach",
+      startLevel: 5,
+      targetLevel: 8,
+      totalGrams: 60,
+      processingMinutes: 35,
+      pricePerGram: 0.1,
+      manualDeveloperVolume: 20,
+    });
+    expect(lastStep(onChange).result.developerVolume).toBe(20);
+
+    chooseOption("Developer", "auto");
+    expect(lastStep(onChange).result.manualDeveloperVolume).toBeNull();
+    expect(lastStep(onChange).result.developerVolume).toBe(6);
   });
 
   it("does not report an unchanged step again when only the callback changes", () => {
@@ -182,13 +201,29 @@ describe("BleachStepCard", () => {
     expect(lastStep(onChange).foil?.percent).toBeNull();
   });
 
-  it("does not change the mix: the placement is a note only", () => {
+  it("does not change the mix: the percent in foil is a note only", () => {
     const { onChange } = renderStep();
     const before = lastStep(onChange).result;
 
     chooseOption("Coverage", "strands-1");
-    fireEvent.change(screen.getByLabelText("Hair in foil, % (approx.)"), { target: { value: "30" } });
+    const inFoil = lastStep(onChange).result;
+    // Foil keeps the powder off the scalp: a single session's mix stays the same.
+    expect(inFoil.grams).toEqual(before.grams);
+    expect(inFoil.developerVolume).toBe(before.developerVolume);
 
-    expect(lastStep(onChange).result).toEqual(before);
+    fireEvent.change(screen.getByLabelText("Hair in foil, % (approx.)"), { target: { value: "30" } });
+    expect(lastStep(onChange).result).toEqual(inFoil);
+  });
+
+  it("lifts strands in foil past the scalp's 3 levels in one session", () => {
+    const { onChange } = renderStep();
+
+    chooseOption("Current level", "4");
+    chooseOption("Target level", "8");
+    expect(lastStep(onChange).result.multiStepRequired).toBe(true);
+
+    chooseOption("Coverage", "strands-1");
+    expect(lastStep(onChange).result.multiStepRequired).toBe(false);
+    expect(screen.queryByText(/Session plan/)).toBeNull();
   });
 });

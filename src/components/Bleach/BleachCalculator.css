@@ -28,3 +28,33 @@
     grid-column: 1 / -1;
   }
 }
+
+/* A lift too big for one session: the plan, one line per session, the break between. */
+.bleach__plan-title {
+  margin: 12px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bleach__plan-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.bleach__plan-list li::marker {
+  color: var(--gold-ink);
+  font-weight: 600;
+}
+
+.bleach__plan-break {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}

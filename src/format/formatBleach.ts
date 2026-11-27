@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import type { Level } from "../engine/levels";
-import type { BleachFormula } from "../engine/bleach";
+import { SESSION_BREAK_MAX_WEEKS, SESSION_BREAK_MIN_WEEKS, type BleachFormula } from "../engine/bleach";
 import { getToningRecommendation } from "../engine/neutralize";
 import { formatDeveloperVolumeLine } from "./formatDeveloperVolume";
 import { formatPigmentName, formatToneName } from "./formulaMessages";
@@ -48,6 +48,25 @@ export function formatBleachText(params: FormatBleachParams): string {
         }),
     i18n.t("format.processingTime", { value: processingMinutes }),
   ];
+  // A lift over several sessions: the mix above is the first one's; the plan follows.
+  const sessions = result.sessions ?? [];
+  if (sessions.length > 1) {
+    lines.push(`${i18n.t("bleach.sessionPlanLabel")}:`);
+    sessions.forEach((session, index) => {
+      const line = i18n.t("bleach.sessionLine", {
+        number: index + 1,
+        start: session.startLevel,
+        target: session.targetLevel,
+        developer: formatDeveloperVolumeLine(session.developerVolume),
+        minutes: session.processingMinutes,
+      });
+      lines.push(
+        index < sessions.length - 1
+          ? `${line}; ${i18n.t("bleach.sessionBreak", { min: SESSION_BREAK_MIN_WEEKS, max: SESSION_BREAK_MAX_WEEKS })}`
+          : line,
+      );
+    });
+  }
   if (result.grams !== null) {
     const toning = formatBleachToning(targetLevel);
     lines.push(`${i18n.t("bleach.backgroundLabel")}: ${toning.background}`);

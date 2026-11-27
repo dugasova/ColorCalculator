@@ -2,12 +2,12 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
 import { LevelField } from "../common/LevelField";
-import { BLEACH_TARGET_LEVELS } from "../../engine/bleach";
+import { BLEACH_TARGET_LEVELS, planBleachSessions } from "../../engine/bleach";
 import { CanvasFields } from "../FormulaCalculator/fields/CanvasFields";
 import { StrandZoneField } from "../FormulaCalculator/fields/StrandZoneField";
 import { StartingBaseField } from "../FormulaCalculator/fields/StartingBaseField";
 import type { StrandZone } from "../../engine/strandZone";
-import type { FoilPlacement } from "../../engine/foil";
+import { isFoiledStrands, type FoilPlacement } from "../../engine/foil";
 import { FoilPlacementField } from "../FormulaCalculator/fields/FoilPlacementField";
 import type { StartingBase } from "../../engine/startingBase";
 import type { BleachHistoryStep, BleachStepSeed, HistoryStep } from "../../history";
@@ -17,6 +17,7 @@ import {
   BleachMixRow,
   BleachSafetyNotes,
   BleachToningRows,
+  BleachDeveloperField,
   BleachTotalGramsField,
   BleachWarnings,
 } from "../Bleach/BleachFormulaParts";
@@ -53,6 +54,12 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
   // it as an effect both cascaded an extra render and tripped react-hooks/set-state-in-effect.
   const [inheritedOnMount] = useState(() => getInheritedZoneState(previousSteps, DEFAULT_STEP_STRAND_ZONE));
 
+  const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
+  const [foil, setFoil] = useState<FoilPlacement | undefined>(seed?.foil);
+  // Strands in foil and lengths-only work keep the powder off the scalp, so the scalp's
+  // per-session limits (3 levels, 9% at most) don't apply to them.
+  const onScalp =
+    (foil === undefined || !isFoiledStrands(foil.group)) && strandZone !== "mid-lengths" && strandZone !== "ends";
   const {
     startLevel,
     setStartLevel,
@@ -62,14 +69,14 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
     setTotalGrams,
     pricePerGram,
     setPricePerGram,
+    manualDeveloperVolume,
+    setManualDeveloperVolume,
     result,
-  } = useBleachFormulaState(seed);
+  } = useBleachFormulaState(seed, onScalp);
   const { porosity, setPorosity, thickness, setThickness, chemicalHistory, setChemicalHistory } = useHairCanvasState(
     seed?.canvas ?? inheritedOnMount?.canvas,
   );
   const [manualProcessingMinutes, setManualProcessingMinutes] = useState<number | undefined>(seed?.processingMinutes);
-  const [strandZone, setStrandZone] = useState<StrandZone>(seed?.strandZone ?? DEFAULT_STEP_STRAND_ZONE);
-  const [foil, setFoil] = useState<FoilPlacement | undefined>(seed?.foil);
   const [startingBase, setStartingBase] = useState<StartingBase>(
     seed?.startingBase ?? inheritedOnMount?.startingBase ?? { kind: "natural" },
   );
@@ -167,6 +174,13 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
           id={`bleachTotalGrams${idSuffix}`}
           totalGrams={totalGrams}
           onTotalGramsChange={setTotalGrams}
+        />
+        <BleachDeveloperField
+          id={`bleachDeveloper${idSuffix}`}
+          onScalp={onScalp}
+          manualDeveloperVolume={manualDeveloperVolume}
+          onManualDeveloperVolumeChange={setManualDeveloperVolume}
+          autoDeveloperVolume={planBleachSessions(startLevel, targetLevel, onScalp)[0]?.developerVolume ?? null}
         />
 
         {result.grams !== null && (

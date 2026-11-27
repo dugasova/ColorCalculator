@@ -711,6 +711,14 @@ export const uk: typeof en = {
     noLiftWarning: "Освітлювач лише освітлює волосся — оберіть цільовий рівень вище поточного.",
     multiStepWarning:
       "Таке освітлення неможливо виконати за один сеанс. Дайте шкірі голови відновитися 1-2 тижні перед наступним сеансом освітлення.",
+    sessionsWarning:
+      "За один сеанс освітлюють не більше ніж на {{max}} рівні, тому до рівня {{target}} — {{count}} сеанси з перервою {{minWeeks}}–{{maxWeeks}} тижні. Сьогодні — до рівня {{level}}: суміш і час нижче для цього сеансу.",
+    developerLabel: "Окислювач",
+    developerAuto: "Авто",
+    developerAutoWith: "Авто — {{developer}}",
+    sessionPlanLabel: "План сеансів",
+    sessionLine: "Сеанс {{number}}: {{start}} → {{target}}, {{developer}}, ~{{minutes}} хв",
+    sessionBreak: "потім перерва {{min}}–{{max}} тижні",
     mixValue: "{{powder}} г освітлювального порошку : {{developer}} г окислювача",
     processingTimeLabel: "Час витримки",
     maxScalpTimeNote:
