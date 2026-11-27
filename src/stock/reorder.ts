@@ -3,6 +3,7 @@ import { ALL_DEVELOPER_VOLUMES } from "../engine/levels";
 import type { ReorderItem, StockRecord, StockStatus } from "./types";
 import {
   DEVELOPER_BOTTLE_SIZE_GRAMS,
+  DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS,
   LOW_STOCK_THRESHOLD_GRAMS,
   developerStockId,
   getBrandScopedDeveloperLines,
@@ -68,7 +69,7 @@ export function buildReorderList(brands: Record<BrandId, Brand>, records: StockR
         const id = developerStockId(brandId, line, volume);
         const record = byId.get(id);
         if (record === undefined) continue;
-        const status = getStockStatus(record.remainingGrams, LOW_STOCK_THRESHOLD_GRAMS);
+        const status = getStockStatus(record.remainingGrams, DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS);
         if (status === "ok") continue;
         items.push({
           id,
@@ -78,7 +79,7 @@ export function buildReorderList(brands: Record<BrandId, Brand>, records: StockR
           packGrams: DEVELOPER_BOTTLE_SIZE_GRAMS,
           suggestedPacks: suggestReorderPacks(
             record.remainingGrams,
-            LOW_STOCK_THRESHOLD_GRAMS,
+            DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS,
             DEVELOPER_BOTTLE_SIZE_GRAMS,
           ),
           kind: "developer",

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import "../../i18n";
+import i18n from "../../i18n";
 import { OrderListView } from "./OrderListView";
 import { usePalette, useStock } from "../../palette";
 import { developerStockId, shadeStockId } from "../../stock";
@@ -58,7 +58,7 @@ describe("OrderListView", () => {
 
     expect(writeText).toHaveBeenCalledTimes(1);
     const text = writeText.mock.calls[0][0] as string;
-    expect(text).toContain("Wella\n7/1 · Koleston Perfect — 1 × tube 60 g");
+    expect(text).toContain("Wella\n7/1 · Koleston Perfect — 1 pcs");
     expect(text).not.toContain("20 vol");
   });
 
@@ -135,5 +135,58 @@ describe("OrderListView", () => {
     expect(screen.getByRole("heading", { name: "Wella" })).toBeInTheDocument();
     expect(screen.getByLabelText("Quantity of 7/1 · Koleston Perfect to order")).toBeInTheDocument();
     expect(screen.queryByLabelText("Quantity of 7.1 · Majirel to order")).not.toBeInTheDocument();
+  });
+  it("shows what is left without the pack size, and steps the quantity with − / +", () => {
+    vi.mocked(usePalette).mockReturnValue({ wella: wellaWithOneShade });
+    vi.mocked(useStock).mockReturnValue([
+      {
+        id: shadeStockId("wella", "koleston-perfect", "7/1"),
+        kind: "shade",
+        brandId: "wella",
+        line: "koleston-perfect",
+        code: "7/1",
+        remainingGrams: 20,
+      },
+    ]);
+    render(<OrderListView />);
+
+    expect(screen.getByText(/20 g left/)).toBeInTheDocument();
+    expect(screen.queryByText(/× tube/)).not.toBeInTheDocument();
+
+    const input = screen.getByLabelText("Quantity of 7/1 · Koleston Perfect to order") as HTMLInputElement;
+    const start = Number(input.value);
+    fireEvent.click(screen.getByRole("button", { name: "More: 7/1 · Koleston Perfect" }));
+    expect(input.value).toBe(String(start + 1));
+    fireEvent.click(screen.getByRole("button", { name: "Fewer: 7/1 · Koleston Perfect" }));
+    expect(input.value).toBe(String(start));
+  });
+  it("dates the order in the app's language", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2026, 10, 27));
+    await i18n.changeLanguage("uk");
+    try {
+      vi.mocked(usePalette).mockReturnValue({ wella: wellaWithOneShade });
+      vi.mocked(useStock).mockReturnValue([
+        {
+          id: shadeStockId("wella", "koleston-perfect", "7/1"),
+          kind: "shade",
+          brandId: "wella",
+          line: "koleston-perfect",
+          code: "7/1",
+          remainingGrams: 20,
+        },
+      ]);
+      render(<OrderListView />);
+      fireEvent.click(screen.getByRole("button", { name: "Скопіювати список" }));
+
+      const text = writeText.mock.calls[0][0] as string;
+      expect(text).toContain("Замовлення 27.11.2026");
+      expect(text).toContain("7/1 · Koleston Perfect — 1 шт.");
+    } finally {
+      vi.useRealTimers();
+      await i18n.changeLanguage("en");
+    }
   });
 });

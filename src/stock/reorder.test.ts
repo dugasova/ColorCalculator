@@ -103,6 +103,29 @@ describe("buildReorderList", () => {
     expect(items[2]).toMatchObject({ status: "out", packGrams: 1000, suggestedPacks: 1 });
   });
 
+  it("counts a developer bottle low at 300 g, not at a shade tube's 60 g", () => {
+    const developer = (volume: 10 | 20 | 30, remainingGrams: number): StockRecord => ({
+      id: developerStockId("wella", null, volume),
+      kind: "developer",
+      brandId: "wella",
+      line: null,
+      volume,
+      remainingGrams,
+    });
+
+    const items = buildReorderList({ wella: { ...BRANDS.wella, shades: [] } }, [
+      developer(10, 200),
+      developer(20, 300),
+      developer(30, 301),
+    ]);
+
+    expect(items.map(item => item.id)).toEqual([
+      developerStockId("wella", null, 10),
+      developerStockId("wella", null, 20),
+    ]);
+    expect(items[0]).toMatchObject({ status: "low", suggestedPacks: 1 });
+  });
+
   it("lists a scoped line's developer (INOA) as its own row, separate from the rest of its brand", () => {
     const brandsWithInoa: Record<string, Brand> = {
       loreal: {

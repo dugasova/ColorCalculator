@@ -834,17 +834,17 @@ export const en = {
   orders: {
     titlePrefix: "Order",
     titleAccent: "list",
-    hint: 'Tracked products with one tube or less left (developer: 60 g). Each quantity is the fewest tubes/bottles that lifts the product out of "Low" — edit any before sending; 0 leaves it out.',
+    hint: 'Tracked products with one tube or less left (developer: {{developerGrams}} g or less). Each quantity is the fewest tubes/bottles that lifts the product out of "Low" — edit any before sending; 0 leaves it out.',
     empty: "Nothing to order — every tracked product is above its low-stock level.",
     selectBrandLabel: "Brand",
     qtyFor: "Quantity of {{label}} to order",
-    tubeDetail: "× tube {{grams}} g · {{remaining}} g left",
-    bottleDetail: "× bottle {{grams}} g · {{remaining}} g left",
+    remaining: "{{remaining}} g left",
+    decrease: "Fewer: {{label}}",
+    increase: "More: {{label}}",
     copy: "Copy list",
     copied: "Copied",
     textTitle: "Order {{date}}",
-    textTubeLine: "{{label}} — {{qty}} × tube {{grams}} g",
-    textBottleLine: "{{label}} — {{qty}} × bottle {{grams}} g",
+    textLine: "{{label}} — {{qty}} pcs",
   },
 
   brandNotes: {

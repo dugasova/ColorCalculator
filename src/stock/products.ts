@@ -31,10 +31,12 @@ export function getShadeTubeSizeGrams(brandId: BrandId, line: string | null): nu
 }
 
 // Developer ships in a 1000 g/ml bottle, not a 60 g tube -- BrandStockList's "+1" restock
-// action needs to add a full bottle for developer rows while still flagging low stock at
-// the same 60 g "one service left" threshold as shades (see LOW_STOCK_THRESHOLD_GRAMS's
-// comment above).
+// action adds a full bottle for developer rows; its low-stock point is below.
 export const DEVELOPER_BOTTLE_SIZE_GRAMS = 1000;
+
+// A bottle is drawn down by 60-120 g a service, so it goes "low" with about three
+// services left -- the salon's own figure (2026-11-27), not the shade tube's 60 g.
+export const DEVELOPER_LOW_STOCK_THRESHOLD_GRAMS = 300;
 
 // Lines whose developer is a chemically distinct product from the rest of their brand's
 // other lines, not a shared bottle -- INOA's own Oxydant Crème (oil-delivery system)
