@@ -702,6 +702,14 @@ export const en = {
     noLiftWarning: "Bleach only lightens hair — choose a target level above your current level.",
     multiStepWarning:
       "This lift cannot be done in a single session. Let the scalp recover for 1-2 weeks before the next lightening session.",
+    sessionsWarning:
+      "One session lifts at most {{max}} levels, so level {{target}} takes {{count}} sessions, {{minWeeks}}–{{maxWeeks}} weeks apart. Today, lift to level {{level}}: the mix and time below are for this session.",
+    developerLabel: "Developer",
+    developerAuto: "Auto",
+    developerAutoWith: "Auto — {{developer}}",
+    sessionPlanLabel: "Session plan",
+    sessionLine: "Session {{number}}: {{start}} → {{target}}, {{developer}}, ~{{minutes}} min",
+    sessionBreak: "then a {{min}}–{{max}} week break",
     mixValue: "{{powder}} g bleach powder : {{developer}} g developer",
     processingTimeLabel: "Processing time",
     maxScalpTimeNote:

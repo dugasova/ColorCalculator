@@ -33,14 +33,16 @@ describe("BleachCalculator", () => {
     expect(html).not.toContain("cannot be done in a single session");
   });
 
-  it("shows the multi-step warning when the requested lift exceeds a single session (1 -> 10)", () => {
-    const result = calculateBleachFormula(1, 10, 60);
+  it("plans a lift over 3 levels in sessions and mixes for the first (4 -> 10)", () => {
+    const result = calculateBleachFormula(4, 10, 60);
     const html = renderToStaticMarkup(<BleachResults result={result} {...noPricing} />);
 
-    expect(html).toContain("cannot be done in a single session");
-    expect(html).toContain("1-2 weeks");
+    expect(html).toContain("level 10 takes 2 sessions, 1–2 weeks apart");
+    expect(html).toContain("Today, lift to level 7");
+    expect(html).toContain("Session 1: 4 → 7");
+    expect(html).toContain("Session 2: 7 → 10");
+    expect(html).toContain("g bleach powder"); // the first session's mix
     expect(html).not.toContain("choose a target level above your current level");
-    expect(html).not.toContain("g bleach powder"); // no grams — no single-session formula
   });
 
   it("shows the no-lift warning when the target level equals the current level", () => {
@@ -50,6 +52,12 @@ describe("BleachCalculator", () => {
     expect(html).toContain("choose a target level above your current level");
     expect(html).not.toContain("cannot be done in a single session");
     expect(html).not.toContain("g bleach powder"); // no grams — no lift, no formula
+  });
+
+  it("offers the developer, automatic by default and up to 9% on the scalp", () => {
+    const html = renderToStaticMarkup(<BleachCalculator />);
+    expect(html).toContain('id="bleachDeveloper"');
+    expect(html).toContain("Auto — 1.9% (6 vol)"); // the default 6 -> 8
   });
 
   it("offers a toner brand and line on the page", () => {

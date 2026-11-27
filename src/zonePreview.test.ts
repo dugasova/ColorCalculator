@@ -1,3 +1,4 @@
+import { calculateBleachFormula } from "./engine/bleach";
 import { describe, it, expect } from "vitest";
 import { buildZonePreview } from "./zonePreview";
 import { shadeToHexColor } from "./engine/color";
@@ -110,6 +111,17 @@ describe("buildZonePreview", () => {
     expect(rows[0].swatches).toHaveLength(3);
     expect(rows[0].swatches.map(s => s.caption)).toEqual(["6", "9", "9.1"]);
     expect(rows[0].swatches[1].hex).toBe(shadeToHexColor({ code: "9", level: 9, tone: "gold" }));
+  });
+
+  it("draws a lift planned over sessions at the level this visit reaches", () => {
+    const bleach = bleachStep({
+      strandZone: "roots",
+      startLevel: 4,
+      targetLevel: 10,
+      result: calculateBleachFormula(4, 10, 60),
+    });
+
+    expect(buildZonePreview([bleach])[0].swatches.map(s => s.caption)).toEqual(["4", "7"]);
   });
 
   it("renders a color step's achieved level, not its nominal target, when a partial-lift fallback occurred", () => {

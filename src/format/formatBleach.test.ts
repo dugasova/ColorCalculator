@@ -23,6 +23,19 @@ describe("formatBleachToning", () => {
 });
 
 describe("formatBleachText", () => {
+  it("adds the session plan when the lift takes several sessions", () => {
+    const text = formatBleachText({
+      startLevel: 4,
+      targetLevel: 10,
+      result: calculateBleachFormula(4, 10, 60),
+      processingMinutes: 35,
+    });
+    expect(text).toContain("Session plan:");
+    expect(text).toContain("Session 1: 4 → 7");
+    expect(text).toContain("then a 1–2 week break");
+    expect(text).toContain("Session 2: 7 → 10");
+  });
+
   it("ends with the background and the toning when there is a formula", () => {
     const result = calculateBleachFormula(6, 8, 60);
     const text = formatBleachText({ startLevel: 6, targetLevel: 8, result, processingMinutes: 30 });

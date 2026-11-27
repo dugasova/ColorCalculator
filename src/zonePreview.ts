@@ -61,7 +61,8 @@ function buildStartSwatch(firstStep: HistoryStep): ZonePreviewSwatch {
 }
 
 function buildBleachSwatch(step: Extract<HistoryStep, { kind: "bleach" }>): ZonePreviewSwatch {
-  const level = step.targetLevel;
+  // A lift planned over several sessions reaches only the first session's level at this visit.
+  const level = step.result.sessions?.[0]?.targetLevel ?? step.targetLevel;
   const tone = getPrePigmentFillerTone(getUnderlyingPigment(level));
   return {
     hex: shadeToHexColor({ code: String(level), level, tone }),

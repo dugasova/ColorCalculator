@@ -184,6 +184,8 @@ export interface BleachStepSeed {
   totalGrams: number;
   processingMinutes: number;
   pricePerGram: number;
+  // The developer picked by hand, when it was (see BleachFormula.manualDeveloperVolume).
+  manualDeveloperVolume?: DeveloperVolume | null;
   canvas?: HairCanvas;
   strandZone?: StrandZone;
   foil?: FoilPlacement;
@@ -339,6 +341,7 @@ export function buildRepeatSessionRequest(
             : 60,
         processingMinutes: step.processingMinutes,
         pricePerGram: step.pricePerGram,
+        manualDeveloperVolume: step.result.manualDeveloperVolume ?? null,
         canvas: step.canvas,
         strandZone: step.strandZone,
         ...(step.foil !== undefined && { foil: step.foil }),
