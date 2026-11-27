@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSalonMarkupMultiplier } from "../../palette";
 import { setSalonMarkupMultiplier } from "../../salonSettings";
 import { CollapsibleSection } from "../common/CollapsibleSection";
+import { BrandPriceList } from "./BrandPriceList";
 
 // Admin-editable salon-wide markup default (src/salonSettings.ts) -- seeds every new
 // calculator's starting markup; a stylist can still override it for one session. Copies
@@ -70,6 +71,7 @@ export function PricingSettingsForm() {
           {error}
         </p>
       )}
+      <BrandPriceList />
     </CollapsibleSection>
   );
 }

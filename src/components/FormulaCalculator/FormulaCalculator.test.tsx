@@ -232,7 +232,7 @@ describe("FormulaCalculator", () => {
           customBrands: [],
           overrides: [],
           stock: [],
-          pricingSettings: { markupMultiplier: 2.5 },
+          pricingSettings: { markupMultiplier: 2.5, brandPricesPerGram: {} },
           calibrationIndex: new Map(),
         }}
       >

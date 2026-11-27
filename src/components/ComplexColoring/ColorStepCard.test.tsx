@@ -37,10 +37,10 @@ describe("ColorStepCard", () => {
     expect(html).not.toContain('id="applicationZone-1"');
   });
 
-  it("defaults the price-per-gram field to 0.18, independent of any brand default", () => {
+  it("defaults the price-per-gram field to the picked brand's price", () => {
     const html = renderToStaticMarkup(<ColorStepCard stepId="1" onChange={() => {}} onRemove={() => {}} />);
     expect(html).toContain('id="stepPricePerGram-1"');
-    expect(/id="stepPricePerGram-1"[^>]*value="0\.18"/.test(html)).toBe(true);
+    expect(/id="stepPricePerGram-1"[^>]*value="0\.1"/.test(html)).toBe(true); // Generic
   });
 
   it("keeps every field id distinct across two steps rendered in the same session", () => {

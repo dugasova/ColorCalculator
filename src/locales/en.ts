@@ -810,6 +810,12 @@ export const en = {
     markupLabel: "Default markup multiplier",
     markupHint: "Seeds every new calculation's service-price markup. A stylist can still override it for one session.",
     markupInvalid: "Enter a markup greater than 0",
+    brandPricesTitle: "Price per gram by brand",
+    brandPricesHint:
+      "Every new calculation for a brand starts from this price. A stylist can still change it for one formula.",
+    brandPriceInvalid: "Enter a price greater than 0",
+    brandPriceDefault: "default",
+    brandPriceReset: "Reset to {{price}}",
     toneFamily: {
       natural: "Natural",
       ash: "Ash",

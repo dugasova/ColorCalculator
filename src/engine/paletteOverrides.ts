@@ -129,6 +129,9 @@ export function buildBrandCatalog(
   baseBrands: Record<BrandId, Brand>,
   customBrands: CustomBrandRecord[],
   overrides: PaletteOverride[],
+  // The salon's own price per gram by brand id (salonSettings' brandPricesPerGram), which
+  // wins over the built-in or add-time price.
+  pricesPerGram: Record<string, number> = {},
 ): Record<BrandId, Brand> {
   const ids = new Set<BrandId>([...Object.keys(baseBrands), ...customBrands.map(c => c.id)]);
   const catalog: Record<BrandId, Brand> = {};
@@ -142,7 +145,7 @@ export function buildBrandCatalog(
       name: custom?.name ?? base!.name,
       shades,
       mixingRatio: custom ? resolveMixingRatio(custom.mixingRatioConfig) : base!.mixingRatio,
-      pricePerGram: custom?.pricePerGram ?? base!.pricePerGram,
+      pricePerGram: pricesPerGram[id] ?? custom?.pricePerGram ?? base!.pricePerGram,
     };
   }
   return catalog;

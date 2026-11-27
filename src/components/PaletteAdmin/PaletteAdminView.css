@@ -161,3 +161,38 @@
   color: var(--brand-muted);
   font-size: 0.85rem;
 }
+
+/* Price per gram by brand: the brand, its price, and "default" or a reset button. */
+.palette-admin__brand-prices {
+  margin-top: 16px;
+}
+
+.palette-admin__price-row {
+  display: grid;
+  grid-template-columns: 1fr 6rem minmax(7rem, auto);
+  align-items: center;
+  gap: 10px;
+}
+
+.palette-admin__price-row input {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border-field);
+  border-radius: 0.65rem;
+  background: var(--field-bg);
+  color: var(--ink);
+  font: inherit;
+  text-align: right;
+  outline: none;
+}
+
+.palette-admin__price-row input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.palette-admin__price-default {
+  font-size: 0.8rem;
+  color: var(--muted);
+}

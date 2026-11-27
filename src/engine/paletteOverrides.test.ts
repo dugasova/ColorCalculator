@@ -10,7 +10,7 @@ import {
   type CustomBrandRecord,
   type PaletteOverride,
 } from "./paletteOverrides";
-import type { Brand } from "./brands";
+import { BRANDS, type Brand } from "./brands";
 import { getMixingRatio } from "./formula";
 import type { Shade } from "./shades";
 
@@ -312,5 +312,11 @@ describe("paletteOverrideSchema", () => {
   it("rejects a document whose kind matches neither branch", () => {
     const result = paletteOverrideSchema.safeParse({ kind: "rename", brandId: "wella", newName: "Wella Pro" });
     expect(result.success).toBe(false);
+  });
+
+  it("takes the salon's own price per gram over a brand's built-in one", () => {
+    const catalog = buildBrandCatalog(BRANDS, [], [], { wella: 0.25 });
+    expect(catalog.wella.pricePerGram).toBe(0.25);
+    expect(catalog.matrix.pricePerGram).toBe(BRANDS.matrix.pricePerGram);
   });
 });
