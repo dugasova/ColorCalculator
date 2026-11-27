@@ -22,6 +22,7 @@ import {
   BleachWarnings,
 } from "../Bleach/BleachFormulaParts";
 import { useBleachFormulaState } from "../Bleach/useBleachFormulaState";
+import { NumberInput } from "../common/NumberInput";
 
 export interface BleachStepCardProps {
   stepId: string;
@@ -187,23 +188,21 @@ export function BleachStepCard({ stepId, previousSteps = [], seed, onChange, onR
           <>
             <div className="field">
               <label htmlFor={`bleachStepProcessingMinutes${idSuffix}`}>{t("results.processingTime")}</label>
-              <input
+              <NumberInput
                 id={`bleachStepProcessingMinutes${idSuffix}`}
-                type="number"
                 min={1}
                 value={processingMinutes}
-                onChange={e => setManualProcessingMinutes(Number(e.target.value))}
+                onValueChange={setManualProcessingMinutes}
               />
             </div>
             <div className="field">
               <label htmlFor={`bleachStepPricePerGram${idSuffix}`}>{t("results.pricePerGram")}</label>
-              <input
+              <NumberInput
                 id={`bleachStepPricePerGram${idSuffix}`}
-                type="number"
                 min={0}
-                step={0.01}
                 value={pricePerGram}
-                onChange={e => setPricePerGram(Number(e.target.value))}
+                onValueChange={setPricePerGram}
+                decimals={2}
               />
             </div>
           </>

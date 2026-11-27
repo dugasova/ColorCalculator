@@ -13,6 +13,7 @@ import { findBleachToners } from "../../engine/correction";
 import { getAshVioletToningHint } from "../../engine/ashVioletMix";
 import { formatBleachToning } from "../../format/formatBleach";
 import { formatDeveloperVolume } from "../../format/formatDeveloperVolume";
+import { NumberInput } from "../common/NumberInput";
 
 // The pieces of a bleach formula that read the same on the standalone BleachCalculator
 // and on a bleach step of a Complex Coloring session (BleachStepCard). They are separate
@@ -29,13 +30,7 @@ export function BleachTotalGramsField({ id, totalGrams, onTotalGramsChange }: Bl
   return (
     <div className="field">
       <label htmlFor={id}>{t("fields.totalGrams")}</label>
-      <input
-        type="number"
-        id={id}
-        min={1}
-        value={totalGrams}
-        onChange={e => onTotalGramsChange(Number(e.target.value))}
-      />
+      <NumberInput id={id} min={1} value={totalGrams} onValueChange={onTotalGramsChange} />
     </div>
   );
 }

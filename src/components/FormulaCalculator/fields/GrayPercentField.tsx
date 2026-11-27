@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useClampedNumberText } from "./useClampedNumberText";
+import { useClampedNumberText } from "../../common/useClampedNumberText";
 
 export interface GrayPercentFieldProps {
   grayPercent: number;

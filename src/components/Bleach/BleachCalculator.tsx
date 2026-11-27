@@ -19,6 +19,7 @@ import {
 } from "./BleachFormulaParts";
 import { useBleachFormulaState } from "./useBleachFormulaState";
 import "./BleachCalculator.css";
+import { NumberInput } from "../common/NumberInput";
 
 export interface BleachResultsProps {
   result: BleachFormula;
@@ -81,24 +82,22 @@ export function BleachResults({
           <div className="results__pricing">
             <div className="field">
               <label htmlFor="bleachPricePerGram">{t("results.pricePerGram")}</label>
-              <input
+              <NumberInput
                 id="bleachPricePerGram"
-                type="number"
                 min={0}
-                step={0.01}
                 value={pricePerGram}
-                onChange={e => onPricePerGramChange(Number(e.target.value))}
+                onValueChange={onPricePerGramChange}
+                decimals={2}
               />
             </div>
             <div className="field">
               <label htmlFor="bleachMarkupMultiplier">{t("results.markupMultiplier")}</label>
-              <input
+              <NumberInput
                 id="bleachMarkupMultiplier"
-                type="number"
                 min={1}
-                step={0.1}
                 value={markupMultiplier}
-                onChange={e => onMarkupMultiplierChange(Number(e.target.value))}
+                onValueChange={onMarkupMultiplierChange}
+                decimals={1}
               />
             </div>
           </div>

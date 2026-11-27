@@ -12,6 +12,7 @@ import { BrandField } from "../FormulaCalculator/fields/BrandField";
 import { LineField } from "../FormulaCalculator/fields/LineField";
 import "./PrePigmentationCalculator.css";
 import "../FormulaCalculator/PrePigmentationStep.css";
+import { NumberInput } from "../common/NumberInput";
 
 export function PrePigmentationCalculator() {
   const { t } = useTranslation();
@@ -72,13 +73,7 @@ export function PrePigmentationCalculator() {
 
         <div className="field">
           <label htmlFor="prepigmentTotalGrams">{t("prePigmentation.totalGrams")}</label>
-          <input
-            type="number"
-            id="prepigmentTotalGrams"
-            min={1}
-            value={totalGrams}
-            onChange={e => setTotalGrams(Number(e.target.value))}
-          />
+          <NumberInput id="prepigmentTotalGrams" min={1} value={totalGrams} onValueChange={setTotalGrams} />
         </div>
       </div>
 

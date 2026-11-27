@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { GramsInputMode } from "../../../engine/applicationZone";
 import { Select } from "../../common/Select";
-import { useClampedNumberText } from "./useClampedNumberText";
+import { useClampedNumberText } from "../../common/useClampedNumberText";
 
 export interface GramsInputFieldProps {
   gramsInputMode: GramsInputMode;
